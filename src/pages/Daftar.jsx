@@ -36,13 +36,58 @@ function Daftar() {
   const [dataPerjalanan, setDataPerjalanan] = useState([]);
   const history = useHistory();
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(15);
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
 
   const changePage = ({ selected }) => {
     setPage(selected);
+  };
+
+  const postSuratTugas = (val) => {
+    console.log(val);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perjalanan/post/surat-tugas`,
+        {
+          asal: val.asal,
+          jenis: val.jenisPerjalanan.id,
+          kode: `${val.daftarSubKegiatan.kodeRekening}${val.daftarSubKegiatan.kegiatan.kodeRekening}`,
+          personilFE: val.personils,
+          ttdSurTug: val.ttdSuratTuga,
+          id: val.id,
+          tanggalPengajuan: val.tanggalPengajuan,
+          tempat: val.tempats,
+          untuk: val.untuk,
+          ttdSurTugJabatan: val.ttdSuratTuga.jabatan,
+          ttdSurTugNama: val.ttdSuratTuga.nama,
+          ttdSurTugNip: val.ttdSuratTuga.nip,
+          ttdSurTugPangkat: val.ttdSuratTuga.pangkat,
+          ttdSurTugGolongan: val.ttdSuratTuga.golongan,
+          noNotaDinas: val.noNotaDinas,
+          noSuratTugas: val.noSuratTugas,
+        },
+        {
+          responseType: "blob", // Penting untuk menerima file sebagai blob
+        }
+      )
+      .then((res) => {
+        // Buat URL untuk file yang diunduh
+        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "letter.docx"); // Nama file yang diunduh
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        fetchDataPerjalanan();
+      })
+      .catch((err) => {
+        console.error(err); // Tangani error
+      });
   };
 
   async function fetchDataPerjalanan() {
@@ -70,165 +115,195 @@ function Daftar() {
   return (
     <>
       <Layout>
-        <Box pt={"80px"} bgColor={"rgba(249, 250, 251, 1)"} pb={"40px"}>
-          <Container
-            bgColor={"white"}
-            borderRadius={"5px"}
-            border={"1px"}
-            borderColor={"rgba(229, 231, 235, 1)"}
-            maxW={"1280px"}
-            p={"30px"}
-          >
-            DAFTAR
-            <Box style={{ overflowX: "auto" }}>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      py={"20px"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      no.
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      Tanggal Berangkat
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      tanggal Pulang
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      Pegawai 1
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      Pegawai 2
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      Pegawai 3
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      Pegawai 4
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      Kode Rekening
-                    </Th>
-                    <Th
-                      bgColor={"blue"}
-                      color={"white"}
-                      borderWidth="1px"
-                      borderColor="white"
-                    >
-                      Aksi
-                    </Th>
+        <Box pt={"80px"} bgColor={"white"} pb={"40px"}>
+          DAFTAR
+          <Box style={{ overflowX: "auto" }}>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    py={"20px"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    no.
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    py={"20px"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    jenis Perjalanan
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    No Surat Tugas
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Tanggal Berangkat
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    tanggal Pulang
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Personil 1
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Personil 2
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Personil 3
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Personil 4
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Personil 5
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Kode Rekening
+                  </Th>
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Aksi
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {dataPerjalanan?.map((item, index) => (
+                  <Tr key={item.id}>
+                    <Td borderWidth="1px" borderColor="primary">
+                      {index + 1}
+                    </Td>{" "}
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.jenisPerjalanan.jenis}
+                    </Td>
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.noSuratTugas ? item.noSuratTugas : "-"}
+                    </Td>
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.tempats?.[0]?.tanggalBerangkat
+                        ? new Date(
+                            item.tempats[0].tanggalBerangkat
+                          ).toLocaleDateString()
+                        : "-"}
+                    </Td>
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.tempats?.[0]?.tanggalPulang
+                        ? new Date(
+                            item.tempats[0].tanggalPulang
+                          ).toLocaleDateString()
+                        : "-"}
+                    </Td>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Td key={i} borderWidth="1px" borderColor="primary">
+                        {item.personils?.[i]?.pegawai?.nama || "-"}
+                      </Td>
+                    ))}
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.kodeRekening?.kode || "-"}
+                    </Td>
+                    <Td borderWidth="1px" borderColor="primary">
+                      <Button
+                        onClick={() =>
+                          history.push(`/detail-perjalanan/${item.id}`)
+                        }
+                      >
+                        Detail
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          postSuratTugas(item);
+                        }}
+                      >
+                        Surtug
+                      </Button>
+                    </Td>
                   </Tr>
-                </Thead>
-                <Tbody>
-                  {dataPerjalanan?.map((item, index) => (
-                    <Tr key={item.id}>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {index + 1}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item?.tanggalBerangkat}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.tanggalPulang}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.pegawai1.nama}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.pegawai2.nama}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.pegawai3.nama}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.pegawai4.nama}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.kodeRekening.kode}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        <Button
-                          onClick={() => {
-                            history.push(`/kwitansi/${item.id}`);
-                          }}
-                        >
-                          Detail
-                        </Button>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </Box>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
 
-                boxSizing: "border-box",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <ReactPaginate
-                previousLabel={"+"}
-                nextLabel={"-"}
-                pageCount={pages}
-                onPageChange={changePage}
-                activeClassName={"item active "}
-                breakClassName={"item break-me "}
-                breakLabel={"..."}
-                containerClassName={"pagination"}
-                disabledClassName={"disabled-page"}
-                marginPagesDisplayed={1}
-                nextClassName={"item next "}
-                pageClassName={"item pagination-page "}
-                pageRangeDisplayed={2}
-                previousClassName={"item previous"}
-              />
-            </div>
-          </Container>
+              boxSizing: "border-box",
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <ReactPaginate
+              previousLabel={"+"}
+              nextLabel={"-"}
+              pageCount={pages}
+              onPageChange={changePage}
+              activeClassName={"item active "}
+              breakClassName={"item break-me "}
+              breakLabel={"..."}
+              containerClassName={"pagination"}
+              disabledClassName={"disabled-page"}
+              marginPagesDisplayed={1}
+              nextClassName={"item next "}
+              pageClassName={"item pagination-page "}
+              pageRangeDisplayed={2}
+              previousClassName={"item previous"}
+            />
+          </div>
         </Box>
       </Layout>
     </>

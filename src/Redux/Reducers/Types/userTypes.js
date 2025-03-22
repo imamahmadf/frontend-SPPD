@@ -1,5 +1,6 @@
-const auth_types = {
-  Redux: "REDUX",
+const userTypes = {
+  LOGIN_SUCCESS: "LOGIN_SUCCESS",
+  LOGOUT: "LOGOUT",
 };
 
-export default auth_types;
+export default userTypes;
