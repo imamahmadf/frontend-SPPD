@@ -32,6 +32,8 @@ import {
   Input,
   Spacer,
 } from "@chakra-ui/react";
+import { useSelector } from "react-redux";
+import { userRedux, selectRole } from "../Redux/Reducers/auth";
 function Daftar() {
   const [dataPerjalanan, setDataPerjalanan] = useState([]);
   const history = useHistory();
@@ -40,6 +42,9 @@ function Daftar() {
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
+
+  const user = useSelector(userRedux);
+  const role = useSelector(selectRole);
 
   const changePage = ({ selected }) => {
     setPage(selected);
@@ -63,12 +68,20 @@ function Daftar() {
           tempat: val.tempats,
           untuk: val.untuk,
           ttdSurTugJabatan: val.ttdSuratTuga.jabatan,
-          ttdSurTugNama: val.ttdSuratTuga.nama,
-          ttdSurTugNip: val.ttdSuratTuga.nip,
-          ttdSurTugPangkat: val.ttdSuratTuga.pangkat,
-          ttdSurTugGolongan: val.ttdSuratTuga.golongan,
+          ttdSurTugNama: val.ttdSuratTuga.pegawai.nama,
+          ttdSurTugNip: val.ttdSuratTuga.pegawai.nip,
+          ttdSurTugPangkat: val.ttdSuratTuga.pegawai.daftarPangkat.pangkat,
+          ttdSurTugGolongan: val.ttdSuratTuga.pegawai.daftarGolongan.golongan,
+          ttdSurTugUnitKerja: val.ttdSuratTuga.unitKerjaId,
+
+          KPANama: val.KPA.pegawai_KPA.nama,
+          KPANip: val.KPA.pegawai_KPA.nip,
+          KPAPangkat: val.KPA.pegawai_KPA.daftarPangkat.pangkat,
+          KPAGolongan: val.KPA.pegawai_KPA.daftarGolongan.golongan,
           noNotaDinas: val.noNotaDinas,
           noSuratTugas: val.noSuratTugas,
+          unitKerja: user[0]?.unitKerja_profile,
+          kodeUnitKerja: user[0]?.unitKerja_profile.kode,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -95,7 +108,9 @@ function Daftar() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/perjalanan/get/all-perjalanan?&time=${time}&page=${page}&limit=${limit}`
+        }/perjalanan/get/all-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${
+          user[0]?.unitKerja_profile?.id
+        }`
       )
       .then((res) => {
         setDataPerjalanan(res.data.result);
@@ -138,6 +153,15 @@ function Daftar() {
                     borderColor="white"
                   >
                     jenis Perjalanan
+                  </Th>
+
+                  <Th
+                    bgColor={"blue"}
+                    color={"white"}
+                    borderWidth="1px"
+                    borderColor="white"
+                  >
+                    Unit Kerja Surat Tugas
                   </Th>
                   <Th
                     bgColor={"blue"}
@@ -229,6 +253,9 @@ function Daftar() {
                     </Td>{" "}
                     <Td borderWidth="1px" borderColor="primary">
                       {item.jenisPerjalanan.jenis}
+                    </Td>{" "}
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.ttdSuratTuga.unitKerja_ttdSuratTugas.kode}
                     </Td>
                     <Td borderWidth="1px" borderColor="primary">
                       {item.noSuratTugas ? item.noSuratTugas : "-"}

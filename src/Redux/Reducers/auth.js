@@ -1,9 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
+const userFromStorage = JSON.parse(localStorage.getItem("user")) || null;
+const tokenFromStorage = localStorage.getItem("token") || null;
+const roleFromStorage = JSON.parse(localStorage.getItem("role")) || null; // Ambil role dari localStorage
+
 const initialState = {
-  user: JSON.parse(localStorage.getItem("user")) || null,
+  user: userFromStorage,
   token: localStorage.getItem("token") || null,
+  role: roleFromStorage,
 };
 
 const authSlice = createSlice({
@@ -11,8 +16,13 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      state.user = action.payload.user;
+      if (action.payload.user) {
+        state.user = action.payload.user;
+      }
       state.token = action.payload.token;
+      if (action.payload.role) {
+        state.role = action.payload.role;
+      }
     },
     logout: (state) => {
       state.user = null;
@@ -33,19 +43,24 @@ export const login = (email, password) => async (dispatch) => {
     );
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user)); // Simpan user
-    dispatch(loginSuccess(data));
+    localStorage.setItem("role", JSON.stringify(data.role)); // Simpan user
+    dispatch(
+      loginSuccess({ user: data.user, token: data.token, role: data.role })
+    );
+    console.log(data, "data dri API");
   } catch (error) {
     console.error("Login failed", error);
   }
 };
-
+export const selectRole = (state) => state.auth.role;
+export const userRedux = (state) => state.auth.user;
 // Fungsi register
-export const register = (name, email, password, role) => async () => {
+export const register = (nama, email, password, role) => async () => {
   try {
     await axios.post(
       `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/register`,
       {
-        name,
+        nama,
         email,
         password,
         role,
@@ -68,6 +83,9 @@ export const performLogout = () => (dispatch) => {
 export default authSlice.reducer;
 console.log("aaa");
 export const selectIsAuthenticated = (state) => !!state.auth.token;
+
+// Tambahkan selector untuk mengambil data user
+export const selectUser = (state) => state.auth.user; // Pastikan ini sesuai dengan struktur state Anda
 
 axios.interceptors.response.use(
   (response) => response,

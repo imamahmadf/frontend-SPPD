@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { register } from "../Redux/Reducers/auth";
 
 const Register = () => {
-  const [name, setName] = useState("");
+  const [nama, setNama] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user"); // Default role sebagai 'user'
@@ -13,7 +13,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await dispatch(register(name, email, password, role));
+    await dispatch(register(nama, email, password, role));
     history.push("/login"); // Arahkan ke halaman login setelah register
   };
 
@@ -23,9 +23,9 @@ const Register = () => {
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          placeholder="Nama"
+          value={nama}
+          onChange={(e) => setNama(e.target.value)}
           required
         />
         <input

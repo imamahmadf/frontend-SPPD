@@ -14,6 +14,9 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { loginSuccess, logout } from "./Redux/Reducers/auth.js";
 import ProtectedRoute from "./Componets/ProtectedRoute";
+import Template from "./pages/Template.jsx";
+import RampungAdmin from "./pages/Admin/RampungAdmin.jsx";
+import Perjalanan from "./pages/Perjalanan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -35,7 +38,12 @@ function App() {
         );
         console.log(data);
         if (data.isAuthenticated) {
-          dispatch(loginSuccess(data));
+          dispatch(
+            loginSuccess({
+              token: token,
+              role: data.user?.role, // Pastikan role disimpan
+            })
+          );
         } else {
           dispatch(logout());
         }
@@ -56,6 +64,9 @@ function App() {
           <Route component={Rill} path="/rill/:kwitId" />
           <Route component={Login} path="/login" />
           <Route component={Register} path="/register" />
+          <Route component={Template} path="/template" />
+          <Route component={RampungAdmin} path="/admin/rampung/:id" />
+          <Route component={Perjalanan} path="/perjalanan" />
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>
