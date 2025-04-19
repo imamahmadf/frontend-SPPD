@@ -109,7 +109,7 @@ function Perjalanan() {
           dalamKota: dataKota,
           tanggalBerangkat,
           tanggalPulang,
-          unitKerja: user[0]?.unitKerja_profile,
+          indukUnitKerjaFE: user[0]?.unitKerja_profile,
           KPAId: dataKPA.value.id,
         },
         {
@@ -149,9 +149,11 @@ function Perjalanan() {
   async function fetchSeedPerjalanan() {
     await axios
       .get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/perjalanan/get/seed/${
-          user[0]?.unitKerja_profile?.id
-        }`
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perjalanan/get/seed?indukUnitKerjaId=${
+          user[0]?.unitKerja_profile?.indukUnitKerja.id
+        }&unitKerjaId=${user[0]?.unitKerja_profile?.id}`
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -442,11 +444,14 @@ function Perjalanan() {
                 {
                   label:
                     dataSeed?.resultTtdSuratTugas?.find(
-                      (val) => val.unitKerjaId === user[0]?.unitKerja_profile.id
-                    )?.["unitKerja-ttdSuratTugas"]?.unitKerja || "Unit Kerja 2",
+                      (val) =>
+                        val.indukUnitKerjaId ===
+                        user[0]?.unitKerja_profile.indukUnitKerja.id
+                    )?.["indukUnitKerja-ttdSuratTugas"]?.indukUnitKerja ||
+                    "Unit Kerja 2",
                   options:
                     dataSeed?.resultTtdSuratTugas
-                      ?.filter((val) => val.unitKerjaId === 2)
+                      ?.filter((val) => val.indukUnitKerjaId === 2)
                       .map((val) => ({
                         value: val,
                         label: `${val?.pegawai?.nama}`,
@@ -456,10 +461,11 @@ function Perjalanan() {
                   label:
                     dataSeed?.resultTtdSuratTugas?.find(
                       (val) => val.unitKerjaId === 1
-                    )?.["unitKerja-ttdSuratTugas"]?.unitKerja || "Unit Kerja 1",
+                    )?.["indukUnitKerja-ttdSuratTugas"]?.indukUnitKerja ||
+                    "Unit Kerja 1",
                   options:
                     dataSeed?.resultTtdSuratTugas
-                      ?.filter((val) => val.unitKerjaId === 1)
+                      ?.filter((val) => val.indukUnitKerjaId === 1)
                       .map((val) => ({
                         value: val,
                         label: `${val?.pegawai?.nama}`,

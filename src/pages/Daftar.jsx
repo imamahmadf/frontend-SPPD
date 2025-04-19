@@ -72,7 +72,7 @@ function Daftar() {
           ttdSurTugNip: val.ttdSuratTuga.pegawai.nip,
           ttdSurTugPangkat: val.ttdSuratTuga.pegawai.daftarPangkat.pangkat,
           ttdSurTugGolongan: val.ttdSuratTuga.pegawai.daftarGolongan.golongan,
-          ttdSurTugUnitKerja: val.ttdSuratTuga.unitKerjaId,
+          ttdSurTugUnitKerja: val.ttdSuratTuga.indukUnitKerjaId,
 
           KPANama: val.KPA.pegawai_KPA.nama,
           KPANip: val.KPA.pegawai_KPA.nip,
@@ -81,7 +81,7 @@ function Daftar() {
           noNotaDinas: val.noNotaDinas,
           noSuratTugas: val.noSuratTugas,
           unitKerja: user[0]?.unitKerja_profile,
-          kodeUnitKerja: user[0]?.unitKerja_profile.kode,
+          indukUnitKerjaFE: user[0]?.unitKerja_profile,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -133,6 +133,8 @@ function Daftar() {
         <Box pt={"80px"} bgColor={"white"} pb={"40px"}>
           DAFTAR
           <Box style={{ overflowX: "auto" }}>
+            {" "}
+            {JSON.stringify(user[0]?.unitKerja_profile)}
             <Table>
               <Thead>
                 <Tr>
@@ -255,7 +257,7 @@ function Daftar() {
                       {item.jenisPerjalanan.jenis}
                     </Td>{" "}
                     <Td borderWidth="1px" borderColor="primary">
-                      {item.ttdSuratTuga.unitKerja_ttdSuratTugas.kode}
+                      {item.ttdSuratTuga.indukUnitKerja_ttdSuratTugas.kodeInduk}
                     </Td>
                     <Td borderWidth="1px" borderColor="primary">
                       {item.noSuratTugas ? item.noSuratTugas : "-"}
