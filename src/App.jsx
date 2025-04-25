@@ -17,6 +17,10 @@ import ProtectedRoute from "./Componets/ProtectedRoute";
 import Template from "./pages/Template.jsx";
 import RampungAdmin from "./pages/Admin/RampungAdmin.jsx";
 import Perjalanan from "./pages/Perjalanan.jsx";
+import suratKeluarAdmin from "./pages/Admin/suratKeluarAdmin.jsx";
+import PengaturanPegawai from "./pages/PengaturanPegawai.jsx";
+import DaftarPegawai from "./pages/DaftarPegawai.jsx";
+import EditPegawai from "./pages/Admin/EditPegawai.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -60,6 +64,7 @@ function App() {
         <Switch>
           <ProtectedRoute component={Daftar} path="/daftar" />
           <Route component={Rampung} path="/rampung/:id" />
+          <Route component={suratKeluarAdmin} path="/admin/surat-keluar" />
           <Route component={Detail} path="/detail-perjalanan/:id" />
           <Route component={Rill} path="/rill/:kwitId" />
           <Route component={Login} path="/login" />
@@ -67,6 +72,12 @@ function App() {
           <Route component={Template} path="/template" />
           <Route component={RampungAdmin} path="/admin/rampung/:id" />
           <Route component={Perjalanan} path="/perjalanan" />
+          <Route
+            component={PengaturanPegawai}
+            path="/admin/pengaturan-pegawai/:id"
+          />
+          <Route component={DaftarPegawai} path="/daftar-pegawai" />
+          <Route component={EditPegawai} path="/admin/edit-pegawai/:id" />
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>

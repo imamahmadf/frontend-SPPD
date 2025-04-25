@@ -116,6 +116,9 @@ function RampungAdmin(props) {
           <Text>Nota Dinas: {detailPerjalanan.noNotaDinas}</Text>
           <Text>Surat Tugas: {detailPerjalanan.noSuratTugas}</Text>
           <Text>Tanggal Pengajuan: {detailPerjalanan.tanggalPengajuan}</Text>
+          <Text>
+            Sumber Dana: {detailPerjalanan.bendahara?.sumberDana?.sumber}
+          </Text>
           {/* <Text>{`${detailPerjalanan?.tempats[0]?.dalamKota?.nama}, ${detailPerjalanan?.tempats[1]?.dalamKota?.nama}`}</Text> */}
 
           <Text>

@@ -78,7 +78,7 @@ function Daftar() {
           KPANip: val.KPA.pegawai_KPA.nip,
           KPAPangkat: val.KPA.pegawai_KPA.daftarPangkat.pangkat,
           KPAGolongan: val.KPA.pegawai_KPA.daftarGolongan.golongan,
-          noNotaDinas: val.noNotaDinas,
+          noNotaDinas: val.suratKeluar.nomor,
           noSuratTugas: val.noSuratTugas,
           unitKerja: user[0]?.unitKerja_profile,
           indukUnitKerjaFE: user[0]?.unitKerja_profile,
@@ -130,118 +130,137 @@ function Daftar() {
   return (
     <>
       <Layout>
-        <Box pt={"80px"} bgColor={"white"} pb={"40px"}>
+        <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
           DAFTAR
           <Box style={{ overflowX: "auto" }}>
-            {" "}
             {JSON.stringify(user[0]?.unitKerja_profile)}
             <Table>
-              <Thead>
+              <Thead bgColor={"primary"} border={"1px"}>
                 <Tr>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    py={"20px"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     no.
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    py={"20px"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     jenis Perjalanan
                   </Th>
 
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Unit Kerja Surat Tugas
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     No Surat Tugas
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
+                  >
+                    No Nota Dinas
+                  </Th>
+                  <Th
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Tanggal Berangkat
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     tanggal Pulang
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Personil 1
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Personil 2
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Personil 3
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Personil 4
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Personil 5
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Kode Rekening
                   </Th>
                   <Th
-                    bgColor={"blue"}
-                    color={"white"}
-                    borderWidth="1px"
-                    borderColor="white"
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    py={"15px"}
+                    border={"1px"}
                   >
                     Aksi
                   </Th>
@@ -261,6 +280,9 @@ function Daftar() {
                     </Td>
                     <Td borderWidth="1px" borderColor="primary">
                       {item.noSuratTugas ? item.noSuratTugas : "-"}
+                    </Td>
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.suratKeluar.nomor ? item.suratKeluar.nomor : "-"}
                     </Td>
                     <Td borderWidth="1px" borderColor="primary">
                       {item.tempats?.[0]?.tanggalBerangkat

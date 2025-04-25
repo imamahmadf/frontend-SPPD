@@ -25,6 +25,8 @@ import {
   Flex,
   Textarea,
   Input,
+  Heading,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -42,6 +44,8 @@ function Perjalanan() {
   const [dataPegawai, setDataPegawai] = useState([]);
   const [selectedPegawai, setSelectedPegawai] = useState([]);
   const [tanggalPengajuan, setTanggalPengajuan] = useState("");
+  const [klasifikasi, setKlasifikasi] = useState(null);
+  const [kodeKlasifikasi, setKodeKlasifikasi] = useState(null);
   // const [inputEndDate, setInputEndDate] = useState("");
   const [dataSeed, setDataSeed] = useState([]);
   const [untuk, setUntuk] = useState("");
@@ -61,6 +65,10 @@ function Perjalanan() {
   const [perjalananKota, setPerjalananKota] = useState([
     { kota: "", tanggalBerangkat: "", tanggalPulang: "" },
   ]);
+  const [dataKlasifikasi, setDataKlasifikasi] = useState([]);
+  const [dataKodeKlasifikasi, setDataKodeKlasifikasi] = useState(null);
+  const [dataSumberDana, setDataSumberDana] = useState(null);
+  const [dataBendahara, setDataBendahara] = useState(null);
 
   const handleChange = (e, field) => {
     //console.log(field);
@@ -111,6 +119,8 @@ function Perjalanan() {
           tanggalPulang,
           indukUnitKerjaFE: user[0]?.unitKerja_profile,
           KPAId: dataKPA.value.id,
+          kodeKlasifikasi: dataKodeKlasifikasi,
+          dataBendaharaId: dataBendahara.id,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -196,6 +206,24 @@ function Perjalanan() {
         console.error(err.message);
       });
   }
+
+  const fetchDataKodeKlasifikasi = async (id) => {
+    await axios
+      .get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/klasifikasi/get/kode-klasifikasi/${id}`
+      )
+      .then((res) => {
+        console.log(res.data, "tessss");
+        setKodeKlasifikasi(res.data.result);
+        setDataKlasifikasi(res.data.result);
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
+
   useEffect(() => {
     fetchDataPegawai();
     fetchSeedPerjalanan();
@@ -238,460 +266,1117 @@ function Perjalanan() {
 
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"white"} pb={"40px"} px={"30px"}>
-        {" "}
-        {JSON.stringify(user[0]?.unitKerja_profile)}
-        <HStack w={"100%"} spacing={4}>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <Select2
-              options={dataPegawai.result?.map((val) => {
-                return {
-                  value: val,
-                  label: `${val.nama}`,
-                };
-              })}
-              placeholder="Cari Nama Pegawai"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                handleSelectChange(selectedOption, 0);
-              }}
-            />
-          </FormControl>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <Select2
-              options={dataPegawai.result?.map((val) => {
-                return {
-                  value: val,
-                  label: `${val.nama}`,
-                };
-              })}
-              placeholder="Cari Nama Pegawai"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                handleSelectChange(selectedOption, 1);
-              }}
-            />
-          </FormControl>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <Select2
-              options={dataPegawai.result?.map((val) => {
-                return {
-                  value: val,
-                  label: `${val.nama}`,
-                };
-              })}
-              placeholder="Cari Nama Pegawai"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                handleSelectChange(selectedOption, 2);
-              }}
-            />
-          </FormControl>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <Select2
-              options={dataPegawai.result?.map((val) => {
-                return {
-                  value: val,
-                  label: `${val.nama}`,
-                };
-              })}
-              placeholder="Cari Nama Pegawai"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                handleSelectChange(selectedOption, 3);
-              }}
-            />
-          </FormControl>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <Select2
-              options={dataPegawai.result?.map((val) => {
-                return {
-                  value: val,
-                  label: `${val.nama}`,
-                };
-              })}
-              placeholder="Cari Nama Pegawai"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                handleSelectChange(selectedOption, 4);
-              }}
-            />
-          </FormControl>
-        </HStack>{" "}
-        <Flex mt={"40px"} gap={4} w={"100%"}>
-          <FormControl>
-            <FormLabel>Untuk</FormLabel>
-            <Textarea
-              onChange={(e) => {
-                setUntuk(e.target.value);
-              }}
-              placeholder="isi dengan tujuan perjalanan dinas"
-            />
-          </FormControl>
-          <Box w={"50%"}>
-            <Box>
-              <Text>Nomor Surat Tugas:</Text>
-              <Text>
-                {dataSeed?.resultDaftarNomorSurat?.length > 0
-                  ? dataSeed.resultDaftarNomorSurat[0]?.jenisSurat.nomorSurat
-                  : "Tidak ada data"}
-              </Text>
-            </Box>
-            <Box>
-              <Text>Nomor Nota Dinas:</Text>
-              <Text>
-                {dataSeed?.resultDaftarNomorSurat?.length > 0
-                  ? dataSeed.resultDaftarNomorSurat[1]?.jenisSurat.nomorSurat
-                  : "Tidak ada data"}
-              </Text>
-            </Box>
-            <Box>
-              <Text>Nomor SPD:</Text>
-              <Text>
-                {dataSeed?.resultDaftarNomorSurat?.length > 0
-                  ? dataSeed.resultDaftarNomorSurat[2]?.jenisSurat.nomorSurat
-                  : "Tidak ada data"}
-              </Text>
-            </Box>
-          </Box>
-        </Flex>
-        <Flex mt={"40px"} gap={4}>
-          <FormControl
-            border={"1px"}
-            borderColor="gray.400"
-            me="5px"
-            maxWidth={"400px"}
-          >
-            {" "}
-            <Text ms="18px">Tanggal Pengajuan</Text>
-            <Input
-              placeholder="Select Date and Time"
-              defaultValue={tanggalPengajuan}
-              size="md"
-              type="date"
-              border={"none"}
-              onChange={(e) => handleChange(e, "pengajuan")}
-            />
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>Asal</FormLabel>
-            <Input
-              onChange={(e) => {
-                setAsal(e.target.value);
-              }}
-              placeholder="isi dengan asal "
-              defaultValue={asal}
-            />
-          </FormControl>
-        </Flex>
-        {selectedPegawai.length > 0 && (
-          <>
-            <Table variant="simple" mt={4}>
-              <Thead>
-                <Tr>
-                  <Th>No</Th>
-                  <Th>Nama</Th>
-                  <Th>Pangkat/Golongan</Th>
-                  <Th>Tingkatan</Th>
-                  <Th>Jabatan</Th>
-                  <Th>NIP</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {selectedPegawai.map((pegawai, index) => (
-                  <Tr key={index}>
-                    <Td>{pegawai.value.id}</Td>
-                    <Td>{pegawai.value.nama}</Td>
-                    <Td>
-                      {pegawai.value.daftarPangkat.pangkat}/
-                      {pegawai.value.daftarGolongan.golongan}
-                    </Td>
-                    <Td> {pegawai.value.daftarTingkatan.tingkatan}</Td>
-                    <Td>{pegawai.value.jabatan}</Td>
-                    <Td>{pegawai.value.nip}</Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </>
-        )}
-        <Box>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            {" "}
-            <FormLabel>Ttd Nota Dinas</FormLabel>
-            <Select2
-              options={
-                dataSeed?.resultTtdNotaDinas?.map((val) => {
+      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          pt={"30px"}
+          ps={"0px"}
+        >
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Data Nota Dinas</Heading>
+          </HStack>
+          <Box p={"30px"}>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
+              <Select2
+                options={dataSeed.resultKlasifikasi?.map((val) => {
                   return {
                     value: val,
-                    label: `${val?.pegawai_notaDinas?.nama}`,
+                    label: `${val.kode}-${val.namaKlasifikasi}`,
                   };
-                }) || []
-              }
-              placeholder="Ttd Nota Dinas"
-              focusBorderColor="red"
-              value={dataTtdNotaDinas}
-              onChange={(selectedOption) => {
-                setDataTtdNotaDinas(selectedOption);
-              }}
-            />
-          </FormControl>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <FormLabel>Ttd Surat Tugas</FormLabel>
-            <Select2
-              options={[
-                {
-                  label:
-                    dataSeed?.resultTtdSuratTugas?.find(
-                      (val) =>
-                        val.indukUnitKerjaId ===
-                        user[0]?.unitKerja_profile.indukUnitKerja.id
-                    )?.["indukUnitKerja-ttdSuratTugas"]?.indukUnitKerja ||
-                    "Unit Kerja 2",
-                  options:
-                    dataSeed?.resultTtdSuratTugas
-                      ?.filter((val) => val.indukUnitKerjaId === 2)
-                      .map((val) => ({
-                        value: val,
-                        label: `${val?.pegawai?.nama}`,
-                      })) || [],
-                },
-                {
-                  label:
-                    dataSeed?.resultTtdSuratTugas?.find(
-                      (val) => val.unitKerjaId === 1
-                    )?.["indukUnitKerja-ttdSuratTugas"]?.indukUnitKerja ||
-                    "Unit Kerja 1",
-                  options:
-                    dataSeed?.resultTtdSuratTugas
-                      ?.filter((val) => val.indukUnitKerjaId === 1)
-                      .map((val) => ({
-                        value: val,
-                        label: `${val?.pegawai?.nama}`,
-                      })) || [],
-                },
-              ]}
-              placeholder="Ttd Surat Tugas"
-              focusBorderColor="red"
-              value={dataTtdSuratTugas}
-              onChange={(selectedOption) => {
-                setDataTtdSuratTugas(selectedOption);
-              }}
-            />
-          </FormControl>
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <FormLabel>Kuasa Pengguna Anggaran</FormLabel>
-            <Select2
-              options={
-                dataSeed?.resultKPA?.map((val) => {
-                  return {
-                    value: val,
-                    label: `${val?.pegawai_KPA?.nama}`,
-                  };
-                }) || []
-              }
-              placeholder="Kuasa Pengguna Anggaran"
-              focusBorderColor="red"
-              value={dataKPA}
-              onChange={(selectedOption) => {
-                setDataKPA(selectedOption);
-              }}
-            />
-          </FormControl>
+                })}
+                placeholder="Cari Klasifikasi"
+                onChange={(selectedOption) => {
+                  setKlasifikasi(selectedOption);
+                  fetchDataKodeKlasifikasi(selectedOption.value.id);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
 
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <FormLabel>PPTK</FormLabel>
-            <Select2
-              options={
-                dataSeed?.resultPPTK?.map((val) => {
-                  return {
-                    value: val,
-                    label: `${val?.pegawai_PPTK?.nama}`,
-                  };
-                }) || []
-              }
-              placeholder="PPTK"
-              focusBorderColor="red"
-              value={dataPPTK}
-              onChange={(selectedOption) => {
-                setDataPPTK(selectedOption);
-              }}
-            />
-          </FormControl>
-
-          <FormControl border={0} bgColor={"white"} flex="1">
-            <Select2
-              options={dataSeed?.resultDaftarKegiatan?.map((val) => {
-                return {
-                  value: val,
-                  label: `${val.kegiatan} - ${val.kodeRekening}`,
-                };
-              })}
-              placeholder="Cari Kegiatan"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                setDataKegiatan(selectedOption);
-              }}
-            />
-          </FormControl>
-          {JSON.stringify(dataKota)}
-          {dataKegiatan?.value && (
-            <>
-              <FormControl border={0} bgColor={"white"} flex="1">
+            {dataKlasifikasi[0] ? (
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
                 <Select2
-                  options={dataKegiatan?.value?.subKegiatan.map((val) => {
-                    return {
-                      value: val,
-                      label: `${val.subKegiatan} - ${val.kodeRekening}`,
-                    };
-                  })}
-                  placeholder="Cari Sub Kegiatan"
+                  options={dataKlasifikasi.map((val) => ({
+                    value: val,
+                    label: `${val.kode} - ${val.kegiatan}`,
+                  }))}
+                  placeholder="Pilih Klasifikasi"
                   focusBorderColor="red"
                   onChange={(selectedOption) => {
-                    setDataSubKegiatan(selectedOption);
+                    setDataKodeKlasifikasi(selectedOption);
+                  }}
+                  components={{
+                    DropdownIndicator: () => null, // Hilangkan tombol panah
+                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                  }}
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "6px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "terang",
+                      border: "0px",
+                      height: "60px",
+                      _hover: {
+                        borderColor: "yellow.700",
+                      },
+                      minHeight: "40px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused ? "primary" : "white",
+                      color: state.isFocused ? "white" : "black",
+                    }),
                   }}
                 />
               </FormControl>
-            </>
-          )}
-          {dataSubKegiatan.value ? (
-            <Text>{`Kode Rekening: ${dataKegiatan?.value?.kodeRekening}.${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan?.value?.kodeRekening}`}</Text>
-          ) : null}
-        </Box>
-        <FormControl border={0} bgColor={"white"} flex="1">
-          <Select2
-            options={dataSeed?.resultJenisPerjalanan?.map((val) => {
-              return {
-                value: val,
-                label: `${val.jenis}`,
-              };
-            })}
-            placeholder="Jenis Perjalanan"
-            focusBorderColor="red"
-            onChange={(selectedOption) => {
-              setJenisPerjalanan(selectedOption);
-            }}
-          />
-        </FormControl>
-        {jenisPerjalanan?.value?.id === 1 ? (
-          <Flex mt={"40px"} gap={4} direction="column">
-            {perjalananKota.map((item, index) => (
-              <Flex key={index} gap={4}>
-                <FormControl>
-                  <FormLabel>Kota</FormLabel>
-                  <Input
-                    value={item.kota}
-                    onChange={(e) =>
-                      handlePerjalananChange(index, "kota", e.target.value)
-                    }
-                    placeholder="Masukkan Kota"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Tanggal Berangkat</FormLabel>
-                  <Input
-                    type="date"
-                    defaultValue={item.tanggalBerangkat}
-                    onChange={(e) =>
-                      handlePerjalananChange(
-                        index,
-                        "tanggalBerangkat",
-                        e.target.value
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Tanggal Pulang</FormLabel>
-                  <Input
-                    type="date"
-                    defaultValue={item.tanggalPulang}
-                    onChange={(e) =>
-                      handlePerjalananChange(
-                        index,
-                        "tanggalPulang",
-                        e.target.value
-                      )
-                    }
-                  />
-                </FormControl>
-              </Flex>
-            ))}
-            <Button onClick={addPerjalanan}>Tambah Kota</Button>
-          </Flex>
-        ) : jenisPerjalanan?.value?.id === 2 ? (
-          <Box>
-            {dataKota.map((item, index) => {
-              return (
-                <Flex key={index} gap={4}>
-                  <FormControl border={0} bgColor={"white"}>
-                    <Select2
-                      options={dataSeed?.resultDalamKota?.map((val) => {
-                        return {
-                          value: { id: val.id, nama: val.nama },
-                          label: `${val.nama}`,
-                        };
-                      })}
-                      placeholder="Pilih Tujuan"
-                      focusBorderColor="red"
-                      value={
-                        item.dataDalamKota
-                          ? {
-                              value: item.dataDalamKota,
-                              label: dataSeed.resultDalamKota.find(
-                                (val) => val.id === item.dataDalamKota.id
-                              )?.nama,
-                            }
-                          : null
-                      }
-                      onChange={(selectedOption) =>
-                        handleDalamKotaChange(
-                          index,
-                          "dataDalamKota",
-                          selectedOption.value
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Tanggal Berangkat</FormLabel>
-                    <Input
-                      type="date"
-                      defaultValue={item.tanggalBerangkat}
-                      onChange={(e) =>
-                        handleDalamKotaChange(
-                          index,
-                          "tanggalBerangkat",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Tanggal Pulang</FormLabel>
-                    <Input
-                      type="date"
-                      defaultValue={item.tanggalPulang}
-                      onChange={(e) =>
-                        handleDalamKotaChange(
-                          index,
-                          "tanggalPulang",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </FormControl>
-                </Flex>
-              );
-            })}
+            ) : null}
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Untuk</FormLabel>
+              <Textarea
+                onChange={(e) => {
+                  setUntuk(e.target.value);
+                }}
+                placeholder="isi dengan tujuan perjalanan dinas"
+                backgroundColor={"terang"}
+                p={"20px"}
+                minHeight={"160px"}
+              />
+            </FormControl>
+          </Box>
+        </Container>
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          pt={"30px"}
+          ps={"0px"}
+          my={"30px"}
+        >
+          {" "}
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Daftar Personil</Heading>
+          </HStack>
+          <SimpleGrid columns={2} spacing={10} p={"30px"}>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Personil 1</FormLabel>
+              <Select2
+                options={dataPegawai.result?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.nama}`,
+                  };
+                })}
+                placeholder="Cari Nama Pegawai"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  handleSelectChange(selectedOption, 0);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Personil 2</FormLabel>
+              <Select2
+                options={dataPegawai.result?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.nama}`,
+                  };
+                })}
+                placeholder="Cari Nama Pegawai"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  handleSelectChange(selectedOption, 1);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Personil 3</FormLabel>
+              <Select2
+                options={dataPegawai.result?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.nama}`,
+                  };
+                })}
+                placeholder="Cari Nama Pegawai"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  handleSelectChange(selectedOption, 2);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Personil 4</FormLabel>
+              <Select2
+                options={dataPegawai.result?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.nama}`,
+                  };
+                })}
+                placeholder="Cari Nama Pegawai"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  handleSelectChange(selectedOption, 3);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Personil 5</FormLabel>
+              <Select2
+                options={dataPegawai.result?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.nama}`,
+                  };
+                })}
+                placeholder="Cari Nama Pegawai"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  handleSelectChange(selectedOption, 4);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+          </SimpleGrid>
+        </Container>
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          pt={"30px"}
+          ps={"0px"}
+        >
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Daftar Tanda Tangan</Heading>
+          </HStack>
+          <Box p={"30px"}>
+            <FormControl border={0} bgColor={"white"} flex="1" my={"30px"}>
+              <FormLabel fontSize={"24px"}>Tanda Tangan Nota Dinas</FormLabel>
+              <Select2
+                options={
+                  dataSeed?.resultTtdNotaDinas?.map((val) => {
+                    return {
+                      value: val,
+                      label: `${val?.pegawai_notaDinas?.nama}`,
+                    };
+                  }) || []
+                }
+                placeholder="Ttd Nota Dinas"
+                focusBorderColor="red"
+                value={dataTtdNotaDinas}
+                onChange={(selectedOption) => {
+                  setDataTtdNotaDinas(selectedOption);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            <FormControl border={0} bgColor={"white"} flex="1" my={"30px"}>
+              <FormLabel fontSize={"24px"}>Tanda tangan Surat Tugas</FormLabel>
+              <Select2
+                options={[
+                  {
+                    label:
+                      dataSeed?.resultTtdSuratTugas?.find(
+                        (val) =>
+                          val.indukUnitKerjaId ===
+                          user[0]?.unitKerja_profile.indukUnitKerja.id
+                      )?.["indukUnitKerja-ttdSuratTugas"]?.indukUnitKerja ||
+                      "Unit Kerja 2",
+                    options:
+                      dataSeed?.resultTtdSuratTugas
+                        ?.filter((val) => val.indukUnitKerjaId === 2)
+                        .map((val) => ({
+                          value: val,
+                          label: `${val?.pegawai?.nama}`,
+                        })) || [],
+                  },
+                  {
+                    label:
+                      dataSeed?.resultTtdSuratTugas?.find(
+                        (val) => val.unitKerjaId === 1
+                      )?.["indukUnitKerja-ttdSuratTugas"]?.indukUnitKerja ||
+                      "Unit Kerja 1",
+                    options:
+                      dataSeed?.resultTtdSuratTugas
+                        ?.filter((val) => val.indukUnitKerjaId === 1)
+                        .map((val) => ({
+                          value: val,
+                          label: `${val?.pegawai?.nama}`,
+                        })) || [],
+                  },
+                ]}
+                placeholder="Ttd Surat Tugas"
+                focusBorderColor="red"
+                value={dataTtdSuratTugas}
+                onChange={(selectedOption) => {
+                  setDataTtdSuratTugas(selectedOption);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            <FormControl border={0} bgColor={"white"} flex="1" my={"30px"}>
+              <FormLabel fontSize={"24px"}>
+                Tanda Tangan Pengguna Anggaran
+              </FormLabel>
+              <Select2
+                options={
+                  dataSeed?.resultKPA?.map((val) => {
+                    return {
+                      value: val,
+                      label: `${val?.pegawai_KPA?.nama}`,
+                    };
+                  }) || []
+                }
+                placeholder="Kuasa Pengguna Anggaran"
+                focusBorderColor="red"
+                value={dataKPA}
+                onChange={(selectedOption) => {
+                  setDataKPA(selectedOption);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
 
-            {dataKota.length > 2 ? null : (
-              <Button onClick={addDataKota}>Tambah Kota</Button>
+            <FormControl border={0} bgColor={"white"} flex="1" my={"30px"}>
+              <FormLabel fontSize={"24px"}>Tanda Tangan PPTK</FormLabel>
+              <Select2
+                options={
+                  dataSeed?.resultPPTK?.map((val) => {
+                    return {
+                      value: val,
+                      label: `${val?.pegawai_PPTK?.nama}`,
+                    };
+                  }) || []
+                }
+                placeholder="PPTK"
+                focusBorderColor="red"
+                value={dataPPTK}
+                onChange={(selectedOption) => {
+                  setDataPPTK(selectedOption);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+          </Box>
+        </Container>
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          pt={"30px"}
+          ps={"0px"}
+          my={"30px"}
+        >
+          {" "}
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Data Perjalanan Dinas</Heading>
+          </HStack>
+          <Box p={"30px"}>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Jenis Perjalanan</FormLabel>
+              <Select2
+                options={dataSeed?.resultJenisPerjalanan?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.jenis}`,
+                  };
+                })}
+                placeholder="Jenis Perjalanan"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  setJenisPerjalanan(selectedOption);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            {jenisPerjalanan?.value?.id === 1 ? (
+              <Flex my={"30px"} gap={4} direction="column">
+                {perjalananKota.map((item, index) => (
+                  <Flex key={index} gap={4}>
+                    <FormControl>
+                      <FormLabel fontSize={"24px"}>Nama Kota</FormLabel>
+                      <Input
+                        height={"60px"}
+                        bgColor={"terang"}
+                        value={item.kota}
+                        onChange={(e) =>
+                          handlePerjalananChange(index, "kota", e.target.value)
+                        }
+                        placeholder="Masukkan Kota"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize={"24px"}>Tanggal Berangkat</FormLabel>
+                      <Input
+                        height={"60px"}
+                        bgColor={"terang"}
+                        type="date"
+                        defaultValue={item.tanggalBerangkat}
+                        onChange={(e) =>
+                          handlePerjalananChange(
+                            index,
+                            "tanggalBerangkat",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize={"24px"}>Tanggal Berangkat</FormLabel>
+                      <Input
+                        height={"60px"}
+                        bgColor={"terang"}
+                        type="date"
+                        defaultValue={item.tanggalPulang}
+                        onChange={(e) =>
+                          handlePerjalananChange(
+                            index,
+                            "tanggalPulang",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </FormControl>
+                  </Flex>
+                ))}
+                <Button variant={"secondary"} onClick={addPerjalanan}>
+                  Tambah Kota
+                </Button>
+              </Flex>
+            ) : jenisPerjalanan?.value?.id === 2 ? (
+              <Box>
+                {dataKota.map((item, index) => {
+                  return (
+                    <Flex key={index} gap={4}>
+                      <FormControl border={0} bgColor={"white"}>
+                        <FormLabel fontSize={"24px"}>Tujuan</FormLabel>
+                        <Select2
+                          options={dataSeed?.resultDalamKota?.map((val) => {
+                            return {
+                              value: { id: val.id, nama: val.nama },
+                              label: `${val.nama}`,
+                            };
+                          })}
+                          placeholder="Pilih Tujuan"
+                          focusBorderColor="red"
+                          value={
+                            item.dataDalamKota
+                              ? {
+                                  value: item.dataDalamKota,
+                                  label: dataSeed.resultDalamKota.find(
+                                    (val) => val.id === item.dataDalamKota.id
+                                  )?.nama,
+                                }
+                              : null
+                          }
+                          onChange={(selectedOption) =>
+                            handleDalamKotaChange(
+                              index,
+                              "dataDalamKota",
+                              selectedOption.value
+                            )
+                          }
+                          components={{
+                            DropdownIndicator: () => null, // Hilangkan tombol panah
+                            IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                          }}
+                          chakraStyles={{
+                            container: (provided) => ({
+                              ...provided,
+                              borderRadius: "6px",
+                            }),
+                            control: (provided) => ({
+                              ...provided,
+                              backgroundColor: "terang",
+                              border: "0px",
+                              height: "60px",
+                              _hover: {
+                                borderColor: "yellow.700",
+                              },
+                              minHeight: "40px",
+                            }),
+                            option: (provided, state) => ({
+                              ...provided,
+                              bg: state.isFocused ? "primary" : "white",
+                              color: state.isFocused ? "white" : "black",
+                            }),
+                          }}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel fontSize={"24px"}>
+                          Tanggal berangkat
+                        </FormLabel>
+                        <Input
+                          height={"60px"}
+                          bgColor={"terang"}
+                          type="date"
+                          defaultValue={item.tanggalBerangkat}
+                          onChange={(e) =>
+                            handleDalamKotaChange(
+                              index,
+                              "tanggalBerangkat",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel fontSize={"24px"}>Tanggal Pulang</FormLabel>
+                        <Input
+                          height={"60px"}
+                          bgColor={"terang"}
+                          type="date"
+                          defaultValue={item.tanggalPulang}
+                          onChange={(e) =>
+                            handleDalamKotaChange(
+                              index,
+                              "tanggalPulang",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </FormControl>
+                    </Flex>
+                  );
+                })}
+
+                {dataKota.length > 2 ? null : (
+                  <Button
+                    width={"100%"}
+                    mt={"15px"}
+                    variant={"secondary"}
+                    onClick={addDataKota}
+                  >
+                    Tambah Kota
+                  </Button>
+                )}
+              </Box>
+            ) : null}
+
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Kegiatan</FormLabel>
+              <Select2
+                options={dataSeed?.resultDaftarKegiatan?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.kegiatan} - ${val.kodeRekening}`,
+                  };
+                })}
+                placeholder="Cari Kegiatan"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  setDataKegiatan(selectedOption);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+            {JSON.stringify(dataKota)}
+            {dataKegiatan?.value && (
+              <>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Sub Kegiatan</FormLabel>
+                  <Select2
+                    options={dataKegiatan?.value?.subKegiatan.map((val) => {
+                      return {
+                        value: val,
+                        label: `${val.subKegiatan} - ${val.kodeRekening}`,
+                      };
+                    })}
+                    placeholder="Cari Sub Kegiatan"
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      setDataSubKegiatan(selectedOption);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+              </>
+            )}
+            {dataSubKegiatan.value ? (
+              <Text>{`Kode Rekening: ${dataKegiatan?.value?.kodeRekening}.${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan?.value?.kodeRekening}`}</Text>
+            ) : null}
+
+            <Flex mt={"40px"} gap={4}>
+              <FormControl>
+                <FormLabel fontSize={"24px"}>Tanggal Pengajuan</FormLabel>
+                <Input
+                  bgColor={"terang"}
+                  height="60px"
+                  placeholder="Select Date and Time"
+                  defaultValue={tanggalPengajuan}
+                  type="date"
+                  border={"none"}
+                  onChange={(e) => handleChange(e, "pengajuan")}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel fontSize={"24px"}>Asal</FormLabel>
+                <Input
+                  onChange={(e) => {
+                    setAsal(e.target.value);
+                  }}
+                  bgColor={"terang"}
+                  height="60px"
+                  placeholder="isi dengan asal "
+                  defaultValue={asal}
+                />
+              </FormControl>
+            </Flex>
+          </Box>
+        </Container>
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          pt={"30px"}
+          ps={"0px"}
+        >
+          {" "}
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Data Keuangan</Heading>
+          </HStack>
+          <Box p={"30px"}>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Sumber Dana</FormLabel>
+              <Select2
+                options={dataSeed?.resultSumberDana?.map((val) => {
+                  return {
+                    value: val,
+                    label: `${val.sumber}`,
+                  };
+                })}
+                placeholder="sumber dana"
+                focusBorderColor="red"
+                onChange={(selectedOption) => {
+                  setDataSumberDana(selectedOption);
+                }}
+                components={{
+                  DropdownIndicator: () => null, // Hilangkan tombol panah
+                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: {
+                      borderColor: "yellow.700",
+                    },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "primary" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
+
+            {dataSumberDana?.value && (
+              <>
+                <FormControl border={0} bgColor={"white"} flex="1">
+                  <Select2
+                    options={dataSumberDana?.value?.bendaharas.map((val) => {
+                      return {
+                        value: val,
+                        label: `${val.jabatan} - ${val.pegawai_bendahara.nama}`,
+                      };
+                    })}
+                    placeholder="Cari Bendahara"
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      setDataBendahara(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+              </>
             )}
           </Box>
-        ) : null}
-        <Button onClick={submitPerjalanan}>Submit</Button>
+        </Container>
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          pt={"30px"}
+          ps={"0px"}
+          my={"20px"}
+        >
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Data Keuangan</Heading>
+          </HStack>
+          <Box p={"30px"} style={{ overflowX: "auto" }}>
+            {selectedPegawai.length > 0 && (
+              <>
+                <Table variant="simple" mt={4}>
+                  <Thead bgColor={"primary"}>
+                    <Tr>
+                      <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                        No
+                      </Th>
+                      <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                        Nama
+                      </Th>
+                      <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                        Pangkat/Golongan
+                      </Th>
+                      <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                        Tingkatan
+                      </Th>
+                      <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                        Jabatan
+                      </Th>
+                      <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                        NIP
+                      </Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody bgColor={"secondary"}>
+                    {selectedPegawai.map((pegawai, index) => (
+                      <Tr key={index}>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {pegawai.value.id}
+                        </Td>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {pegawai.value.nama}
+                        </Td>
+                        <Td>
+                          {pegawai.value.daftarPangkat.pangkat}/
+                          {pegawai.value.daftarGolongan.golongan}
+                        </Td>
+                        <Td> {pegawai.value.daftarTingkatan.tingkatan}</Td>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {pegawai.value.jabatan}
+                        </Td>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {pegawai.value.nip}
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </>
+            )}
+          </Box>
+        </Container>
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          p={"30px"}
+        >
+          {/* {JSON.stringify(user[0]?.unitKerja_profile)} */}
+          {JSON.stringify(dataBendahara)}
+          <HStack w={"100%"} spacing={4}></HStack>{" "}
+          <Flex mt={"40px"} gap={4} w={"100%"}>
+            <Box w={"50%"}>
+              <Box>
+                <Text>Nomor Surat Tugas:</Text>
+                <Text>
+                  {dataSeed?.resultDaftarNomorSurat?.length > 0
+                    ? dataSeed.resultDaftarNomorSurat[0]?.jenisSurat.nomorSurat
+                    : "Tidak ada data"}
+                </Text>
+              </Box>
+              <Box>
+                <Text>Nomor Nota Dinas:</Text>
+                <Text>
+                  {dataSeed?.resultDaftarNomorSurat?.length > 0
+                    ? dataSeed.resultDaftarNomorSurat[1]?.jenisSurat.nomorSurat
+                    : "Tidak ada data"}
+                </Text>
+              </Box>
+              <Box>
+                <Text>Nomor SPD:</Text>
+                <Text>
+                  {dataSeed?.resultDaftarNomorSurat?.length > 0
+                    ? dataSeed.resultDaftarNomorSurat[2]?.jenisSurat.nomorSurat
+                    : "Tidak ada data"}
+                </Text>
+              </Box>
+            </Box>
+          </Flex>
+        </Container>
+        <Container maxW={"1280px"}>
+          {" "}
+          <Button onClick={submitPerjalanan}>Submit</Button>
+        </Container>
       </Box>
     </Layout>
   );

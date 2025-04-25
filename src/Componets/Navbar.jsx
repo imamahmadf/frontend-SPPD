@@ -9,6 +9,7 @@ import {
   HStack,
   Table,
   Spacer,
+  Image,
 } from "@chakra-ui/react";
 import Logout from "./Logout";
 import { useSelector } from "react-redux";
@@ -17,6 +18,7 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
+import Logo from "../assets/logo.png";
 
 function Navbar() {
   const isAuthenticated =
@@ -27,15 +29,16 @@ function Navbar() {
   console.log("User Data:", user);
 
   return (
-    <Box>
-      <Container py={"30px"} maxW={"1280px"}>
+    <Box color={"white"} bgColor={"primary"}>
+      <Container py={"20px"} maxW={"1280px"}>
         <HStack gap={5}>
+          <Image height="65px" overflow="hiden" objectFit="cover" src={Logo} />
           <Text>LOGO</Text> <Text>{user[0]?.nama}</Text>{" "}
           <Text>{role[0]?.id}</Text> <Spacer /> <Text>HOME</Text>{" "}
           <Text>DAFTAR</Text> <Text>PENGATURAN</Text>
           {isAuthenticated ? <Logout /> : <a href="/login">Login</a>}
         </HStack>
-        {JSON.stringify(role)}
+        {/* {JSON.stringify(role)} */}
       </Container>
     </Box>
   );

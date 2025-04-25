@@ -45,7 +45,7 @@ function Home() {
   // const [inputEndDate, setInputEndDate] = useState("");
   const [dataSeed, setDataSeed] = useState([]);
   const [untuk, setUntuk] = useState("");
-  const [asal, setAsal] = useState(user[0]?.unitKerja_profile?.asal);
+
   const [dataTtdNotaDinas, setDataTtdNotaDinas] = useState(null);
   const [dataTtdSuratTugas, setDataTtdSuratTugas] = useState(null);
   const [dataPPTK, setDataPPTK] = useState(null);
@@ -72,65 +72,6 @@ function Home() {
     } else if (field === "pulang") {
       setTanggalPulang(value);
     }
-  };
-
-  const submitPerjalanan = () => {
-    console.log(
-      // selectedPegawai,
-      // tanggalPengajuan,
-      // dataSeed.resultNomorSurat,
-      // untuk,
-      // asal,
-
-      dataTtdNotaDinas,
-      // dataTtdSurTug
-      dataTtdSuratTugas
-    );
-    axios
-      .post(
-        `${
-          import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/perjalanan/post/nota-dinas`,
-        {
-          pegawai: selectedPegawai,
-          dataTtdSurTug: dataTtdSuratTugas,
-          dataTtdNotaDinas,
-          PPTKId: dataPPTK.value.id,
-          tanggalPengajuan,
-          noSurat: dataSeed?.resultDaftarNomorSurat,
-          subKegiatanId: dataSubKegiatan.value.id,
-          untuk,
-          asal,
-          kodeRekeningFE: `${dataKegiatan?.value?.kodeRekening}.${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan.value.kodeRekening}`,
-          ttdNotDis: dataTtdNotaDinas,
-          perjalananKota,
-          sumber: dataKegiatan.value.sumber,
-          jenis: jenisPerjalanan.value,
-          dalamKota: dataKota,
-          tanggalBerangkat,
-          tanggalPulang,
-          unitKerja: user[0]?.unitKerja_profile,
-          KPAId: dataKPA.value.id,
-        },
-        {
-          responseType: "blob", // Penting untuk menerima file sebagai blob
-        }
-      )
-      .then((res) => {
-        console.log(res.data); // Log respons dari backend
-
-        // Buat URL untuk file yang diunduh
-        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "nota_dinas.docx"); // Nama file yang diunduh
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      })
-      .catch((err) => {
-        console.error(err); // Tangani error
-      });
   };
 
   async function fetchDataPegawai() {
