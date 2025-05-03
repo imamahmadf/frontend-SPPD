@@ -3,14 +3,27 @@ import { Route, Redirect } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const ProtectedRoute = ({ component: Component, ...rest }) => {
-  const token =
-    useSelector((state) => state.auth.token) || localStorage.getItem("token");
+  const isAuthenticated = useSelector((state) => !!state.auth.token);
+  const loading = useSelector((state) => state.auth.loading); // Jika ada loading state
+
+  if (loading) {
+    return <div>Loading...</div>; // Atau spinner
+  }
 
   return (
     <Route
       {...rest}
       render={(props) =>
-        token ? <Component {...props} /> : <Redirect to="/login" />
+        isAuthenticated ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/login",
+              state: { from: props.location },
+            }}
+          />
+        )
       }
     />
   );

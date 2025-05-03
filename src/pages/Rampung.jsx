@@ -166,22 +166,16 @@ function Rampung(props) {
         }/kwitansi/post/kwitansi-otomatis`,
         {
           personilId: dataRampung.result.id,
-          nomorSPD: dataRampung.result.nomorSPD,
-          tanggalPengajuan: dataRampung.result.tanggalPengajuan,
-          pegawaiNama: dataRampung.result.pegawai.nama,
-          pegawaiNip: dataRampung.result.pegawai.nip,
-          pegawaiJabatan: dataRampung.result.pegawai.jabatan,
-          untuk: dataRampung.result.perjalanan.untuk,
-          PPTKNama: dataRampung.result.perjalanan.PPTK.pegawai_PPTK.nama,
-          PPTKNip: dataRampung.result.perjalanan.PPTK.pegawai_PPTK.nip,
+
           subKegiatan:
             dataRampung.result.perjalanan.daftarSubKegiatan.subKegiatan,
-          kodeRekening: `${dataRampung.result.perjalanan.daftarSubKegiatan.kegiatan.kodeRekening}${dataRampung.result.perjalanan.daftarSubKegiatan.kodeRekening}`,
+          // kodeRekening: `${dataRampung.result.perjalanan.daftarSubKegiatan.kegiatan.kodeRekening}${dataRampung.result.perjalanan.daftarSubKegiatan.kodeRekening}`,
           uangHarian: 170000,
           uangTransport: maxTransport.dalamKota.uangTransport,
           tempatNama: maxTransport.dalamKota.nama,
           asal: dataRampung.result.perjalanan.asal,
           totalDurasi,
+          pelayananKesehatan: dataRampung.result.perjalanan.pelayananKesehatan,
         }
       )
       .then((res) => {
@@ -213,7 +207,7 @@ function Rampung(props) {
           KPAJabatan: dataRampung.result.perjalanan.KPA.jabatan,
           subKegiatan:
             dataRampung.result.perjalanan.daftarSubKegiatan.subKegiatan,
-          kodeRekening: `${dataRampung.result.perjalanan.daftarSubKegiatan.kegiatan.kodeRekening}${dataRampung.result.perjalanan.daftarSubKegiatan.kodeRekening}${dataRampung.result.perjalanan.jenisPerjalanan.kodeRekening}`,
+          kodeRekening: `${dataRampung.result.perjalanan.daftarSubKegiatan.kodeRekening}${dataRampung.result.perjalanan.jenisPerjalanan.kodeRekening}`,
           rincianBPD: dataRampung.result.rincianBPDs,
           tanggalPengajuan: dataRampung.result.perjalanan.tanggalPengajuan,
           totalDurasi,
@@ -459,7 +453,8 @@ function Rampung(props) {
             {JSON.stringify(user[0]?.unitKerja_profile)}
 
             {JSON.stringify(bendaharaSelected)}
-            {dataRampung?.result?.perjalanan?.jenisPerjalanan.id === 2 &&
+            {dataRampung?.result?.perjalanan?.jenisPerjalanan
+              .tipePerjalananId === 1 &&
             dataRampung?.result?.rincianBPDs.length == 0 ? (
               <Button onClick={buatOtomatis}>buat otomatis</Button>
             ) : null}

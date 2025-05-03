@@ -2,7 +2,7 @@ import userTypes from "./Types/userTypes";
 
 const init_state = {
   id: "",
-  email: "",
+  namaPengguna: "",
   emailVerified: "",
   firebaseProviderId: "",
   amprahanOpen: 0,

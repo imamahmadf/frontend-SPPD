@@ -73,7 +73,17 @@ function suratKeluarAdmin() {
       setTanggalSurat(val);
     }
   };
-
+  const resetForm = () => {
+    setDataKodeKlasifikasi(null);
+    setKlasifikasi(null); // Reset klasifikasi utama
+    setKodeKlasifikasi(null); // Reset kode klasifikasi
+    setSelectedUnitKerja(null); // Reset unit kerja
+    setTujuan(""); // Reset tujuan
+    setPerihal(""); // Reset perihal
+    setTanggalSurat(""); // Reset tanggal surat
+    // Jika perlu, fetch kembali data klasifikasi awal
+    fetchKlasifikasi();
+  };
   const submitSuratKeluar = () => {
     axios
       .post(
@@ -81,16 +91,18 @@ function suratKeluarAdmin() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/admin/post/surat-keluar`,
         {
-          unitKerja: user[0]?.unitKerja_profile,
+          unitKerja: selectedUnitKerja,
           dataKodeKlasifikasi,
           perihal,
           tujuan,
           tanggalSurat,
+          indukUnitKerja: user[0]?.unitKerja_profile?.indukUnitKerja,
         }
       )
       .then((res) => {
         console.log(res.data);
         fetchDataSuratKeluar();
+        resetForm();
       })
       .catch((err) => {
         console.error(err); // Tangani error
@@ -115,8 +127,8 @@ function suratKeluarAdmin() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/admin/get/surat-keluar?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${
-          user[0]?.unitKerja_profile?.id
+        }/admin/get/surat-keluar?&time=${time}&page=${page}&limit=${limit}&indukUnitKerjaId=${
+          user[0]?.unitKerja_profile?.indukUnitKerja.id
         }`
       )
       .then((res) => {
@@ -214,13 +226,13 @@ function suratKeluarAdmin() {
             </FormControl>
             {dataKlasifikasi[0] ? (
               <FormControl my={"30px"}>
-                <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
+                <FormLabel fontSize={"24px"}>Kode Klasifikasi</FormLabel>
                 <Select2
                   options={dataKlasifikasi.map((val) => ({
                     value: val.kode,
                     label: `${val.kode} - ${val.kegiatan}`,
                   }))}
-                  placeholder="Pilih Klasifikasi"
+                  placeholder="Pilih kode Klasifikasi"
                   focusBorderColor="red"
                   onChange={(selectedOption) => {
                     setDataKodeKlasifikasi(selectedOption.value);
@@ -254,10 +266,10 @@ function suratKeluarAdmin() {
               </FormControl>
             ) : null}
             <FormControl border={0} bgColor={"white"} flex="1">
-              <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
+              <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
               <Select2
                 options={dataUnitKerja?.map((val) => ({
-                  value: val.kode,
+                  value: val,
                   label: `${val.kode}`,
                 }))}
                 placeholder="Pilih Klasifikasi"
@@ -291,19 +303,21 @@ function suratKeluarAdmin() {
                   }),
                 }}
               />
-            </FormControl>{" "}
+            </FormControl>
             <FormControl my={"30px"}>
               <FormLabel fontSize={"24px"}>Tujuan</FormLabel>
               <Input
+                value={tujuan}
                 height={"60px"}
                 bgColor={"terang"}
                 onChange={(e) => handleSubmitChange("tujuan", e.target.value)}
                 placeholder="Tujuan Surat"
               />
-            </FormControl>{" "}
+            </FormControl>
             <FormControl my={"30px"}>
               <FormLabel fontSize={"24px"}>Perihal</FormLabel>
               <Input
+                value={perihal}
                 height={"60px"}
                 bgColor={"terang"}
                 onChange={(e) => handleSubmitChange("perihal", e.target.value)}
@@ -313,6 +327,7 @@ function suratKeluarAdmin() {
             <FormControl my={"30px"}>
               <FormLabel fontSize={"24px"}>Tanggal Surat</FormLabel>
               <Input
+                value={tanggalSurat}
                 type="date"
                 height={"60px"}
                 bgColor={"terang"}

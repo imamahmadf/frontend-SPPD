@@ -10,8 +10,18 @@ import {
   Table,
   Spacer,
   Image,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuItemOption,
+  MenuGroup,
+  MenuOptionGroup,
+  MenuDivider,
+  Button,
 } from "@chakra-ui/react";
 import Logout from "./Logout";
+import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   selectIsAuthenticated,
@@ -27,18 +37,80 @@ function Navbar() {
   const role = useSelector(selectRole);
   // console.log("Is Authenticated:", isAuthenticated);
   console.log("User Data:", user);
+  const history = useHistory();
 
   return (
     <Box color={"white"} bgColor={"primary"}>
       <Container py={"20px"} maxW={"1280px"}>
         <HStack gap={5}>
           <Image height="65px" overflow="hiden" objectFit="cover" src={Logo} />
-          <Text>LOGO</Text> <Text>{user[0]?.nama}</Text>{" "}
-          <Text>{role[0]?.id}</Text> <Spacer /> <Text>HOME</Text>{" "}
-          <Text>DAFTAR</Text> <Text>PENGATURAN</Text>
+          <Text>{user[0]?.nama}</Text> <Text>{role[0]?.id}</Text> <Spacer />{" "}
+          <Box
+            as="button"
+            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+            _hover={{
+              bg: "secondary",
+              color: "black",
+            }}
+            onClick={() => {
+              history.push("/");
+            }}
+          >
+            <Text>HOME</Text>
+          </Box>
+          <Box
+            as="button"
+            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+            _hover={{
+              bg: "secondary",
+              color: "black",
+            }}
+            onClick={() => {
+              history.push("/perjalanan");
+            }}
+          >
+            <Text>PERJALANAN</Text>
+          </Box>
+          <Box
+            as="button"
+            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+            _hover={{
+              bg: "secondary",
+              color: "black",
+            }}
+            onClick={() => {
+              history.push("/daftar");
+            }}
+          >
+            <Text>DAFTAR</Text>
+          </Box>
+          <Menu>
+            <MenuButton as={Button}>ADMIN</MenuButton>
+            <MenuList color={"black"}>
+              <Link to={"/admin/keuangan/daftar-perjalanan"}>
+                <MenuItem>Daftar Perjalanan</MenuItem>
+              </Link>
+              <Link to={"/daftar-pegawai"}>
+                <MenuItem>Daftar Pegawai</MenuItem>
+              </Link>
+              <Link to={"/admin/surat-keluar"}>
+                <MenuItem>Daftar Surat Keluar</MenuItem>
+              </Link>
+              <Link to={"/admin/dalam-kota"}>
+                <MenuItem>Daftar Dalam Kota</MenuItem>
+              </Link>
+              <Link to={"/admin/tambah-user"}>
+                <MenuItem>Pengaturan Pengguna</MenuItem>
+              </Link>
+              <Link to={"/admin/induk-unit-kerja"}>
+                <MenuItem>Induk Unit Kerja</MenuItem>
+              </Link>
+            </MenuList>
+          </Menu>
           {isAuthenticated ? <Logout /> : <a href="/login">Login</a>}
         </HStack>
-        {/* {JSON.stringify(role)} */}
+        {/* {JSON.stringify(user[0]?.unitKerja_profile?.indukUnitKerja.id)}
+        {JSON.stringify(localStorage.getItem("token"))} */}
       </Container>
     </Box>
   );

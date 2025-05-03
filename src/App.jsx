@@ -21,6 +21,11 @@ import suratKeluarAdmin from "./pages/Admin/suratKeluarAdmin.jsx";
 import PengaturanPegawai from "./pages/PengaturanPegawai.jsx";
 import DaftarPegawai from "./pages/DaftarPegawai.jsx";
 import EditPegawai from "./pages/Admin/EditPegawai.jsx";
+import DalamKotaAdmin from "./pages/Admin/DalamKotaAdmin.jsx";
+import IndukUnitKerjaAdmin from "./pages/Admin/IndukUnitKerjaAdmin.jsx";
+import DetailPegawaiAdmin from "./pages/Admin/DetailPegawaiAdmin.jsx";
+import DaftarAdmin from "./pages/Admin/DaftarAdmin.jsx";
+import TambahUser from "./pages/Admin/TambahUser.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -78,6 +83,21 @@ function App() {
           />
           <Route component={DaftarPegawai} path="/daftar-pegawai" />
           <Route component={EditPegawai} path="/admin/edit-pegawai/:id" />
+          <Route component={DalamKotaAdmin} path="/admin/dalam-kota" />
+          <Route
+            component={DaftarAdmin}
+            path="/admin/keuangan/daftar-perjalanan"
+          />
+          <Route
+            component={IndukUnitKerjaAdmin}
+            path="/admin/induk-unit-kerja"
+          />
+
+          <Route component={TambahUser} path="/admin/tambah-user" />
+          <Route
+            component={DetailPegawaiAdmin}
+            path="/admin/detail-pegawai/:id"
+          />
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>

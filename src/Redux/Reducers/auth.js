@@ -35,11 +35,11 @@ const authSlice = createSlice({
 export const { loginSuccess, logout } = authSlice.actions;
 
 // Fungsi login
-export const login = (email, password) => async (dispatch) => {
+export const login = (namaPengguna, password) => async (dispatch) => {
   try {
     const { data } = await axios.post(
       `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/login`,
-      { email, password }
+      { namaPengguna, password }
     );
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user)); // Simpan user
@@ -55,14 +55,14 @@ export const login = (email, password) => async (dispatch) => {
 export const selectRole = (state) => state.auth.role;
 export const userRedux = (state) => state.auth.user;
 // Fungsi register
-export const register = (nama, email, password, role) => async () => {
+export const register = (nama, namaPengguna, password, role) => async () => {
   try {
     await axios.post(
       `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/register`,
       {
         nama,
-        email,
         password,
+        namaPengguna,
         role,
       }
     );

@@ -5,7 +5,7 @@ import { register } from "../Redux/Reducers/auth";
 
 const Register = () => {
   const [nama, setNama] = useState("");
-  const [email, setEmail] = useState("");
+  const [namaPengguna, setNamaPengguna] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user"); // Default role sebagai 'user'
   const dispatch = useDispatch();
@@ -13,7 +13,7 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await dispatch(register(nama, email, password, role));
+    await dispatch(register(nama, namaPengguna, password, role));
     history.push("/login"); // Arahkan ke halaman login setelah register
   };
 
@@ -29,10 +29,10 @@ const Register = () => {
           required
         />
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Nama Pengguna"
+          value={namaPengguna}
+          onChange={(e) => setNamaPengguna(e.target.value)}
           required
         />
         <input

@@ -4,7 +4,7 @@ import { login } from "../Redux/Reducers/auth"; // Import action creator
 import { useHistory } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [namaPengguna, setNamaPengguna] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const history = useHistory();
@@ -12,7 +12,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await dispatch(login(email, password));
+      await dispatch(login(namaPengguna, password));
       history.push("/");
     } catch (err) {
       setError("Email atau password salah!");
@@ -24,10 +24,10 @@ const Login = () => {
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Nama pengguna"
+          value={namaPengguna}
+          onChange={(e) => setNamaPengguna(e.target.value)}
         />
         <input
           type="password"

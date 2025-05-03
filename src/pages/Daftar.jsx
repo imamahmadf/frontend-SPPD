@@ -60,7 +60,7 @@ function Daftar() {
         {
           asal: val.asal,
           jenis: val.jenisPerjalanan.id,
-          kode: `${val.daftarSubKegiatan.kodeRekening}${val.daftarSubKegiatan.kegiatan.kodeRekening}`,
+          kode: `${val.daftarSubKegiatan.kodeRekening}.${val.jenisPerjalanan.kodeRekening}`,
           personilFE: val.personils,
           ttdSurTug: val.ttdSuratTuga,
           id: val.id,
@@ -73,11 +73,11 @@ function Daftar() {
           ttdSurTugPangkat: val.ttdSuratTuga.pegawai.daftarPangkat.pangkat,
           ttdSurTugGolongan: val.ttdSuratTuga.pegawai.daftarGolongan.golongan,
           ttdSurTugUnitKerja: val.ttdSuratTuga.indukUnitKerjaId,
-
           KPANama: val.KPA.pegawai_KPA.nama,
           KPANip: val.KPA.pegawai_KPA.nip,
           KPAPangkat: val.KPA.pegawai_KPA.daftarPangkat.pangkat,
           KPAGolongan: val.KPA.pegawai_KPA.daftarGolongan.golongan,
+          KPAJabatan: val.KPA.jabatan,
           noNotaDinas: val.suratKeluar.nomor,
           noSuratTugas: val.noSuratTugas,
           unitKerja: user[0]?.unitKerja_profile,
