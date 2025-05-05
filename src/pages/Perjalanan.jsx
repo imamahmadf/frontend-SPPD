@@ -37,6 +37,7 @@ import axios from "axios";
 import Layout from "../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
+import { Link, useHistory } from "react-router-dom";
 
 function Perjalanan() {
   const user = useSelector(userRedux);
@@ -55,6 +56,7 @@ function Perjalanan() {
   const [dataPPTK, setDataPPTK] = useState(null);
   const [dataKPA, setDataKPA] = useState(null);
   const [jenisPerjalanan, setJenisPerjalanan] = useState([]);
+  const history = useHistory();
   const [dataKota, setDataKota] = useState([
     { dataDalamKota: "", tanggalBerangkat: "", tanggalPulang: "" },
   ]);
@@ -128,6 +130,7 @@ function Perjalanan() {
         document.body.appendChild(link);
         link.click();
         link.remove();
+        history.push(`/daftar`);
       })
       .catch((err) => {
         console.error(err); // Tangani error

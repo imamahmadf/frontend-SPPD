@@ -32,9 +32,11 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { Link, useHistory } from "react-router-dom";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
+import TambahUnitKerja from "../../Componets/TambahUnitKerja";
 
 function IndukUnitKerjaAdmin() {
   const user = useSelector(userRedux);
@@ -46,6 +48,7 @@ function IndukUnitKerjaAdmin() {
   const [editingId, setEditingId] = useState(null);
   const [editValues, setEditValues] = useState({});
   const toast = useToast();
+  const history = useHistory();
 
   // Fungsi untuk mengubah nilai edit
   const handleEditChange = (id, value) => {
@@ -62,6 +65,7 @@ function IndukUnitKerjaAdmin() {
         }`
       );
       setData(response.data.result);
+      console.log(response.data);
     } catch (err) {
       console.error("Gagal mengambil data:", err);
       toast({
@@ -400,6 +404,13 @@ function IndukUnitKerjaAdmin() {
             <Heading size="md" mb={4}>
               Tanda Tangan Surat Tugas
             </Heading>
+            <Button
+              onClick={() => {
+                history.push("/admin/ttd-surat-tugas");
+              }}
+            >
+              +
+            </Button>
             {isLoading ? (
               <Text>Memuat data...</Text>
             ) : (
@@ -507,6 +518,9 @@ function IndukUnitKerjaAdmin() {
           <Heading size="md" mb={4} px={4}>
             Daftar Unit Kerja
           </Heading>
+          <TambahUnitKerja
+            indukUnitKerjaId={user[0].unitKerja_profile.indukUnitKerja.id}
+          />
           {isLoading ? (
             <Text>Memuat data...</Text>
           ) : (
@@ -522,7 +536,13 @@ function IndukUnitKerjaAdmin() {
                         </Text>
                       </Box>
                       <Spacer />
-                      <Button>+</Button>
+                      <Button
+                        onClick={() => {
+                          history.push(`/admin/unit-kerja/${unitKerja.id}`);
+                        }}
+                      >
+                        +
+                      </Button>
                     </HStack>
                   </CardHeader>
                   <CardBody>

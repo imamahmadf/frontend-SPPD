@@ -307,13 +307,16 @@ function Daftar() {
                       {item.kodeRekening?.kode || "-"}
                     </Td>
                     <Td borderWidth="1px" borderColor="primary">
-                      <Button
-                        onClick={() =>
-                          history.push(`/detail-perjalanan/${item.id}`)
-                        }
-                      >
-                        Detail
-                      </Button>
+                      {item.noSuratTugas ? (
+                        <Button
+                          onClick={() =>
+                            history.push(`/detail-perjalanan/${item.id}`)
+                          }
+                        >
+                          Detail
+                        </Button>
+                      ) : null}
+
                       <Button
                         onClick={() => {
                           postSuratTugas(item);

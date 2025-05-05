@@ -26,6 +26,10 @@ import IndukUnitKerjaAdmin from "./pages/Admin/IndukUnitKerjaAdmin.jsx";
 import DetailPegawaiAdmin from "./pages/Admin/DetailPegawaiAdmin.jsx";
 import DaftarAdmin from "./pages/Admin/DaftarAdmin.jsx";
 import TambahUser from "./pages/Admin/TambahUser.jsx";
+import UnitKerjaAdmin from "./pages/Admin/UnitKerjaAdmin.jsx";
+import TtdSuratTugasAdmin from "./pages/Admin/TtdSuratTugasAdmin.jsx";
+import DaftarIndukUnitKerjaAdmin from "./pages/Admin/DaftarIndukUnitKerjaAdmin.jsx";
+import DaftarBendaharaAdmin from "./pages/Admin/DaftarBendaharaAdmin.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -74,14 +78,14 @@ function App() {
           <Route component={Rill} path="/rill/:kwitId" />
           <Route component={Login} path="/login" />
           <Route component={Register} path="/register" />
-          <Route component={Template} path="/template" />
+          <Route component={Template} path="/admin/template" />
           <Route component={RampungAdmin} path="/admin/rampung/:id" />
           <Route component={Perjalanan} path="/perjalanan" />
           <Route
             component={PengaturanPegawai}
             path="/admin/pengaturan-pegawai/:id"
           />
-          <Route component={DaftarPegawai} path="/daftar-pegawai" />
+          <ProtectedRoute component={DaftarPegawai} path="/daftar-pegawai" />
           <Route component={EditPegawai} path="/admin/edit-pegawai/:id" />
           <Route component={DalamKotaAdmin} path="/admin/dalam-kota" />
           <Route
@@ -92,12 +96,25 @@ function App() {
             component={IndukUnitKerjaAdmin}
             path="/admin/induk-unit-kerja"
           />
+          <Route
+            component={DaftarIndukUnitKerjaAdmin}
+            path="/admin/daftar-induk-unit-kerja"
+          />
 
           <Route component={TambahUser} path="/admin/tambah-user" />
+
           <Route
             component={DetailPegawaiAdmin}
             path="/admin/detail-pegawai/:id"
           />
+
+          <Route component={TtdSuratTugasAdmin} path="/admin/ttd-surat-tugas" />
+          <Route component={UnitKerjaAdmin} path="/admin/unit-kerja/:id" />
+          <Route
+            component={DaftarBendaharaAdmin}
+            path="/admin/daftar-bendahara"
+          />
+
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>

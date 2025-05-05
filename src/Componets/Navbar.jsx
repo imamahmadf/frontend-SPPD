@@ -44,7 +44,8 @@ function Navbar() {
       <Container py={"20px"} maxW={"1280px"}>
         <HStack gap={5}>
           <Image height="65px" overflow="hiden" objectFit="cover" src={Logo} />
-          <Text>{user[0]?.nama}</Text> <Text>{role[0]?.id}</Text> <Spacer />{" "}
+          {/* <Text>{user[0]?.nama}</Text> <Text>{role[0]?.id}</Text>  */}
+          <Spacer />{" "}
           <Box
             as="button"
             transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
@@ -104,6 +105,15 @@ function Navbar() {
               </Link>
               <Link to={"/admin/induk-unit-kerja"}>
                 <MenuItem>Induk Unit Kerja</MenuItem>
+              </Link>{" "}
+              <Link to={"/admin/daftar-induk-unit-kerja"}>
+                <MenuItem>Daftar Induk Unit Kerja</MenuItem>
+              </Link>
+              <Link to={"/admin/daftar-bendahara"}>
+                <MenuItem>Daftar Bendahara</MenuItem>
+              </Link>
+              <Link to={"/admin/template"}>
+                <MenuItem>Template</MenuItem>
               </Link>
             </MenuList>
           </Menu>

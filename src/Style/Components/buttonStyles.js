@@ -9,7 +9,8 @@ export const buttonStyles = {
       fontSize: "16px",
       fontWeight: "600",
       _hover: {
-        bg: "rgba(10, 107, 67, 1)",
+        bg: "primaryTerang",
+        color: "gelap",
       },
     }),
     secondary: (props) => ({

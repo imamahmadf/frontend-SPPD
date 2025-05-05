@@ -55,6 +55,7 @@ import {
 } from "../Redux/Reducers/auth";
 function Rampung(props) {
   const toast = useToast();
+  const [randomNumber, setRandomNumber] = useState(0);
   const inputFileRef = useRef(null);
   const [dataRampung, setDataRampung] = useState([]);
   const [namaKegiatan, setNamaKegiatan] = useState("");
@@ -75,7 +76,11 @@ function Rampung(props) {
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
   const [bendaharaSelected, setBendaharaSelected] = useState(null);
-
+  const {
+    isOpen: isInputOpen,
+    onOpen: onInputOpen,
+    onClose: onInputClose,
+  } = useDisclosure();
   function renderJenis() {
     return dataRampung.jenisRampung?.map((val) => {
       return (
@@ -406,7 +411,7 @@ function Rampung(props) {
   };
   useEffect(() => {
     fetchDataRampung();
-  }, []);
+  }, [randomNumber]);
 
   useEffect(() => {
     if (dataRampung?.dataBendahara?.length > 0) {
@@ -489,7 +494,16 @@ function Rampung(props) {
             <Rill
               data={dataRampung?.daftarRill}
               personilId={dataRampung?.result?.id}
+              randomNumber={setRandomNumber}
+              status={dataRampung?.result?.statusId}
             />
+            {dataRampung?.result?.statusId === 3 ||
+            dataRampung?.result?.statusId === 2 ? null : (
+              <Button onClick={onInputOpen} variant={"primary"}>
+                Tambah +
+              </Button>
+            )}
+
             {dataRampung?.result?.statusId === 3 ||
             dataRampung?.result?.statusId === 2 ? null : (
               <Box></Box>
@@ -510,7 +524,7 @@ function Rampung(props) {
             ) : null}
           </Box>
         </Container>
-        <Container
+        {/* <Container
           border={"1px"}
           borderRadius={"6px"}
           borderColor={"rgba(229, 231, 235, 1)"}
@@ -523,149 +537,7 @@ function Rampung(props) {
             <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
             <Heading color={"primary"}>Input Rincian Biaya Perjalanan</Heading>
           </HStack>
-          <Box p={"30px"}>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Item</FormLabel>
-              <Input
-                placeholder="Contoh: Hotel"
-                height={"60px"}
-                bgColor={"terang"}
-                type="text"
-                border={"none"}
-                onChange={(e) => {
-                  formik.setFieldValue("item", e.target.value);
-                }}
-              />
-              {formik.errors.item ? (
-                <Alert status="error" color="red" text="center">
-                  {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                  <Text ms="10px">{formik.errors.item}</Text>
-                </Alert>
-              ) : null}
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Satuan</FormLabel>
-              <Input
-                placeholder="contoh: malam"
-                height={"60px"}
-                bgColor={"terang"}
-                type="text"
-                border={"none"}
-                onChange={(e) => {
-                  formik.setFieldValue("satuan", e.target.value);
-                }}
-              />
-              {formik.errors.satuan ? (
-                <Alert status="error" color="red" text="center">
-                  {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                  <Text ms="10px">{formik.errors.satuan}</Text>
-                </Alert>
-              ) : null}
-            </FormControl>
-            <FormControl my={"30px"}>
-              {" "}
-              <FormLabel fontSize={"24px"}>Quantity</FormLabel>
-              <Input
-                placeholder="contoh; 1"
-                height={"60px"}
-                bgColor={"terang"}
-                type="number"
-                border={"none"}
-                onChange={(e) => {
-                  formik.setFieldValue("qty", e.target.value);
-                }}
-              />
-              {formik.errors.qty ? (
-                <Alert status="error" color="red" text="center">
-                  {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                  <Text ms="10px">{formik.errors.qty}</Text>
-                </Alert>
-              ) : null}
-            </FormControl>{" "}
-            <FormControl my={"30px"}>
-              {" "}
-              <FormLabel fontSize={"24px"}>Nilai</FormLabel>
-              <Input
-                placeholder="Contoh: 5000000"
-                height={"60px"}
-                bgColor={"terang"}
-                type="number"
-                border={"none"}
-                onChange={(e) => {
-                  formik.setFieldValue("nilai", e.target.value);
-                }}
-              />
-              {formik.errors.nilai ? (
-                <Alert status="error" color="red" text="center">
-                  {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                  <Text ms="10px">{formik.errors.nilai}</Text>
-                </Alert>
-              ) : null}
-            </FormControl>
-            <FormControl>
-              <FormLabel fontSize={"24px"}>Jenis</FormLabel>
-              <Select
-                placeholder="Jenis"
-                height={"60px"}
-                bgColor={"terang"}
-                borderRadius={"8px"}
-                borderColor={"rgba(229, 231, 235, 1)"}
-                onChange={(e) => {
-                  formik.setFieldValue("jenis", parseInt(e.target.value));
-                }}
-              >
-                {renderJenis()}
-              </Select>
-              {formik.errors.jenis ? (
-                <Alert status="error" color="red" text="center">
-                  <i className="fa-solid fa-circle-exclamation"></i>
-                  <Text ms="10px">{formik.errors.jenis}</Text>
-                </Alert>
-              ) : null}
-            </FormControl>
-            <FormControl>
-              <Input
-                onChange={handleFile}
-                ref={inputFileRef}
-                accept="image/png, image/jpeg"
-                display="none"
-                type="file"
-
-                // hidden="hidden"
-              />
-            </FormControl>{" "}
-            <FormControl>
-              <Image
-                src={Foto}
-                id="imgpreview"
-                alt="Room image"
-                width="100%"
-                height={{ ss: "210px", sm: "210px", sl: "650px" }}
-                me="10px"
-                mt="20px"
-                overflow="hiden"
-                objectFit="cover"
-              />
-            </FormControl>{" "}
-            <FormControl mt="20px">
-              <FormHelperText>Max size: 1MB</FormHelperText>
-              <Button
-                variant={"secondary"}
-                w="100%"
-                onClick={() => inputFileRef.current.click()}
-              >
-                Add Photo
-              </Button>
-              {fileSizeMsg ? (
-                <Alert status="error" color="red" text="center">
-                  {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                  <Text ms="10px">{fileSizeMsg}</Text>
-                </Alert>
-              ) : null}
-            </FormControl>{" "}
-            <Button onClick={formik.handleSubmit}>submit</Button>
-          </Box>
-        </Container>
+        </Container> */}
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -854,6 +726,165 @@ function Rampung(props) {
             >
               Hapus
             </Button>
+          </ModalBody>
+
+          <ModalFooter></ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        closeOnOverlayClick={false}
+        isOpen={isInputOpen}
+        onClose={onInputClose}
+      >
+        <ModalOverlay />
+        <ModalContent borderRadius={0} maxWidth="1200px">
+          <ModalHeader>Rill </ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody pb={6}>
+            <Box>
+              <FormControl mb={"30px"}>
+                <FormLabel fontSize={"24px"}>Item</FormLabel>
+                <Input
+                  placeholder="Contoh: Hotel"
+                  height={"60px"}
+                  bgColor={"terang"}
+                  type="text"
+                  border={"none"}
+                  onChange={(e) => {
+                    formik.setFieldValue("item", e.target.value);
+                  }}
+                />
+                {formik.errors.item ? (
+                  <Alert status="error" color="red" text="center">
+                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
+                    <Text ms="10px">{formik.errors.item}</Text>
+                  </Alert>
+                ) : null}
+              </FormControl>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Satuan</FormLabel>
+                <Input
+                  placeholder="contoh: malam"
+                  height={"60px"}
+                  bgColor={"terang"}
+                  type="text"
+                  border={"none"}
+                  onChange={(e) => {
+                    formik.setFieldValue("satuan", e.target.value);
+                  }}
+                />
+                {formik.errors.satuan ? (
+                  <Alert status="error" color="red" text="center">
+                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
+                    <Text ms="10px">{formik.errors.satuan}</Text>
+                  </Alert>
+                ) : null}
+              </FormControl>
+              <FormControl my={"30px"}>
+                {" "}
+                <FormLabel fontSize={"24px"}>Quantity</FormLabel>
+                <Input
+                  placeholder="contoh; 1"
+                  height={"60px"}
+                  bgColor={"terang"}
+                  type="number"
+                  border={"none"}
+                  onChange={(e) => {
+                    formik.setFieldValue("qty", e.target.value);
+                  }}
+                />
+                {formik.errors.qty ? (
+                  <Alert status="error" color="red" text="center">
+                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
+                    <Text ms="10px">{formik.errors.qty}</Text>
+                  </Alert>
+                ) : null}
+              </FormControl>{" "}
+              <FormControl my={"30px"}>
+                {" "}
+                <FormLabel fontSize={"24px"}>Nilai</FormLabel>
+                <Input
+                  placeholder="Contoh: 5000000"
+                  height={"60px"}
+                  bgColor={"terang"}
+                  type="number"
+                  border={"none"}
+                  onChange={(e) => {
+                    formik.setFieldValue("nilai", e.target.value);
+                  }}
+                />
+                {formik.errors.nilai ? (
+                  <Alert status="error" color="red" text="center">
+                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
+                    <Text ms="10px">{formik.errors.nilai}</Text>
+                  </Alert>
+                ) : null}
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize={"24px"}>Jenis</FormLabel>
+                <Select
+                  placeholder="Jenis"
+                  height={"60px"}
+                  bgColor={"terang"}
+                  borderRadius={"8px"}
+                  borderColor={"rgba(229, 231, 235, 1)"}
+                  onChange={(e) => {
+                    formik.setFieldValue("jenis", parseInt(e.target.value));
+                  }}
+                >
+                  {renderJenis()}
+                </Select>
+                {formik.errors.jenis ? (
+                  <Alert status="error" color="red" text="center">
+                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <Text ms="10px">{formik.errors.jenis}</Text>
+                  </Alert>
+                ) : null}
+              </FormControl>
+              <FormControl>
+                <Input
+                  onChange={handleFile}
+                  ref={inputFileRef}
+                  accept="image/png, image/jpeg"
+                  display="none"
+                  type="file"
+
+                  // hidden="hidden"
+                />
+              </FormControl>{" "}
+              <FormControl>
+                <Image
+                  src={Foto}
+                  id="imgpreview"
+                  alt="Room image"
+                  width="100%"
+                  height={{ ss: "210px", sm: "210px", sl: "650px" }}
+                  me="10px"
+                  mt="20px"
+                  overflow="hiden"
+                  objectFit="cover"
+                />
+              </FormControl>{" "}
+              <FormControl mt="20px">
+                <FormHelperText>Max size: 1MB</FormHelperText>
+                <Button
+                  variant={"secondary"}
+                  w="100%"
+                  onClick={() => inputFileRef.current.click()}
+                >
+                  Add Photo
+                </Button>
+                {fileSizeMsg ? (
+                  <Alert status="error" color="red" text="center">
+                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
+                    <Text ms="10px">{fileSizeMsg}</Text>
+                  </Alert>
+                ) : null}
+              </FormControl>{" "}
+              <Button onClick={formik.handleSubmit}>submit</Button>
+            </Box>
           </ModalBody>
 
           <ModalFooter></ModalFooter>

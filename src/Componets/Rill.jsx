@@ -51,6 +51,8 @@ function Rill(props) {
       })
       .then((res) => {
         console.log(res.data);
+        props.randomNumber(Math.random());
+        onRillClose();
       })
       .catch((err) => {
         console.error(err);
@@ -88,20 +90,22 @@ function Rill(props) {
                 ))}
               </Tbody>
             </Table>
-            <HStack spacing={4} mt={4}>
-              <Input
-                placeholder="Item"
-                onChange={(e) => setItem(e.target.value)}
-              />
-              <Input
-                placeholder="Nilai"
-                type="number"
-                onChange={(e) => setNilai(e.target.value)}
-              />
-              <Button onClick={submitRill} colorScheme="blue">
-                Tambah
-              </Button>
-            </HStack>
+            {props.status === 3 || props.status === 2 ? null : (
+              <HStack spacing={4} mt={4}>
+                <Input
+                  placeholder="Item"
+                  onChange={(e) => setItem(e.target.value)}
+                />
+                <Input
+                  placeholder="Nilai"
+                  type="number"
+                  onChange={(e) => setNilai(e.target.value)}
+                />
+                <Button onClick={submitRill} colorScheme="blue">
+                  Tambah
+                </Button>
+              </HStack>
+            )}
           </ModalBody>
           {props.data?.[0]?.rincianBPD?.personil?.id &&
             JSON.stringify(props.data[0].rincianBPD)}
