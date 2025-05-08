@@ -30,6 +30,8 @@ import UnitKerjaAdmin from "./pages/Admin/UnitKerjaAdmin.jsx";
 import TtdSuratTugasAdmin from "./pages/Admin/TtdSuratTugasAdmin.jsx";
 import DaftarIndukUnitKerjaAdmin from "./pages/Admin/DaftarIndukUnitKerjaAdmin.jsx";
 import DaftarBendaharaAdmin from "./pages/Admin/DaftarBendaharaAdmin.jsx";
+import TambahBendahara from "./pages/Admin/TambahBendahara.jsx";
+import NomorSuratAdmin from "./pages/Admin/nomorSuratAdmin.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -71,51 +73,136 @@ function App() {
     <>
       <BrowserRouter>
         <Switch>
-          <ProtectedRoute component={Daftar} path="/daftar" />
-          <Route component={Rampung} path="/rampung/:id" />
-          <Route component={suratKeluarAdmin} path="/admin/surat-keluar" />
-          <Route component={Detail} path="/detail-perjalanan/:id" />
-          <Route component={Rill} path="/rill/:kwitId" />
+          <ProtectedRoute
+            component={Daftar}
+            path="/daftar"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={Rampung}
+            path="/rampung/:id"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={suratKeluarAdmin}
+            path="/admin/surat-keluar"
+            exact
+            roleRoute={[5, 4]}
+          />
+          <ProtectedRoute
+            component={Detail}
+            path="/detail-perjalanan/:id"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={Rill}
+            path="/rill/:kwitId"
+            exact
+            roleRoute={[5, 1]}
+          />
           <Route component={Login} path="/login" />
           <Route component={Register} path="/register" />
-          <Route component={Template} path="/admin/template" />
-          <Route component={RampungAdmin} path="/admin/rampung/:id" />
-          <Route component={Perjalanan} path="/perjalanan" />
-          <Route
+          <ProtectedRoute
+            component={Template}
+            path="/admin/template"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={RampungAdmin}
+            path="/admin/rampung/:id"
+            exact
+            roleRoute={[4]}
+          />
+          <ProtectedRoute
+            component={Perjalanan}
+            path="/perjalanan"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
             component={PengaturanPegawai}
             path="/admin/pengaturan-pegawai/:id"
           />
-          <ProtectedRoute component={DaftarPegawai} path="/daftar-pegawai" />
-          <Route component={EditPegawai} path="/admin/edit-pegawai/:id" />
-          <Route component={DalamKotaAdmin} path="/admin/dalam-kota" />
-          <Route
+          <ProtectedRoute
+            component={DaftarPegawai}
+            path="/daftar-pegawai"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={EditPegawai}
+            path="/admin/edit-pegawai/:id"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute component={DalamKotaAdmin} path="/admin/dalam-kota" />
+          <ProtectedRoute
             component={DaftarAdmin}
             path="/admin/keuangan/daftar-perjalanan"
+            exact
+            roleRoute={[3]}
           />
-          <Route
+          <ProtectedRoute
             component={IndukUnitKerjaAdmin}
             path="/admin/induk-unit-kerja"
+            exact
+            roleRoute={[2]}
           />
-          <Route
+          <ProtectedRoute
             component={DaftarIndukUnitKerjaAdmin}
             path="/admin/daftar-induk-unit-kerja"
+            exact
+            roleRoute={[5]}
           />
 
-          <Route component={TambahUser} path="/admin/tambah-user" />
+          <ProtectedRoute
+            component={TambahUser}
+            path="/admin/tambah-user"
+            exact
+            roleRoute={[5]}
+          />
 
-          <Route
+          <ProtectedRoute
             component={DetailPegawaiAdmin}
             path="/admin/detail-pegawai/:id"
+            exact
+            roleRoute={[5]}
           />
-
-          <Route component={TtdSuratTugasAdmin} path="/admin/ttd-surat-tugas" />
-          <Route component={UnitKerjaAdmin} path="/admin/unit-kerja/:id" />
-          <Route
+          <ProtectedRoute
+            component={NomorSuratAdmin}
+            path="/admin/nomor-surat"
+            exact
+            roleRoute={[4]}
+          />
+          <ProtectedRoute
+            component={TtdSuratTugasAdmin}
+            path="/admin/ttd-surat-tugas"
+            exact
+            roleRoute={[2]}
+          />
+          <ProtectedRoute
+            component={UnitKerjaAdmin}
+            path="/admin/unit-kerja/:id"
+            exact
+            roleRoute={[2]}
+          />
+          <ProtectedRoute
             component={DaftarBendaharaAdmin}
             path="/admin/daftar-bendahara"
+            exact
+            roleRoute={[2]}
           />
-
-          <Route component={Home} path="/" />
+          <ProtectedRoute
+            component={TambahBendahara}
+            path="/admin/tambah-bendahara"
+            exact
+            roleRoute={[2]}
+          />
+          <ProtectedRoute component={Home} path="/" />
         </Switch>
       </BrowserRouter>
     </>

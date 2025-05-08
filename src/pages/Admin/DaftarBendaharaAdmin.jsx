@@ -39,7 +39,9 @@ import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
 function DaftarBendaharaAdmin() {
   const [dataBendahara, setDataBendahara] = useState(null);
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedBendahara, setSelectedBendahara] = useState(0);
+  const history = useHistory();
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
   async function fetchDataBendahara() {
@@ -62,6 +64,23 @@ function DaftarBendaharaAdmin() {
       });
   }
 
+  const hapusBendahara = (e) => {
+    console.log(e);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/keuangan/delete/bendahara/${e}`
+      )
+      .then((res) => {
+        console.log(res.status, res.data, "tessss");
+        fetchDataBendahara();
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
+
   useEffect(() => {
     fetchDataBendahara();
   }, []);
@@ -79,7 +98,13 @@ function DaftarBendaharaAdmin() {
           ps={"0px"}
           my={"30px"}
         >
-          <Button>Tambah +</Button>
+          <Button
+            onClick={() => {
+              history.push("/admin/tambah-bendahara");
+            }}
+          >
+            Tambah +
+          </Button>
           <Table>
             <Thead>
               <Tr>
@@ -100,7 +125,13 @@ function DaftarBendaharaAdmin() {
                       <Td>{b.jabatan}</Td>
                       <Td>{b.pegawai_bendahara?.nama || "-"}</Td>
                       <Td>
-                        <Button>Hapus</Button>
+                        <Button
+                          onClick={() => {
+                            selectedBendahara(b.id);
+                          }}
+                        >
+                          Hapus
+                        </Button>
                         <Button>Edit</Button>
                       </Td>
                     </Tr>
@@ -110,6 +141,28 @@ function DaftarBendaharaAdmin() {
           </Table>
         </Container>
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Konfirmasi Hapus</ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>Apakah Anda yakin ingin menghapus data ini?</ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme="red"
+              mr={3}
+              onClick={hapusBendahara(selectedBendahara)}
+            >
+              Ya, Hapus
+            </Button>
+            <Button variant="ghost" onClick={onClose}>
+              Batal
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Layout>
   );
 }

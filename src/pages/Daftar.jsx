@@ -133,7 +133,7 @@ function Daftar() {
         <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
           DAFTAR
           <Box style={{ overflowX: "auto" }}>
-            {JSON.stringify(user[0]?.unitKerja_profile)}
+            {/* {JSON.stringify(user[0]?.unitKerja_profile)} */}
             <Table>
               <Thead bgColor={"primary"} border={"1px"}>
                 <Tr>

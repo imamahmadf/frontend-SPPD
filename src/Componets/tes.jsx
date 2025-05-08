@@ -7,16 +7,15 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
-
 function ProtectedRoute({ component: Component, roleRoute, ...rest }) {
   const history = useHistory();
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isAuthenticated = useSelector((state) => !!state.auth.token);
+  const { UserRoles = [] } = useSelector((state) => state.user || {});
   const loading = useSelector((state) => state.auth.loading);
   const user = useSelector(userRedux);
-  const roles = useSelector(selectRole); // This returns the array of role objects
-
+  const role = useSelector(selectRole);
   // Show loading while checking auth state
-  if (loading || (isAuthenticated && !roles)) {
+  if (loading || (isAuthenticated && !UserRoles)) {
     return <Loading />;
   }
 
@@ -37,19 +36,9 @@ function ProtectedRoute({ component: Component, roleRoute, ...rest }) {
         }
 
         // Check authorization (roles) if roleRoute is provided
-        if (roleRoute) {
-          // Extract just the roleIds from the nested structure
-          const userRoleIds = roles.map((roleObj) => roleObj.roleId);
-
-          // Check if any of the user's roles match the required roles
-          const hasRequiredRole = roleRoute.some((requiredRole) =>
-            userRoleIds.includes(requiredRole)
-          );
-
-          if (!hasRequiredRole) {
-            // You can redirect to unauthorized page or back to home
-            return <Redirect to="/" />;
-          }
+        if (roleRoute && !roleRoute.some((role) => UserRoles.includes(role))) {
+          // You can redirect to unauthorized page or back to home
+          return <Redirect to="/" />;
         }
 
         // All checks passed - render component

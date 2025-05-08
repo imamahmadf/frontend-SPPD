@@ -118,7 +118,7 @@ function EditPegawai(props) {
   }, []);
   return (
     <Layout>
-      {JSON.stringify(dataPegawai)}
+      {/* {JSON.stringify(dataPegawai)} */}
       <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}

@@ -67,7 +67,6 @@ const Template = () => {
         <Text fontSize="xl" fontWeight="bold" mb={4}>
           Upload Template Word
         </Text>
-        <Text>{JSON.stringify(user[0]?.unitKerja_profile)}</Text>
 
         <Formik
           initialValues={{ file: null, jenis: null }}

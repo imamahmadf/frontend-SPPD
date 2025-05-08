@@ -454,16 +454,19 @@ function Rampung(props) {
             <Text fontWeight={"600"} fontSize={"18px"}>
               Asal: {dataRampung?.result?.perjalanan?.asal}
             </Text>
-            {JSON.stringify(dataRampung?.result?.perjalanan.tanggalPengajuan)}
+            {/* {JSON.stringify(dataRampung?.result?.perjalanan.tanggalPengajuan)}
             {JSON.stringify(user[0]?.unitKerja_profile)}
 
-            {JSON.stringify(bendaharaSelected)}
+            {JSON.stringify(bendaharaSelected)} */}
             {dataRampung?.result?.perjalanan?.jenisPerjalanan
               .tipePerjalananId === 1 &&
             dataRampung?.result?.rincianBPDs.length == 0 ? (
               <Button onClick={buatOtomatis}>buat otomatis</Button>
             ) : null}
             <Text>Status: {dataRampung?.result?.status.statusKuitansi}</Text>
+            <Text>
+              Catatan: {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
+            </Text>
 
             {dataRampung?.result?.statusId === 3 ? null : (
               <>

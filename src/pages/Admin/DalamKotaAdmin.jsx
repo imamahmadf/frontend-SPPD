@@ -267,7 +267,7 @@ function DalamKotaAdmin() {
           px={"0px"}
         >
           <Box p={"30px"}>
-            {JSON.stringify(dataDalamKota)}
+            {/* {JSON.stringify(dataDalamKota)} */}
             <Table>
               <Thead bgColor={"primary"} border={"1px"}>
                 <Tr>

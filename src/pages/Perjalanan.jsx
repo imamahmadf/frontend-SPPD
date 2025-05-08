@@ -487,7 +487,7 @@ function Perjalanan() {
                 }}
               />
             </FormControl>
-            <FormControl my={"30px"}>
+            <FormControl>
               <FormLabel fontSize={"24px"}>Personil 3</FormLabel>
               <Select2
                 options={dataPegawai.result?.map((val) => {
@@ -528,7 +528,7 @@ function Perjalanan() {
                 }}
               />
             </FormControl>
-            <FormControl my={"30px"}>
+            <FormControl>
               <FormLabel fontSize={"24px"}>Personil 4</FormLabel>
               <Select2
                 options={dataPegawai.result?.map((val) => {
@@ -951,7 +951,7 @@ function Perjalanan() {
                 <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
                 <Heading color={"primary"}>Data Perjalanan Dinas</Heading>
               </HStack>
-              {JSON.stringify(jenisPelayananKesehatan)}
+              {/* {JSON.stringify(jenisPelayananKesehatan)} */}
 
               <Box p={"30px"}>
                 <FormControl my={"30px"}>
@@ -1218,7 +1218,7 @@ function Perjalanan() {
                 ) : null}
 
                 <FormControl my={"30px"}>
-                  <FormLabel fontSize={"24px"}> SUB BARU Kegiatan</FormLabel>
+                  <FormLabel fontSize={"24px"}> Sub Kegiatan</FormLabel>
                   <Select2
                     options={dataSeed?.resultDaftarSubKegiatan?.map((val) => {
                       return {
@@ -1258,7 +1258,7 @@ function Perjalanan() {
                     }}
                   />
                 </FormControl>
-                {JSON.stringify(dataKota)}
+                {/* {JSON.stringify(dataKota)} */}
                 {dataKegiatan?.value && (
                   <>
                     <FormControl my={"30px"}>
@@ -1305,7 +1305,7 @@ function Perjalanan() {
                   </>
                 )}
                 {dataSubKegiatan.value ? (
-                  <Text>{`Kode Rekening: ${dataKegiatan?.value?.kodeRekening}.${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan?.value?.kodeRekening}`}</Text>
+                  <Text>{`Kode Rekening: ${dataSubKegiatan?.value?.kodeRekening}${jenisPerjalanan?.value?.kodeRekening}`}</Text>
                 ) : null}
 
                 <Flex mt={"40px"} gap={4}>
@@ -1352,7 +1352,7 @@ function Perjalanan() {
         >
           <HStack>
             <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Data Keuangan</Heading>
+            <Heading color={"primary"}>Data Personil</Heading>
           </HStack>
           <Box p={"30px"} style={{ overflowX: "auto" }}>
             {selectedPegawai.length > 0 && (
@@ -1408,7 +1408,7 @@ function Perjalanan() {
             )}
           </Box>
         </Container>
-        <Container
+        {/* <Container
           border={"1px"}
           borderRadius={"6px"}
           borderColor={"rgba(229, 231, 235, 1)"}
@@ -1416,8 +1416,7 @@ function Perjalanan() {
           bgColor={"white"}
           p={"30px"}
         >
-          {/* {JSON.stringify(user[0]?.unitKerja_profile)} */}
-          {JSON.stringify(dataBendahara)}
+
           <HStack w={"100%"} spacing={4}></HStack>{" "}
           <Flex mt={"40px"} gap={4} w={"100%"}>
             <Box w={"50%"}>
@@ -1447,10 +1446,17 @@ function Perjalanan() {
               </Box>
             </Box>
           </Flex>
-        </Container>
-        <Container maxW={"1280px"}>
+        </Container> */}
+        <Container maxW={"1280px"} p={0}>
           {" "}
-          <Button onClick={submitPerjalanan}>Submit</Button>
+          <Button
+            variant={"primary"}
+            height={"60px"}
+            width={"100%"}
+            onClick={submitPerjalanan}
+          >
+            Submit
+          </Button>
         </Container>
       </Box>
     </Layout>

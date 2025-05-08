@@ -292,7 +292,7 @@ function DaftarPegawai() {
               Tambah Pegawai
             </Button>
           </Box>
-          {JSON.stringify(dataSeed.resultPangkat)}
+          {/* {JSON.stringify(dataSeed.resultPangkat)} */}
         </Container>
         <Container
           border={"1px"}

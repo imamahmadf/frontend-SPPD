@@ -44,7 +44,7 @@ function Navbar() {
       <Container py={"20px"} maxW={"1280px"}>
         <HStack gap={5}>
           <Image height="65px" overflow="hiden" objectFit="cover" src={Logo} />
-          {/* <Text>{user[0]?.nama}</Text> <Text>{role[0]?.id}</Text>  */}
+          <Text>{user[0]?.nama}</Text> <Text>{JSON.stringify(role)}</Text>
           <Spacer />{" "}
           <Box
             as="button"
