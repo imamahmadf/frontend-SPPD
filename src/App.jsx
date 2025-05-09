@@ -32,6 +32,7 @@ import DaftarIndukUnitKerjaAdmin from "./pages/Admin/DaftarIndukUnitKerjaAdmin.j
 import DaftarBendaharaAdmin from "./pages/Admin/DaftarBendaharaAdmin.jsx";
 import TambahBendahara from "./pages/Admin/TambahBendahara.jsx";
 import NomorSuratAdmin from "./pages/Admin/nomorSuratAdmin.jsx";
+import SubKegiatanAdmin from "./pages/Admin/SubKegiatanAdmin.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -199,6 +200,13 @@ function App() {
           <ProtectedRoute
             component={TambahBendahara}
             path="/admin/tambah-bendahara"
+            exact
+            roleRoute={[2]}
+          />
+
+          <ProtectedRoute
+            component={SubKegiatanAdmin}
+            path="/admin/sub-kegiatan"
             exact
             roleRoute={[2]}
           />
