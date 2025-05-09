@@ -31,7 +31,7 @@ import TtdSuratTugasAdmin from "./pages/Admin/TtdSuratTugasAdmin.jsx";
 import DaftarIndukUnitKerjaAdmin from "./pages/Admin/DaftarIndukUnitKerjaAdmin.jsx";
 import DaftarBendaharaAdmin from "./pages/Admin/DaftarBendaharaAdmin.jsx";
 import TambahBendahara from "./pages/Admin/TambahBendahara.jsx";
-import NomorSuratAdmin from "./pages/Admin/nomorSuratAdmin.jsx";
+import NomorSuratAdmin from "./pages/Admin/NomorSuratAdmin.jsx";
 import SubKegiatanAdmin from "./pages/Admin/SubKegiatanAdmin.jsx";
 function App() {
   const dispatch = useDispatch();
