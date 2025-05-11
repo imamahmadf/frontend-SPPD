@@ -36,6 +36,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import Layout from "../../Componets/Layout";
+import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   Select as Select2,
@@ -49,6 +50,7 @@ function UnitKerjaAdmin(props) {
   const [pegawaiId, setPegawaiId] = useState(0);
   const [jenis, setJenis] = useState(0);
   const [jabatan, setJabatan] = useState("");
+  const history = useHistory();
   async function fetchDataPegawai() {
     await axios
       .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get`)
@@ -77,6 +79,7 @@ function UnitKerjaAdmin(props) {
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
+        history.push("/admin/induk-unit-kerja");
       })
       .catch((err) => {
         console.error(err.message);
@@ -95,11 +98,10 @@ function UnitKerjaAdmin(props) {
           borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
+          p={"30px"}
           my={"30px"}
         >
-          <FormControl my={"30px"}>
+          <FormControl mb={"30px"}>
             <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
             <Select2
               options={dataPegawai.result?.map((val) => {
@@ -146,6 +148,7 @@ function UnitKerjaAdmin(props) {
               height={"60px"}
               bgColor={"terang"}
               borderRadius={"8px"}
+              placeholder="jenis"
               borderColor={"rgba(229, 231, 235, 1)"}
               onChange={(e) => {
                 setJenis(e.target.value);
@@ -168,7 +171,9 @@ function UnitKerjaAdmin(props) {
               }}
             />
           </FormControl>
-          <Button onClick={postTandaTangan}> Tambahkan</Button>
+          <Button variant={"primary"} onClick={postTandaTangan}>
+            Tambahkan
+          </Button>
         </Container>
       </Box>
     </Layout>

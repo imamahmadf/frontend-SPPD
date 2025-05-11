@@ -55,22 +55,24 @@ export const login = (namaPengguna, password) => async (dispatch) => {
 export const selectRole = (state) => state.auth.role;
 export const userRedux = (state) => state.auth.user;
 // Fungsi register
-export const register = (nama, namaPengguna, password, role) => async () => {
-  try {
-    await axios.post(
-      `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/register`,
-      {
-        nama,
-        password,
-        namaPengguna,
-        role,
-      }
-    );
-    console.log("Register berhasil");
-  } catch (error) {
-    console.error("Register gagal", error);
-  }
-};
+export const register =
+  (nama, namaPengguna, cleanPassword, role, unitKerjaId) => async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/register`,
+        {
+          nama,
+          password: cleanPassword,
+          namaPengguna,
+          role,
+          unitKerjaId,
+        }
+      );
+      console.log("Register berhasil");
+    } catch (error) {
+      console.error("Register gagal", error);
+    }
+  };
 
 // Fungsi Logout
 export const performLogout = () => (dispatch) => {

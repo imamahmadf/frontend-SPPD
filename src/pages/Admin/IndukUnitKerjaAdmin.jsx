@@ -30,6 +30,7 @@ import {
   Divider,
   Spacer,
   useDisclosure,
+  Flex,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Link, useHistory } from "react-router-dom";
@@ -249,13 +250,48 @@ function IndukUnitKerjaAdmin() {
     if (!items || items.length === 0) return <Text>Tidak ada data</Text>;
 
     return (
-      <Table variant="simple" size="sm">
-        <Thead bg="gray.100">
+      <Table>
+        <Thead bgColor={"primary"} border={"1px"}>
           <Tr>
-            <Th>No</Th>
-            <Th>Jabatan</Th>
-            <Th>Nama Pegawai</Th>
-            <Th width="250px">Aksi</Th>
+            <Th
+              fontSize={"14px"}
+              borderColor={"secondary"}
+              color={"secondary"}
+              p={"10px"}
+              border={"1px"}
+              width="50px"
+            >
+              No
+            </Th>
+            <Th
+              fontSize={"14px"}
+              borderColor={"secondary"}
+              color={"secondary"}
+              p={"10px"}
+              border={"1px"}
+              width="450px"
+            >
+              Jabatan
+            </Th>
+            <Th
+              fontSize={"14px"}
+              borderColor={"secondary"}
+              color={"secondary"}
+              p={"10px"}
+              border={"1px"}
+            >
+              Nama Pegawai
+            </Th>
+            <Th
+              fontSize={"14px"}
+              borderColor={"secondary"}
+              color={"secondary"}
+              p={"10px"}
+              border={"1px"}
+              width="150px"
+            >
+              Aksi
+            </Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -280,22 +316,24 @@ function IndukUnitKerjaAdmin() {
 
             return (
               <Tr key={item.id}>
-                <Td>{index + 1}</Td>
-                <Td>
+                <Td borderWidth="1px" borderColor="primary">
+                  {index + 1}
+                </Td>
+                <Td borderWidth="1px" borderColor="primary">
                   <EditableCell
                     value={currentValue}
                     isEditing={isEditing}
                     onChange={(value) => handleEditChange(uniqueId, value)}
                   />
                 </Td>
-                <Td>
+                <Td borderWidth="1px" borderColor="primary">
                   {type === "notaDinas"
                     ? item.pegawai_notaDinas.nama
                     : type === "PPTK"
                     ? item.pegawai_PPTK.nama
                     : item.pegawai_KPA.nama}
                 </Td>
-                <Td>
+                <Td borderWidth="1px" borderColor="primary">
                   {isEditing ? (
                     <HStack spacing={2}>
                       <Button
@@ -359,7 +397,7 @@ function IndukUnitKerjaAdmin() {
           maxW={"1280px"}
           bgColor={"white"}
           pt={"30px"}
-          ps={"0px"}
+          px={"20px"}
           my={"30px"}
         >
           {/* Modal Konfirmasi Hapus */}
@@ -400,27 +438,66 @@ function IndukUnitKerjaAdmin() {
           </VStack>
 
           {/* Tabel Tanda Tangan Surat Tugas */}
-          <Box mb={8} px={4}>
-            <Heading size="md" mb={4}>
-              Tanda Tangan Surat Tugas
-            </Heading>
-            <Button
-              onClick={() => {
-                history.push("/admin/ttd-surat-tugas");
-              }}
-            >
-              +
-            </Button>
+          <Box>
+            <Flex mb={"20px"}>
+              <Heading size="md" mb={4}>
+                Tanda Tangan Surat Tugas
+              </Heading>
+              <Spacer />
+              <Button
+                variant={"primary"}
+                onClick={() => {
+                  history.push("/admin/ttd-surat-tugas");
+                }}
+              >
+                Tambah TTD Surat Tugas +
+              </Button>
+            </Flex>
             {isLoading ? (
               <Text>Memuat data...</Text>
             ) : (
-              <Table variant="striped" size="sm">
-                <Thead bg="blue.50">
+              <Table>
+                <Thead bgColor={"primary"} border={"1px"}>
                   <Tr>
-                    <Th>No</Th>
-                    <Th>Nama</Th>
-                    <Th>Jabatan</Th>
-                    <Th width="200px">Aksi</Th>
+                    <Th
+                      fontSize={"14px"}
+                      borderColor={"secondary"}
+                      color={"secondary"}
+                      p={"10px"}
+                      border={"1px"}
+                      width="50px"
+                    >
+                      No
+                    </Th>
+                    <Th
+                      fontSize={"14px"}
+                      borderColor={"secondary"}
+                      color={"secondary"}
+                      p={"10px"}
+                      border={"1px"}
+                    >
+                      Nama
+                    </Th>
+                    <Th
+                      fontSize={"14px"}
+                      borderColor={"secondary"}
+                      color={"secondary"}
+                      p={"10px"}
+                      border={"1px"}
+                      width="550px"
+                    >
+                      Jabatan
+                    </Th>
+                    <Th
+                      fontSize={"14px"}
+                      borderColor={"secondary"}
+                      color={"secondary"}
+                      p={"10px"}
+                      border={"1px"}
+                      width="150px"
+                    >
+                      Aksi
+                    </Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -445,9 +522,13 @@ function IndukUnitKerjaAdmin() {
 
                     return (
                       <Tr key={item.id}>
-                        <Td>{index + 1}</Td>
-                        <Td>{item.pegawai.nama}</Td>
-                        <Td>
+                        <Td borderWidth="1px" borderColor="primary">
+                          {index + 1}
+                        </Td>
+                        <Td borderWidth="1px" borderColor="primary">
+                          {item.pegawai.nama}
+                        </Td>
+                        <Td borderWidth="1px" borderColor="primary">
                           <EditableCell
                             value={currentValue}
                             isEditing={isEditing}
@@ -456,7 +537,7 @@ function IndukUnitKerjaAdmin() {
                             }
                           />
                         </Td>
-                        <Td>
+                        <Td borderWidth="1px" borderColor="primary">
                           {isEditing ? (
                             <HStack spacing={2}>
                               <Button
@@ -515,28 +596,33 @@ function IndukUnitKerjaAdmin() {
           <Divider my={6} />
 
           {/* Daftar Unit Kerja */}
-          <Heading size="md" mb={4} px={4}>
-            Daftar Unit Kerja
-          </Heading>
-          <TambahUnitKerja
-            indukUnitKerjaId={user[0].unitKerja_profile.indukUnitKerja.id}
-          />
+          <Flex mb={"20px"}>
+            <Heading size="md" mb={4}>
+              Daftar Unit Kerja
+            </Heading>
+            <Spacer />
+            <TambahUnitKerja
+              indukUnitKerjaId={user[0].unitKerja_profile.indukUnitKerja.id}
+            />
+          </Flex>
           {isLoading ? (
             <Text>Memuat data...</Text>
           ) : (
-            <Stack spacing={6} px={4}>
+            <Stack>
               {data?.daftarUnitKerjas?.map((unitKerja) => (
                 <Card key={unitKerja.id} variant="outline">
-                  <CardHeader bg="gray.50" borderBottomWidth="1px">
+                  <CardHeader bg="primary" borderBottomWidth="1px">
                     <HStack>
-                      <Box>
+                      <Box color="white">
                         <Heading size="sm">{unitKerja.unitKerja}</Heading>
-                        <Text fontSize="sm" color="gray.600">
+                        <Text fontSize="sm">
                           Asal: {unitKerja.asal} | Kode: {unitKerja.kode}
                         </Text>
                       </Box>
                       <Spacer />
                       <Button
+                        variant={"secondary"}
+                        h={"40px"}
                         onClick={() => {
                           history.push(`/admin/unit-kerja/${unitKerja.id}`);
                         }}

@@ -40,6 +40,12 @@ import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 function NomorSuratAdmin() {
   const user = useSelector(userRedux);
   const [dataNomorSurat, setDataNomorSurat] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editData, setEditData] = useState({
+    nomorLoket: "",
+  });
+  const toast = useToast();
+
   async function fetchDataNomorSurat() {
     await axios
       .get(
@@ -59,39 +65,147 @@ function NomorSuratAdmin() {
   useEffect(() => {
     fetchDataNomorSurat();
   }, []);
+
+  const handleEdit = (item) => {
+    setEditingId(item.id);
+    setEditData({
+      nomorLoket: item.nomorLoket,
+    });
+  };
+
+  const handleSave = async (id) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/nomor-surat/edit/${id}`,
+        editData
+      );
+      toast({
+        title: "Berhasil",
+        description: "Data berhasil diperbarui",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      setEditingId(null);
+      fetchDataNomorSurat();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui data",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+  };
+
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"40px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
           borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
+          p={"30px"}
           my={"30px"}
         >
-          {JSON.stringify(dataNomorSurat)}
           <Table>
-            <Thead>
+            <Thead bgColor={"primary"} border={"1px"}>
               <Tr>
-                <Th>No</Th>
-                <Th>jenis nomor surat</Th>
-                <Th>Nomor Surat</Th>
-                <Th>Nomor Loket</Th>
-                <Th>Aksi</Th>
+                <Th
+                  fontSize={"14px"}
+                  borderColor={"secondary"}
+                  color={"secondary"}
+                  p={"10px"}
+                  border={"1px"}
+                >
+                  No
+                </Th>
+                <Th
+                  fontSize={"14px"}
+                  borderColor={"secondary"}
+                  color={"secondary"}
+                  p={"10px"}
+                  border={"1px"}
+                >
+                  jenis nomor surat
+                </Th>
+                <Th
+                  fontSize={"14px"}
+                  borderColor={"secondary"}
+                  color={"secondary"}
+                  p={"10px"}
+                  border={"1px"}
+                >
+                  Nomor Surat
+                </Th>
+                <Th
+                  fontSize={"14px"}
+                  borderColor={"secondary"}
+                  color={"secondary"}
+                  p={"10px"}
+                  border={"1px"}
+                >
+                  Nomor Loket
+                </Th>
+                <Th
+                  fontSize={"14px"}
+                  borderColor={"secondary"}
+                  color={"secondary"}
+                  p={"10px"}
+                  border={"1px"}
+                >
+                  Aksi
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
               {dataNomorSurat?.map((item, index) => (
-                <Tr>
-                  <Td>{index + 1}</Td>
-                  <Td>{item.jenisSurat.jenis}</Td>
-                  <Td>{item.jenisSurat.nomorSurat}</Td>
-                  <Td>{item.nomorLoket}</Td>
-                  <Td>
-                    <Button>edit</Button>
+                <Tr key={item.id}>
+                  <Td borderWidth="1px" borderColor="primary">
+                    {index + 1}
+                  </Td>
+                  <Td borderWidth="1px" borderColor="primary">
+                    {item.jenisSurat.jenis}
+                  </Td>
+                  <Td borderWidth="1px" borderColor="primary">
+                    {item.jenisSurat.nomorSurat}
+                  </Td>
+                  <Td borderWidth="1px" borderColor="primary">
+                    {editingId === item.id ? (
+                      <Input
+                        value={editData.nomorLoket}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            nomorLoket: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      item.nomorLoket
+                    )}
+                  </Td>
+                  <Td borderWidth="1px" borderColor="primary">
+                    {editingId === item.id ? (
+                      <HStack spacing={2}>
+                        <Button
+                          colorScheme="green"
+                          onClick={() => handleSave(item.id)}
+                        >
+                          Simpan
+                        </Button>
+                        <Button onClick={handleCancel}>Batal</Button>
+                      </HStack>
+                    ) : (
+                      <Button onClick={() => handleEdit(item)}>Edit</Button>
+                    )}
                   </Td>
                 </Tr>
               ))}

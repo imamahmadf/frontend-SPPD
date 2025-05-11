@@ -29,6 +29,7 @@ import {
   Heading,
   SimpleGrid,
 } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import {
   Select as Select2,
   CreatableSelect,
@@ -45,7 +46,7 @@ function DalamKotaAdmin() {
   const [dataDalamKota, setDataDalamKota] = useState([]);
   const history = useHistory();
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(15);
+  const [limit, setLimit] = useState(50);
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
@@ -57,6 +58,11 @@ function DalamKotaAdmin() {
   const [uangTransport, setUangTransport] = useState(0);
   const [durasi, setDurasi] = useState(0);
   const [indukUnitKerjaId, setIndukUnitKerjaId] = useState(0);
+  const {
+    isOpen: isTambahOpen,
+    onOpen: onTambahOpen,
+    onClose: onTambahClose,
+  } = useDisclosure();
   const [formData, setFormData] = useState({
     nama: "",
     uangTransport: "",
@@ -116,7 +122,7 @@ function DalamKotaAdmin() {
   useEffect(() => {
     fetchDalamKota();
     fetchIndukUnitKerja();
-  }, []);
+  }, [page]);
 
   const handleEdit = (data) => {
     setSelectedData(data);
@@ -175,97 +181,12 @@ function DalamKotaAdmin() {
           maxW={"1280px"}
           bgColor={"white"}
           pt={"30px"}
-          ps={"0px"}
-        >
-          <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Tambah Tujuan</Heading>
-          </HStack>
-          <Box p={"30px"}>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Nama Tujuan</FormLabel>
-              <Input
-                height={"60px"}
-                bgColor={"terang"}
-                onChange={(e) =>
-                  handleSubmitChange("namaTujuan", e.target.value)
-                }
-                placeholder="Contoh: Puskesmas Lolo"
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>uang transport</FormLabel>
-              <Input
-                height={"60px"}
-                type="number"
-                bgColor={"terang"}
-                onChange={(e) =>
-                  handleSubmitChange("uangTransport", e.target.value)
-                }
-                placeholder="Contoh: Rp. 450.000"
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Durasi</FormLabel>
-              <Input
-                height={"60px"}
-                bgColor={"terang"}
-                type="number"
-                onChange={(e) => handleSubmitChange("durasi", e.target.value)}
-                placeholder="4 jam"
-              />
-            </FormControl>
-            <FormControl border={0} bgColor={"white"} flex="1">
-              <FormLabel fontSize={"24px"}>Induk Unit Kerja</FormLabel>
-              <Select2
-                options={dataIndukUnitKerja?.map((val) => ({
-                  value: val.id,
-                  label: `${val.indukUnitKerja}`,
-                }))}
-                placeholder="Pilih Induk Unit Kerja"
-                focusBorderColor="red"
-                onChange={(selectedOption) => {
-                  setIndukUnitKerjaId(selectedOption.value);
-                }}
-                components={{
-                  DropdownIndicator: () => null, // Hilangkan tombol panah
-                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: {
-                      borderColor: "yellow.700",
-                    },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "primary" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-          </Box>
-          <Button onClick={tambahTujuan}>Tambah</Button>
-        </Container>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          pt={"30px"}
           px={"0px"}
         >
+          {" "}
+          <Button onClick={onTambahOpen} mb={"30px"} variant={"primary"}>
+            Tambah +
+          </Button>
           <Box p={"30px"}>
             {/* {JSON.stringify(dataDalamKota)} */}
             <Table>
@@ -326,7 +247,10 @@ function DalamKotaAdmin() {
                         {item.nama}
                       </Td>
                       <Td borderWidth="1px" borderColor="primary">
-                        {item.uangTransport}
+                        {new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        }).format(item.uangTransport)}
                       </Td>
                       <Td borderWidth="1px" borderColor="primary">
                         {item.durasi} jam
@@ -395,6 +319,7 @@ function DalamKotaAdmin() {
                 <FormControl mb={4}>
                   <FormLabel>Uang Transport</FormLabel>
                   <Input
+                    type="number"
                     value={formData.uangTransport}
                     onChange={(e) =>
                       setFormData({
@@ -407,21 +332,10 @@ function DalamKotaAdmin() {
                 <FormControl mb={4}>
                   <FormLabel>Durasi</FormLabel>
                   <Input
+                    type="number"
                     value={formData.durasi}
                     onChange={(e) =>
                       setFormData({ ...formData, durasi: e.target.value })
-                    }
-                  />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>Induk Unit Kerja</FormLabel>
-                  <Input
-                    value={formData.indukUnitKerja}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        indukUnitKerja: e.target.value,
-                      })
                     }
                   />
                 </FormControl>
@@ -438,6 +352,102 @@ function DalamKotaAdmin() {
           </Modal>
         </Container>
       </Box>
+
+      <Modal
+        closeOnOverlayClick={false}
+        isOpen={isTambahOpen}
+        onClose={onTambahClose}
+      >
+        <ModalOverlay />
+        <ModalContent borderRadius={0} maxWidth="1200px">
+          <ModalHeader></ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            <HStack>
+              <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+              <Heading color={"primary"}>Tambah Tujuan</Heading>
+            </HStack>
+            <Box p={"30px"}>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Nama Tujuan</FormLabel>
+                <Input
+                  height={"60px"}
+                  bgColor={"terang"}
+                  onChange={(e) =>
+                    handleSubmitChange("namaTujuan", e.target.value)
+                  }
+                  placeholder="Contoh: Puskesmas Lolo"
+                />
+              </FormControl>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>uang transport</FormLabel>
+                <Input
+                  height={"60px"}
+                  type="number"
+                  bgColor={"terang"}
+                  onChange={(e) =>
+                    handleSubmitChange("uangTransport", e.target.value)
+                  }
+                  placeholder="Contoh: Rp. 450.000"
+                />
+              </FormControl>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Durasi</FormLabel>
+                <Input
+                  height={"60px"}
+                  bgColor={"terang"}
+                  type="number"
+                  onChange={(e) => handleSubmitChange("durasi", e.target.value)}
+                  placeholder="4 jam"
+                />
+              </FormControl>
+              <FormControl border={0} bgColor={"white"} flex="1">
+                <FormLabel fontSize={"24px"}>Induk Unit Kerja</FormLabel>
+                <Select2
+                  options={dataIndukUnitKerja?.map((val) => ({
+                    value: val.id,
+                    label: `${val.indukUnitKerja}`,
+                  }))}
+                  placeholder="Pilih Induk Unit Kerja"
+                  focusBorderColor="red"
+                  onChange={(selectedOption) => {
+                    setIndukUnitKerjaId(selectedOption.value);
+                  }}
+                  components={{
+                    DropdownIndicator: () => null, // Hilangkan tombol panah
+                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                  }}
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "6px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "terang",
+                      border: "0px",
+                      height: "60px",
+                      _hover: {
+                        borderColor: "yellow.700",
+                      },
+                      minHeight: "40px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused ? "primary" : "white",
+                      color: state.isFocused ? "white" : "black",
+                    }),
+                  }}
+                />
+              </FormControl>
+            </Box>
+            <Button onClick={tambahTujuan}>Tambah</Button>
+          </ModalBody>
+
+          <ModalFooter pe={"60px"} pb={"30px"}></ModalFooter>
+        </ModalContent>
+      </Modal>
     </Layout>
   );
 }

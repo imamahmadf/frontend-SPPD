@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Layout from "../Componets/Layout";
 import ReactPaginate from "react-paginate";
+import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -32,6 +33,7 @@ import {
   Input,
   Spacer,
 } from "@chakra-ui/react";
+import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
 function Daftar() {
@@ -67,6 +69,7 @@ function Daftar() {
           tanggalPengajuan: val.tanggalPengajuan,
           tempat: val.tempats,
           untuk: val.untuk,
+          dasar: val.dasar,
           ttdSurTugJabatan: val.ttdSuratTuga.jabatan,
           ttdSurTugNama: val.ttdSuratTuga.pegawai.nama,
           ttdSurTugNip: val.ttdSuratTuga.pegawai.nip,
@@ -131,8 +134,12 @@ function Daftar() {
     <>
       <Layout>
         <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
-          DAFTAR
-          <Box style={{ overflowX: "auto" }}>
+          <Box
+            style={{ overflowX: "auto" }}
+            bgColor={"white"}
+            p={"30px"}
+            borderRadius={"5px"}
+          >
             {/* {JSON.stringify(user[0]?.unitKerja_profile)} */}
             <Table>
               <Thead bgColor={"primary"} border={"1px"}>
@@ -141,7 +148,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     no.
@@ -150,7 +157,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     jenis Perjalanan
@@ -160,7 +167,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Unit Kerja Surat Tugas
@@ -169,7 +176,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     No Surat Tugas
@@ -178,7 +185,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     No Nota Dinas
@@ -187,7 +194,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Tanggal Berangkat
@@ -196,7 +203,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     tanggal Pulang
@@ -205,7 +212,16 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
+                    border={"1px"}
+                  >
+                    Tujuan
+                  </Th>
+                  <Th
+                    fontSize={"14px"}
+                    borderColor={"secondary"}
+                    color={"secondary"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 1
@@ -214,7 +230,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 2
@@ -223,7 +239,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 3
@@ -232,7 +248,7 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 4
@@ -241,25 +257,17 @@ function Daftar() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 5
                   </Th>
+
                   <Th
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
-                    border={"1px"}
-                  >
-                    Kode Rekening
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Aksi
@@ -298,66 +306,82 @@ function Daftar() {
                           ).toLocaleDateString()
                         : "-"}
                     </Td>
+                    <Td borderWidth="1px" borderColor="primary">
+                      {item.jenisPerjalanan.tipePerjalanan.id === 1
+                        ? item.tempats.map((val) => (
+                            <Text key={val.id}>{val.dalamKota.nama}</Text>
+                          ))
+                        : item.tempats.map((val) => (
+                            <Text key={val.id}>{val.tempat}</Text>
+                          ))}
+                    </Td>
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Td key={i} borderWidth="1px" borderColor="primary">
                         {item.personils?.[i]?.pegawai?.nama || "-"}
                       </Td>
                     ))}
                     <Td borderWidth="1px" borderColor="primary">
-                      {item.kodeRekening?.kode || "-"}
-                    </Td>
-                    <Td borderWidth="1px" borderColor="primary">
-                      {item.noSuratTugas ? (
-                        <Button
-                          onClick={() =>
-                            history.push(`/detail-perjalanan/${item.id}`)
-                          }
-                        >
-                          Detail
-                        </Button>
-                      ) : null}
+                      <Flex gap={"10px"}>
+                        {item.noSuratTugas ? (
+                          <Button
+                            variant={"primary"}
+                            p={"0px"}
+                            fontSize={"16px"}
+                            h={"40px"}
+                            onClick={() =>
+                              history.push(`/detail-perjalanan/${item.id}`)
+                            }
+                          >
+                            <BsEyeFill />
+                          </Button>
+                        ) : null}
 
-                      <Button
-                        onClick={() => {
-                          postSuratTugas(item);
-                        }}
-                      >
-                        Surtug
-                      </Button>
+                        <Button
+                          variant={"secondary"}
+                          p={"0px"}
+                          fontSize={"16px"}
+                          h={"40px"}
+                          onClick={() => {
+                            postSuratTugas(item);
+                          }}
+                        >
+                          <BsFileEarmarkArrowDown />
+                        </Button>
+                      </Flex>
                     </Td>
                   </Tr>
                 ))}
               </Tbody>
-            </Table>
-          </Box>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
+            </Table>{" "}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
 
-              boxSizing: "border-box",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <ReactPaginate
-              previousLabel={"+"}
-              nextLabel={"-"}
-              pageCount={pages}
-              onPageChange={changePage}
-              activeClassName={"item active "}
-              breakClassName={"item break-me "}
-              breakLabel={"..."}
-              containerClassName={"pagination"}
-              disabledClassName={"disabled-page"}
-              marginPagesDisplayed={1}
-              nextClassName={"item next "}
-              pageClassName={"item pagination-page "}
-              pageRangeDisplayed={2}
-              previousClassName={"item previous"}
-            />
-          </div>
+                boxSizing: "border-box",
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <ReactPaginate
+                previousLabel={"+"}
+                nextLabel={"-"}
+                pageCount={pages}
+                onPageChange={changePage}
+                activeClassName={"item active "}
+                breakClassName={"item break-me "}
+                breakLabel={"..."}
+                containerClassName={"pagination"}
+                disabledClassName={"disabled-page"}
+                marginPagesDisplayed={1}
+                nextClassName={"item next "}
+                pageClassName={"item pagination-page "}
+                pageRangeDisplayed={2}
+                previousClassName={"item previous"}
+              />
+            </div>
+          </Box>
         </Box>
       </Layout>
     </>

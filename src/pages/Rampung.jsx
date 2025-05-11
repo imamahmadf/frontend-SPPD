@@ -5,6 +5,7 @@ import { Link, useHistory } from "react-router-dom";
 import Rill from "../Componets/Rill";
 import { useDisclosure } from "@chakra-ui/react";
 import Foto from "../assets/add_photo.png";
+import TambahBuktiKegiatan from "../Componets/TambahBuktiKegiatan";
 import {
   Select as Select2,
   CreatableSelect,
@@ -53,6 +54,7 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
+
 function Rampung(props) {
   const toast = useToast();
   const [randomNumber, setRandomNumber] = useState(0);
@@ -86,16 +88,6 @@ function Rampung(props) {
       return (
         <option key={val.id} value={val.id}>
           {val.jenis}
-        </option>
-      );
-    });
-  }
-
-  function renderBendahara() {
-    return dataRampung?.dataBendahara?.map((val) => {
-      return (
-        <option key={val.id} value={val.id}>
-          {val.pegawai_bendahara.nama}
         </option>
       );
     });
@@ -298,6 +290,7 @@ function Rampung(props) {
           // Menampilkan toast setelah berhasil
           console.log(res.data);
           fetchDataRampung();
+          onInputClose();
           toast({
             title: "Berhasil!",
             description: "Data Nomor Batch berhasil disimpan.",
@@ -388,27 +381,6 @@ function Rampung(props) {
       });
   }
 
-  const submitRampung = () => {
-    axios
-      .post(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kwitansi/post/rampung`,
-        {
-          item: namaKegiatan,
-          qty,
-          satuan,
-          jenisId: jenisRampung.value,
-          nilai,
-          personilId: dataRampung.result.id,
-        }
-      )
-      .then((res) => {
-        console.log(res.data);
-        fetchDataRampung();
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
   useEffect(() => {
     fetchDataRampung();
   }, [randomNumber]);
@@ -448,26 +420,38 @@ function Rampung(props) {
           </HStack>
 
           <Box p={"30px"}>
-            <Text fontWeight={"600"} fontSize={"18px"}>
-              Nama: {dataRampung?.result?.pegawai?.nama}
-            </Text>
-            <Text fontWeight={"600"} fontSize={"18px"}>
-              Asal: {dataRampung?.result?.perjalanan?.asal}
-            </Text>
-            {/* {JSON.stringify(dataRampung?.result?.perjalanan.tanggalPengajuan)}
-            {JSON.stringify(user[0]?.unitKerja_profile)}
-
-            {JSON.stringify(bendaharaSelected)} */}
-            {dataRampung?.result?.perjalanan?.jenisPerjalanan
-              .tipePerjalananId === 1 &&
-            dataRampung?.result?.rincianBPDs.length == 0 ? (
-              <Button onClick={buatOtomatis}>buat otomatis</Button>
-            ) : null}
-            <Text>Status: {dataRampung?.result?.status.statusKuitansi}</Text>
-            <Text>
-              Catatan: {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
-            </Text>
-
+            <Flex gap={"30px"}>
+              <Box>
+                <TambahBuktiKegiatan
+                  pic={dataRampung?.result?.perjalanan?.pic}
+                  id={dataRampung?.result?.perjalanan?.id}
+                  randomNumber={setRandomNumber}
+                />
+              </Box>
+              <Box>
+                <Text fontWeight={"600"} fontSize={"18px"}>
+                  Nama: {dataRampung?.result?.pegawai?.nama}
+                </Text>
+                <Text fontWeight={"600"} fontSize={"18px"}>
+                  Asal: {dataRampung?.result?.perjalanan?.asal}
+                </Text>
+                {/* {JSON.stringify(dataRampung?.result?.perjalanan.tanggalPengajuan)}
+              {JSON.stringify(user[0]?.unitKerja_profile)}
+  
+              {JSON.stringify(bendaharaSelected)} */}
+                {dataRampung?.result?.perjalanan?.jenisPerjalanan
+                  .tipePerjalananId === 1 &&
+                dataRampung?.result?.rincianBPDs.length == 0 ? (
+                  <Button onClick={buatOtomatis}>buat otomatis</Button>
+                ) : null}
+                <Text>
+                  Status: {dataRampung?.result?.status.statusKuitansi}
+                </Text>
+                <Text>
+                  Catatan: {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
+                </Text>
+              </Box>
+            </Flex>
             {dataRampung?.result?.statusId === 3 ? null : (
               <>
                 {/* <FormControl>
@@ -608,7 +592,10 @@ function Rampung(props) {
                                 onChange={(e) => handleChange(e, "nilai")}
                               />
                             ) : (
-                              item.nilai
+                              new Intl.NumberFormat("id-ID", {
+                                style: "currency",
+                                currency: "IDR",
+                              }).format(item.nilai)
                             )}
                           </Td>
                           <Td fontSize={"14px"} color={"primary"} py={"10px"}>
@@ -654,7 +641,7 @@ function Rampung(props) {
                                         item.bukti
                                       : Foto
                                   }
-                                />{" "}
+                                />
                               </Box>
                             )}
                           </Td>

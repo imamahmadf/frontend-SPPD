@@ -59,6 +59,12 @@ function suratKeluarAdmin() {
   const [tujuan, setTujuan] = useState("");
   const [perihal, setPerihal] = useState("");
   const [tanggalSurat, setTanggalSurat] = useState("");
+
+  const {
+    isOpen: isTambahOpen,
+    onOpen: onTambahOpen,
+    onClose: onTambahClose,
+  } = useDisclosure();
   const changePage = ({ selected }) => {
     setPage(selected);
   };
@@ -103,6 +109,7 @@ function suratKeluarAdmin() {
         console.log(res.data);
         fetchDataSuratKeluar();
         resetForm();
+        onTambahClose();
       })
       .catch((err) => {
         console.error(err); // Tangani error
@@ -176,177 +183,9 @@ function suratKeluarAdmin() {
           pt={"30px"}
           ps={"0px"}
         >
-          {JSON.stringify(dataKodeKlasifikasi)}
-          <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Data Nota Dinas</Heading>
-          </HStack>
-          <Box p={"30px"}>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
-              <Select2
-                options={klasifikasi?.map((val) => {
-                  return {
-                    value: val,
-                    label: `${val.kode}-${val.namaKlasifikasi}`,
-                  };
-                })}
-                placeholder="Cari Nama Pegawai"
-                focusBorderColor="red"
-                onChange={(selectedOption) => {
-                  //   setKlasifikasi(selectedOption);
-                  fetchDataKodeKlasifikasi(selectedOption.value.id);
-                }}
-                components={{
-                  DropdownIndicator: () => null, // Hilangkan tombol panah
-                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: {
-                      borderColor: "yellow.700",
-                    },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "primary" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-            {dataKlasifikasi[0] ? (
-              <FormControl my={"30px"}>
-                <FormLabel fontSize={"24px"}>Kode Klasifikasi</FormLabel>
-                <Select2
-                  options={dataKlasifikasi.map((val) => ({
-                    value: val.kode,
-                    label: `${val.kode} - ${val.kegiatan}`,
-                  }))}
-                  placeholder="Pilih kode Klasifikasi"
-                  focusBorderColor="red"
-                  onChange={(selectedOption) => {
-                    setDataKodeKlasifikasi(selectedOption.value);
-                  }}
-                  components={{
-                    DropdownIndicator: () => null, // Hilangkan tombol panah
-                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                  }}
-                  chakraStyles={{
-                    container: (provided) => ({
-                      ...provided,
-                      borderRadius: "6px",
-                    }),
-                    control: (provided) => ({
-                      ...provided,
-                      backgroundColor: "terang",
-                      border: "0px",
-                      height: "60px",
-                      _hover: {
-                        borderColor: "yellow.700",
-                      },
-                      minHeight: "40px",
-                    }),
-                    option: (provided, state) => ({
-                      ...provided,
-                      bg: state.isFocused ? "primary" : "white",
-                      color: state.isFocused ? "white" : "black",
-                    }),
-                  }}
-                />
-              </FormControl>
-            ) : null}
-            <FormControl border={0} bgColor={"white"} flex="1">
-              <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
-              <Select2
-                options={dataUnitKerja?.map((val) => ({
-                  value: val,
-                  label: `${val.kode}`,
-                }))}
-                placeholder="Pilih Klasifikasi"
-                focusBorderColor="red"
-                onChange={(selectedOption) => {
-                  setSelectedUnitKerja(selectedOption.value);
-                }}
-                components={{
-                  DropdownIndicator: () => null, // Hilangkan tombol panah
-                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: {
-                      borderColor: "yellow.700",
-                    },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "primary" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Tujuan</FormLabel>
-              <Input
-                value={tujuan}
-                height={"60px"}
-                bgColor={"terang"}
-                onChange={(e) => handleSubmitChange("tujuan", e.target.value)}
-                placeholder="Tujuan Surat"
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Perihal</FormLabel>
-              <Input
-                value={perihal}
-                height={"60px"}
-                bgColor={"terang"}
-                onChange={(e) => handleSubmitChange("perihal", e.target.value)}
-                placeholder="Perihal"
-              />
-            </FormControl>{" "}
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Tanggal Surat</FormLabel>
-              <Input
-                value={tanggalSurat}
-                type="date"
-                height={"60px"}
-                bgColor={"terang"}
-                onChange={(e) =>
-                  handleSubmitChange("tanggalSurat", e.target.value)
-                }
-                placeholder="Perihal"
-              />
-            </FormControl>
-            <Button
-              mt={"30px"}
-              variant={"primary"}
-              onClick={() => {
-                submitSuratKeluar();
-              }}
-            >
-              Submit
-            </Button>
-          </Box>
+          <Button onClick={onTambahOpen} ms={"30px"} variant={"primary"}>
+            Tambah +
+          </Button>
           <Box p={"30px"}>
             <Table variant="simple">
               <Thead bgColor={"primary"}>
@@ -422,6 +261,197 @@ function suratKeluarAdmin() {
             />
           </div>
         </Container>
+        <Modal
+          closeOnOverlayClick={false}
+          isOpen={isTambahOpen}
+          onClose={onTambahClose}
+        >
+          <ModalOverlay />
+          <ModalContent borderRadius={0} maxWidth="1200px">
+            <ModalHeader></ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody>
+              <HStack>
+                <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+                <Heading color={"primary"}>Data Nota Dinas</Heading>
+              </HStack>
+              <Box p={"30px"}>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
+                  <Select2
+                    options={klasifikasi?.map((val) => {
+                      return {
+                        value: val,
+                        label: `${val.kode}-${val.namaKlasifikasi}`,
+                      };
+                    })}
+                    placeholder="Cari Nama Pegawai"
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      //   setKlasifikasi(selectedOption);
+                      fetchDataKodeKlasifikasi(selectedOption.value.id);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+                {dataKlasifikasi[0] ? (
+                  <FormControl my={"30px"}>
+                    <FormLabel fontSize={"24px"}>Kode Klasifikasi</FormLabel>
+                    <Select2
+                      options={dataKlasifikasi.map((val) => ({
+                        value: val.kode,
+                        label: `${val.kode} - ${val.kegiatan}`,
+                      }))}
+                      placeholder="Pilih kode Klasifikasi"
+                      focusBorderColor="red"
+                      onChange={(selectedOption) => {
+                        setDataKodeKlasifikasi(selectedOption.value);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null, // Hilangkan tombol panah
+                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "60px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "primary" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>
+                ) : null}
+                <FormControl border={0} bgColor={"white"} flex="1">
+                  <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                  <Select2
+                    options={dataUnitKerja?.map((val) => ({
+                      value: val,
+                      label: `${val.kode}`,
+                    }))}
+                    placeholder="Pilih Klasifikasi"
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      setSelectedUnitKerja(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Tujuan</FormLabel>
+                  <Input
+                    value={tujuan}
+                    height={"60px"}
+                    bgColor={"terang"}
+                    onChange={(e) =>
+                      handleSubmitChange("tujuan", e.target.value)
+                    }
+                    placeholder="Tujuan Surat"
+                  />
+                </FormControl>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Perihal</FormLabel>
+                  <Input
+                    value={perihal}
+                    height={"60px"}
+                    bgColor={"terang"}
+                    onChange={(e) =>
+                      handleSubmitChange("perihal", e.target.value)
+                    }
+                    placeholder="Perihal"
+                  />
+                </FormControl>{" "}
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Tanggal Surat</FormLabel>
+                  <Input
+                    value={tanggalSurat}
+                    type="date"
+                    height={"60px"}
+                    bgColor={"terang"}
+                    onChange={(e) =>
+                      handleSubmitChange("tanggalSurat", e.target.value)
+                    }
+                    placeholder="Perihal"
+                  />
+                </FormControl>
+              </Box>
+            </ModalBody>
+
+            <ModalFooter pe={"60px"} pb={"30px"}>
+              <Button
+                mt={"30px"}
+                variant={"primary"}
+                onClick={() => {
+                  submitSuratKeluar();
+                }}
+              >
+                Submit
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Box>
     </Layout>
   );

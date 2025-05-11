@@ -95,8 +95,7 @@ function TtdSuratTugasAdmin() {
           borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
+          p={"30px"}
           my={"30px"}
         >
           <FormControl my={"30px"}>
@@ -153,7 +152,10 @@ function TtdSuratTugasAdmin() {
               }}
             />
           </FormControl>
-          <Button onClick={postTandaTangan}> Tambahkan</Button>
+          <Button onClick={postTandaTangan} variant={"primary"}>
+            {" "}
+            Tambahkan
+          </Button>
         </Container>
       </Box>
     </Layout>

@@ -29,5 +29,21 @@ export const buttonStyles = {
         borderColor: "white",
       },
     }),
+    cancle: (props) => ({
+      bg: "danger",
+      color: "terang",
+      borderRadius: "5px",
+      border: "1px",
+      borderColor: "primary",
+
+      fontSize: "16px",
+      fontWeight: "600",
+
+      _hover: {
+        bg: "danger",
+        color: "white",
+        borderColor: "white",
+      },
+    }),
   },
 };

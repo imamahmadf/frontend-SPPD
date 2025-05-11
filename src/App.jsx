@@ -33,6 +33,7 @@ import DaftarBendaharaAdmin from "./pages/Admin/DaftarBendaharaAdmin.jsx";
 import TambahBendahara from "./pages/Admin/TambahBendahara.jsx";
 import NomorSuratAdmin from "./pages/Admin/NomorSuratAdmin.jsx";
 import SubKegiatanAdmin from "./pages/Admin/SubKegiatanAdmin.jsx";
+import DaftarUserAdmin from "./pages/Admin/DaftarUserAdmin.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -163,6 +164,12 @@ function App() {
           <ProtectedRoute
             component={TambahUser}
             path="/admin/tambah-user"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={DaftarUserAdmin}
+            path="/admin/daftar-user"
             exact
             roleRoute={[5]}
           />

@@ -28,6 +28,7 @@ import {
   Badge,
   VStack,
   Divider,
+  Flex,
   Spacer,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -82,6 +83,7 @@ function DaftarBendaharaAdmin() {
   };
 
   useEffect(() => {
+    console.log("useEffect dijalankan");
     fetchDataBendahara();
   }, []);
 
@@ -94,11 +96,12 @@ function DaftarBendaharaAdmin() {
           borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
+          p={"30px"}
           my={"30px"}
         >
           <Button
+            mb={"30px"}
+            variant={"primary"}
             onClick={() => {
               history.push("/admin/tambah-bendahara");
             }}
@@ -106,33 +109,55 @@ function DaftarBendaharaAdmin() {
             Tambah +
           </Button>
           <Table>
-            <Thead>
+            <Thead bgColor={"primary"}>
               <Tr>
-                <Th>No</Th>
-                <Th>Sumber Dana</Th>
-                <Th>Jabatan</Th>
-                <Th>Nama</Th>
-                <Th>Aksi</Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  No
+                </Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  Sumber Dana
+                </Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  Jabatan
+                </Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  Nama
+                </Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  Aksi
+                </Th>
               </Tr>
             </Thead>
-            <Tbody>
+            <Tbody bgColor={"secondary"}>
               {dataBendahara &&
                 dataBendahara.map((item, index) =>
                   item.bendaharas.map((b, idx) => (
                     <Tr key={`${index}-${idx}`}>
-                      <Td>{index + 1}</Td>
-                      <Td>{item.sumber}</Td>
-                      <Td>{b.jabatan}</Td>
-                      <Td>{b.pegawai_bendahara?.nama || "-"}</Td>
-                      <Td>
-                        <Button
-                          onClick={() => {
-                            selectedBendahara(b.id);
-                          }}
-                        >
-                          Hapus
-                        </Button>
-                        <Button>Edit</Button>
+                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                        {index + 1}
+                      </Td>
+                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                        {item.sumber}
+                      </Td>
+                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                        {b.jabatan}
+                      </Td>
+                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                        {b.pegawai_bendahara?.nama || "-"}
+                      </Td>
+                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                        <Flex gap={"20px"}>
+                          <Button variant={"primary"}>Edit</Button>
+                          <Button
+                            variant={"cancle"}
+                            onClick={() => {
+                              setSelectedBendahara(b.id);
+                              onOpen();
+                            }}
+                          >
+                            Hapus
+                          </Button>
+                        </Flex>
                       </Td>
                     </Tr>
                   ))
@@ -153,7 +178,7 @@ function DaftarBendaharaAdmin() {
             <Button
               colorScheme="red"
               mr={3}
-              onClick={hapusBendahara(selectedBendahara)}
+              onClick={() => hapusBendahara(selectedBendahara)}
             >
               Ya, Hapus
             </Button>

@@ -28,6 +28,7 @@ import {
   Heading,
   SimpleGrid,
 } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import ReactPaginate from "react-paginate";
 import "../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
@@ -45,6 +46,8 @@ function DaftarPegawai() {
   const history = useHistory();
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(15);
+  const [keyword, setKeyword] = useState("");
+  const [alfabet, setAlfabet] = useState("");
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
   const [dataSeed, setDataSeed] = useState([]);
@@ -56,6 +59,20 @@ function DaftarPegawai() {
   const [nip, setNip] = useState("");
   const [jabatan, setJabatan] = useState("");
   const token = localStorage.getItem("token");
+  const {
+    isOpen: isTambahOpen,
+    onOpen: onTambahOpen,
+    onClose: onTambahClose,
+  } = useDisclosure();
+
+  function inputHandler(event) {
+    const tes = setTimeout(() => {
+      //console.log(event.target.value);
+      const { value } = event.target;
+
+      setKeyword(value);
+    }, 2000);
+  }
   async function fetchSeed() {
     axios
       .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get/seed`)
@@ -80,6 +97,7 @@ function DaftarPegawai() {
       })
       .then((res) => {
         console.log(res.status, res.data, "tessss");
+        onTambahClose();
       })
       .catch((err) => {
         console.error(err.message);
@@ -91,7 +109,7 @@ function DaftarPegawai() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/pegawai/get/daftar?&time=${time}&page=${page}&limit=${limit}`,
+        }/pegawai/get/daftar?search_query=${keyword}&alfabet=${alfabet}&time=${time}&page=${page}&limit=${limit}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -124,7 +142,7 @@ function DaftarPegawai() {
   useEffect(() => {
     fetchDataPegawai();
     fetchSeed();
-  }, []);
+  }, [page, keyword]);
   return (
     <Layout>
       <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
@@ -134,174 +152,23 @@ function DaftarPegawai() {
           borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
-          my={"30px"}
-        >
-          <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Tambah Tujuan</Heading>
-          </HStack>
-
-          <Box p={"30px"}>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
-              <Input
-                height={"60px"}
-                bgColor={"terang"}
-                onChange={(e) => handleSubmitChange("nama", e.target.value)}
-                placeholder="Contoh: Sifulan, SKM"
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>NIP</FormLabel>
-              <Input
-                height={"60px"}
-                bgColor={"terang"}
-                onChange={(e) => handleSubmitChange("nip", e.target.value)}
-                placeholder="Contoh: 19330722 195502 1 003"
-              />
-            </FormControl>
-            <FormControl border={0} bgColor={"white"} flex="1">
-              <FormLabel fontSize={"24px"}>Pangkat</FormLabel>
-              <Select2
-                options={dataSeed?.resultPangkat?.map((val) => ({
-                  value: val.id,
-                  label: `${val.pangkat}`,
-                }))}
-                placeholder="Contoh: Pembina"
-                focusBorderColor="red"
-                onChange={(selectedOption) => {
-                  setPangkatId(selectedOption.value);
-                }}
-                components={{
-                  DropdownIndicator: () => null, // Hilangkan tombol panah
-                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: {
-                      borderColor: "yellow.700",
-                    },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "primary" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-            <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
-              <FormLabel fontSize={"24px"}>Golongan</FormLabel>
-              <Select2
-                options={dataSeed?.resultGolongan?.map((val) => ({
-                  value: val.id,
-                  label: `${val.golongan}`,
-                }))}
-                placeholder="Contoh: VI a"
-                focusBorderColor="red"
-                onChange={(selectedOption) => {
-                  setGolonganId(selectedOption.value);
-                }}
-                components={{
-                  DropdownIndicator: () => null, // Hilangkan tombol panah
-                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: {
-                      borderColor: "yellow.700",
-                    },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "primary" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Jabatan</FormLabel>
-              <Input
-                height={"60px"}
-                bgColor={"terang"}
-                onChange={(e) => handleSubmitChange("jabatan", e.target.value)}
-                placeholder="Contoh: bendahara"
-              />
-            </FormControl>{" "}
-            <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
-              <FormLabel fontSize={"24px"}>Tingkatan</FormLabel>
-              <Select2
-                options={dataSeed?.resultTingkatan?.map((val) => ({
-                  value: val.id,
-                  label: `${val.tingkatan}`,
-                }))}
-                placeholder="Contoh: TIngkat 3"
-                focusBorderColor="red"
-                onChange={(selectedOption) => {
-                  setTingkatanId(selectedOption.value);
-                }}
-                components={{
-                  DropdownIndicator: () => null, // Hilangkan tombol panah
-                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: {
-                      borderColor: "yellow.700",
-                    },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "primary" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-            <Button onClick={tambahPegawai} variant={"primary"}>
-              Tambah Pegawai
-            </Button>
-          </Box>
-          {/* {JSON.stringify(dataSeed.resultPangkat)} */}
-        </Container>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
           p={"30px"}
         >
+          <Flex>
+            <Button onClick={onTambahOpen} mb={"30px"} variant={"primary"}>
+              Tambah +
+            </Button>
+            <FormControl flex="1" mr={2}>
+              <Input
+                onChange={inputHandler}
+                type="name"
+                placeholder="Cari Obat"
+                borderRadius="8px"
+                borderColor="rgba(175, 175, 175, 1)"
+                width={{ ss: "65vw", sl: "20vw" }}
+              />{" "}
+            </FormControl>
+          </Flex>
           <Table>
             <Thead bgColor={"primary"} border={"1px"}>
               <Tr>
@@ -493,6 +360,182 @@ function DaftarPegawai() {
           </div>
         </Container>
       </Box>
+
+      <Modal
+        closeOnOverlayClick={false}
+        isOpen={isTambahOpen}
+        onClose={onTambahClose}
+      >
+        <ModalOverlay />
+        <ModalContent borderRadius={0} maxWidth="1200px">
+          <ModalHeader></ModalHeader>
+          <ModalCloseButton />
+
+          <ModalBody>
+            <Box>
+              <HStack>
+                <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+                <Heading color={"primary"}>Tambah Pegawai</Heading>
+              </HStack>
+
+              <Box p={"30px"}>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                  <Input
+                    height={"60px"}
+                    bgColor={"terang"}
+                    onChange={(e) => handleSubmitChange("nama", e.target.value)}
+                    placeholder="Contoh: Sifulan, SKM"
+                  />
+                </FormControl>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>NIP</FormLabel>
+                  <Input
+                    height={"60px"}
+                    bgColor={"terang"}
+                    onChange={(e) => handleSubmitChange("nip", e.target.value)}
+                    placeholder="Contoh: 19330722 195502 1 003"
+                  />
+                </FormControl>
+                <FormControl border={0} bgColor={"white"} flex="1">
+                  <FormLabel fontSize={"24px"}>Pangkat</FormLabel>
+                  <Select2
+                    options={dataSeed?.resultPangkat?.map((val) => ({
+                      value: val.id,
+                      label: `${val.pangkat}`,
+                    }))}
+                    placeholder="Contoh: Pembina"
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      setPangkatId(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+                <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                  <FormLabel fontSize={"24px"}>Golongan</FormLabel>
+                  <Select2
+                    options={dataSeed?.resultGolongan?.map((val) => ({
+                      value: val.id,
+                      label: `${val.golongan}`,
+                    }))}
+                    placeholder="Contoh: VI a"
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      setGolonganId(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Jabatan</FormLabel>
+                  <Input
+                    height={"60px"}
+                    bgColor={"terang"}
+                    onChange={(e) =>
+                      handleSubmitChange("jabatan", e.target.value)
+                    }
+                    placeholder="Contoh: bendahara"
+                  />
+                </FormControl>{" "}
+                <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                  <FormLabel fontSize={"24px"}>Tingkatan</FormLabel>
+                  <Select2
+                    options={dataSeed?.resultTingkatan?.map((val) => ({
+                      value: val.id,
+                      label: `${val.tingkatan}`,
+                    }))}
+                    placeholder="Contoh: TIngkat 3"
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      setTingkatanId(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+              </Box>
+            </Box>
+          </ModalBody>
+
+          <ModalFooter pe={"60px"} pb={"30px"}>
+            <Button onClick={tambahPegawai} variant={"primary"}>
+              Tambah Pegawai
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Layout>
   );
 }

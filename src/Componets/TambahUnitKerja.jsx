@@ -83,21 +83,19 @@ function TambahUnitKerja(props) {
   };
   return (
     <Box>
-      <Center
+      <Button
         onClick={onOpen}
         borderRadius={"5px"}
-        as="button"
-        h="25px"
-        w="25px"
-        fontSize="12px"
         transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
         color="white"
         _hover={{
-          bg: "black",
+          bg: "primaryTerang",
         }}
-        bg="red"
+        bg="primary"
         // onClick={onOpen}
-      ></Center>
+      >
+        Tambah Unit Kerja +
+      </Button>
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />

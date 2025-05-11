@@ -123,8 +123,7 @@ function TambahBendahara() {
           borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
+          p={"30px"}
           my={"30px"}
         >
           <FormControl my={"30px"}>

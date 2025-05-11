@@ -75,17 +75,29 @@ function Rill(props) {
 
           <ModalBody pb={6}>
             <Table>
-              <Thead>
+              <Thead bgColor={"primary"}>
                 <Tr>
-                  <Th>Item</Th>
-                  <Th>Nilai</Th>
+                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                    Item
+                  </Th>
+                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                    Nilai
+                  </Th>
                 </Tr>
               </Thead>
-              <Tbody>
+              <Tbody bgColor={"secondary"}>
                 {props?.data?.map((item) => (
                   <Tr key={item.id}>
-                    <Td>{item.item}</Td>
-                    <Td>{item.nilai}</Td>
+                    <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                      {item.item}
+                    </Td>
+                    <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                      {" "}
+                      {new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }).format(item.nilai)}
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>
@@ -107,8 +119,6 @@ function Rill(props) {
               </HStack>
             )}
           </ModalBody>
-          {props.data?.[0]?.rincianBPD?.personil?.id &&
-            JSON.stringify(props.data[0].rincianBPD)}
 
           <ModalFooter></ModalFooter>
         </ModalContent>

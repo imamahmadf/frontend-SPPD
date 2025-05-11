@@ -88,8 +88,7 @@ function DaftarAdmin() {
           ps={"0px"}
           my={"30px"}
         >
-          <Box style={{ overflowX: "auto" }}>
-            {JSON.stringify(user[0]?.unitKerja_profile)}
+          <Box style={{ overflowX: "auto" }} p={"30px"}>
             <Table>
               <Thead bgColor={"primary"} border={"1px"}>
                 <Tr>
@@ -97,7 +96,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     no.
@@ -106,7 +105,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     jenis Perjalanan
@@ -116,7 +115,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Unit Kerja Surat Tugas
@@ -125,7 +124,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     No Surat Tugas
@@ -134,7 +133,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     No Nota Dinas
@@ -143,7 +142,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Tanggal Berangkat
@@ -152,7 +151,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     tanggal Pulang
@@ -161,7 +160,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 1
@@ -170,7 +169,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 2
@@ -179,7 +178,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 3
@@ -188,7 +187,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 4
@@ -197,7 +196,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Personil 5
@@ -206,7 +205,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Kode Rekening
@@ -215,7 +214,7 @@ function DaftarAdmin() {
                     fontSize={"14px"}
                     borderColor={"secondary"}
                     color={"secondary"}
-                    py={"15px"}
+                    p={"10px"}
                     border={"1px"}
                   >
                     Aksi

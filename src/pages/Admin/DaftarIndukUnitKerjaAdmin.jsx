@@ -112,30 +112,42 @@ function DaftarIndukUnitKerjaAdmin() {
           borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
+          p={"30px"}
           my={"30px"}
         >
-          {JSON.stringify(data)}
           <Button variant={"primary"} onClick={onOpen}>
-            +
+            Tambah OPD +
           </Button>
-          <Table>
-            <Thead>
+          <Table variant="simple" mt={2}>
+            <Thead bgColor={"primary"}>
               <Tr>
-                <Th>No</Th>
-                <Th>OPD</Th>
-                <Th>Kode</Th>
-                <Th>Sumber Dana</Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  No
+                </Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  OPD
+                </Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  Kode
+                </Th>
+                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                  Sumber Dana
+                </Th>
               </Tr>
             </Thead>
-            <Tbody>
+            <Tbody bgColor={"secondary"}>
               {data?.map((item, index) => (
                 <Tr>
-                  <Td>{index + 1}</Td>
-                  <Td>{item.indukUnitKerja}</Td>
-                  <Td>{item.kodeInduk}</Td>
-                  <Td>
+                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                    {index + 1}
+                  </Td>
+                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                    {item.indukUnitKerja}
+                  </Td>
+                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                    {item.kodeInduk}
+                  </Td>
+                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
                     {item.indukUKSumberDanas.map((val, idx) => (
                       <Text>{val.sumberDana.sumber}</Text>
                     ))}
@@ -150,7 +162,7 @@ function DaftarIndukUnitKerjaAdmin() {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent maxWidth="900px">
-          <ModalHeader>Modal Title</ModalHeader>
+          <ModalHeader>Tambah OPD</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <FormControl>
@@ -186,12 +198,12 @@ function DaftarIndukUnitKerjaAdmin() {
                 placeholder="isi dengan Kode"
               />
             </FormControl>
-            {JSON.stringify(checkedIds)}
+
             <Flex>
               {dataSumberDana?.map((item, index) => (
                 <Box>
                   <Checkbox
-                    colorScheme="green"
+                    colorScheme="blue"
                     key={item.id}
                     isChecked={checkedItems[index]}
                     onChange={() => handleCheckboxChange(index)}

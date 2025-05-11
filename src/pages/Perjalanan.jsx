@@ -27,6 +27,7 @@ import {
   Input,
   Heading,
   SimpleGrid,
+  Checkbox,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -50,6 +51,7 @@ function Perjalanan() {
   // const [inputEndDate, setInputEndDate] = useState("");
   const [dataSeed, setDataSeed] = useState([]);
   const [untuk, setUntuk] = useState("");
+  const [dasar, setDasar] = useState(null);
   const [asal, setAsal] = useState(user[0]?.unitKerja_profile?.asal);
   const [dataTtdNotaDinas, setDataTtdNotaDinas] = useState(null);
   const [dataTtdSuratTugas, setDataTtdSuratTugas] = useState(null);
@@ -73,6 +75,7 @@ function Perjalanan() {
   const [dataBendahara, setDataBendahara] = useState(null);
   const [jenisPelayananKesehatan, setJenisPelayananKesehatan] = useState(1);
   const [dataJenisPerjalanan, setDataJenisPerjalanan] = useState([]);
+  const [isSrikandi, setIsSrikandi] = useState(1);
   const handleChange = (e, field) => {
     //console.log(field);
     const { value } = e.target;
@@ -100,6 +103,7 @@ function Perjalanan() {
           noSurat: dataSeed?.resultDaftarNomorSurat,
           subKegiatanId: dataSubKegiatan.value.id,
           untuk,
+          dasar,
           asal,
           kodeRekeningFE: `${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan.value.kodeRekening}`,
           ttdNotDis: dataTtdNotaDinas,
@@ -114,6 +118,7 @@ function Perjalanan() {
           kodeKlasifikasi: dataKodeKlasifikasi,
           dataBendaharaId: dataBendahara.id,
           pelayananKesehatanId: jenisPelayananKesehatan,
+          isSrikandi,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -387,6 +392,24 @@ function Perjalanan() {
                 minHeight={"160px"}
               />
             </FormControl>
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Dasar</FormLabel>
+              <Textarea
+                onChange={(e) => {
+                  setDasar(e.target.value);
+                }}
+                placeholder="isi dengan telaah staff atau undangan"
+                backgroundColor={"terang"}
+                p={"20px"}
+                minHeight={"160px"}
+              />
+            </FormControl>
+            <Checkbox
+              isChecked={isSrikandi === 1}
+              onChange={(e) => setIsSrikandi(e.target.checked ? 1 : 0)}
+            >
+              Srikandi
+            </Checkbox>
           </Box>
         </Container>
         <Container
