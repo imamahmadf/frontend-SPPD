@@ -62,6 +62,7 @@ function TambahUser() {
       register(nama, namaPengguna, cleanPassword, role, unitKerjaId)
     );
     // Arahkan ke halaman login setelah register
+    history.push("/admin/daftar-user");
   };
 
   async function fetchRole() {
@@ -71,7 +72,6 @@ function TambahUser() {
         console.log(res.status, res.data, "tessss");
         setDataUnitKerja(res.data.resultUnitKerja);
         setDataRole(res.data.result);
-        history.push("/admin/daftar-user");
       })
       .catch((err) => {
         console.error(err.message);
