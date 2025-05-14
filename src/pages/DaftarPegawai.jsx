@@ -27,7 +27,13 @@ import {
   Input,
   Heading,
   SimpleGrid,
+  Spacer,
 } from "@chakra-ui/react";
+import { BsCaretRightFill } from "react-icons/bs";
+import { BsCaretLeftFill } from "react-icons/bs";
+import { BsCart4 } from "react-icons/bs";
+import { BsEyeFill } from "react-icons/bs";
+import { BsPencilFill } from "react-icons/bs";
 import { useDisclosure } from "@chakra-ui/react";
 import ReactPaginate from "react-paginate";
 import "../Style/pagination.css";
@@ -145,12 +151,12 @@ function DaftarPegawai() {
   }, [page, keyword]);
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
           borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
+          maxW={"2880px"}
           bgColor={"white"}
           p={"30px"}
         >
@@ -158,171 +164,62 @@ function DaftarPegawai() {
             <Button onClick={onTambahOpen} mb={"30px"} variant={"primary"}>
               Tambah +
             </Button>
-            <FormControl flex="1" mr={2}>
-              <Input
-                onChange={inputHandler}
-                type="name"
-                placeholder="Cari Obat"
-                borderRadius="8px"
-                borderColor="rgba(175, 175, 175, 1)"
-                width={{ ss: "65vw", sl: "20vw" }}
-              />{" "}
-            </FormControl>
+            <Spacer />
+            <Box>
+              <FormControl>
+                <Input
+                  onChange={inputHandler}
+                  type="name"
+                  placeholder="Cari Pegawai"
+                  borderRadius="5px"
+                  borderColor="rgba(175, 175, 175, 1)"
+                  width={"500px"}
+                />{" "}
+              </FormControl>
+            </Box>
           </Flex>
-          <Table>
-            <Thead bgColor={"primary"} border={"1px"}>
+          <Table variant={"primary"}>
+            <Thead>
               <Tr>
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  px={"5px"}
-                  border={"1px"}
-                >
-                  nama
-                </Th>{" "}
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  px={"5px"}
-                  border={"1px"}
-                >
-                  NIP
-                </Th>{" "}
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  px={"5px"}
-                  border={"1px"}
-                >
-                  Pangkat
-                </Th>{" "}
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  px={"5px"}
-                  border={"1px"}
-                >
-                  Gol.
-                </Th>{" "}
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  px={"5px"}
-                  border={"1px"}
-                >
-                  Jabatan
-                </Th>{" "}
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  px={"5px"}
-                  border={"1px"}
-                >
-                  Tingkatan
-                </Th>{" "}
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  px={"5px"}
-                  border={"1px"}
-                >
-                  Aksi
-                </Th>
+                <Th>nama</Th> <Th>NIP</Th> <Th>Pangkat</Th> <Th>Gol.</Th>
+                <Th>Jabatan</Th> <Th>Tingkatan</Th> <Th>Unit Kerja</Th>
+                <Th>Aksi</Th>
               </Tr>
             </Thead>
             <Tbody>
               {dataPegawai?.result?.map((item, index) => (
                 <Tr>
-                  <Td
-                    borderWidth="1px"
-                    px={"5px"}
-                    py={"5px"}
-                    borderColor="primary"
-                  >
-                    {item.nama}
-                  </Td>
-                  <Td
-                    borderWidth="1px"
-                    px={"5px"}
-                    py={"5px"}
-                    borderColor="primary"
-                    minWidth={"200px"}
-                  >
-                    {item.nip}
-                  </Td>
-                  <Td
-                    borderWidth="1px"
-                    px={"5px"}
-                    py={"5px"}
-                    borderColor="primary"
-                  >
-                    {item.daftarPangkat.pangkat}
-                  </Td>
-                  <Td
-                    borderWidth="1px"
-                    px={"5px"}
-                    py={"5px"}
-                    borderColor="primary"
-                  >
-                    {item.daftarGolongan.golongan}
-                  </Td>
-                  <Td
-                    borderWidth="1px"
-                    px={"5px"}
-                    py={"5px"}
-                    borderColor="primary"
-                  >
-                    {item.jabatan}
-                  </Td>
-                  <Td
-                    borderWidth="1px"
-                    px={"5px"}
-                    py={"5px"}
-                    borderColor="primary"
-                  >
-                    {item.daftarTingkatan.tingkatan}
-                  </Td>
-                  <Td
-                    borderWidth="1px"
-                    px={"5px"}
-                    py={"5px"}
-                    borderColor="primary"
-                  >
-                    <Flex>
+                  <Td>{item.nama}</Td>
+                  <Td minWidth={"200px"}>{item.nip}</Td>
+                  <Td>{item.daftarPangkat.pangkat}</Td>
+                  <Td>{item.daftarGolongan.golongan}</Td>
+                  <Td>{item.jabatan}</Td>
+                  <Td>{item.daftarTingkatan.tingkatan}</Td>
+                  <Td>{item?.daftarUnitKerja?.unitKerja}</Td>
+                  <Td>
+                    <Flex gap={2}>
                       <Button
-                        height={"30px"}
+                        variant={"primary"}
+                        p={"0px"}
+                        fontSize={"14px"}
                         onClick={() =>
                           history.push(`/admin/detail-pegawai/${item.id}`)
                         }
-                        variant={"primary"}
                       >
-                        Detail
+                        <BsEyeFill />
                       </Button>
                       <Button
-                        height={"30px"}
+                        p={"0px"}
+                        fontSize={"14px"}
                         onClick={() =>
                           history.push(`/admin/edit-pegawai/${item.id}`)
                         }
-                        variant={"primary"}
+                        variant={"secondary"}
                       >
-                        Ubah
+                        <BsPencilFill />
                       </Button>
-                      <Button height={"30px"} variant={"secondary"}>
-                        hapus
+                      <Button p={"0px"} fontSize={"14px"} variant={"cancle"}>
+                        X
                       </Button>
                     </Flex>
                   </Td>
@@ -342,8 +239,8 @@ function DaftarPegawai() {
             }}
           >
             <ReactPaginate
-              previousLabel={"+"}
-              nextLabel={"-"}
+              previousLabel={<BsCaretLeftFill />}
+              nextLabel={<BsCaretRightFill />}
               pageCount={pages}
               onPageChange={changePage}
               activeClassName={"item active "}
@@ -351,7 +248,7 @@ function DaftarPegawai() {
               breakLabel={"..."}
               containerClassName={"pagination"}
               disabledClassName={"disabled-page"}
-              marginPagesDisplayed={1}
+              marginPagesDisplayed={2}
               nextClassName={"item next "}
               pageClassName={"item pagination-page "}
               pageRangeDisplayed={2}

@@ -32,10 +32,13 @@ import {
   Textarea,
   Input,
   Spacer,
+  useToast,
 } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
+import Loading from "../Componets/Loading";
+
 function Daftar() {
   const [dataPerjalanan, setDataPerjalanan] = useState([]);
   const history = useHistory();
@@ -44,6 +47,8 @@ function Daftar() {
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
 
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
@@ -53,7 +58,7 @@ function Daftar() {
   };
 
   const postSuratTugas = (val) => {
-    console.log(val);
+    setIsLoading(true);
     axios
       .post(
         `${
@@ -76,6 +81,8 @@ function Daftar() {
           ttdSurTugPangkat: val.ttdSuratTuga.pegawai.daftarPangkat.pangkat,
           ttdSurTugGolongan: val.ttdSuratTuga.pegawai.daftarGolongan.golongan,
           ttdSurTugUnitKerja: val.ttdSuratTuga.indukUnitKerjaId,
+          ttdSurtTugKode:
+            val.ttdSuratTuga.indukUnitKerja_ttdSuratTugas.kodeInduk,
           KPANama: val.KPA.pegawai_KPA.nama,
           KPANip: val.KPA.pegawai_KPA.nip,
           KPAPangkat: val.KPA.pegawai_KPA.daftarPangkat.pangkat,
@@ -95,14 +102,35 @@ function Daftar() {
         const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "letter.docx"); // Nama file yang diunduh
+        link.setAttribute(
+          "download",
+          `Surat_Tugas_${user[0]?.unitKerja_profile?.kode}_${Date.now()}.docx`
+        ); // Nama file yang diunduh
         document.body.appendChild(link);
         link.click();
         link.remove();
         fetchDataPerjalanan();
+
+        toast({
+          title: "Berhasil",
+          description: "File surat tugas berhasil diunduh",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       })
       .catch((err) => {
         console.error(err); // Tangani error
+        toast({
+          title: "Gagal",
+          description: "Gagal mengunduh file surat tugas",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -132,8 +160,9 @@ function Daftar() {
   }, [page]);
   return (
     <>
+      {isLoading && <Loading />}
       <Layout>
-        <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Box
             style={{ overflowX: "auto" }}
             bgColor={"white"}
@@ -141,172 +170,53 @@ function Daftar() {
             borderRadius={"5px"}
           >
             {/* {JSON.stringify(user[0]?.unitKerja_profile)} */}
-            <Table>
-              <Thead bgColor={"primary"} border={"1px"}>
+            <Table variant={"primary"}>
+              <Thead>
                 <Tr>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    no.
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    jenis Perjalanan
-                  </Th>
+                  <Th>no.</Th>
+                  <Th>jenis Perjalanan</Th>
 
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Unit Kerja Surat Tugas
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    No Surat Tugas
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    No Nota Dinas
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Tanggal Berangkat
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    tanggal Pulang
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Tujuan
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 1
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 2
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 3
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 4
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 5
-                  </Th>
+                  <Th>Unit Kerja Surat Tugas</Th>
+                  <Th>No Surat Tugas</Th>
+                  <Th>No Nota Dinas</Th>
+                  <Th>Tanggal Berangkat</Th>
+                  <Th>tanggal Pulang</Th>
+                  <Th>Tujuan</Th>
+                  <Th>Personil 1</Th>
+                  <Th>Personil 2</Th>
+                  <Th>Personil 3</Th>
+                  <Th>Personil 4</Th>
+                  <Th>Personil 5</Th>
 
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Aksi
-                  </Th>
+                  <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {dataPerjalanan?.map((item, index) => (
                   <Tr key={item.id}>
-                    <Td borderWidth="1px" borderColor="primary">
-                      {index + 1}
-                    </Td>{" "}
-                    <Td borderWidth="1px" borderColor="primary">
-                      {item.jenisPerjalanan.jenis}
-                    </Td>{" "}
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>{index + 1}</Td> <Td>{item.jenisPerjalanan.jenis}</Td>{" "}
+                    <Td>
                       {item.ttdSuratTuga.indukUnitKerja_ttdSuratTugas.kodeInduk}
                     </Td>
-                    <Td borderWidth="1px" borderColor="primary">
-                      {item.noSuratTugas ? item.noSuratTugas : "-"}
-                    </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>{item.noSuratTugas ? item.noSuratTugas : "-"}</Td>
+                    <Td>
                       {item.suratKeluar.nomor ? item.suratKeluar.nomor : "-"}
                     </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>
                       {item.tempats?.[0]?.tanggalBerangkat
                         ? new Date(
                             item.tempats[0].tanggalBerangkat
                           ).toLocaleDateString()
                         : "-"}
                     </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>
                       {item.tempats?.[0]?.tanggalPulang
                         ? new Date(
                             item.tempats[0].tanggalPulang
                           ).toLocaleDateString()
                         : "-"}
                     </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>
                       {item.jenisPerjalanan.tipePerjalanan.id === 1
                         ? item.tempats.map((val) => (
                             <Text key={val.id}>{val.dalamKota.nama}</Text>
@@ -316,18 +226,17 @@ function Daftar() {
                           ))}
                     </Td>
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Td key={i} borderWidth="1px" borderColor="primary">
+                      <Td key={i}>
                         {item.personils?.[i]?.pegawai?.nama || "-"}
                       </Td>
                     ))}
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>
                       <Flex gap={"10px"}>
                         {item.noSuratTugas ? (
                           <Button
                             variant={"primary"}
                             p={"0px"}
-                            fontSize={"16px"}
-                            h={"40px"}
+                            fontSize={"14px"}
                             onClick={() =>
                               history.push(`/detail-perjalanan/${item.id}`)
                             }
@@ -339,7 +248,7 @@ function Daftar() {
                         <Button
                           variant={"secondary"}
                           p={"0px"}
-                          fontSize={"16px"}
+                          fontSize={"14px"}
                           h={"40px"}
                           onClick={() => {
                             postSuratTugas(item);

@@ -32,67 +32,70 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { BsPencilFill } from "react-icons/bs";
 import { Link, useHistory } from "react-router-dom";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
+import { BsPencilFill } from "react-icons/bs";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
-function NomorSuratAdmin() {
-  const user = useSelector(userRedux);
-  const [dataNomorSurat, setDataNomorSurat] = useState(null);
+function EditJenisSurat() {
+  const [dataJenisSurat, setDataJenisSurat] = useState(null);
   const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({
-    nomorLoket: "",
-  });
+  const [editValue, setEditValue] = useState("");
   const toast = useToast();
 
-  async function fetchDataNomorSurat() {
+  async function fetchDataJenisSurat() {
     await axios
-      .get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/nomor-surat/get/${
-          user[0]?.unitKerja_profile?.indukUnitKerja.id
-        }`
-      )
+      .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/nomor-surat/get`)
       .then((res) => {
         console.log(res.status, res.data, "tessss");
 
-        setDataNomorSurat(res.data.result);
+        setDataJenisSurat(res.data.result);
       })
       .catch((err) => {
         console.error(err.message);
       });
   }
+
   useEffect(() => {
-    fetchDataNomorSurat();
+    fetchDataJenisSurat();
   }, []);
 
-  const handleEdit = (item) => {
-    setEditingId(item.id);
-    setEditData({
-      nomorLoket: item.nomorLoket,
-    });
+  const handleEdit = (id, currentValue) => {
+    setEditingId(id);
+    setEditValue(currentValue);
   };
 
   const handleSave = async (id) => {
     try {
       await axios.post(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/nomor-surat/edit/${id}`,
-        editData
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/nomor-surat/edit/nomor/${id}`,
+        {
+          nomorSurat: editValue,
+        }
       );
+
+      // Update data lokal setelah berhasil update di API
+      setDataJenisSurat(
+        dataJenisSurat.map((item) =>
+          item.id === id ? { ...item, nomorSurat: editValue } : item
+        )
+      );
+
+      setEditingId(null);
       toast({
         title: "Berhasil",
-        description: "Data berhasil diperbarui",
+        description: "Nomor surat berhasil diperbarui",
         status: "success",
         duration: 3000,
         isClosable: true,
       });
-      setEditingId(null);
-      fetchDataNomorSurat();
     } catch (error) {
       toast({
         title: "Error",
-        description: "Gagal memperbarui data",
+        description: "Gagal memperbarui nomor surat",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -100,13 +103,9 @@ function NomorSuratAdmin() {
     }
   };
 
-  const handleCancel = () => {
-    setEditingId(null);
-  };
-
   return (
     <Layout>
-      <Box pt={"40px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -119,55 +118,57 @@ function NomorSuratAdmin() {
           <Table variant={"primary"}>
             <Thead>
               <Tr>
-                <Th>No</Th>
-                <Th>jenis nomor surat</Th>
+                <Th>NO</Th>
+                <Th>Jenis Surat</Th>
                 <Th>Nomor Surat</Th>
-                <Th>Nomor Loket</Th>
                 <Th>Aksi</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {dataNomorSurat?.map((item, index) => (
+              {dataJenisSurat?.map((item, index) => (
                 <Tr key={item.id}>
                   <Td>{index + 1}</Td>
-                  <Td>{item.jenisSurat.jenis}</Td>
-                  <Td>{item.jenisSurat.nomorSurat}</Td>
+                  <Td>{item.jenis}</Td>
                   <Td>
                     {editingId === item.id ? (
-                      <Input
-                        value={editData.nomorLoket}
-                        onChange={(e) =>
-                          setEditData({
-                            ...editData,
-                            nomorLoket: e.target.value,
-                          })
-                        }
-                      />
+                      <HStack>
+                        <Input
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          size="sm"
+                        />
+                      </HStack>
                     ) : (
-                      item.nomorLoket
+                      item.nomorSurat
                     )}
                   </Td>
                   <Td>
                     {editingId === item.id ? (
-                      <HStack spacing={2}>
+                      <>
+                        {" "}
                         <Button
-                          variant={"primary"}
+                          size="sm"
+                          colorScheme="green"
                           onClick={() => handleSave(item.id)}
                         >
                           Simpan
                         </Button>
-                        <Button variant={"cancle"} onClick={handleCancel}>
+                        <Button
+                          size="sm"
+                          colorScheme="red"
+                          onClick={() => setEditingId(null)}
+                        >
                           Batal
                         </Button>
-                      </HStack>
+                      </>
                     ) : (
                       <Button
                         p={"0px"}
                         fontSize={"14px"}
-                        variant={"secondary"}
-                        onClick={() => handleEdit(item)}
+                        variant={"primary"}
+                        onClick={() => handleEdit(item.id, item.nomorSurat)}
+                        isDisabled={editingId === item.id}
                       >
-                        {" "}
                         <BsPencilFill />
                       </Button>
                     )}
@@ -182,4 +183,4 @@ function NomorSuratAdmin() {
   );
 }
 
-export default NomorSuratAdmin;
+export default EditJenisSurat;

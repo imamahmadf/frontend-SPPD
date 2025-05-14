@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { login } from "../Redux/Reducers/auth"; // Import action creator
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import LogoPena from "../assets/Logo Pena.png";
 import {
   Box,
   Center,
@@ -36,6 +37,7 @@ import {
   VStack,
   Divider,
   Spacer,
+  Image,
   useDisclosure,
 } from "@chakra-ui/react";
 import {
@@ -68,15 +70,28 @@ const Login = () => {
 
   return (
     <>
-      <Center bgColor={"primary"} height={"100vh"}>
+      <Center
+        bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
+        height={"100vh"}
+      >
         <Center
+          transform="translateY(-2px)"
+          boxShadow="md"
           bgColor={"white"}
-          height={"50vh"}
-          width={"50vw"}
           borderRadius={"8px"}
-          p={"0px"}
+          p={"100px"}
         >
           <VStack p={"0px"}>
+            {" "}
+            <Image
+              height="150px"
+              overflow="hidden"
+              objectFit="cover"
+              src={LogoPena}
+              transition="transform 0.3s ease"
+              _hover={{ transform: "scale(1.05)" }}
+              mb={"50px"}
+            />
             <FormControl>
               <FormLabel fontSize={"24px"}>Nama Pengguna</FormLabel>
               <Input
@@ -84,7 +99,7 @@ const Login = () => {
                 onChange={(e) => setNamaPengguna(e.target.value)}
                 bgColor={"terang"}
                 height="60px"
-                placeholder="isi dengan asal "
+                placeholder="contoh: sifulan"
                 w={"600px"}
               />
             </FormControl>

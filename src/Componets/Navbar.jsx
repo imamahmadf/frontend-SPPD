@@ -29,6 +29,7 @@ import {
   selectRole,
 } from "../Redux/Reducers/auth";
 import Logo from "../assets/logo.png";
+import LogoPena from "../assets/Logo Pena.png";
 
 function Navbar() {
   const isAuthenticated =
@@ -40,109 +41,175 @@ function Navbar() {
   const history = useHistory();
 
   return (
-    <Box color={"white"} bgColor={"primary"}>
-      <Container py={"20px"} maxW={"1280px"}>
-        <HStack gap={5}>
-          <Image height="65px" overflow="hiden" objectFit="cover" src={Logo} />
-          <Text>{user[0]?.nama}</Text>
-          {/* <Text>{JSON.stringify(role)}</Text> */}
-          <Spacer />{" "}
-          <Box
-            as="button"
-            transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-            _hover={{
-              bg: "secondary",
-              color: "black",
-            }}
-            onClick={() => {
-              history.push("/");
-            }}
-          >
-            <Text>HOME</Text>
-          </Box>
-          <Menu>
-            <MenuButton as={Button}>PERJALANAN</MenuButton>
-            <MenuList color={"black"}>
-              <Link to={"/perjalanan"}>
-                <MenuItem>Perjalanan</MenuItem>
-              </Link>
-              <Link to={"/daftar"}>
-                <MenuItem>Daftar Perjalanan</MenuItem>
-              </Link>
-            </MenuList>
-          </Menu>
-          <Menu>
-            <MenuButton as={Button}>Keuangan</MenuButton>
-            <MenuList color={"black"}>
-              <Link to={"/admin/keuangan/daftar-perjalanan"}>
-                <MenuItem>Daftar</MenuItem>
-              </Link>
-              {/* <Link to={"/daftar"}>
-                <MenuItem>Daftar Perjalanan</MenuItem>
-              </Link> */}
-            </MenuList>
-          </Menu>
-          <Menu>
-            <MenuButton as={Button}>Kepegawaian</MenuButton>
-            <MenuList color={"black"}>
-              <Link to={"/daftar-pegawai"}>
-                <MenuItem>Daftar Pegawai</MenuItem>
-              </Link>
-              {/* <Link to={"/daftar"}>
-                <MenuItem>Daftar Perjalanan</MenuItem>
-              </Link> */}
-            </MenuList>
-          </Menu>
-          <Menu>
-            <MenuButton as={Button}>ADMIN</MenuButton>
-            <MenuList color={"black"}>
-              <Link to={"/admin/induk-unit-kerja"}>
-                <MenuItem>Induk Unit Kerja</MenuItem>
-              </Link>{" "}
-              <Link to={"/admin/daftar-bendahara"}>
-                <MenuItem>Daftar Bendahara</MenuItem>
-              </Link>
-              <Link to={"/admin/template"}>
-                <MenuItem>Template</MenuItem>
-              </Link>
-              <Link to={"/admin/sub-kegiatan"}>
-                <MenuItem>Sub Kegiatan</MenuItem>
-              </Link>
-            </MenuList>
-          </Menu>
-          <Menu>
-            <MenuButton as={Button}>SURAT</MenuButton>
-            <MenuList color={"black"}>
-              <Link to={"/admin/nomor-surat"}>
-                <MenuItem>Pengaturan</MenuItem>
-              </Link>{" "}
-              <Link to={"/admin/surat-keluar"}>
-                <MenuItem>Daftar Surat Keluar</MenuItem>
-              </Link>
-            </MenuList>
-          </Menu>
-          <Menu>
-            <MenuButton as={Button}>ADMIN PUSAT</MenuButton>
-            <MenuList color={"black"}>
-              <Link to={"/admin/dalam-kota"}>
-                <MenuItem>Daftar Dalam Kota</MenuItem>
-              </Link>
-              <Link to={"/admin/tambah-user"}>
-                <MenuItem>Pengaturan Pengguna</MenuItem>
-              </Link>
-              <Link to={"/admin/daftar-user"}>
-                <MenuItem>Daftar Pengguna</MenuItem>
-              </Link>
+    <Box
+      color={"primary"}
+      position="fixed"
+      top={0}
+      left={0}
+      right={0}
+      bg="white"
+      zIndex={1000}
+      boxShadow="lg"
+      borderBottom="1px"
+      borderColor="gray.200"
+    >
+      <Container py={"15px"} maxW={"2480px"}>
+        <HStack gap={5} alignItems="center">
+          <HStack spacing={2}>
+            <Image
+              height="50px"
+              overflow="hidden"
+              objectFit="cover"
+              src={Logo}
+              transition="transform 0.3s ease"
+              _hover={{ transform: "scale(1.05)" }}
+            />
+            <Image
+              height="50px"
+              overflow="hidden"
+              objectFit="cover"
+              src={LogoPena}
+              transition="transform 0.3s ease"
+              _hover={{ transform: "scale(1.05)" }}
+            />
+          </HStack>
 
-              <Link to={"/admin/daftar-induk-unit-kerja"}>
-                <MenuItem>Daftar Induk Unit Kerja</MenuItem>
-              </Link>
-            </MenuList>
-          </Menu>
-          {isAuthenticated ? <Logout /> : <a href="/login">Login</a>}
+          <Text fontWeight="medium" color="gray.700">
+            {user[0]?.nama}
+          </Text>
+
+          <Spacer />
+
+          <HStack spacing={4}>
+            <Box
+              as="button"
+              px={4}
+              py={2}
+              borderRadius="md"
+              transition="all 0.2s"
+              _hover={{
+                bg: "secondary",
+                color: "black",
+                transform: "translateY(-2px)",
+                boxShadow: "md",
+              }}
+              onClick={() => history.push("/")}
+            >
+              <Text fontWeight="semibold">HOME</Text>
+            </Box>
+
+            <Menu>
+              <MenuButton
+                as={Button}
+                variant="ghost"
+                _hover={{ bg: "gray.100" }}
+                _active={{ bg: "gray.200" }}
+              >
+                PERJALANAN
+              </MenuButton>
+              <MenuList
+                color={"black"}
+                boxShadow="xl"
+                borderRadius="lg"
+                border="none"
+              >
+                <Link to={"/perjalanan"}>
+                  <MenuItem _hover={{ bg: "gray.100" }} transition="all 0.2s">
+                    Perjalanan
+                  </MenuItem>
+                </Link>
+                <Link to={"/daftar"}>
+                  <MenuItem _hover={{ bg: "gray.100" }} transition="all 0.2s">
+                    Daftar Perjalanan
+                  </MenuItem>
+                </Link>
+              </MenuList>
+            </Menu>
+
+            <Menu>
+              <MenuButton as={Button}>Keuangan</MenuButton>
+              <MenuList color={"black"}>
+                <Link to={"/admin/keuangan/daftar-perjalanan"}>
+                  <MenuItem>Daftar</MenuItem>
+                </Link>
+              </MenuList>
+            </Menu>
+
+            <Menu>
+              <MenuButton as={Button}>Kepegawaian</MenuButton>
+              <MenuList color={"black"}>
+                <Link to={"/daftar-pegawai"}>
+                  <MenuItem>Daftar Pegawai</MenuItem>
+                </Link>
+              </MenuList>
+            </Menu>
+
+            <Menu>
+              <MenuButton as={Button}>ADMIN</MenuButton>
+              <MenuList color={"black"}>
+                <Link to={"/admin/induk-unit-kerja"}>
+                  <MenuItem>Induk Unit Kerja</MenuItem>
+                </Link>{" "}
+                <Link to={"/admin/daftar-bendahara"}>
+                  <MenuItem>Daftar Bendahara</MenuItem>
+                </Link>
+                <Link to={"/admin/template"}>
+                  <MenuItem>Template</MenuItem>
+                </Link>
+                <Link to={"/admin/sub-kegiatan"}>
+                  <MenuItem>Sub Kegiatan</MenuItem>
+                </Link>
+              </MenuList>
+            </Menu>
+
+            <Menu>
+              <MenuButton as={Button}>SURAT</MenuButton>
+              <MenuList color={"black"}>
+                <Link to={"/admin/nomor-surat"}>
+                  <MenuItem>Pengaturan</MenuItem>
+                </Link>{" "}
+                <Link to={"/admin/surat-keluar"}>
+                  <MenuItem>Daftar Surat Keluar</MenuItem>
+                </Link>
+              </MenuList>
+            </Menu>
+
+            <Menu>
+              <MenuButton as={Button}>ADMIN PUSAT</MenuButton>
+              <MenuList color={"black"}>
+                <Link to={"/admin/dalam-kota"}>
+                  <MenuItem>Daftar Dalam Kota</MenuItem>
+                </Link>
+                <Link to={"/admin/edit-jenis-surat"}>
+                  <MenuItem>Jenis Surat</MenuItem>
+                </Link>
+                <Link to={"/admin/tambah-user"}>
+                  <MenuItem>Pengaturan Pengguna</MenuItem>
+                </Link>
+                <Link to={"/admin/daftar-user"}>
+                  <MenuItem>Daftar Pengguna</MenuItem>
+                </Link>
+
+                <Link to={"/admin/daftar-induk-unit-kerja"}>
+                  <MenuItem>Daftar Induk Unit Kerja</MenuItem>
+                </Link>
+              </MenuList>
+            </Menu>
+
+            {isAuthenticated ? (
+              <Logout />
+            ) : (
+              <Button
+                colorScheme="blue"
+                variant="solid"
+                _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
+                transition="all 0.2s"
+              >
+                <a href="/login">Login</a>
+              </Button>
+            )}
+          </HStack>
         </HStack>
-        {/* {JSON.stringify(user[0]?.unitKerja_profile?.indukUnitKerja.id)}
-        {JSON.stringify(localStorage.getItem("token"))} */}
       </Container>
     </Box>
   );

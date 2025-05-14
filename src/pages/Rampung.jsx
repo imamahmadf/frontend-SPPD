@@ -54,6 +54,7 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
+import Loading from "../Componets/Loading";
 
 function Rampung(props) {
   const toast = useToast();
@@ -83,6 +84,8 @@ function Rampung(props) {
     onOpen: onInputOpen,
     onClose: onInputClose,
   } = useDisclosure();
+  const [isPrinting, setIsPrinting] = useState(false);
+
   function renderJenis() {
     return dataRampung.jenisRampung?.map((val) => {
       return (
@@ -185,6 +188,7 @@ function Rampung(props) {
   };
 
   const cetak = () => {
+    setIsPrinting(true);
     axios
       .post(
         `${
@@ -219,20 +223,38 @@ function Rampung(props) {
           //   dataRampung.result.perjalanan.bendahara.sumberDana.untukPembayaran,
         },
         {
-          responseType: "blob", // Penting untuk menerima file sebagai blob
+          responseType: "blob",
         }
       )
       .then((res) => {
-        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
+        const url = window.URL.createObjectURL(new Blob([res.data]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "letter.docx"); // Nama file yang diunduh
+        link.setAttribute("download", "letter.docx");
         document.body.appendChild(link);
         link.click();
         link.remove();
+
+        toast({
+          title: "Berhasil!",
+          description: "File berhasil diunduh.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
       })
       .catch((err) => {
         console.error(err);
+        toast({
+          title: "Error!",
+          description: "Gagal mengunduh file.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsPrinting(false);
       });
   };
 
@@ -404,7 +426,8 @@ function Rampung(props) {
 
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      {isPrinting && <Loading />}
+      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -416,7 +439,9 @@ function Rampung(props) {
         >
           <HStack>
             <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Detail Rampung</Heading>
+            <Heading color={"primary"}>Data Rampung</Heading>
+            <Spacer />
+            <Box>STATUS {JSON.stringify(dataRampung?.result?.status)}</Box>
           </HStack>
 
           <Box p={"30px"}>
@@ -533,6 +558,7 @@ function Rampung(props) {
           bgColor={"white"}
           pt={"30px"}
           ps={"0px"}
+          mt={"30px"}
         >
           <HStack>
             <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>

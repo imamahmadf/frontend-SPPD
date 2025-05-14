@@ -18,7 +18,7 @@ function Footer() {
         borderTop={"1px"}
         borderColor={"white"}
         py={"20px"}
-        bgColor={"primary"}
+        bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
         color={"white"}
       >
         {" "}

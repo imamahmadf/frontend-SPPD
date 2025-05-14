@@ -38,7 +38,8 @@ import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import TambahUnitKerja from "../../Componets/TambahUnitKerja";
-
+import { BsEyeFill } from "react-icons/bs";
+import { BsPencilFill } from "react-icons/bs";
 function IndukUnitKerjaAdmin() {
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
@@ -250,48 +251,13 @@ function IndukUnitKerjaAdmin() {
     if (!items || items.length === 0) return <Text>Tidak ada data</Text>;
 
     return (
-      <Table>
-        <Thead bgColor={"primary"} border={"1px"}>
+      <Table variant={"primary"}>
+        <Thead>
           <Tr>
-            <Th
-              fontSize={"14px"}
-              borderColor={"secondary"}
-              color={"secondary"}
-              p={"10px"}
-              border={"1px"}
-              width="50px"
-            >
-              No
-            </Th>
-            <Th
-              fontSize={"14px"}
-              borderColor={"secondary"}
-              color={"secondary"}
-              p={"10px"}
-              border={"1px"}
-              width="450px"
-            >
-              Jabatan
-            </Th>
-            <Th
-              fontSize={"14px"}
-              borderColor={"secondary"}
-              color={"secondary"}
-              p={"10px"}
-              border={"1px"}
-            >
-              Nama Pegawai
-            </Th>
-            <Th
-              fontSize={"14px"}
-              borderColor={"secondary"}
-              color={"secondary"}
-              p={"10px"}
-              border={"1px"}
-              width="150px"
-            >
-              Aksi
-            </Th>
+            <Th width="50px">No</Th>
+            <Th width="450px">Jabatan</Th>
+            <Th>Nama Pegawai</Th>
+            <Th width="150px">Aksi</Th>
           </Tr>
         </Thead>
         <Tbody>
@@ -316,24 +282,22 @@ function IndukUnitKerjaAdmin() {
 
             return (
               <Tr key={item.id}>
-                <Td borderWidth="1px" borderColor="primary">
-                  {index + 1}
-                </Td>
-                <Td borderWidth="1px" borderColor="primary">
+                <Td>{index + 1}</Td>
+                <Td>
                   <EditableCell
                     value={currentValue}
                     isEditing={isEditing}
                     onChange={(value) => handleEditChange(uniqueId, value)}
                   />
                 </Td>
-                <Td borderWidth="1px" borderColor="primary">
+                <Td>
                   {type === "notaDinas"
                     ? item.pegawai_notaDinas.nama
                     : type === "PPTK"
                     ? item.pegawai_PPTK.nama
                     : item.pegawai_KPA.nama}
                 </Td>
-                <Td borderWidth="1px" borderColor="primary">
+                <Td>
                   {isEditing ? (
                     <HStack spacing={2}>
                       <Button
@@ -356,24 +320,26 @@ function IndukUnitKerjaAdmin() {
                   ) : (
                     <HStack spacing={2}>
                       <Button
-                        size="sm"
-                        colorScheme="blue"
+                        p={"0px"}
+                        fontSize={"14px"}
+                        variant={"secondary"}
                         onClick={() =>
                           handleEditClick(item.id, type, unitKerjaId)
                         }
                         isDisabled={isLoading}
                       >
-                        Edit
+                        <BsPencilFill />
                       </Button>
                       <Button
-                        size="sm"
-                        colorScheme="red"
+                        p={"0px"}
+                        fontSize={"14px"}
+                        variant={"cancle"}
                         onClick={() =>
                           handleDeleteClick({ ...item, type, unitKerjaId })
                         }
                         isDisabled={isLoading}
                       >
-                        Hapus
+                        X
                       </Button>
                     </HStack>
                   )}
@@ -456,48 +422,13 @@ function IndukUnitKerjaAdmin() {
             {isLoading ? (
               <Text>Memuat data...</Text>
             ) : (
-              <Table>
-                <Thead bgColor={"primary"} border={"1px"}>
+              <Table variant={"primary"}>
+                <Thead>
                   <Tr>
-                    <Th
-                      fontSize={"14px"}
-                      borderColor={"secondary"}
-                      color={"secondary"}
-                      p={"10px"}
-                      border={"1px"}
-                      width="50px"
-                    >
-                      No
-                    </Th>
-                    <Th
-                      fontSize={"14px"}
-                      borderColor={"secondary"}
-                      color={"secondary"}
-                      p={"10px"}
-                      border={"1px"}
-                    >
-                      Nama
-                    </Th>
-                    <Th
-                      fontSize={"14px"}
-                      borderColor={"secondary"}
-                      color={"secondary"}
-                      p={"10px"}
-                      border={"1px"}
-                      width="550px"
-                    >
-                      Jabatan
-                    </Th>
-                    <Th
-                      fontSize={"14px"}
-                      borderColor={"secondary"}
-                      color={"secondary"}
-                      p={"10px"}
-                      border={"1px"}
-                      width="150px"
-                    >
-                      Aksi
-                    </Th>
+                    <Th width="50px">No</Th>
+                    <Th>Nama</Th>
+                    <Th width="550px">Jabatan</Th>
+                    <Th width="150px">Aksi</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -522,13 +453,9 @@ function IndukUnitKerjaAdmin() {
 
                     return (
                       <Tr key={item.id}>
-                        <Td borderWidth="1px" borderColor="primary">
-                          {index + 1}
-                        </Td>
-                        <Td borderWidth="1px" borderColor="primary">
-                          {item.pegawai.nama}
-                        </Td>
-                        <Td borderWidth="1px" borderColor="primary">
+                        <Td>{index + 1}</Td>
+                        <Td>{item.pegawai.nama}</Td>
+                        <Td>
                           <EditableCell
                             value={currentValue}
                             isEditing={isEditing}
@@ -537,7 +464,7 @@ function IndukUnitKerjaAdmin() {
                             }
                           />
                         </Td>
-                        <Td borderWidth="1px" borderColor="primary">
+                        <Td>
                           {isEditing ? (
                             <HStack spacing={2}>
                               <Button
@@ -560,18 +487,20 @@ function IndukUnitKerjaAdmin() {
                           ) : (
                             <HStack spacing={2}>
                               <Button
-                                size="sm"
-                                colorScheme="blue"
+                                p={"0px"}
+                                fontSize={"14px"}
+                                variant={"secondary"}
                                 onClick={() =>
                                   handleEditClick(item.id, "ttdSuratTugas")
                                 }
                                 isDisabled={isLoading}
                               >
-                                Edit
+                                <BsPencilFill />
                               </Button>
                               <Button
-                                size="sm"
-                                colorScheme="red"
+                                p={"0px"}
+                                fontSize={"14px"}
+                                variant={"cancle"}
                                 onClick={() =>
                                   handleDeleteClick({
                                     ...item,
@@ -580,7 +509,7 @@ function IndukUnitKerjaAdmin() {
                                 }
                                 isDisabled={isLoading}
                               >
-                                Hapus
+                                X
                               </Button>
                             </HStack>
                           )}
@@ -621,8 +550,8 @@ function IndukUnitKerjaAdmin() {
                       </Box>
                       <Spacer />
                       <Button
-                        variant={"secondary"}
-                        h={"40px"}
+                        variant={"primary"}
+                        width={"60px"}
                         onClick={() => {
                           history.push(`/admin/unit-kerja/${unitKerja.id}`);
                         }}

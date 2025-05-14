@@ -125,7 +125,7 @@ function DaftarUserAdmin() {
   }, []);
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"120px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -134,52 +134,32 @@ function DaftarUserAdmin() {
           bgColor={"white"}
           p={"30px"}
         >
-          <Table>
-            <Thead bgColor={"primary"}>
+          <Table variant={"primary"}>
+            <Thead>
               <Tr>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  No
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Nama
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Nama Pengguna
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Unit Kerja
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Role
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Aksi
-                </Th>
+                <Th>No</Th>
+                <Th>Nama</Th>
+                <Th>Nama Pengguna</Th>
+                <Th>Unit Kerja</Th>
+                <Th>Role</Th>
+                <Th>Aksi</Th>
               </Tr>
             </Thead>
-            <Tbody bgColor={"secondary"}>
+            <Tbody>
               {dataUser?.map((user, index) => (
                 <Tr>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {index + 1}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {user.nama}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {user.namaPengguna}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {user.profiles[0].unitKerja_profile.unitKerja}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                  <Td>{index + 1}</Td>
+                  <Td>{user.nama}</Td>
+                  <Td>{user.namaPengguna}</Td>
+                  <Td>{user.profiles[0].unitKerja_profile.unitKerja}</Td>
+                  <Td>
                     <Text>
                       {user?.userRoles?.map((val) => (
                         <Text>{val.role.nama}</Text>
                       ))}
                     </Text>
                   </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                  <Td>
                     {/* <Button>Hapus</Button> */}
                     <Flex gap={3}>
                       <Center

@@ -83,17 +83,7 @@ function TambahUnitKerja(props) {
   };
   return (
     <Box>
-      <Button
-        onClick={onOpen}
-        borderRadius={"5px"}
-        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-        color="white"
-        _hover={{
-          bg: "primaryTerang",
-        }}
-        bg="primary"
-        // onClick={onOpen}
-      >
+      <Button onClick={onOpen} variant={"primary"}>
         Tambah Unit Kerja +
       </Button>
 

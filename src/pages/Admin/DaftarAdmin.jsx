@@ -29,6 +29,7 @@ import {
   SimpleGrid,
   Spinner,
 } from "@chakra-ui/react";
+import { BsEyeFill } from "react-icons/bs";
 import ReactPaginate from "react-paginate";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
@@ -77,7 +78,7 @@ function DaftarAdmin() {
   }, [page]);
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -89,164 +90,45 @@ function DaftarAdmin() {
           my={"30px"}
         >
           <Box style={{ overflowX: "auto" }} p={"30px"}>
-            <Table>
-              <Thead bgColor={"primary"} border={"1px"}>
+            <Table variant={"primary"}>
+              <Thead>
                 <Tr>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    no.
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    jenis Perjalanan
-                  </Th>
+                  <Th>no.</Th>
+                  <Th>jenis Perjalanan</Th>
 
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Unit Kerja Surat Tugas
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    No Surat Tugas
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    No Nota Dinas
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Tanggal Berangkat
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    tanggal Pulang
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 1
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 2
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 3
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 4
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Personil 5
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Kode Rekening
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    p={"10px"}
-                    border={"1px"}
-                  >
-                    Aksi
-                  </Th>
+                  <Th>Unit Kerja Surat Tugas</Th>
+                  <Th>No Surat Tugas</Th>
+                  <Th>No Nota Dinas</Th>
+                  <Th>Tanggal Berangkat</Th>
+                  <Th>tanggal Pulang</Th>
+                  <Th>Personil 1</Th>
+                  <Th>Personil 2</Th>
+                  <Th>Personil 3</Th>
+                  <Th>Personil 4</Th>
+                  <Th>Personil 5</Th>
+                  <Th>Kode Rekening</Th>
+                  <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {dataPerjalanan?.map((item, index) => (
                   <Tr key={item.id}>
-                    <Td borderWidth="1px" borderColor="primary">
-                      {index + 1}
-                    </Td>{" "}
-                    <Td borderWidth="1px" borderColor="primary">
-                      {item.jenisPerjalanan.jenis}
-                    </Td>{" "}
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>{index + 1}</Td> <Td>{item.jenisPerjalanan.jenis}</Td>{" "}
+                    <Td>
                       {item.ttdSuratTuga.indukUnitKerja_ttdSuratTugas.kodeInduk}
                     </Td>
-                    <Td borderWidth="1px" borderColor="primary">
-                      {item.noSuratTugas ? item.noSuratTugas : "-"}
-                    </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>{item.noSuratTugas ? item.noSuratTugas : "-"}</Td>
+                    <Td>
                       {item.suratKeluar.nomor ? item.suratKeluar.nomor : "-"}
                     </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>
                       {item.tempats?.[0]?.tanggalBerangkat
                         ? new Date(
                             item.tempats[0].tanggalBerangkat
                           ).toLocaleDateString()
                         : "-"}
                     </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>
                       {item.tempats?.[0]?.tanggalPulang
                         ? new Date(
                             item.tempats[0].tanggalPulang
@@ -254,20 +136,21 @@ function DaftarAdmin() {
                         : "-"}
                     </Td>
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Td key={i} borderWidth="1px" borderColor="primary">
+                      <Td key={i}>
                         {item.personils?.[i]?.pegawai?.nama || "-"}
                       </Td>
                     ))}
-                    <Td borderWidth="1px" borderColor="primary">
-                      {item.kodeRekening?.kode || "-"}
-                    </Td>
-                    <Td borderWidth="1px" borderColor="primary">
+                    <Td>{item.kodeRekening?.kode || "-"}</Td>
+                    <Td>
                       <Button
+                        variant={"primary"}
+                        p={"0px"}
+                        fontSize={"14px"}
                         onClick={() =>
                           history.push(`/admin/rampung/${item.id}`)
                         }
                       >
-                        Detail
+                        <BsEyeFill />
                       </Button>
                     </Td>
                   </Tr>

@@ -30,6 +30,7 @@ import {
   SimpleGrid,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
+import { BsPencilFill } from "react-icons/bs";
 import {
   Select as Select2,
   CreatableSelect,
@@ -189,82 +190,37 @@ function DalamKotaAdmin() {
           </Button>
           <Box p={"30px"}>
             {/* {JSON.stringify(dataDalamKota)} */}
-            <Table>
-              <Thead bgColor={"primary"} border={"1px"}>
+            <Table variant={"primary"}>
+              <Thead>
                 <Tr>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    py={"15px"}
-                    border={"1px"}
-                  >
-                    Tujuan
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    py={"15px"}
-                    border={"1px"}
-                  >
-                    Uang transport
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    py={"15px"}
-                    border={"1px"}
-                  >
-                    Durasi
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    py={"15px"}
-                    border={"1px"}
-                  >
-                    Induk Unit Kerja
-                  </Th>
-                  <Th
-                    fontSize={"14px"}
-                    borderColor={"secondary"}
-                    color={"secondary"}
-                    py={"15px"}
-                    border={"1px"}
-                  >
-                    Aksi
-                  </Th>
+                  <Th>Tujuan</Th>
+                  <Th>Uang transport</Th>
+                  <Th>Durasi</Th>
+                  <Th>Induk Unit Kerja</Th>
+                  <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {dataDalamKota.map((item, index) => {
                   return (
                     <Tr key={index}>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.nama}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
+                      <Td>{item.nama}</Td>
+                      <Td>
                         {new Intl.NumberFormat("id-ID", {
                           style: "currency",
                           currency: "IDR",
                         }).format(item.uangTransport)}
                       </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item.durasi} jam
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
-                        {item?.indukUnitKerja.indukUnitkerja}
-                      </Td>
-                      <Td borderWidth="1px" borderColor="primary">
+                      <Td>{item.durasi} jam</Td>
+                      <Td>{item?.indukUnitKerja.indukUnitkerja}</Td>
+                      <Td>
                         <Button
-                          colorScheme="blue"
-                          size="sm"
+                          p={"0px"}
+                          fontSize={"14px"}
+                          variant={"secondary"}
                           onClick={() => handleEdit(item)}
                         >
-                          Edit
+                          <BsPencilFill />
                         </Button>
                       </Td>
                     </Tr>

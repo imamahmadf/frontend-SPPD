@@ -1,11 +1,15 @@
 import { Center, Spinner, Image, Flex, Text, Box } from "@chakra-ui/react";
 // import LogoAPP from "../assets/logo app.png";
+import LogoPena from "../assets/Logo Pena.png";
 function Loading() {
   return (
     <Center h="100vh" flexDirection="column">
-      <Image mb="20px" h="100px" src={""} alt="Turu Icon" />
+      <Image mb="20px" h="200px" src={LogoPena} alt="Logo Pena" />
       <Flex>
-        <Text me="10px">Loading ...</Text> <Spinner color="primary" />
+        <Text h={"120px"} me="10px">
+          Loading ...
+        </Text>{" "}
+        <Spinner color="primary" />
       </Flex>
     </Center>
   );

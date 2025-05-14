@@ -111,50 +111,24 @@ function DetailPegawaiAdmin(props) {
           <Text>NIP. : {dataPegawai[0]?.nip}</Text>
           <Text mb={5}>Jabatan: {dataPegawai[0]?.jabatan}</Text>
 
-          <Table>
-            <Thead bgColor={"primary"} border={"1px"}>
+          <Table variant={"primary"}>
+            <Thead>
               <Tr>
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  border={"1px"}
-                >
-                  nomor SPD
-                </Th>
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  border={"1px"}
-                >
-                  Tujuan
-                </Th>
-                <Th
-                  fontSize={"14px"}
-                  borderColor={"secondary"}
-                  color={"secondary"}
-                  py={"15px"}
-                  border={"1px"}
-                >
-                  Biaya Perjalanan
-                </Th>
+                <Th>nomor SPD</Th>
+                <Th>Tujuan</Th>
+                <Th>Biaya Perjalanan</Th>
               </Tr>
             </Thead>
-            <Tbody bgColor={"secondary"}>
+            <Tbody>
               {dataPegawai[0]?.personils?.map((item, index) => (
                 <Tr key={index}>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {item?.nomorSPD || "-"}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                  <Td>{item?.nomorSPD || "-"}</Td>
+                  <Td>
                     {item?.tujuan?.map((val, idx) => (
                       <Text key={idx}>{val || "-"}</Text>
                     ))}
                   </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                  <Td>
                     {new Intl.NumberFormat("id-ID", {
                       style: "currency",
                       currency: "IDR",

@@ -34,6 +34,8 @@ import TambahBendahara from "./pages/Admin/TambahBendahara.jsx";
 import NomorSuratAdmin from "./pages/Admin/NomorSuratAdmin.jsx";
 import SubKegiatanAdmin from "./pages/Admin/SubKegiatanAdmin.jsx";
 import DaftarUserAdmin from "./pages/Admin/DaftarUserAdmin.jsx";
+import EditJenisSurat from "./pages/Admin/EditJenisSurat.jsx";
+import TemplateKeuangan from "./pages/Admin/TemplateKeuangan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -149,6 +151,12 @@ function App() {
             roleRoute={[3]}
           />
           <ProtectedRoute
+            component={TemplateKeuangan}
+            path="/admin/keuangan/template"
+            exact
+            roleRoute={[3]}
+          />
+          <ProtectedRoute
             component={IndukUnitKerjaAdmin}
             path="/admin/induk-unit-kerja"
             exact
@@ -210,14 +218,19 @@ function App() {
             exact
             roleRoute={[2]}
           />
-
+          <ProtectedRoute
+            component={EditJenisSurat}
+            path="/admin/edit-jenis-surat"
+            exact
+            roleRoute={[5]}
+          />
           <ProtectedRoute
             component={SubKegiatanAdmin}
             path="/admin/sub-kegiatan"
             exact
             roleRoute={[2]}
           />
-          <ProtectedRoute component={Home} path="/" />
+          <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>
     </>

@@ -119,7 +119,7 @@ function EditPegawai(props) {
   return (
     <Layout>
       {/* {JSON.stringify(dataPegawai)} */}
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"120px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -129,11 +129,11 @@ function EditPegawai(props) {
           pt={"30px"}
           ps={"0px"}
         >
-          <Box>
+          <Box p={"30px"}>
             <Table>
               <Thead>
                 <Tr>
-                  <Th>Nama</Th>
+                  <Th minWidth={"100px"}>Nama:</Th>
                   <Td>
                     <Flex>
                       {isEditing ? (
@@ -157,7 +157,7 @@ function EditPegawai(props) {
                   </Td>
                 </Tr>
                 <Tr>
-                  <Th>NIP</Th>
+                  <Th minWidth={"100px"}>NIP</Th>
                   <Td>
                     <Flex>
                       {isEditing ? (
@@ -181,30 +181,31 @@ function EditPegawai(props) {
                   </Td>
                 </Tr>
                 <Tr>
-                  <Th>Golongan</Th>
-                  {isEditing ? (
-                    <>
-                      <Select
-                        defaultValue={dataPegawai.daftarGolongan.id}
-                        onChange={(e) =>
-                          handleSelectChange("daftarGolongan", e.target.value)
-                        }
-                      >
-                        <option value="">Pilih Golongan</option>
-                        {dataSeed.resultGolongan &&
-                          dataSeed.resultGolongan.map((val) => (
-                            <option key={val.id} value={val.id}>
-                              {val.golongan}
-                            </option>
-                          ))}
-                      </Select>
-                    </>
-                  ) : (
-                    <>
-                      <Text>{dataPegawai.daftarGolongan.golongan}</Text>
-                    </>
-                  )}
-                  <Th></Th>
+                  <Th minWidth={"100px"}>Golongan</Th>
+                  <Td>
+                    {isEditing ? (
+                      <>
+                        <Select
+                          defaultValue={dataPegawai.daftarGolongan.id}
+                          onChange={(e) =>
+                            handleSelectChange("daftarGolongan", e.target.value)
+                          }
+                        >
+                          <option value="">Pilih Golongan</option>
+                          {dataSeed.resultGolongan &&
+                            dataSeed.resultGolongan.map((val) => (
+                              <option key={val.id} value={val.id}>
+                                {val.golongan}
+                              </option>
+                            ))}
+                        </Select>
+                      </>
+                    ) : (
+                      <>
+                        <Text>{dataPegawai.daftarGolongan.golongan}</Text>
+                      </>
+                    )}
+                  </Td>
                 </Tr>
                 <Tr>
                   <Th>Pangkat</Th>
@@ -255,21 +256,40 @@ function EditPegawai(props) {
                               </option>
                             ))}
                         </Select>
-                        <Button onClick={() => editData()}>Simpan</Button>
-                        <Button onClick={() => setIsEditing(false)}>
-                          Batal
-                        </Button>
                       </>
                     ) : (
                       <>
                         <Text>{dataPegawai.daftarTingkatan?.tingkatan}</Text>
-                        <Button onClick={() => setIsEditing(true)}>Edit</Button>
                       </>
                     )}
                   </Td>
                 </Tr>
               </Thead>
             </Table>
+            <Box mt={"30px"}>
+              {isEditing ? (
+                <>
+                  {" "}
+                  <Button
+                    me={"15px"}
+                    variant={"primary"}
+                    onClick={() => editData()}
+                  >
+                    Simpan
+                  </Button>
+                  <Button
+                    variant={"cancle"}
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Batal
+                  </Button>
+                </>
+              ) : (
+                <Button variant={"primary"} onClick={() => setIsEditing(true)}>
+                  Edit
+                </Button>
+              )}
+            </Box>
           </Box>
         </Container>
       </Box>

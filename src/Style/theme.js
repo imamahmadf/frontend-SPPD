@@ -16,8 +16,11 @@ const breakpoints = {
 
 export const myNewTheme = extendTheme({
   colors: {
-    primary: "rgba(29, 53, 87, 1)",
-    primaryTerang: "rgba(188, 215, 255, 1)",
+    // primary: "rgba(29, 53, 87, 1)",
+    primary: "rgba(55, 176, 134, 1)",
+    primaryGelap: "rgba(19, 122, 106, 1)",
+    oren: "rgba(235, 92, 24, 1)",
+    ungu: "rgba(73, 79, 171, 1)",
     secondary: "rgba(244, 244, 237, 1)",
     danger: "rgba(198, 46, 46, 1)",
     gelap: "rgba(38, 38, 38, 1)",
