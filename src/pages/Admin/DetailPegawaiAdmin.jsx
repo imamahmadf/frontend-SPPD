@@ -36,6 +36,7 @@ import axios from "axios";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
+import Loading from "../../Componets/Loading";
 
 function DetailPegawaiAdmin(props) {
   const [dataPegawai, setDataPegawai] = useState(null);
@@ -66,9 +67,7 @@ function DetailPegawaiAdmin(props) {
   if (loading) {
     return (
       <Layout>
-        <Center pt="80px" h="100vh">
-          <Spinner size="xl" />
-        </Center>
+        <Loading />
       </Layout>
     );
   }

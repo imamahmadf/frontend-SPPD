@@ -57,9 +57,9 @@ function TambahUser() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Hapus spasi dari password
-    const cleanPassword = password.replace(/\s+/g, "");
+    const cleanNamaPengguna = namaPengguna.replace(/\s+/g, "");
     await dispatch(
-      register(nama, namaPengguna, cleanPassword, role, unitKerjaId)
+      register(nama, password, cleanNamaPengguna, role, unitKerjaId)
     );
     // Arahkan ke halaman login setelah register
     history.push("/admin/daftar-user");
@@ -107,7 +107,7 @@ function TambahUser() {
           bgColor={"white"}
           p={"30px"}
         >
-          <FormControl my={"30px"}>
+          {/* <FormControl my={"30px"}>
             <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
             <Select2
               options={dataPegawai.result?.map((val) => {
@@ -139,6 +139,54 @@ function TambahUser() {
                   _hover: {
                     borderColor: "yellow.700",
                   },
+                  minHeight: "40px",
+                }),
+                option: (provided, state) => ({
+                  ...provided,
+                  bg: state.isFocused ? "primary" : "white",
+                  color: state.isFocused ? "white" : "black",
+                }),
+              }}
+            />
+          </FormControl> */}
+
+          <FormControl my={"30px"}>
+            <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+            <AsyncSelect
+              loadOptions={async (inputValue) => {
+                if (!inputValue) return [];
+                try {
+                  const res = await axios.get(
+                    `${
+                      import.meta.env.VITE_REACT_APP_API_BASE_URL
+                    }/pegawai/search?q=${inputValue}`
+                  );
+                  return res.data.result.map((val) => ({
+                    value: val,
+                    label: val.nama,
+                  }));
+                } catch (err) {
+                  console.error("Failed to load options:", err.message);
+                  return [];
+                }
+              }}
+              placeholder="Ketik Nama Pegawai"
+              onChange={(selectedOption) => {
+                setNama(selectedOption.value.nama);
+                setNamaPengguna(selectedOption.value.nip);
+              }}
+              components={{
+                DropdownIndicator: () => null,
+                IndicatorSeparator: () => null,
+              }}
+              chakraStyles={{
+                container: (provided) => ({ ...provided, borderRadius: "6px" }),
+                control: (provided) => ({
+                  ...provided,
+                  backgroundColor: "terang",
+                  border: "0px",
+                  height: "60px",
+                  _hover: { borderColor: "yellow.700" },
                   minHeight: "40px",
                 }),
                 option: (provided, state) => ({
@@ -234,12 +282,12 @@ function TambahUser() {
             />
           </FormControl>
           <FormControl>
-            <FormLabel fontSize={"24px"}>Nama Pengguna</FormLabel>
+            <FormLabel fontSize={"24px"}>Kata Sandi</FormLabel>
             <Input
               height={"60px"}
               bgColor={"terang"}
-              onChange={(e) => setNamaPengguna(e.target.value)}
-              placeholder="Contoh: amin"
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="kata sandi"
             />
           </FormControl>
           <Button mt={"30px"} variant={"primary"} onClick={handleSubmit}>

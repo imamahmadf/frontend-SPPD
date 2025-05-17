@@ -56,14 +56,14 @@ export const selectRole = (state) => state.auth.role;
 export const userRedux = (state) => state.auth.user;
 // Fungsi register
 export const register =
-  (nama, namaPengguna, cleanPassword, role, unitKerjaId) => async () => {
+  (nama, CleanNamaPengguna, password, role, unitKerjaId) => async () => {
     try {
       await axios.post(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/register`,
         {
           nama,
-          password: cleanPassword,
-          namaPengguna,
+          password: CleanNamaPengguna,
+          namaPengguna: password,
           role,
           unitKerjaId,
         }

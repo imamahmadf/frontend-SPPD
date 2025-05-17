@@ -530,9 +530,6 @@ function IndukUnitKerjaAdmin() {
               Daftar Unit Kerja
             </Heading>
             <Spacer />
-            <TambahUnitKerja
-              indukUnitKerjaId={user[0].unitKerja_profile.indukUnitKerja.id}
-            />
           </Flex>
           {isLoading ? (
             <Text>Memuat data...</Text>

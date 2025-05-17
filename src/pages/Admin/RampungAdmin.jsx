@@ -35,8 +35,15 @@ function RampungAdmin(props) {
   const [isModalBatalOpen, setIsModalBatalOpen] = useState(false);
   const [alasanBatal, setAlasanBatal] = useState("");
   const [selectedItemId, setSelectedItemId] = useState(null);
-  const [selectedRills, setSelectedRills] = useState([]);
-  const [isRillsModalOpen, setIsRillsModalOpen] = useState(false);
+
+  const daftarTempat = detailPerjalanan.tempats?.map(
+    (tempat, index) =>
+      `${
+        detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1
+          ? tempat.dalamKota.nama
+          : tempat.tempat
+      }${index < detailPerjalanan.tempats.length - 1 ? `, ` : ``}`
+  );
 
   const terimaVerifikasi = (personilId) => {
     axios
@@ -76,11 +83,6 @@ function RampungAdmin(props) {
     console.log(selectedItemId);
   };
 
-  const handleRills = (rills) => {
-    setSelectedRills(rills);
-    setIsRillsModalOpen(true);
-  };
-
   async function fetchDataPerjalanan() {
     await axios
       .get(
@@ -103,7 +105,7 @@ function RampungAdmin(props) {
 
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           bgColor={"white"}
           borderRadius={"5px"}
@@ -134,17 +136,51 @@ function RampungAdmin(props) {
               <Text>Dasar: {detailPerjalanan.dasar || "-"}</Text>
               <Text>Nota Dinas: {detailPerjalanan.noNotaDinas}</Text>
               <Text>Surat Tugas: {detailPerjalanan.noSuratTugas}</Text>
+
               <Text>
-                Tanggal Pengajuan: {detailPerjalanan.tanggalPengajuan}
+                Tanggal Pengajuan:
+                {new Date(detailPerjalanan.tanggalPengajuan).toLocaleDateString(
+                  "id-ID",
+                  {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  }
+                )}
               </Text>
+              <Text>
+                Tanggal Berangkat:{" "}
+                {new Date(
+                  detailPerjalanan.tempats?.[0]?.tanggalBerangkat
+                ).toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
+              <Text>
+                Tanggal Pulang:{" "}
+                {new Date(
+                  detailPerjalanan.tempats?.[
+                    detailPerjalanan.tempats?.length - 1
+                  ]?.tanggalPulang
+                ).toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
+
               <Text>
                 Sumber Dana: {detailPerjalanan.bendahara?.sumberDana?.sumber}
               </Text>
-              {/* <Text>{`${detailPerjalanan?.tempats[0]?.dalamKota?.nama}, ${detailPerjalanan?.tempats[1]?.dalamKota?.nama}`}</Text> */}
-
+              <Text>Tujuan: {daftarTempat}</Text>
               <Text>
-                Untuk Pembayaran:{" "}
-                {`Belanja ${detailPerjalanan?.jenisPerjalanan?.jenis} dalam rangka untuk ${detailPerjalanan?.untuk} ke, sub kegiatan ${detailPerjalanan?.daftarSubKegiatan?.subKegiatan}, tahun anggaran `}
+                Untuk Pembayaran:
+                {`Belanja ${detailPerjalanan?.jenisPerjalanan?.jenis} dalam rangka untuk ${detailPerjalanan?.untuk} ke ${daftarTempat}, sub kegiatan ${detailPerjalanan?.daftarSubKegiatan?.subKegiatan} ${detailPerjalanan?.bendahara?.sumberDana?.kalimat1}, tahun anggaran`}
               </Text>
               <Text>
                 Kode Rekening:
@@ -168,84 +204,83 @@ function RampungAdmin(props) {
               <Text>Nomor SPD: {item?.nomorSPD}</Text>
               <Text>Status : {item.status.statusKuitansi}</Text>
               <Text>Catatan : {item.catatan}</Text>
-              <Table variant="simple" mt={2}>
-                <Thead bgColor={"primary"}>
+              <Table variant="primary" mt={2}>
+                <Thead>
                   <Tr>
-                    <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                      Jenis
-                    </Th>
-                    <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                      Item
-                    </Th>
-                    <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                      Nilai
-                    </Th>
-                    <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                      Qty
-                    </Th>
-                    <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                      Satuan
-                    </Th>
-                    <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                      Bukti
-                    </Th>
-                    <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                      Aksi
-                    </Th>
+                    <Th>Jenis</Th>
+                    <Th>Item</Th>
+                    <Th>Nilai</Th>
+                    <Th>Qty</Th>
+                    <Th>Satuan</Th>
+                    <Th>Bukti</Th>
                   </Tr>
                 </Thead>
-                <Tbody bgColor={"secondary"}>
+                <Tbody>
                   {item.rincianBPDs.map((val, idx) => (
-                    <Tr key={idx}>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {val.jenisRincianBPD.jenis}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {val.item}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {new Intl.NumberFormat("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                        }).format(val.nilai)}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {val.qty}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {val.satuan}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        <Image
-                          borderRadius={"5px"}
-                          alt="foto obat"
-                          width="120px"
-                          height="80px"
-                          overflow="hidden"
-                          objectFit="cover"
-                          src={
-                            val.bukti
-                              ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
-                                val.bukti
-                              : Foto
-                          }
-                          onClick={() => {
-                            setSelectedImage(
-                              import.meta.env.VITE_REACT_APP_API_BASE_URL +
-                                val.bukti
-                            );
-                            onOpen();
-                          }}
-                        />
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {val.rills.length > 0 && (
-                          <Button onClick={() => handleRills(val.rills)}>
-                            Lihat Rills
-                          </Button>
-                        )}
-                      </Td>
-                    </Tr>
+                    <React.Fragment key={idx}>
+                      <Tr>
+                        <Td>{val.jenisRincianBPD.jenis}</Td>
+                        <Td>{val.item}</Td>
+                        <Td>
+                          {new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                          }).format(val.nilai)}
+                        </Td>
+                        <Td>{val.qty}</Td>
+                        <Td>{val.satuan}</Td>
+                        <Td>
+                          <Image
+                            borderRadius={"5px"}
+                            alt="foto obat"
+                            width="120px"
+                            height="80px"
+                            overflow="hidden"
+                            objectFit="cover"
+                            src={
+                              val.bukti
+                                ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                                  val.bukti
+                                : Foto
+                            }
+                            onClick={() => {
+                              setSelectedImage(
+                                import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                                  val.bukti
+                              );
+                              onOpen();
+                            }}
+                          />
+                        </Td>
+                      </Tr>
+                      {val.rills.length > 0 && (
+                        <Tr>
+                          <Td colSpan={7}>
+                            <Table size="sm">
+                              <Thead bg="secondary">
+                                <Tr>
+                                  <Th py={"15px"}>Item </Th>
+                                  <Th py={"15px"}>Nilai </Th>
+                                </Tr>
+                              </Thead>
+                              <Tbody>
+                                {val.rills.map((rill, rillIndex) => (
+                                  <Tr key={rillIndex}>
+                                    <Td>{rill.item}</Td>
+                                    <Td>
+                                      {new Intl.NumberFormat("id-ID", {
+                                        style: "currency",
+                                        currency: "IDR",
+                                      }).format(rill.nilai)}
+                                    </Td>
+                                  </Tr>
+                                ))}
+                              </Tbody>
+                            </Table>
+                          </Td>
+                        </Tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </Tbody>
               </Table>
@@ -319,49 +354,6 @@ function RampungAdmin(props) {
                 Batalkan
               </Button>
               <Button onClick={() => setIsModalBatalOpen(false)}>Tutup</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        <Modal
-          isOpen={isRillsModalOpen}
-          onClose={() => setIsRillsModalOpen(false)}
-          size={"xl"}
-        >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Informasi Rills</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th>Item</Th>
-                    <Th>Nilai</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {selectedRills.map((rill, index) => (
-                    <Tr key={index}>
-                      <Td>{rill.item}</Td>
-                      <Td>
-                        {new Intl.NumberFormat("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                        }).format(rill.nilai)}
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                colorScheme="blue"
-                onClick={() => setIsRillsModalOpen(false)}
-              >
-                Tutup
-              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>

@@ -61,11 +61,9 @@ function Rampung(props) {
   const [randomNumber, setRandomNumber] = useState(0);
   const inputFileRef = useRef(null);
   const [dataRampung, setDataRampung] = useState([]);
-  const [namaKegiatan, setNamaKegiatan] = useState("");
-  const [satuan, setSatuan] = useState("");
-  const [qty, setQty] = useState(0);
-  const [nilai, setNilai] = useState(0);
-  const [jenisRampung, setJenisRampung] = useState(0);
+  const [templateId, setTemplateId] = useState(
+    dataRampung?.template?.[0]?.id || null
+  );
   const [editMode, setEditMode] = useState(null);
   const [editedData, setEditedData] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
@@ -85,6 +83,16 @@ function Rampung(props) {
     onClose: onInputClose,
   } = useDisclosure();
   const [isPrinting, setIsPrinting] = useState(false);
+
+  function renderTemplate() {
+    return dataRampung.template?.map((val) => {
+      return (
+        <option key={val.id} value={val.id}>
+          {val.nama}
+        </option>
+      );
+    });
+  }
 
   function renderJenis() {
     return dataRampung.jenisRampung?.map((val) => {
@@ -196,6 +204,7 @@ function Rampung(props) {
         }/kwitansi/post/cetak-kwitansi`,
         {
           id: dataRampung.result.id,
+
           nomorSPD: dataRampung.result.nomorSPD,
           pegawaiNama: dataRampung.result.pegawai.nama,
           pegawaiNip: dataRampung.result.pegawai.nip,
@@ -206,6 +215,7 @@ function Rampung(props) {
           KPANama: dataRampung.result.perjalanan.KPA.pegawai_KPA.nama,
           KPANip: dataRampung.result.perjalanan.KPA.pegawai_KPA.nip,
           KPAJabatan: dataRampung.result.perjalanan.KPA.jabatan,
+          templateId,
           subKegiatan:
             dataRampung.result.perjalanan.daftarSubKegiatan.subKegiatan,
           kodeRekening: `${dataRampung.result.perjalanan.daftarSubKegiatan.kodeRekening}${dataRampung.result.perjalanan.jenisPerjalanan.kodeRekening}`,
@@ -413,6 +423,12 @@ function Rampung(props) {
     }
   }, [dataRampung]);
 
+  useEffect(() => {
+    if (dataRampung?.template?.length > 0) {
+      setTemplateId(dataRampung.template[0].id);
+    }
+  }, [dataRampung]);
+
   // Kelompokkan rincianBPDs berdasarkan jenis
   const groupedData =
     dataRampung.result?.rincianBPDs?.reduce((acc, item) => {
@@ -475,6 +491,21 @@ function Rampung(props) {
                 <Text>
                   Catatan: {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
                 </Text>
+                <FormControl>
+                  <FormLabel fontSize={"24px"}>Template</FormLabel>
+                  <Select
+                    height={"60px"}
+                    bgColor={"terang"}
+                    borderRadius={"8px"}
+                    borderColor={"rgba(229, 231, 235, 1)"}
+                    defaultValue={dataRampung?.template?.[0]?.id}
+                    onChange={(e) => {
+                      setTemplateId(e.target.value);
+                    }}
+                  >
+                    {renderTemplate()}
+                  </Select>
+                </FormControl>
               </Box>
             </Flex>
             {dataRampung?.result?.statusId === 3 ? null : (
@@ -515,7 +546,6 @@ function Rampung(props) {
                 Tambah +
               </Button>
             )}
-
             {dataRampung?.result?.statusId === 3 ||
             dataRampung?.result?.statusId === 2 ? null : (
               <Box></Box>
@@ -523,7 +553,6 @@ function Rampung(props) {
             {dataRampung?.result?.statusId === 3 ? (
               <Button onClick={cetak}>CETAK</Button>
             ) : null}
-
             {dataRampung?.result?.statusId === 1 ||
             dataRampung?.result?.statusId == 4 ? (
               <Button

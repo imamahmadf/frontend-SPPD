@@ -74,10 +74,6 @@ function Navbar() {
             />
           </HStack>
 
-          <Text fontWeight="medium" color="gray.700">
-            {user[0]?.nama}
-          </Text>
-
           <Spacer />
 
           <HStack spacing={4}>
@@ -132,6 +128,18 @@ function Navbar() {
                 <Link to={"/admin/keuangan/daftar-perjalanan"}>
                   <MenuItem>Daftar</MenuItem>
                 </Link>
+                <Link to={"/admin/keuangan/perjalanan"}>
+                  <MenuItem>Perjalanan</MenuItem>
+                </Link>
+                <Link to={"/admin/keuangan/template"}>
+                  <MenuItem>Template</MenuItem>
+                </Link>
+                <Link to={"/admin/dalam-kota"}>
+                  <MenuItem>Daftar Dalam Kota</MenuItem>
+                </Link>
+                <Link to={"/admin/keuangan/sumber-dana"}>
+                  <MenuItem>Sumber Dana</MenuItem>
+                </Link>
               </MenuList>
             </Menu>
 
@@ -177,9 +185,6 @@ function Navbar() {
             <Menu>
               <MenuButton as={Button}>ADMIN PUSAT</MenuButton>
               <MenuList color={"black"}>
-                <Link to={"/admin/dalam-kota"}>
-                  <MenuItem>Daftar Dalam Kota</MenuItem>
-                </Link>
                 <Link to={"/admin/edit-jenis-surat"}>
                   <MenuItem>Jenis Surat</MenuItem>
                 </Link>
@@ -199,14 +204,19 @@ function Navbar() {
             {isAuthenticated ? (
               <Logout />
             ) : (
-              <Button
-                colorScheme="blue"
-                variant="solid"
-                _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
-                transition="all 0.2s"
-              >
-                <a href="/login">Login</a>
-              </Button>
+              <>
+                <Text fontWeight="medium" color="gray.700">
+                  {user[0]?.nama}
+                </Text>
+                <Button
+                  colorScheme="blue"
+                  variant="solid"
+                  _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
+                  transition="all 0.2s"
+                >
+                  <a href="/login">Login</a>
+                </Button>
+              </>
             )}
           </HStack>
         </HStack>

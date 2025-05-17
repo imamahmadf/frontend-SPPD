@@ -36,6 +36,7 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import axios from "axios";
+import { BsEyeFill } from "react-icons/bs";
 import { Link, useHistory } from "react-router-dom";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
@@ -43,6 +44,7 @@ import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
 function DaftarIndukUnitKerjaAdmin() {
   const [allChecked, setAllChecked] = useState(false);
+  const history = useHistory();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [data, setData] = useState(null);
   const [dataSumberDana, setDataSumberDana] = useState(null);
@@ -118,39 +120,40 @@ function DaftarIndukUnitKerjaAdmin() {
           <Button variant={"primary"} onClick={onOpen}>
             Tambah OPD +
           </Button>
-          <Table variant="simple" mt={2}>
-            <Thead bgColor={"primary"}>
+          <Table mt={"30px"} variant={"primary"}>
+            <Thead>
               <Tr>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  No
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  OPD
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Kode
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Sumber Dana
-                </Th>
+                <Th>No</Th>
+                <Th>OPD</Th>
+                <Th>Kode</Th>
+                <Th>Sumber Dana</Th>
+                <Th>Aksi</Th>
               </Tr>
             </Thead>
-            <Tbody bgColor={"secondary"}>
+            <Tbody>
               {data?.map((item, index) => (
                 <Tr>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {index + 1}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {item.indukUnitKerja}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                    {item.kodeInduk}
-                  </Td>
-                  <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                  <Td>{index + 1}</Td>
+                  <Td>{item.indukUnitKerja}</Td>
+                  <Td>{item.kodeInduk}</Td>
+                  <Td>
                     {item.indukUKSumberDanas.map((val, idx) => (
                       <Text>{val.sumberDana.sumber}</Text>
                     ))}
+                  </Td>
+                  <Td>
+                    <Button
+                      variant={"primary"}
+                      p={"0px"}
+                      fontSize={"14px"}
+                      onClick={() =>
+                        history.push(
+                          `/admin/detail-induk-unit-kerja/${item.id}`
+                        )
+                      }
+                    >
+                      <BsEyeFill />
+                    </Button>
                   </Td>
                 </Tr>
               ))}

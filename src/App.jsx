@@ -36,6 +36,9 @@ import SubKegiatanAdmin from "./pages/Admin/SubKegiatanAdmin.jsx";
 import DaftarUserAdmin from "./pages/Admin/DaftarUserAdmin.jsx";
 import EditJenisSurat from "./pages/Admin/EditJenisSurat.jsx";
 import TemplateKeuangan from "./pages/Admin/TemplateKeuangan.jsx";
+import DetailIndukUnitKerja from "./pages/Admin/DetailIndukUnitKerja.jsx";
+import DaftarPerjalanan from "./pages/Admin/DaftarPerjalanan.jsx";
+import SumberDanaAdmin from "./pages/Admin/SumberDanaAdmin.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -143,7 +146,11 @@ function App() {
             exact
             roleRoute={[5]}
           />
-          <ProtectedRoute component={DalamKotaAdmin} path="/admin/dalam-kota" />
+          <ProtectedRoute
+            component={DalamKotaAdmin}
+            path="/admin/dalam-kota"
+            roleRoute={[3]}
+          />
           <ProtectedRoute
             component={DaftarAdmin}
             path="/admin/keuangan/daftar-perjalanan"
@@ -157,6 +164,18 @@ function App() {
             roleRoute={[3]}
           />
           <ProtectedRoute
+            component={SumberDanaAdmin}
+            path="/admin/keuangan/sumber-dana"
+            exact
+            roleRoute={[3]}
+          />
+          <ProtectedRoute
+            component={DaftarPerjalanan}
+            path="/admin/keuangan/perjalanan"
+            exact
+            roleRoute={[3]}
+          />
+          <ProtectedRoute
             component={IndukUnitKerjaAdmin}
             path="/admin/induk-unit-kerja"
             exact
@@ -165,6 +184,12 @@ function App() {
           <ProtectedRoute
             component={DaftarIndukUnitKerjaAdmin}
             path="/admin/daftar-induk-unit-kerja"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={DetailIndukUnitKerja}
+            path="/admin/detail-induk-unit-kerja/:id"
             exact
             roleRoute={[5]}
           />
@@ -186,7 +211,7 @@ function App() {
             component={DetailPegawaiAdmin}
             path="/admin/detail-pegawai/:id"
             exact
-            roleRoute={[5]}
+            roleRoute={[3]}
           />
           <ProtectedRoute
             component={NomorSuratAdmin}

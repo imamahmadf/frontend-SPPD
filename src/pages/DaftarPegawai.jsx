@@ -51,7 +51,7 @@ function DaftarPegawai() {
   const [dataPegawai, setDataPegawai] = useState([]);
   const history = useHistory();
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(15);
+  const [limit, setLimit] = useState(50);
   const [keyword, setKeyword] = useState("");
   const [alfabet, setAlfabet] = useState("");
   const [pages, setPages] = useState(0);
@@ -183,6 +183,7 @@ function DaftarPegawai() {
               <Tr>
                 <Th>nama</Th> <Th>NIP</Th> <Th>Pangkat</Th> <Th>Gol.</Th>
                 <Th>Jabatan</Th> <Th>Tingkatan</Th> <Th>Unit Kerja</Th>
+                <Th>Pendidikan</Th> <Th>Status Pegawai</Th>
                 <Th>Aksi</Th>
               </Tr>
             </Thead>
@@ -196,25 +197,17 @@ function DaftarPegawai() {
                   <Td>{item.jabatan}</Td>
                   <Td>{item.daftarTingkatan.tingkatan}</Td>
                   <Td>{item?.daftarUnitKerja?.unitKerja}</Td>
+                  <Td>{item.pendidikan}</Td>
+                  <Td>{item?.statusPegawai?.status}</Td>
                   <Td>
                     <Flex gap={2}>
-                      <Button
-                        variant={"primary"}
-                        p={"0px"}
-                        fontSize={"14px"}
-                        onClick={() =>
-                          history.push(`/admin/detail-pegawai/${item.id}`)
-                        }
-                      >
-                        <BsEyeFill />
-                      </Button>
                       <Button
                         p={"0px"}
                         fontSize={"14px"}
                         onClick={() =>
                           history.push(`/admin/edit-pegawai/${item.id}`)
                         }
-                        variant={"secondary"}
+                        variant={"primary"}
                       >
                         <BsPencilFill />
                       </Button>
