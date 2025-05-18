@@ -34,10 +34,16 @@ import {
 import axios from "axios";
 import Layout from "../Componets/Layout";
 import { useSelector } from "react-redux";
-import { userRedux, selectRole } from "../Redux/Reducers/auth";
+import {
+  userRedux,
+  selectRole,
+  selectIsAuthenticated,
+} from "../Redux/Reducers/auth";
 import HomeFoto from "../assets/home.png";
 
 function Home() {
+  const isAuthenticated =
+    useSelector(selectIsAuthenticated) || localStorage.getItem("token");
   return (
     <Layout>
       <Box
@@ -67,7 +73,12 @@ function Home() {
             mb={"20px"}
           >
             SELAMAT DATANG DI PENA
-          </Text>{" "}
+          </Text>
+          {isAuthenticated ? null : (
+            <>
+              <Button variant={"primary"}>Login</Button>
+            </>
+          )}
         </Box>
       </Box>
     </Layout>

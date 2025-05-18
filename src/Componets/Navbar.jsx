@@ -19,6 +19,7 @@ import {
   MenuOptionGroup,
   MenuDivider,
   Button,
+  Avatar,
 } from "@chakra-ui/react";
 import Logout from "./Logout";
 import { Link, useHistory } from "react-router-dom";
@@ -94,129 +95,139 @@ function Navbar() {
               <Text fontWeight="semibold">HOME</Text>
             </Box>
 
-            <Menu>
-              <MenuButton
-                as={Button}
-                variant="ghost"
-                _hover={{ bg: "gray.100" }}
-                _active={{ bg: "gray.200" }}
-              >
-                PERJALANAN
-              </MenuButton>
-              <MenuList
-                color={"black"}
-                boxShadow="xl"
-                borderRadius="lg"
-                border="none"
-              >
-                <Link to={"/perjalanan"}>
-                  <MenuItem _hover={{ bg: "gray.100" }} transition="all 0.2s">
-                    Perjalanan
-                  </MenuItem>
-                </Link>
-                <Link to={"/daftar"}>
-                  <MenuItem _hover={{ bg: "gray.100" }} transition="all 0.2s">
-                    Daftar Perjalanan
-                  </MenuItem>
-                </Link>
-              </MenuList>
-            </Menu>
-
-            <Menu>
-              <MenuButton as={Button}>Keuangan</MenuButton>
-              <MenuList color={"black"}>
-                <Link to={"/admin/keuangan/daftar-perjalanan"}>
-                  <MenuItem>Daftar</MenuItem>
-                </Link>
-                <Link to={"/admin/keuangan/perjalanan"}>
-                  <MenuItem>Perjalanan</MenuItem>
-                </Link>
-                <Link to={"/admin/keuangan/template"}>
-                  <MenuItem>Template</MenuItem>
-                </Link>
-                <Link to={"/admin/dalam-kota"}>
-                  <MenuItem>Daftar Dalam Kota</MenuItem>
-                </Link>
-                <Link to={"/admin/keuangan/sumber-dana"}>
-                  <MenuItem>Sumber Dana</MenuItem>
-                </Link>
-              </MenuList>
-            </Menu>
-
-            <Menu>
-              <MenuButton as={Button}>Kepegawaian</MenuButton>
-              <MenuList color={"black"}>
-                <Link to={"/daftar-pegawai"}>
-                  <MenuItem>Daftar Pegawai</MenuItem>
-                </Link>
-              </MenuList>
-            </Menu>
-
-            <Menu>
-              <MenuButton as={Button}>ADMIN</MenuButton>
-              <MenuList color={"black"}>
-                <Link to={"/admin/induk-unit-kerja"}>
-                  <MenuItem>Induk Unit Kerja</MenuItem>
-                </Link>{" "}
-                <Link to={"/admin/daftar-bendahara"}>
-                  <MenuItem>Daftar Bendahara</MenuItem>
-                </Link>
-                <Link to={"/admin/template"}>
-                  <MenuItem>Template</MenuItem>
-                </Link>
-                <Link to={"/admin/sub-kegiatan"}>
-                  <MenuItem>Sub Kegiatan</MenuItem>
-                </Link>
-              </MenuList>
-            </Menu>
-
-            <Menu>
-              <MenuButton as={Button}>SURAT</MenuButton>
-              <MenuList color={"black"}>
-                <Link to={"/admin/nomor-surat"}>
-                  <MenuItem>Pengaturan</MenuItem>
-                </Link>{" "}
-                <Link to={"/admin/surat-keluar"}>
-                  <MenuItem>Daftar Surat Keluar</MenuItem>
-                </Link>
-              </MenuList>
-            </Menu>
-
-            <Menu>
-              <MenuButton as={Button}>ADMIN PUSAT</MenuButton>
-              <MenuList color={"black"}>
-                <Link to={"/admin/edit-jenis-surat"}>
-                  <MenuItem>Jenis Surat</MenuItem>
-                </Link>
-                <Link to={"/admin/tambah-user"}>
-                  <MenuItem>Pengaturan Pengguna</MenuItem>
-                </Link>
-                <Link to={"/admin/daftar-user"}>
-                  <MenuItem>Daftar Pengguna</MenuItem>
-                </Link>
-
-                <Link to={"/admin/daftar-induk-unit-kerja"}>
-                  <MenuItem>Daftar Induk Unit Kerja</MenuItem>
-                </Link>
-              </MenuList>
-            </Menu>
-
             {isAuthenticated ? (
-              <Logout />
-            ) : (
               <>
-                <Text fontWeight="medium" color="gray.700">
-                  {user[0]?.nama}
-                </Text>
-                <Button
-                  colorScheme="blue"
-                  variant="solid"
-                  _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
-                  transition="all 0.2s"
-                >
-                  <a href="/login">Login</a>
-                </Button>
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    variant="ghost"
+                    _hover={{ bg: "gray.100" }}
+                    _active={{ bg: "gray.200" }}
+                  >
+                    PERJALANAN
+                  </MenuButton>
+                  <MenuList
+                    color={"black"}
+                    boxShadow="xl"
+                    borderRadius="lg"
+                    border="none"
+                  >
+                    <Link to={"/perjalanan"}>
+                      <MenuItem
+                        _hover={{ bg: "gray.100" }}
+                        transition="all 0.2s"
+                      >
+                        Perjalanan
+                      </MenuItem>
+                    </Link>
+                    <Link to={"/daftar"}>
+                      <MenuItem
+                        _hover={{ bg: "gray.100" }}
+                        transition="all 0.2s"
+                      >
+                        Daftar Perjalanan
+                      </MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+
+                <Menu>
+                  <MenuButton as={Button}>Keuangan</MenuButton>
+                  <MenuList color={"black"}>
+                    <Link to={"/admin/keuangan/daftar-perjalanan"}>
+                      <MenuItem>Daftar</MenuItem>
+                    </Link>
+                    <Link to={"/admin/keuangan/perjalanan"}>
+                      <MenuItem>Perjalanan</MenuItem>
+                    </Link>
+                    <Link to={"/admin/keuangan/template"}>
+                      <MenuItem>Template</MenuItem>
+                    </Link>
+                    <Link to={"/admin/dalam-kota"}>
+                      <MenuItem>Daftar Dalam Kota</MenuItem>
+                    </Link>
+                    <Link to={"/admin/keuangan/sumber-dana"}>
+                      <MenuItem>Sumber Dana</MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+
+                <Menu>
+                  <MenuButton as={Button}>Kepegawaian</MenuButton>
+                  <MenuList color={"black"}>
+                    <Link to={"/daftar-pegawai"}>
+                      <MenuItem>Daftar Pegawai</MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+
+                <Menu>
+                  <MenuButton as={Button}>ADMIN</MenuButton>
+                  <MenuList color={"black"}>
+                    <Link to={"/admin/induk-unit-kerja"}>
+                      <MenuItem>Induk Unit Kerja</MenuItem>
+                    </Link>{" "}
+                    <Link to={"/admin/daftar-bendahara"}>
+                      <MenuItem>Daftar Bendahara</MenuItem>
+                    </Link>
+                    <Link to={"/admin/template"}>
+                      <MenuItem>Template</MenuItem>
+                    </Link>
+                    <Link to={"/admin/sub-kegiatan"}>
+                      <MenuItem>Sub Kegiatan</MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+
+                <Menu>
+                  <MenuButton as={Button}>SURAT</MenuButton>
+                  <MenuList color={"black"}>
+                    <Link to={"/admin/nomor-surat"}>
+                      <MenuItem>Pengaturan</MenuItem>
+                    </Link>{" "}
+                    <Link to={"/admin/surat-keluar"}>
+                      <MenuItem>Daftar Surat Keluar</MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+
+                <Menu>
+                  <MenuButton as={Button}>ADMIN PUSAT</MenuButton>
+                  <MenuList color={"black"}>
+                    <Link to={"/admin/edit-jenis-surat"}>
+                      <MenuItem>Jenis Surat</MenuItem>
+                    </Link>
+                    <Link to={"/admin/tambah-user"}>
+                      <MenuItem>Pengaturan Pengguna</MenuItem>
+                    </Link>
+                    <Link to={"/admin/daftar-user"}>
+                      <MenuItem>Daftar Pengguna</MenuItem>
+                    </Link>
+
+                    <Link to={"/admin/daftar-induk-unit-kerja"}>
+                      <MenuItem>Daftar Induk Unit Kerja</MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+
+                <Menu bgColor={"white"}>
+                  <MenuButton py={"auto"} bgColor={"white"} as={Button}>
+                    <Avatar h={"40px"} w={"40px"} /> {user[0].nama}
+                  </MenuButton>
+                  <MenuList color={"black"}>
+                    <Link to={"/profile"}>
+                      <MenuItem>Profile</MenuItem>
+                    </Link>
+                    <MenuItem>
+                      <Logout />
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
               </>
+            ) : (
+              <Link to={"/login"}>
+                <Button variant={"primary"}>Login</Button>
+              </Link>
             )}
           </HStack>
         </HStack>

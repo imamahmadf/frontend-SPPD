@@ -28,7 +28,11 @@ const Template = () => {
 
   async function fetchTemplate() {
     await axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/get`)
+      .get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/get/${
+          user[0].unitKerja_profile.indukUnitKerja.id
+        }`
+      )
       .then((res) => {
         setDataTemplate(res.data.result);
         console.log(res.data);
