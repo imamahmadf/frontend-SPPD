@@ -174,7 +174,7 @@ function DalamKotaAdmin() {
 
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -185,7 +185,12 @@ function DalamKotaAdmin() {
           px={"0px"}
         >
           {" "}
-          <Button onClick={onTambahOpen} mb={"30px"} variant={"primary"}>
+          <Button
+            ms={"30px"}
+            onClick={onTambahOpen}
+            mb={"30px"}
+            variant={"primary"}
+          >
             Tambah +
           </Button>
           <Box p={"30px"}>

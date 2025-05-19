@@ -59,9 +59,11 @@ function Rill(props) {
       });
   };
   return (
-    <Box>
-      <Container>
-        <Button onClick={onRillOpen}>Rill</Button>
+    <Box p={0} m={0}>
+      <Container p={0} m={0}>
+        <Button variant={"secondary"} onClick={onRillOpen}>
+          Rill
+        </Button>
       </Container>
       <Modal
         closeOnOverlayClick={false}

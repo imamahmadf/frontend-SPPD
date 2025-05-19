@@ -91,7 +91,7 @@ function Profile() {
           pt={"30px"}
           ps={"0px"}
         >
-          {JSON.stringify(dataProfile)}
+          {/* {JSON.stringify(dataProfile)} */}
         </Container>
       </Box>
     </Layout>

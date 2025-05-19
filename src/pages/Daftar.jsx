@@ -170,7 +170,6 @@ function Daftar() {
               p={"30px"}
               borderRadius={"5px"}
             >
-              {JSON.stringify(dataPerjalanan)}
               <Table variant={"primary"}>
                 <Thead>
                   <Tr>

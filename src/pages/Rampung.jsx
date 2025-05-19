@@ -480,32 +480,30 @@ function Rampung(props) {
               {JSON.stringify(user[0]?.unitKerja_profile)}
   
               {JSON.stringify(bendaharaSelected)} */}
-                {dataRampung?.result?.perjalanan?.jenisPerjalanan
-                  .tipePerjalananId === 1 &&
-                dataRampung?.result?.rincianBPDs.length == 0 ? (
-                  <Button onClick={buatOtomatis}>buat otomatis</Button>
-                ) : null}
+
                 <Text>
                   Status: {dataRampung?.result?.status.statusKuitansi}
                 </Text>
                 <Text>
                   Catatan: {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
                 </Text>
-                <FormControl>
-                  <FormLabel fontSize={"24px"}>Template</FormLabel>
-                  <Select
-                    height={"60px"}
-                    bgColor={"terang"}
-                    borderRadius={"8px"}
-                    borderColor={"rgba(229, 231, 235, 1)"}
-                    defaultValue={dataRampung?.template?.[0]?.id}
-                    onChange={(e) => {
-                      setTemplateId(e.target.value);
-                    }}
-                  >
-                    {renderTemplate()}
-                  </Select>
-                </FormControl>
+                {dataRampung?.result?.statusId === 3 ? (
+                  <FormControl>
+                    <FormLabel fontSize={"24px"}>Template</FormLabel>
+                    <Select
+                      height={"60px"}
+                      bgColor={"terang"}
+                      borderRadius={"8px"}
+                      borderColor={"rgba(229, 231, 235, 1)"}
+                      defaultValue={dataRampung?.template?.[0]?.id}
+                      onChange={(e) => {
+                        setTemplateId(e.target.value);
+                      }}
+                    >
+                      {renderTemplate()}
+                    </Select>
+                  </FormControl>
+                ) : null}
               </Box>
             </Flex>
             {dataRampung?.result?.statusId === 3 ? null : (
@@ -533,36 +531,36 @@ function Rampung(props) {
                 </FormControl> */}
               </>
             )}
-
-            <Rill
-              data={dataRampung?.daftarRill}
-              personilId={dataRampung?.result?.id}
-              randomNumber={setRandomNumber}
-              status={dataRampung?.result?.statusId}
-            />
-            {dataRampung?.result?.statusId === 3 ||
-            dataRampung?.result?.statusId === 2 ? null : (
-              <Button onClick={onInputOpen} variant={"primary"}>
-                Tambah +
-              </Button>
-            )}
             {dataRampung?.result?.statusId === 3 ||
             dataRampung?.result?.statusId === 2 ? null : (
               <Box></Box>
-            )}
-            {dataRampung?.result?.statusId === 3 ? (
-              <Button onClick={cetak}>CETAK</Button>
-            ) : null}
-            {dataRampung?.result?.statusId === 1 ||
-            dataRampung?.result?.statusId == 4 ? (
-              <Button
-                onClick={() => {
-                  pengajuan();
-                }}
-              >
-                Ajukan
-              </Button>
-            ) : null}
+            )}{" "}
+            <Flex mt={"30px"} gap={5}>
+              <Rill
+                data={dataRampung?.daftarRill}
+                personilId={dataRampung?.result?.id}
+                randomNumber={setRandomNumber}
+                status={dataRampung?.result?.statusId}
+              />
+              {dataRampung?.result?.statusId === 3 ? (
+                <Button variant={"primary"} onClick={cetak}>
+                  CETAK
+                </Button>
+              ) : null}
+              {dataRampung?.result?.statusId === 3 ||
+              dataRampung?.result?.statusId === 2 ? null : (
+                <Button onClick={onInputOpen} variant={"primary"}>
+                  Tambah +
+                </Button>
+              )}{" "}
+              {dataRampung?.result?.perjalanan?.jenisPerjalanan
+                .tipePerjalananId === 1 &&
+              dataRampung?.result?.rincianBPDs.length == 0 ? (
+                <Button variant={"primary"} onClick={buatOtomatis}>
+                  buat otomatis
+                </Button>
+              ) : null}
+            </Flex>
           </Box>
         </Container>
         {/* <Container
@@ -749,6 +747,19 @@ function Rampung(props) {
               <Text>Tidak ada data untuk ditampilkan.</Text>
             )}
           </Box>
+          {dataRampung?.result?.statusId === 1 ||
+          dataRampung?.result?.statusId == 4 ? (
+            <Button
+              ms={"30px"}
+              mb={"30px"}
+              variant={"primary"}
+              onClick={() => {
+                pengajuan();
+              }}
+            >
+              Ajukan
+            </Button>
+          ) : null}
         </Container>
       </Box>
 

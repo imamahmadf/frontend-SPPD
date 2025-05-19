@@ -247,6 +247,7 @@ function DaftarPegawai() {
                       <FormControl mt={"5px"}>
                         <Input
                           onChange={inputHandler}
+                          color={"gelap"}
                           type="name"
                           borderRadius="5px"
                           h={"30px"}
@@ -265,6 +266,7 @@ function DaftarPegawai() {
                           handleSubmitFilterChange("nip", e.target.value)
                         }
                         type="name"
+                        color={"gelap"}
                         borderRadius="5px"
                         h={"30px"}
                         bgColor={"secondary"}
@@ -371,6 +373,7 @@ function DaftarPegawai() {
                           handleSubmitFilterChange("jabatan", e.target.value)
                         }
                         type="name"
+                        color={"gelap"}
                         borderRadius="5px"
                         h={"30px"}
                         bgColor={"secondary"}
@@ -477,6 +480,7 @@ function DaftarPegawai() {
                         onChange={(e) =>
                           handleSubmitFilterChange("pendidikan", e.target.value)
                         }
+                        color={"gelap"}
                         type="name"
                         borderRadius="5px"
                         h={"30px"}
