@@ -21,6 +21,7 @@ import {
   Tbody,
   Tr,
   Th,
+  Center,
   Td,
   Flex,
   Textarea,
@@ -200,10 +201,35 @@ function RampungAdmin(props) {
               mb={"25px"}
               p={"10px"}
             >
-              <Text fontWeight="bold">{item?.pegawai.nama}</Text>
-              <Text>Nomor SPD: {item?.nomorSPD}</Text>
-              <Text>Status : {item.status.statusKuitansi}</Text>
-              <Text>Catatan : {item.catatan}</Text>
+              <Flex>
+                <Box>
+                  <Text fontWeight="bold">{item?.pegawai.nama}</Text>
+                  <Text>Nomor SPD: {item?.nomorSPD}</Text>
+
+                  <Text>Catatan : {item.catatan}</Text>
+                </Box>
+                <Spacer />
+                <Center
+                  height={"50px"}
+                  borderRadius={"3px"}
+                  p={"5px"}
+                  color={"white"}
+                  w={"160px"}
+                  bgColor={
+                    item.status.id === 1
+                      ? "grey"
+                      : item.status.id === 2
+                      ? "primary"
+                      : item.status.id === 3
+                      ? "ungu"
+                      : item.status.id === 4
+                      ? "oren"
+                      : item.status.id === 5
+                  }
+                >
+                  <Text> {item.status.statusKuitansi}</Text>
+                </Center>
+              </Flex>
               <Table variant="primary" mt={2}>
                 <Thead>
                   <Tr>

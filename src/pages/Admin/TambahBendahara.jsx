@@ -5,6 +5,7 @@ import ReactPaginate from "react-paginate";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
+import Loading from "../../Componets/Loading";
 import {
   Select as Select2,
   CreatableSelect,
@@ -38,6 +39,7 @@ import {
   Input,
   Spacer,
   Select,
+  Spinner,
 } from "@chakra-ui/react";
 
 function TambahBendahara() {
@@ -45,6 +47,8 @@ function TambahBendahara() {
   const [pegawaiId, setPegawaiId] = useState(0);
   const [dataSumberDana, setDataSumberDana] = useState(null);
   const [sumberDanaId, setSumberDanaId] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const user = useSelector(userRedux);
   const [jabatan, setJabatan] = useState("");
   const history = useHistory();
@@ -59,39 +63,36 @@ function TambahBendahara() {
     });
   }
   async function fetchDataPegawai() {
-    await axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get`)
-      .then((res) => {
-        console.log(res.status, res.data, "tessss");
-
-        setDataPegawai(res.data);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get`
+      );
+      setDataPegawai(res.data);
+    } catch (err) {
+      console.error(err.message);
+    }
   }
 
   async function fetchSumberDana() {
-    await axios
-      .get(
+    try {
+      const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/keuangan/get/sumber-dana/${
           user[0].unitKerja_profile.indukUnitKerja.id
         }`
-      )
-      .then((res) => {
-        console.log(res.status, res.data, "tessss");
-
-        setDataSumberDana(res.data.result);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
+      );
+      setDataSumberDana(res.data.result);
+    } catch (err) {
+      console.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   }
-  const postBendahara = () => {
-    axios
-      .post(
+  const postBendahara = async () => {
+    setIsSubmitting(true);
+    try {
+      await axios.post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/keuangan/post/bendahara`,
@@ -101,18 +102,19 @@ function TambahBendahara() {
           jabatan,
           sumberDanaId,
         }
-      )
-      .then((res) => {
-        console.log(res.status, res.data, "tessss");
-        history.push("/admin/daftar-bendahara");
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
+      );
+      history.push("/admin/daftar-bendahara");
+    } catch (err) {
+      console.error(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   useEffect(() => {
-    fetchDataPegawai();
-    fetchSumberDana();
+    const fetchData = async () => {
+      await Promise.all([fetchDataPegawai(), fetchSumberDana()]);
+    };
+    fetchData();
   }, []);
   return (
     <Layout>
@@ -126,76 +128,88 @@ function TambahBendahara() {
           p={"30px"}
           my={"30px"}
         >
-          <FormControl my={"30px"}>
-            <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
-            <Select2
-              options={dataPegawai.result?.map((val) => {
-                return {
-                  value: val,
-                  label: `${val.nama}`,
-                };
-              })}
-              placeholder="Cari Nama Pegawai"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                setPegawaiId(selectedOption.value.id);
-              }}
-              components={{
-                DropdownIndicator: () => null, // Hilangkan tombol panah
-                IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-              }}
-              chakraStyles={{
-                container: (provided) => ({
-                  ...provided,
-                  borderRadius: "6px",
-                }),
-                control: (provided) => ({
-                  ...provided,
-                  backgroundColor: "terang",
-                  border: "0px",
-                  height: "60px",
-                  _hover: {
-                    borderColor: "yellow.700",
-                  },
-                  minHeight: "40px",
-                }),
-                option: (provided, state) => ({
-                  ...provided,
-                  bg: state.isFocused ? "primary" : "white",
-                  color: state.isFocused ? "white" : "black",
-                }),
-              }}
-            />
-          </FormControl>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                <Select2
+                  options={dataPegawai.result?.map((val) => ({
+                    value: val,
+                    label: `${val.nama}`,
+                  }))}
+                  placeholder="Cari Nama Pegawai"
+                  focusBorderColor="red"
+                  onChange={(selectedOption) => {
+                    setPegawaiId(selectedOption.value.id);
+                  }}
+                  components={{
+                    DropdownIndicator: () => null,
+                    IndicatorSeparator: () => null,
+                  }}
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "6px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "terang",
+                      border: "0px",
+                      height: "60px",
+                      _hover: {
+                        borderColor: "yellow.700",
+                      },
+                      minHeight: "40px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused ? "primary" : "white",
+                      color: state.isFocused ? "white" : "black",
+                    }),
+                  }}
+                />
+              </FormControl>
 
-          <FormControl my={"30px"}>
-            <FormLabel fontSize={"24px"}>Jabatan</FormLabel>
-            <Input
-              height={"60px"}
-              bgColor={"terang"}
-              type="text"
-              border={"none"}
-              onChange={(e) => {
-                setJabatan(e.target.value);
-              }}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel fontSize={"24px"}>Sumber Dana</FormLabel>
-            <Select
-              placeholder="Jenis"
-              height={"60px"}
-              bgColor={"terang"}
-              borderRadius={"8px"}
-              borderColor={"rgba(229, 231, 235, 1)"}
-              onChange={(e) => {
-                setSumberDanaId(parseInt(e.target.value));
-              }}
-            >
-              {renderSumberDana()}
-            </Select>
-          </FormControl>
-          <Button onClick={postBendahara}> Tambahkan</Button>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Jabatan</FormLabel>
+                <Input
+                  height={"60px"}
+                  bgColor={"terang"}
+                  type="text"
+                  border={"none"}
+                  onChange={(e) => {
+                    setJabatan(e.target.value);
+                  }}
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel fontSize={"24px"}>Sumber Dana</FormLabel>
+                <Select
+                  placeholder="Jenis"
+                  height={"60px"}
+                  bgColor={"terang"}
+                  borderRadius={"8px"}
+                  borderColor={"rgba(229, 231, 235, 1)"}
+                  onChange={(e) => {
+                    setSumberDanaId(parseInt(e.target.value));
+                  }}
+                >
+                  {renderSumberDana()}
+                </Select>
+              </FormControl>
+
+              <Button
+                onClick={postBendahara}
+                isLoading={isSubmitting}
+                loadingText="Menambahkan..."
+              >
+                Tambahkan
+              </Button>
+            </>
+          )}
         </Container>
       </Box>
     </Layout>

@@ -38,3 +38,8 @@ export const myNewTheme = extendTheme({
   //     body: `Work Sans`,
   //   },
 });
+
+// 1 secondary
+// 2 ungu
+//3 primary
+//4 dengar

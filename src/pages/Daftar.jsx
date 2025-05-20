@@ -174,7 +174,7 @@ function Daftar() {
                 <Thead>
                   <Tr>
                     <Th>no.</Th>
-                    <Th>jenis Perjalanan</Th>
+                    <Th maxWidth={"20px"}>jenis Perjalanan</Th>
 
                     <Th>Unit Kerja Surat Tugas</Th>
                     <Th>No Surat Tugas</Th>
@@ -194,7 +194,8 @@ function Daftar() {
                 <Tbody>
                   {dataPerjalanan?.map((item, index) => (
                     <Tr key={item.id}>
-                      <Td>{index + 1}</Td> <Td>{item.jenisPerjalanan.jenis}</Td>{" "}
+                      <Td maxWidth={"20px"}>{index + 1}</Td>
+                      <Td>{item.jenisPerjalanan.jenis}</Td>
                       <Td>
                         {
                           item.ttdSuratTuga.indukUnitKerja_ttdSuratTugas
@@ -230,7 +231,28 @@ function Daftar() {
                       </Td>
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Td key={i}>
-                          {item.personils?.[i]?.pegawai?.nama || "-"}
+                          <Flex>
+                            <Center
+                              borderRadius={"2px"}
+                              width={"5px"}
+                              maxH={"20px"}
+                              me={"3px"}
+                              bgColor={
+                                item.personils?.[i]?.statusId === 1
+                                  ? "secondary"
+                                  : item.personils?.[i]?.statusId === 2
+                                  ? "ungu"
+                                  : item.personils?.[i]?.statusId === 3
+                                  ? "primary"
+                                  : item.personils?.[i]?.statusId === 4
+                                  ? "danger"
+                                  : null
+                              }
+                            ></Center>
+                            <Text>
+                              {item.personils?.[i]?.pegawai?.nama || "-"}
+                            </Text>
+                          </Flex>
                         </Td>
                       ))}
                       <Td>
@@ -264,7 +286,7 @@ function Daftar() {
                     </Tr>
                   ))}
                 </Tbody>
-              </Table>{" "}
+              </Table>
               <div
                 style={{
                   display: "flex",

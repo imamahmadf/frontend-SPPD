@@ -31,38 +31,40 @@ import {
   Flex,
   Spacer,
   useDisclosure,
+  Center,
+  Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Link, useHistory } from "react-router-dom";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
-
+import Loading from "../../Componets/Loading";
 function DaftarBendaharaAdmin() {
   const [dataBendahara, setDataBendahara] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedBendahara, setSelectedBendahara] = useState(0);
   const history = useHistory();
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
+
   async function fetchDataBendahara() {
-    axios
-      .get(
+    setIsLoading(true);
+    try {
+      const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/keuangan/get/bendahara/${
           user[0]?.unitKerja_profile?.indukUnitKerja.id
         }`
-      )
-
-      .then((res) => {
-        console.log(res.status, res.data, "tessss");
-
-        setDataBendahara(res.data.result);
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
+      );
+      setDataBendahara(res.data.result);
+    } catch (err) {
+      console.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const hapusBendahara = (e) => {
@@ -108,62 +110,66 @@ function DaftarBendaharaAdmin() {
           >
             Tambah +
           </Button>
-          <Table>
-            <Thead bgColor={"primary"}>
-              <Tr>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  No
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Sumber Dana
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Jabatan
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Nama
-                </Th>
-                <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                  Aksi
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody bgColor={"secondary"}>
-              {dataBendahara &&
-                dataBendahara.map((item, index) =>
-                  item.bendaharas.map((b, idx) => (
-                    <Tr key={`${index}-${idx}`}>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {index + 1}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {item.sumber}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {b.jabatan}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {b.pegawai_bendahara?.nama || "-"}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        <Flex gap={"20px"}>
-                          <Button variant={"primary"}>Edit</Button>
-                          <Button
-                            variant={"cancle"}
-                            onClick={() => {
-                              setSelectedBendahara(b.id);
-                              onOpen();
-                            }}
-                          >
-                            Hapus
-                          </Button>
-                        </Flex>
-                      </Td>
-                    </Tr>
-                  ))
-                )}
-            </Tbody>
-          </Table>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <Table>
+              <Thead bgColor={"primary"}>
+                <Tr>
+                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                    No
+                  </Th>
+                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                    Sumber Dana
+                  </Th>
+                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                    Jabatan
+                  </Th>
+                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                    Nama
+                  </Th>
+                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
+                    Aksi
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody bgColor={"secondary"}>
+                {dataBendahara &&
+                  dataBendahara.map((item, index) =>
+                    item.bendaharas.map((b, idx) => (
+                      <Tr key={`${index}-${idx}`}>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {index + 1}
+                        </Td>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {item.sumber}
+                        </Td>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {b.jabatan}
+                        </Td>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          {b.pegawai_bendahara?.nama || "-"}
+                        </Td>
+                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          <Flex gap={"20px"}>
+                            <Button variant={"primary"}>Edit</Button>
+                            <Button
+                              variant={"cancle"}
+                              onClick={() => {
+                                setSelectedBendahara(b.id);
+                                onOpen();
+                              }}
+                            >
+                              Hapus
+                            </Button>
+                          </Flex>
+                        </Td>
+                      </Tr>
+                    ))
+                  )}
+              </Tbody>
+            </Table>
+          )}
         </Container>
       </Box>
 
