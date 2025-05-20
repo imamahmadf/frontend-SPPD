@@ -92,7 +92,7 @@ function Navbar() {
               }}
               onClick={() => history.push("/")}
             >
-              <Text fontWeight="semibold">HOME</Text>
+              <Text fontWeight="semibold">HOME</Text>xxxx
             </Box>
 
             {isAuthenticated ? (
