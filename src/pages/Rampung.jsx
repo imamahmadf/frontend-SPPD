@@ -457,7 +457,27 @@ function Rampung(props) {
             <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
             <Heading color={"primary"}>Data Rampung</Heading>
             <Spacer />
-            <Box>STATUS {JSON.stringify(dataRampung?.result?.status)}</Box>
+
+            <Center
+              height={"50px"}
+              borderRadius={"3px"}
+              p={"5px"}
+              color={"white"}
+              w={"160px"}
+              bgColor={
+                dataRampung?.result?.status.id === 1
+                  ? "grey"
+                  : dataRampung?.result?.status.id === 2
+                  ? "primary"
+                  : dataRampung?.result?.status.id === 3
+                  ? "ungu"
+                  : dataRampung?.result?.status.id === 4
+                  ? "oren"
+                  : dataRampung?.result?.status.id === 5
+              }
+            >
+              <Text> {dataRampung?.result?.status.statusKuitansi}</Text>
+            </Center>
           </HStack>
 
           <Box p={"30px"}>
@@ -598,36 +618,23 @@ function Rampung(props) {
                   <Text fontWeight="bold" fontSize="lg">
                     {jenis}
                   </Text>
-                  <Table variant="simple" mt={2}>
-                    <Thead bgColor={"primary"}>
+                  <Table variant="primary" mt={2}>
+                    <Thead>
                       <Tr>
-                        <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                          item
-                        </Th>
-                        <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                          Nilai
-                        </Th>
-                        <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                          Qty
-                        </Th>
-                        <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                          Satuan
-                        </Th>{" "}
-                        <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                          Bukti
-                        </Th>
+                        <Th>item</Th>
+                        <Th>Nilai</Th>
+                        <Th>Qty</Th>
+                        <Th>Satuan</Th> <Th>Bukti</Th>
                         {dataRampung?.result?.statusId === 3 ||
                         dataRampung?.result?.statusId === 2 ? null : (
-                          <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                            Aksi
-                          </Th>
+                          <Th>Aksi</Th>
                         )}
                       </Tr>
                     </Thead>
-                    <Tbody bgColor={"secondary"}>
+                    <Tbody>
                       {groupedData[jenis].map((item) => (
                         <Tr key={item.id}>
-                          <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          <Td>
                             {editMode === item.id ? (
                               <Input
                                 value={editedData.item}
@@ -637,7 +644,7 @@ function Rampung(props) {
                               item.item
                             )}
                           </Td>
-                          <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          <Td>
                             {editMode === item.id ? (
                               <Input
                                 type="number"
@@ -651,7 +658,7 @@ function Rampung(props) {
                               }).format(item.nilai)
                             )}
                           </Td>
-                          <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          <Td>
                             {editMode === item.id ? (
                               <Input
                                 type="number"
@@ -662,7 +669,7 @@ function Rampung(props) {
                               item.qty
                             )}
                           </Td>
-                          <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          <Td>
                             {editMode === item.id ? (
                               <Input
                                 value={editedData.satuan}
@@ -672,7 +679,7 @@ function Rampung(props) {
                               item.satuan
                             )}
                           </Td>{" "}
-                          <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                          <Td>
                             {editMode === item.id ? (
                               <Input
                                 value={editedData.satuan}
@@ -700,7 +707,7 @@ function Rampung(props) {
                           </Td>
                           {dataRampung?.result?.statusId === 3 ||
                           dataRampung?.result?.statusId === 2 ? null : (
-                            <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                            <Td>
                               {editMode === item.id ? (
                                 <HStack>
                                   <Button

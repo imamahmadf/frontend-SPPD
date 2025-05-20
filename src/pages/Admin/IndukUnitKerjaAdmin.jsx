@@ -37,6 +37,7 @@ import { Link, useHistory } from "react-router-dom";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
+import Loading from "../../Componets/Loading";
 import TambahUnitKerja from "../../Componets/TambahUnitKerja";
 import { BsEyeFill } from "react-icons/bs";
 import { BsPencilFill } from "react-icons/bs";

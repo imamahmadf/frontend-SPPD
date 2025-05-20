@@ -36,6 +36,7 @@ import {
   Spacer,
   Select,
 } from "@chakra-ui/react";
+import Loading from "../../Componets/Logout";
 import { useSelector } from "react-redux";
 
 function DaftarUserAdmin() {
@@ -43,6 +44,7 @@ function DaftarUserAdmin() {
   const [role, setRole] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedUserRoles, setSelectedUserRoles] = useState([]); // Tambahkan state baru untuk menyimpan role pengguna yang dipilih
   const [availableRoles, setAvailableRoles] = useState([]);
   const {
@@ -113,6 +115,7 @@ function DaftarUserAdmin() {
         console.log(res.status, res.data, "tessss");
 
         setDataUser(res.data.result);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.error(err.message);
@@ -125,91 +128,95 @@ function DaftarUserAdmin() {
   }, []);
   return (
     <Layout>
-      <Box pt={"120px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          p={"30px"}
-        >
-          <Table variant={"primary"}>
-            <Thead>
-              <Tr>
-                <Th>No</Th>
-                <Th>Nama</Th>
-                <Th>Nama Pengguna</Th>
-                <Th>Unit Kerja</Th>
-                <Th>Role</Th>
-                <Th>Aksi</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {dataUser?.map((user, index) => (
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <Box pt={"120px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+          <Container
+            border={"1px"}
+            borderRadius={"6px"}
+            borderColor={"rgba(229, 231, 235, 1)"}
+            maxW={"1280px"}
+            bgColor={"white"}
+            p={"30px"}
+          >
+            <Table variant={"primary"}>
+              <Thead>
                 <Tr>
-                  <Td>{index + 1}</Td>
-                  <Td>{user.nama}</Td>
-                  <Td>{user.namaPengguna}</Td>
-                  <Td>{user.profiles[0].unitKerja_profile.unitKerja}</Td>
-                  <Td>
-                    <Text>
-                      {user?.userRoles?.map((val) => (
-                        <Text>{val.role.nama}</Text>
-                      ))}
-                    </Text>
-                  </Td>
-                  <Td>
-                    {/* <Button>Hapus</Button> */}
-                    <Flex gap={3}>
-                      <Center
-                        onClick={() => {
-                          setCurrentUserId(user?.id);
-                          onAddOpen();
-                        }}
-                        borderRadius={"5px"}
-                        as="button"
-                        h="35px"
-                        w="35px"
-                        fontSize="14px"
-                        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-                        color="white"
-                        _hover={{
-                          bg: "black",
-                        }}
-                        bg="primary"
-                        // onClick={onOpen}
-                      >
-                        <BsPlusCircle />
-                      </Center>{" "}
-                      <Center
-                        onClick={() => {
-                          setCurrentUserId(user?.id);
-                          setAvailableRoles(user.userRoles || []);
-                          onDeleteOpen();
-                        }}
-                        borderRadius={"5px"}
-                        as="button"
-                        h="35px"
-                        w="35px"
-                        fontSize="14px"
-                        transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
-                        color="white"
-                        _hover={{
-                          bg: "black",
-                        }}
-                        bg="danger"
-                      >
-                        <BsXCircle />
-                      </Center>
-                    </Flex>
-                  </Td>
+                  <Th>No</Th>
+                  <Th>Nama</Th>
+                  <Th>Nama Pengguna</Th>
+                  <Th>Unit Kerja</Th>
+                  <Th>Role</Th>
+                  <Th>Aksi</Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Container>
-      </Box>
+              </Thead>
+              <Tbody>
+                {dataUser?.map((user, index) => (
+                  <Tr>
+                    <Td>{index + 1}</Td>
+                    <Td>{user.nama}</Td>
+                    <Td>{user.namaPengguna}</Td>
+                    <Td>{user.profiles[0].unitKerja_profile.unitKerja}</Td>
+                    <Td>
+                      <Text>
+                        {user?.userRoles?.map((val) => (
+                          <Text>{val.role.nama}</Text>
+                        ))}
+                      </Text>
+                    </Td>
+                    <Td>
+                      {/* <Button>Hapus</Button> */}
+                      <Flex gap={3}>
+                        <Center
+                          onClick={() => {
+                            setCurrentUserId(user?.id);
+                            onAddOpen();
+                          }}
+                          borderRadius={"5px"}
+                          as="button"
+                          h="35px"
+                          w="35px"
+                          fontSize="14px"
+                          transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+                          color="white"
+                          _hover={{
+                            bg: "black",
+                          }}
+                          bg="primary"
+                          // onClick={onOpen}
+                        >
+                          <BsPlusCircle />
+                        </Center>{" "}
+                        <Center
+                          onClick={() => {
+                            setCurrentUserId(user?.id);
+                            setAvailableRoles(user.userRoles || []);
+                            onDeleteOpen();
+                          }}
+                          borderRadius={"5px"}
+                          as="button"
+                          h="35px"
+                          w="35px"
+                          fontSize="14px"
+                          transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+                          color="white"
+                          _hover={{
+                            bg: "black",
+                          }}
+                          bg="danger"
+                        >
+                          <BsXCircle />
+                        </Center>
+                      </Flex>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Container>
+        </Box>
+      )}
       <Modal isOpen={isAddOpen} onClose={onAddClose}>
         <ModalOverlay />
         <ModalContent>

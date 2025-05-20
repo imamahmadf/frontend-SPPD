@@ -43,6 +43,7 @@ import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import ReactPaginate from "react-paginate";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
+import Loading from "../../Componets/Loading";
 function DalamKotaAdmin() {
   const [dataDalamKota, setDataDalamKota] = useState([]);
   const history = useHistory();
@@ -59,6 +60,7 @@ function DalamKotaAdmin() {
   const [uangTransport, setUangTransport] = useState(0);
   const [durasi, setDurasi] = useState(0);
   const [indukUnitKerjaId, setIndukUnitKerjaId] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const {
     isOpen: isTambahOpen,
     onOpen: onTambahOpen,
@@ -114,6 +116,7 @@ function DalamKotaAdmin() {
         setPage(res.data.page);
         setPages(res.data.totalPage);
         setRows(res.data.totalRows);
+        setIsLoading(false);
       })
       .catch((err) => {
         console.error(err);
@@ -174,145 +177,149 @@ function DalamKotaAdmin() {
 
   return (
     <Layout>
-      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          pt={"30px"}
-          px={"0px"}
-        >
-          {" "}
-          <Button
-            ms={"30px"}
-            onClick={onTambahOpen}
-            mb={"30px"}
-            variant={"primary"}
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+          <Container
+            border={"1px"}
+            borderRadius={"6px"}
+            borderColor={"rgba(229, 231, 235, 1)"}
+            maxW={"1280px"}
+            bgColor={"white"}
+            pt={"30px"}
+            px={"0px"}
           >
-            Tambah +
-          </Button>
-          <Box p={"30px"}>
-            {/* {JSON.stringify(dataDalamKota)} */}
-            <Table variant={"primary"}>
-              <Thead>
-                <Tr>
-                  <Th>Tujuan</Th>
-                  <Th>Uang transport</Th>
-                  <Th>Durasi</Th>
-                  <Th>Induk Unit Kerja</Th>
-                  <Th>Aksi</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {dataDalamKota.map((item, index) => {
-                  return (
-                    <Tr key={index}>
-                      <Td>{item.nama}</Td>
-                      <Td>
-                        {new Intl.NumberFormat("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                        }).format(item.uangTransport)}
-                      </Td>
-                      <Td>{item.durasi} jam</Td>
-                      <Td>{item?.indukUnitKerja.indukUnitkerja}</Td>
-                      <Td>
-                        <Button
-                          p={"0px"}
-                          fontSize={"14px"}
-                          variant={"secondary"}
-                          onClick={() => handleEdit(item)}
-                        >
-                          <BsPencilFill />
-                        </Button>
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
-          </Box>{" "}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
+            {" "}
+            <Button
+              ms={"30px"}
+              onClick={onTambahOpen}
+              mb={"30px"}
+              variant={"primary"}
+            >
+              Tambah +
+            </Button>
+            <Box p={"30px"}>
+              {/* {JSON.stringify(dataDalamKota)} */}
+              <Table variant={"primary"}>
+                <Thead>
+                  <Tr>
+                    <Th>Tujuan</Th>
+                    <Th>Uang transport</Th>
+                    <Th>Durasi</Th>
+                    <Th>Induk Unit Kerja</Th>
+                    <Th>Aksi</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {dataDalamKota.map((item, index) => {
+                    return (
+                      <Tr key={index}>
+                        <Td>{item.nama}</Td>
+                        <Td>
+                          {new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                          }).format(item.uangTransport)}
+                        </Td>
+                        <Td>{item.durasi} jam</Td>
+                        <Td>{item?.indukUnitKerja.indukUnitkerja}</Td>
+                        <Td>
+                          <Button
+                            p={"0px"}
+                            fontSize={"14px"}
+                            variant={"secondary"}
+                            onClick={() => handleEdit(item)}
+                          >
+                            <BsPencilFill />
+                          </Button>
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            </Box>{" "}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
 
-              boxSizing: "border-box",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <ReactPaginate
-              previousLabel={"+"}
-              nextLabel={"-"}
-              pageCount={pages}
-              onPageChange={changePage}
-              activeClassName={"item active "}
-              breakClassName={"item break-me "}
-              breakLabel={"..."}
-              containerClassName={"pagination"}
-              disabledClassName={"disabled-page"}
-              marginPagesDisplayed={1}
-              nextClassName={"item next "}
-              pageClassName={"item pagination-page "}
-              pageRangeDisplayed={2}
-              previousClassName={"item previous"}
-            />
-          </div>
-          <Modal isOpen={isOpen} onClose={handleClose}>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Edit Data Dalam Kota</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <FormControl mb={4}>
-                  <FormLabel>Tujuan</FormLabel>
-                  <Input
-                    value={formData.nama}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nama: e.target.value })
-                    }
-                  />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>Uang Transport</FormLabel>
-                  <Input
-                    type="number"
-                    value={formData.uangTransport}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        uangTransport: e.target.value,
-                      })
-                    }
-                  />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>Durasi</FormLabel>
-                  <Input
-                    type="number"
-                    value={formData.durasi}
-                    onChange={(e) =>
-                      setFormData({ ...formData, durasi: e.target.value })
-                    }
-                  />
-                </FormControl>
-              </ModalBody>
-              <ModalFooter>
-                <Button colorScheme="blue" mr={3} onClick={handleSave}>
-                  Simpan
-                </Button>
-                <Button variant="ghost" onClick={handleClose}>
-                  Batal
-                </Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
-        </Container>
-      </Box>
+                boxSizing: "border-box",
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <ReactPaginate
+                previousLabel={"+"}
+                nextLabel={"-"}
+                pageCount={pages}
+                onPageChange={changePage}
+                activeClassName={"item active "}
+                breakClassName={"item break-me "}
+                breakLabel={"..."}
+                containerClassName={"pagination"}
+                disabledClassName={"disabled-page"}
+                marginPagesDisplayed={1}
+                nextClassName={"item next "}
+                pageClassName={"item pagination-page "}
+                pageRangeDisplayed={2}
+                previousClassName={"item previous"}
+              />
+            </div>
+            <Modal isOpen={isOpen} onClose={handleClose}>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Edit Data Dalam Kota</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <FormControl mb={4}>
+                    <FormLabel>Tujuan</FormLabel>
+                    <Input
+                      value={formData.nama}
+                      onChange={(e) =>
+                        setFormData({ ...formData, nama: e.target.value })
+                      }
+                    />
+                  </FormControl>
+                  <FormControl mb={4}>
+                    <FormLabel>Uang Transport</FormLabel>
+                    <Input
+                      type="number"
+                      value={formData.uangTransport}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          uangTransport: e.target.value,
+                        })
+                      }
+                    />
+                  </FormControl>
+                  <FormControl mb={4}>
+                    <FormLabel>Durasi</FormLabel>
+                    <Input
+                      type="number"
+                      value={formData.durasi}
+                      onChange={(e) =>
+                        setFormData({ ...formData, durasi: e.target.value })
+                      }
+                    />
+                  </FormControl>
+                </ModalBody>
+                <ModalFooter>
+                  <Button colorScheme="blue" mr={3} onClick={handleSave}>
+                    Simpan
+                  </Button>
+                  <Button variant="ghost" onClick={handleClose}>
+                    Batal
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+          </Container>
+        </Box>
+      )}
 
       <Modal
         closeOnOverlayClick={false}

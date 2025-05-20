@@ -30,6 +30,7 @@ import {
   Td,
   Flex,
   Textarea,
+  Tooltip,
   Input,
   Spacer,
   useToast,
@@ -231,28 +232,44 @@ function Daftar() {
                       </Td>
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Td key={i}>
-                          <Flex>
-                            <Center
-                              borderRadius={"2px"}
-                              width={"5px"}
-                              maxH={"20px"}
-                              me={"3px"}
-                              bgColor={
-                                item.personils?.[i]?.statusId === 1
-                                  ? "secondary"
-                                  : item.personils?.[i]?.statusId === 2
-                                  ? "ungu"
-                                  : item.personils?.[i]?.statusId === 3
-                                  ? "primary"
-                                  : item.personils?.[i]?.statusId === 4
-                                  ? "danger"
-                                  : null
-                              }
-                            ></Center>
-                            <Text>
-                              {item.personils?.[i]?.pegawai?.nama || "-"}
-                            </Text>
-                          </Flex>
+                          <Tooltip
+                            label={item.personils?.[i]?.status?.statusKuitansi}
+                            aria-label="A tooltip"
+                            bgColor={
+                              item.personils?.[i]?.statusId === 1
+                                ? "gelap"
+                                : item.personils?.[i]?.statusId === 2
+                                ? "ungu"
+                                : item.personils?.[i]?.statusId === 3
+                                ? "primary"
+                                : item.personils?.[i]?.statusId === 4
+                                ? "danger"
+                                : null
+                            }
+                          >
+                            <Flex>
+                              <Center
+                                borderRadius={"2px"}
+                                width={"5px"}
+                                maxH={"20px"}
+                                me={"3px"}
+                                bgColor={
+                                  item.personils?.[i]?.statusId === 1
+                                    ? "gelap"
+                                    : item.personils?.[i]?.statusId === 2
+                                    ? "ungu"
+                                    : item.personils?.[i]?.statusId === 3
+                                    ? "primary"
+                                    : item.personils?.[i]?.statusId === 4
+                                    ? "danger"
+                                    : null
+                                }
+                              ></Center>
+                              <Text>
+                                {item.personils?.[i]?.pegawai?.nama || "-"}
+                              </Text>
+                            </Flex>
+                          </Tooltip>
                         </Td>
                       ))}
                       <Td>
