@@ -52,6 +52,11 @@ function SumberDanaAdmin() {
     kalimat1: "",
     kalimat2: "",
   });
+  const [editingJenisId, setEditingJenisId] = useState(null);
+  const [editJenisForm, setEditJenisForm] = useState({
+    jenis: "",
+    kodeRekening: "",
+  });
   const toast = useToast();
 
   async function fetchDataSumberDana() {
@@ -117,6 +122,48 @@ function SumberDanaAdmin() {
 
   const handleCancel = () => {
     setEditingId(null);
+  };
+
+  const handleEditJenis = (item) => {
+    setEditingJenisId(item.id);
+    setEditJenisForm({
+      jenis: item.jenis,
+      kodeRekening: item.kodeRekening,
+    });
+  };
+
+  const handleSaveJenis = async (id) => {
+    try {
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/keuangan/edit/jenis-perjalanan/${id}`,
+        editJenisForm
+      );
+
+      toast({
+        title: "Berhasil",
+        description: "Data jenis perjalanan berhasil diperbarui",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      setEditingJenisId(null);
+      fetchDataSumberDana();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui data jenis perjalanan",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleCancelJenis = () => {
+    setEditingJenisId(null);
   };
 
   return (
@@ -239,13 +286,59 @@ function SumberDanaAdmin() {
               <Tr>
                 <Th>Jenis</Th>
                 <Th>Kode Rekening</Th>
+                <Th>Aksi</Th>
               </Tr>
             </Thead>
             <Tbody>
               {dataJenisPerjalanan?.map((item, index) => (
-                <Tr>
-                  <Td>{item.jenis}</Td>
-                  <Td>{item.kodeRekening}</Td>
+                <Tr key={item.id}>
+                  <Td>
+                    {editingJenisId === item.id ? (
+                      <Input
+                        value={editJenisForm.jenis}
+                        onChange={(e) =>
+                          setEditJenisForm({
+                            ...editJenisForm,
+                            jenis: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      item.jenis
+                    )}
+                  </Td>
+                  <Td>
+                    {editingJenisId === item.id ? (
+                      <Input
+                        value={editJenisForm.kodeRekening}
+                        onChange={(e) =>
+                          setEditJenisForm({
+                            ...editJenisForm,
+                            kodeRekening: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      item.kodeRekening
+                    )}
+                  </Td>
+                  <Td>
+                    {editingJenisId === item.id ? (
+                      <HStack>
+                        <Button
+                          colorScheme="green"
+                          onClick={() => handleSaveJenis(item.id)}
+                        >
+                          Simpan
+                        </Button>
+                        <Button onClick={handleCancelJenis}>Batal</Button>
+                      </HStack>
+                    ) : (
+                      <Button onClick={() => handleEditJenis(item)}>
+                        Edit
+                      </Button>
+                    )}
+                  </Td>
                 </Tr>
               ))}
             </Tbody>

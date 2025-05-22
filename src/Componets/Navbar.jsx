@@ -65,6 +65,10 @@ function Navbar() {
               transition="transform 0.3s ease"
               _hover={{ transform: "scale(1.05)" }}
             />
+            {/* <Box fontWeight={500} color={"gelap"} me={"10px"}>
+              <Text>Dinas Kesehatan</Text>
+              <Text>Kabupaten Paser</Text>
+            </Box> */}
             <Image
               height="50px"
               overflow="hidden"
@@ -92,7 +96,7 @@ function Navbar() {
               }}
               onClick={() => history.push("/")}
             >
-              <Text fontWeight="semibold">HOME</Text>xxxx
+              <Text fontWeight="semibold">HOME</Text>
             </Box>
 
             {isAuthenticated ? (
@@ -157,6 +161,9 @@ function Navbar() {
                   <MenuList color={"black"}>
                     <Link to={"/daftar-pegawai"}>
                       <MenuItem>Daftar Pegawai</MenuItem>
+                    </Link>
+                    <Link to={"/statistik-pegawai"}>
+                      <MenuItem>Statistik Pegawai</MenuItem>
                     </Link>
                   </MenuList>
                 </Menu>

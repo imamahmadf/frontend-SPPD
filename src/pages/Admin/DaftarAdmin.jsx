@@ -25,15 +25,21 @@ import {
   Flex,
   Textarea,
   Input,
+  Tooltip,
   Heading,
   SimpleGrid,
   Spinner,
 } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import ReactPaginate from "react-paginate";
+import {
+  Select as Select2,
+  CreatableSelect,
+  AsyncSelect,
+} from "chakra-react-select";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
-import axios from "axios";
+import axios, { Axios } from "axios";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
@@ -48,6 +54,8 @@ function DaftarAdmin() {
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [dataUnitKerja, setDataUnitKerja] = useState(null);
+  const [filterUnitKerjaId, setFilterUnitKerjaId] = useState(0);
 
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
@@ -56,6 +64,20 @@ function DaftarAdmin() {
     setPage(selected);
   };
 
+  async function fetchUnitkerja() {
+    axios
+      .get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/admin/get/unit-kerja`
+      )
+      .then((res) => {
+        setDataUnitKerja(res.data.result);
+        console.log(res.data.result, "ÏNI DSATAAA");
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
   async function fetchDataPerjalanan() {
     setIsLoading(true);
     try {
@@ -63,7 +85,7 @@ function DaftarAdmin() {
         .get(
           `${
             import.meta.env.VITE_REACT_APP_API_BASE_URL
-          }/admin/get/keuangan/daftar-perjalanan?&time=${time}&page=${page}&limit=${limit}`
+          }/admin/get/keuangan/daftar-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${filterUnitKerjaId}`
         )
         .then((res) => {
           setDataPerjalanan(res.data.result);
@@ -81,7 +103,8 @@ function DaftarAdmin() {
 
   useEffect(() => {
     fetchDataPerjalanan();
-  }, [page]);
+    fetchUnitkerja();
+  }, [page, filterUnitKerjaId]);
   return (
     <Layout>
       <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
@@ -99,6 +122,47 @@ function DaftarAdmin() {
             my={"30px"}
           >
             <Box style={{ overflowX: "auto" }} p={"30px"}>
+              <FormControl my={"15px"}>
+                <Select2
+                  options={dataUnitKerja?.map((val) => ({
+                    value: val.id,
+                    label: `${val.unitKerja}`,
+                  }))}
+                  focusBorderColor="red"
+                  onChange={(selectedOption) => {
+                    setFilterUnitKerjaId(selectedOption.value);
+                  }}
+                  components={{
+                    DropdownIndicator: () => null, // Hilangkan tombol panah
+                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                  }}
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "0px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "terang",
+                      color: "gelap",
+                      textTransform: "none",
+                      border: "0px",
+                      width: "500px",
+                      height: "30px",
+                      _hover: {
+                        borderColor: "yellow.700",
+                      },
+                      minHeight: "30px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused ? "primary" : "white",
+                      color: state.isFocused ? "white" : "gelap",
+                      textTransform: "none",
+                    }),
+                  }}
+                />
+              </FormControl>
               <Table variant={"primary"}>
                 <Thead>
                   <Tr>
@@ -149,7 +213,44 @@ function DaftarAdmin() {
                       </Td>
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Td key={i}>
-                          {item.personils?.[i]?.pegawai?.nama || "-"}
+                          <Tooltip
+                            label={item.personils?.[i]?.status?.statusKuitansi}
+                            aria-label="A tooltip"
+                            bgColor={
+                              item.personils?.[i]?.statusId === 1
+                                ? "gelap"
+                                : item.personils?.[i]?.statusId === 2
+                                ? "ungu"
+                                : item.personils?.[i]?.statusId === 3
+                                ? "primary"
+                                : item.personils?.[i]?.statusId === 4
+                                ? "danger"
+                                : null
+                            }
+                          >
+                            <Flex>
+                              <Center
+                                borderRadius={"2px"}
+                                width={"5px"}
+                                maxH={"20px"}
+                                me={"3px"}
+                                bgColor={
+                                  item.personils?.[i]?.statusId === 1
+                                    ? "gelap"
+                                    : item.personils?.[i]?.statusId === 2
+                                    ? "ungu"
+                                    : item.personils?.[i]?.statusId === 3
+                                    ? "primary"
+                                    : item.personils?.[i]?.statusId === 4
+                                    ? "danger"
+                                    : null
+                                }
+                              ></Center>
+                              <Text>
+                                {item.personils?.[i]?.pegawai?.nama || "-"}
+                              </Text>
+                            </Flex>
+                          </Tooltip>
                         </Td>
                       ))}
                       <Td>{item.kodeRekening?.kode || "-"}</Td>

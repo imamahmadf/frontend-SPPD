@@ -60,6 +60,11 @@ function DalamKotaAdmin() {
   const [uangTransport, setUangTransport] = useState(0);
   const [durasi, setDurasi] = useState(0);
   const [indukUnitKerjaId, setIndukUnitKerjaId] = useState(0);
+  const [filterIndukUnitKerjaId, setFilterIndukUnitKerjaId] = useState(0);
+  const [filterTujuan, setFilterTujuan] = useState("");
+  const [filterUangTransport, setFilterUangTransport] = useState("");
+  const [filterDurasi, setFilterDurasi] = useState("");
+
   const [isLoading, setIsLoading] = useState(true);
   const {
     isOpen: isTambahOpen,
@@ -82,6 +87,18 @@ function DalamKotaAdmin() {
     } else if (field == "durasi") {
       setDurasi(val);
     }
+  };
+
+  const handleSubmitFilterChange = (field, val) => {
+    const tes = setTimeout(() => {
+      if (field == "tujuan") {
+        setFilterTujuan(val);
+      } else if (field == "uangTransport") {
+        setFilterUangTransport(val);
+      } else if (field == "durasi") {
+        setFilterDurasi(val);
+      }
+    }, 2000);
   };
 
   const tambahTujuan = () => {
@@ -108,7 +125,7 @@ function DalamKotaAdmin() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/tujuan/get/dalam-kota?&time=${time}&page=${page}&limit=${limit}`
+        }/tujuan/get/dalam-kota?&time=${time}&page=${page}&limit=${limit}&uangTransport=${filterUangTransport}&durasi=${filterDurasi}&nama=${filterTujuan}&indukUnitKerjaId=${filterIndukUnitKerjaId}`
       )
       .then((res) => {
         console.log(res.data, "DATASEEED");
@@ -126,7 +143,13 @@ function DalamKotaAdmin() {
   useEffect(() => {
     fetchDalamKota();
     fetchIndukUnitKerja();
-  }, [page]);
+  }, [
+    page,
+    filterDurasi,
+    filterIndukUnitKerjaId,
+    filterTujuan,
+    filterUangTransport,
+  ]);
 
   const handleEdit = (data) => {
     setSelectedData(data);
@@ -190,7 +213,6 @@ function DalamKotaAdmin() {
             pt={"30px"}
             px={"0px"}
           >
-            {" "}
             <Button
               ms={"30px"}
               onClick={onTambahOpen}
@@ -204,10 +226,105 @@ function DalamKotaAdmin() {
               <Table variant={"primary"}>
                 <Thead>
                   <Tr>
-                    <Th>Tujuan</Th>
-                    <Th>Uang transport</Th>
-                    <Th>Durasi</Th>
-                    <Th>Induk Unit Kerja</Th>
+                    <Th width={"320px"}>
+                      Asal
+                      <Box mt={"5px"} width={"320px"}>
+                        <FormControl width={"320px"}>
+                          <Select2
+                            options={dataIndukUnitKerja?.map((val) => ({
+                              value: val.id,
+                              label: `${val.indukUnitKerja}`,
+                            }))}
+                            placeholder="Pilih Induk Unit Kerja"
+                            focusBorderColor="red"
+                            onChange={(selectedOption) => {
+                              setFilterIndukUnitKerjaId(selectedOption.value);
+                            }}
+                            components={{
+                              DropdownIndicator: () => null, // Hilangkan tombol panah
+                              IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                            }}
+                            chakraStyles={{
+                              container: (provided) => ({
+                                ...provided,
+                                borderRadius: "6px",
+                              }),
+                              control: (provided) => ({
+                                ...provided,
+                                backgroundColor: "terang",
+                                border: "0px",
+                                width: "320px",
+                                height: "30px",
+                                color: "gelap",
+                                _hover: {
+                                  borderColor: "yellow.700",
+                                },
+                                minHeight: "30px",
+                              }),
+                              option: (provided, state) => ({
+                                ...provided,
+                                bg: state.isFocused ? "primary" : "white",
+                                color: state.isFocused ? "white" : "black",
+                              }),
+                            }}
+                          />
+                        </FormControl>
+                      </Box>
+                    </Th>
+                    <Th>
+                      Tujuan
+                      <Box>
+                        <FormControl mt={"5px"}>
+                          <Input
+                            onChange={(e) =>
+                              handleSubmitFilterChange("tujuan", e.target.value)
+                            }
+                            type="name"
+                            color={"gelap"}
+                            borderRadius="5px"
+                            h={"30px"}
+                            bgColor={"secondary"}
+                          />
+                        </FormControl>
+                      </Box>
+                    </Th>
+                    <Th>
+                      Uang transport
+                      <Box>
+                        <FormControl mt={"5px"}>
+                          <Input
+                            onChange={(e) =>
+                              handleSubmitFilterChange(
+                                "uangTransport",
+                                e.target.value
+                              )
+                            }
+                            type="number"
+                            color={"gelap"}
+                            borderRadius="5px"
+                            h={"30px"}
+                            bgColor={"secondary"}
+                          />
+                        </FormControl>
+                      </Box>
+                    </Th>
+                    <Th>
+                      Durasi
+                      <Box>
+                        <FormControl mt={"5px"}>
+                          <Input
+                            onChange={(e) =>
+                              handleSubmitFilterChange("durasi", e.target.value)
+                            }
+                            type="number"
+                            color={"gelap"}
+                            borderRadius="5px"
+                            h={"30px"}
+                            bgColor={"secondary"}
+                          />
+                        </FormControl>
+                      </Box>
+                    </Th>
                     <Th>Aksi</Th>
                   </Tr>
                 </Thead>
@@ -215,6 +332,7 @@ function DalamKotaAdmin() {
                   {dataDalamKota.map((item, index) => {
                     return (
                       <Tr key={index}>
+                        <Td>{item?.indukUnitKerja.indukUnitkerja}</Td>
                         <Td>{item.nama}</Td>
                         <Td>
                           {new Intl.NumberFormat("id-ID", {
@@ -223,7 +341,7 @@ function DalamKotaAdmin() {
                           }).format(item.uangTransport)}
                         </Td>
                         <Td>{item.durasi} jam</Td>
-                        <Td>{item?.indukUnitKerja.indukUnitkerja}</Td>
+
                         <Td>
                           <Button
                             p={"0px"}
@@ -239,7 +357,7 @@ function DalamKotaAdmin() {
                   })}
                 </Tbody>
               </Table>
-            </Box>{" "}
+            </Box>
             <div
               style={{
                 display: "flex",

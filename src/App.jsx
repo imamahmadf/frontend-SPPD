@@ -39,6 +39,7 @@ import TemplateKeuangan from "./pages/Admin/TemplateKeuangan.jsx";
 import DetailIndukUnitKerja from "./pages/Admin/DetailIndukUnitKerja.jsx";
 import DaftarPerjalanan from "./pages/Admin/DaftarPerjalanan.jsx";
 import SumberDanaAdmin from "./pages/Admin/SumberDanaAdmin.jsx";
+import StatistikPegawai from "./pages/Admin/StatistikPegawai.jsx";
 import Profile from "./pages/Profile.jsx";
 function App() {
   const dispatch = useDispatch();
@@ -144,6 +145,13 @@ function App() {
           <ProtectedRoute
             component={DaftarPegawai}
             path="/daftar-pegawai"
+            exact
+            roleRoute={[5]}
+          />
+
+          <ProtectedRoute
+            component={StatistikPegawai}
+            path="/statistik-pegawai"
             exact
             roleRoute={[5]}
           />
