@@ -497,10 +497,6 @@ function Rampung(props) {
                 <Text fontWeight={"600"} fontSize={"18px"}>
                   Asal: {dataRampung?.result?.perjalanan?.asal}
                 </Text>
-                {/* {JSON.stringify(dataRampung?.result?.perjalanan.tanggalPengajuan)}
-              {JSON.stringify(user[0]?.unitKerja_profile)}
-  
-              {JSON.stringify(bendaharaSelected)} */}
 
                 <Text>
                   Status: {dataRampung?.result?.status.statusKuitansi}
