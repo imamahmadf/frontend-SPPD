@@ -51,7 +51,7 @@ function DetailPegawaiAdmin(props) {
         }/pegawai/get/detail-pegawai/${props.match.params.id}`
       );
       setDataPegawai(res.data.result);
-      console.log(res.data.result);
+      console.log(res.data);
     } catch (err) {
       console.error(err);
       setError("Gagal memuat data pegawai");
@@ -114,6 +114,8 @@ function DetailPegawaiAdmin(props) {
             <Thead>
               <Tr>
                 <Th>nomor SPD</Th>
+                <Th>Tanggal Berangkat</Th>
+                <Th>Tanggal Pulang</Th>
                 <Th>Tujuan</Th>
                 <Th>Biaya Perjalanan</Th>
               </Tr>
@@ -122,6 +124,25 @@ function DetailPegawaiAdmin(props) {
               {dataPegawai[0]?.personils?.map((item, index) => (
                 <Tr key={index}>
                   <Td>{item?.nomorSPD || "-"}</Td>
+                  <Td>
+                    {new Date(item?.tanggalBerangkat).toLocaleDateString(
+                      "id-ID",
+                      {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }
+                    ) || "-"}
+                  </Td>
+                  <Td>
+                    {new Date(item?.tanggalPulang).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    }) || "-"}
+                  </Td>
                   <Td>
                     {item?.tujuan?.map((val, idx) => (
                       <Text key={idx}>{val || "-"}</Text>

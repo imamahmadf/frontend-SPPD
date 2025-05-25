@@ -58,6 +58,85 @@ function Daftar() {
     setPage(selected);
   };
 
+  const postNotaDinas = (val) => {
+    setIsLoading(true);
+
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perjalanan/post/nota-dinas`,
+        {
+          pegawai: val.personils,
+          dataTtdSurTug: dataTtdSuratTugas,
+          dataTtdNotaDinas,
+          PPTKId: dataPPTK.value.id,
+          tanggalPengajuan,
+          noSurat: dataSeed?.resultDaftarNomorSurat,
+          subKegiatanId: dataSubKegiatan.value.id,
+          untuk,
+          dasar,
+          asal,
+          kodeRekeningFE: `${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan.value.kodeRekening}`,
+          ttdNotDis: dataTtdNotaDinas,
+          perjalananKota,
+          // sumber: dataKegiatan.value.sumber,
+          jenis: jenisPerjalanan.value,
+          dalamKota: dataKota,
+          tanggalBerangkat,
+          tanggalPulang,
+          indukUnitKerjaFE: user[0]?.unitKerja_profile,
+          KPAId: dataKPA.value.id,
+          kodeKlasifikasi: dataKodeKlasifikasi,
+          dataBendaharaId: dataBendahara.id,
+          pelayananKesehatanId: jenisPelayananKesehatan,
+          isSrikandi,
+        },
+        {
+          responseType: "blob", // Penting untuk menerima file sebagai blob
+        }
+      )
+      .then((res) => {
+        console.log(res.data); // Log respons dari backend
+
+        // Buat URL untuk file yang diunduh
+        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "nota_dinas.docx"); // Nama file yang diunduh
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // Tampilkan toast sukses
+        toast({
+          title: "Berhasil",
+          description: "File nota dinas berhasil diunduh",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
+
+        // Redirect setelah download selesai
+        history.push(`/daftar`);
+      })
+      .catch((err) => {
+        console.error(err); // Tangani error
+        setIsLoading(false);
+
+        // Tampilkan toast error
+        toast({
+          title: "Gagal",
+          description: "Terjadi kesalahan saat mengunduh file",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
+      });
+  };
+
   const postSuratTugas = (val) => {
     setIsLoading(true);
     axios
@@ -215,9 +294,11 @@ function Daftar() {
                           : "-"}
                       </Td>
                       <Td>
-                        {item.tempats?.[0]?.tanggalPulang
+                        {item.tempats?.[item.tempats.length - 1]?.tanggalPulang
                           ? new Date(
-                              item.tempats[0].tanggalPulang
+                              item.tempats[
+                                item.tempats.length - 1
+                              ].tanggalPulang
                             ).toLocaleDateString()
                           : "-"}
                       </Td>

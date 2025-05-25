@@ -40,7 +40,9 @@ import DetailIndukUnitKerja from "./pages/Admin/DetailIndukUnitKerja.jsx";
 import DaftarPerjalanan from "./pages/Admin/DaftarPerjalanan.jsx";
 import SumberDanaAdmin from "./pages/Admin/SumberDanaAdmin.jsx";
 import StatistikPegawai from "./pages/Admin/StatistikPegawai.jsx";
+import SuratTugasKadis from "./pages/SuratTugasKadis.jsx";
 import Profile from "./pages/Profile.jsx";
+import TemplateKadis from "./pages/TemplateKadis.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -89,6 +91,12 @@ function App() {
             roleRoute={[5, 1]}
           />
           <ProtectedRoute
+            component={SuratTugasKadis}
+            path="/daftar/kadis"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
             component={Profile}
             path="/profile"
             exact
@@ -123,6 +131,12 @@ function App() {
           <ProtectedRoute
             component={Template}
             path="/admin/template"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={TemplateKadis}
+            path="/template-kadis"
             exact
             roleRoute={[5, 1]}
           />

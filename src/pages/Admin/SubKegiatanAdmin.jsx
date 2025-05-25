@@ -122,6 +122,17 @@ function SubKegiatanAdmin() {
   }, []);
 
   const handleEdit = (item) => {
+    if (editingId !== null) {
+      toast({
+        title: "Peringatan",
+        description: "Selesaikan edit yang sedang berlangsung terlebih dahulu",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setEditingId(item.id);
     setEditForm({
       kodeRekening: item.kodeRekening,
@@ -166,13 +177,13 @@ function SubKegiatanAdmin() {
 
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"}>
+      <Box py={"120px"} bgColor={"secondary"} px={"30px"}>
         <Container
           bgColor={"white"}
           borderRadius={"5px"}
           border={"1px"}
           borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
+          maxW={"2880px"}
           p={"30px"}
         >
           {" "}
@@ -187,6 +198,9 @@ function SubKegiatanAdmin() {
                   <Th>Kode Rekening</Th>
                   <Th>sub Kegiatan</Th>
                   <Th>Anggaran</Th>
+                  <Th>Realisasi</Th>
+                  <Th>presentase</Th>
+                  <Th>Sisa Anggaran</Th>
                   <Th>Aksi</Th>
                 </Tr>
               </Thead>
@@ -236,8 +250,32 @@ function SubKegiatanAdmin() {
                           }
                         />
                       ) : (
-                        item.anggaran
+                        new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        }).format(item.anggaran)
                       )}
+                    </Td>
+                    <Td>
+                      {new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }).format(item.total)}
+                    </Td>
+                    <Td>
+                      {item.anggaran
+                        ? `${((item.total / item.anggaran) * 100).toFixed(2)}%`
+                        : "-"}
+                    </Td>
+
+                    <Td
+                      bgColor={item.anggaran - item.total < 0 ? "danger" : null}
+                      color={item.anggaran - item.total < 0 ? "white" : "black"}
+                    >
+                      {new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }).format(item.anggaran - item.total)}
                     </Td>
                     <Td>
                       {editingId === item.id ? (

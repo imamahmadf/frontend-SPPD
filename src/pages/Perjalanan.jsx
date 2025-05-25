@@ -1534,45 +1534,6 @@ function Perjalanan() {
                 </Container>
               )}
 
-              {/* <Container
-              border={"1px"}
-              borderRadius={"6px"}
-              borderColor={"rgba(229, 231, 235, 1)"}
-              maxW={"1280px"}
-              bgColor={"white"}
-              p={"30px"}
-            >
-
-              <HStack w={"100%"} spacing={4}></HStack>{" "}
-              <Flex mt={"40px"} gap={4} w={"100%"}>
-                <Box w={"50%"}>
-                  <Box>
-                    <Text>Nomor Surat Tugas:</Text>
-                    <Text>
-                      {dataSeed?.resultDaftarNomorSurat?.length > 0
-                        ? dataSeed.resultDaftarNomorSurat[0]?.jenisSurat.nomorSurat
-                        : "Tidak ada data"}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Text>Nomor Nota Dinas:</Text>
-                    <Text>
-                      {dataSeed?.resultDaftarNomorSurat?.length > 0
-                        ? dataSeed.resultDaftarNomorSurat[1]?.jenisSurat.nomorSurat
-                        : "Tidak ada data"}
-                    </Text>
-                  </Box>
-                  <Box>
-                    <Text>Nomor SPD:</Text>
-                    <Text>
-                      {dataSeed?.resultDaftarNomorSurat?.length > 0
-                        ? dataSeed.resultDaftarNomorSurat[2]?.jenisSurat.nomorSurat
-                        : "Tidak ada data"}
-                    </Text>
-                  </Box>
-                </Box>
-              </Flex>
-            </Container> */}
               <Container maxW={"1280px"} p={0}>
                 {" "}
                 <Button

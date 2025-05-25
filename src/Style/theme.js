@@ -1,6 +1,7 @@
 import { extendTheme } from "@chakra-ui/react";
 import { buttonStyles as Button } from "./Components/buttonStyles";
 import { tableStyles as Table } from "./Components/tableStyles";
+import { selectStyles as Select2 } from "./Components/selectStyles";
 
 // import "@fontsource/work-sans";
 
@@ -30,6 +31,7 @@ export const myNewTheme = extendTheme({
   components: {
     Button,
     Table,
+    Select2,
   },
 
   breakpoints: { ...breakpoints },

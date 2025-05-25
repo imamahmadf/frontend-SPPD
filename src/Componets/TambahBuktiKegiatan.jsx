@@ -137,16 +137,19 @@ function TambahBuktiKegiatan(props) {
             : Foto
         }
       />
-      <Button
-        onClick={onInputOpen}
-        position="absolute"
-        bottom="0px"
-        left="0px"
-        h={"40px"}
-        variant={"secondary"}
-      >
-        Tambah +
-      </Button>
+      {props.status === 1 || props.status == 4 ? (
+        <Button
+          onClick={onInputOpen}
+          position="absolute"
+          bottom="0px"
+          left="0px"
+          h={"40px"}
+          variant={"secondary"}
+        >
+          Tambah +
+        </Button>
+      ) : null}
+
       <Modal
         closeOnOverlayClick={false}
         isOpen={isInputOpen}

@@ -31,7 +31,7 @@ function Detail(props) {
   return (
     <>
       <Layout>
-        <Box pt={"80px"} bgColor={"rgba(249, 250, 251, 1)"} pb={"40px"}>
+        <Box pt={"140px"} bgColor={"rgba(249, 250, 251, 1)"} pb={"40px"}>
           <Container
             bgColor={"white"}
             borderRadius={"5px"}
@@ -43,7 +43,13 @@ function Detail(props) {
             {detailPerjalanan?.personils?.map((item, index) => {
               return (
                 <>
-                  <Box bgColor={"blue"} color={"white"} p={"10px"} m={"15px"}>
+                  <Box
+                    bgColor={"primary"}
+                    borderRadius={"5px"}
+                    color={"white"}
+                    p={"10px"}
+                    m={"15px"}
+                  >
                     <Text>{item.pegawai.nama}</Text>
                     <Text>{item.total}</Text>
                     <Button

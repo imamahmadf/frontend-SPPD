@@ -169,6 +169,18 @@ function Navbar() {
                 </Menu>
 
                 <Menu>
+                  <MenuButton as={Button}>Kepala Dinas</MenuButton>
+                  <MenuList color={"black"}>
+                    <Link to={"/daftar/kadis"}>
+                      <MenuItem>Daftar Perjalanan</MenuItem>
+                    </Link>
+                    <Link to={"/template-kadis"}>
+                      <MenuItem>Template</MenuItem>
+                    </Link>
+                  </MenuList>
+                </Menu>
+
+                <Menu>
                   <MenuButton as={Button}>ADMIN</MenuButton>
                   <MenuList color={"black"}>
                     <Link to={"/admin/induk-unit-kerja"}>

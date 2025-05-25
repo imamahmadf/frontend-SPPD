@@ -486,6 +486,7 @@ function Rampung(props) {
                 <TambahBuktiKegiatan
                   pic={dataRampung?.result?.perjalanan?.pic}
                   id={dataRampung?.result?.perjalanan?.id}
+                  status={dataRampung?.result?.status.id}
                   randomNumber={setRandomNumber}
                 />
               </Box>

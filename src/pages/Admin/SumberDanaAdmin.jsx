@@ -45,6 +45,7 @@ import Loading from "../../Componets/Loading";
 function SumberDanaAdmin() {
   const [dataSumberDana, setDataSumberDana] = useState(null);
   const [dataJenisPerjalanan, setDataJenisPerjalanan] = useState(null);
+  const [dataPelayanan, setDataPelayanan] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({
     sumber: "",
@@ -57,6 +58,11 @@ function SumberDanaAdmin() {
     jenis: "",
     kodeRekening: "",
   });
+  const [editPelayananForm, setEditPelayananForm] = useState({
+    jenis: "",
+    uangTransport: 0,
+  });
+  const [editingPelayananId, setEditingPelayananId] = useState(null);
   const toast = useToast();
 
   async function fetchDataSumberDana() {
@@ -70,6 +76,7 @@ function SumberDanaAdmin() {
         console.log(res.data);
         setDataSumberDana(res.data.result);
         setDataJenisPerjalanan(res.data.resultJenisPerjalanan);
+        setDataPelayanan(res.data.resultPelayanan);
       })
       .catch((err) => {
         console.error(err); // Tangani error
@@ -164,6 +171,48 @@ function SumberDanaAdmin() {
 
   const handleCancelJenis = () => {
     setEditingJenisId(null);
+  };
+
+  const handleEditPelayanan = (item) => {
+    setEditingPelayananId(item.id);
+    setEditPelayananForm({
+      jenis: item.jenis,
+      uangTransport: item.uangTransport,
+    });
+  };
+
+  const handleSavePelayanan = async (id) => {
+    try {
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/keuangan/edit/pelayanan/${id}`,
+        editPelayananForm
+      );
+
+      toast({
+        title: "Berhasil",
+        description: "Data pelayanan berhasil diperbarui",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      setEditingPelayananId(null);
+      fetchDataSumberDana();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui data pelayanan",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleCancelPelayanan = () => {
+    setEditingPelayananId(null);
   };
 
   return (
@@ -335,6 +384,83 @@ function SumberDanaAdmin() {
                       </HStack>
                     ) : (
                       <Button onClick={() => handleEditJenis(item)}>
+                        Edit
+                      </Button>
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Container>{" "}
+        <Container
+          border={"1px"}
+          borderRadius={"6px"}
+          borderColor={"rgba(229, 231, 235, 1)"}
+          maxW={"1280px"}
+          bgColor={"white"}
+          p={"30px"}
+          my={"30px"}
+        >
+          <Heading mb={"20px"}>Pelayanan kesehatan</Heading>
+          <Table variant={"primary"}>
+            <Thead>
+              <Tr>
+                <Th>Jenis</Th>
+                <Th>Uang transport</Th>
+                <Th>Aksi</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {dataPelayanan?.map((item, index) => (
+                <Tr key={item.id}>
+                  <Td>
+                    {editingPelayananId === item.id ? (
+                      <Input
+                        value={editPelayananForm.jenis}
+                        onChange={(e) =>
+                          setEditPelayananForm({
+                            ...editPelayananForm,
+                            jenis: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      item.jenis
+                    )}
+                  </Td>
+                  <Td>
+                    {editingPelayananId === item.id ? (
+                      <Input
+                        type="number"
+                        value={editPelayananForm.uangTransport}
+                        onChange={(e) =>
+                          setEditPelayananForm({
+                            ...editPelayananForm,
+                            uangTransport: parseInt(e.target.value),
+                          })
+                        }
+                      />
+                    ) : (
+                      new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }).format(item.uangTransport)
+                    )}
+                  </Td>
+                  <Td>
+                    {editingPelayananId === item.id ? (
+                      <HStack>
+                        <Button
+                          colorScheme="green"
+                          onClick={() => handleSavePelayanan(item.id)}
+                        >
+                          Simpan
+                        </Button>
+                        <Button onClick={handleCancelPelayanan}>Batal</Button>
+                      </HStack>
+                    ) : (
+                      <Button onClick={() => handleEditPelayanan(item)}>
                         Edit
                       </Button>
                     )}

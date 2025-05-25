@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet";
 import {
   Box,
   Text,
@@ -45,43 +46,53 @@ function Home() {
   const isAuthenticated =
     useSelector(selectIsAuthenticated) || localStorage.getItem("token");
   return (
-    <Layout>
-      <Box
-        height="100vh"
-        backgroundImage={`url(${HomeFoto})`}
-        backgroundSize="cover"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        position="relative"
-      >
-        <Box
-          position="absolute"
-          top="0"
-          left="0"
-          right="0"
-          bottom="0"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
+    <>
+      <Helmet>
+        <title>Aplikasi Dinas Kesehatan Kabupaten Paser</title>
+        <meta
+          name="description"
+          content="Pena Dinkes adalah aplikasi administrasi di Dinas Kesehatan Kabupaten paser"
         />
-        <Box>
-          <Text
-            color="white"
-            textAlign="center"
-            position="relative"
-            fontWeight={800}
-            fontSize={{ ss: "30px", sl: "60px" }}
-            mb={"20px"}
-          >
-            SELAMAT DATANG DI PENA
-          </Text>
-          {isAuthenticated ? null : (
+      </Helmet>
+      <div>Konten halaman</div>
+      <Layout>
+        <Box
+          height="100vh"
+          backgroundImage={`url(${HomeFoto})`}
+          backgroundSize="cover"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          position="relative"
+        >
+          <Box
+            position="absolute"
+            top="0"
+            left="0"
+            right="0"
+            bottom="0"
+            backgroundColor="rgba(0, 0, 0, 0.5)"
+          />
+          <Box>
+            <Text
+              color="white"
+              textAlign="center"
+              position="relative"
+              fontWeight={800}
+              fontSize={{ ss: "30px", sl: "60px" }}
+              mb={"20px"}
+            >
+              SELAMAT DATANG DI PENA
+            </Text>
+            {/* {isAuthenticated ? null : (
             <>
               <Button variant={"primary"}>Login</Button>
             </>
-          )}
+          )} */}
+          </Box>
         </Box>
-      </Box>
-    </Layout>
+      </Layout>
+    </>
   );
 }
 
