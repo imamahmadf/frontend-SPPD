@@ -105,7 +105,7 @@ function EditJenisSurat() {
 
   return (
     <Layout>
-      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}

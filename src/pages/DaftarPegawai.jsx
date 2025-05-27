@@ -29,6 +29,7 @@ import {
   SimpleGrid,
   Spacer,
   Spinner,
+  useColorMode,
 } from "@chakra-ui/react";
 import { BsCaretRightFill } from "react-icons/bs";
 import { BsCaretLeftFill } from "react-icons/bs";
@@ -89,6 +90,7 @@ function DaftarPegawai() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const user = useSelector(userRedux);
+  const { colorMode, toggleColorMode } = useColorMode();
 
   function inputHandler(event, field) {
     const tes = setTimeout(() => {
@@ -229,13 +231,15 @@ function DaftarPegawai() {
       {isLoading ? (
         <Loading />
       ) : (
-        <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"65vh"}>
           <Container
             border={"1px"}
             borderRadius={"6px"}
-            borderColor={"rgba(229, 231, 235, 1)"}
+            borderColor={
+              colorMode === "dark" ? "gray.800" : "rgba(229, 231, 235, 1)"
+            }
             maxW={"2880px"}
-            bgColor={"white"}
+            bg={colorMode === "dark" ? "gray.800" : "white"}
             p={"30px"}
           >
             <Flex gap={5}>

@@ -41,7 +41,7 @@ import { userRedux, selectRole } from "../Redux/Reducers/auth";
 function PengaturanPegawai() {
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}></Box>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}></Box>
     </Layout>
   );
 }

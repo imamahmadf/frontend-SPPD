@@ -177,7 +177,7 @@ function SubKegiatanAdmin() {
 
   return (
     <Layout>
-      <Box py={"120px"} bgColor={"secondary"} px={"30px"}>
+      <Box bgColor={"secondary"} px={"30px"}>
         <Container
           bgColor={"white"}
           borderRadius={"5px"}

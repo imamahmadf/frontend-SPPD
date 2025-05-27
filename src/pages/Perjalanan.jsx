@@ -113,7 +113,7 @@ function Perjalanan() {
 
   const submitPerjalanan = () => {
     setIsLoading(true);
-
+    console.log(dataKota, perjalananKota);
     axios
       .post(
         `${
@@ -130,7 +130,7 @@ function Perjalanan() {
           untuk,
           dasar,
           asal,
-          kodeRekeningFE: `${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan.value.kodeRekening}`,
+          kodeRekeningFE: `${dataSubKegiatan?.value?.kodeRekening}${jenisPerjalanan.value.kodeRekening}`,
           ttdNotDis: dataTtdNotaDinas,
           perjalananKota,
           // sumber: dataKegiatan.value.sumber,
@@ -336,7 +336,7 @@ function Perjalanan() {
       ) : (
         <>
           {dataTemplate.templateNotaDinas ? (
-            <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+            <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
               <Container
                 border={"1px"}
                 borderRadius={"6px"}
@@ -1550,7 +1550,7 @@ function Perjalanan() {
             </Box>
           ) : (
             <>
-              <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+              <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
                 <Container
                   border={"1px"}
                   borderRadius={"6px"}

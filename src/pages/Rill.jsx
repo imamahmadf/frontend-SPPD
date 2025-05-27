@@ -37,7 +37,7 @@ function Rill(props) {
   return (
     <>
       <Layout>
-        <Box pt={"80px"} bgColor={"rgba(249, 250, 251, 1)"} pb={"40px"}>
+        <Box bgColor={"rgba(249, 250, 251, 1)"} pb={"40px"}>
           <Container
             bgColor={"white"}
             borderRadius={"5px"}

@@ -173,7 +173,7 @@ function suratKeluarAdmin() {
   }, [page]);
   return (
     <Layout>
-      <Box pt={"80px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
@@ -187,45 +187,25 @@ function suratKeluarAdmin() {
             Tambah +
           </Button>
           <Box p={"30px"}>
-            <Table variant="simple">
-              <Thead bgColor={"primary"}>
+            <Table variant="primary">
+              <Thead>
                 <Tr>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    no.
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Nomor Surat
-                  </Th>{" "}
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Jenis Surat
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Tujuan
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Perihal
-                  </Th>
+                  <Th>no.</Th>
+                  <Th>Nomor Surat</Th> <Th>Jenis Surat</Th>
+                  <Th>Tujuan</Th>
+                  <Th>Perihal</Th>
                 </Tr>
               </Thead>
-              <Tbody bgColor={"secondary"}>
+              <Tbody>
                 {dataSuratKeluar?.map((item, index) => {
                   return (
                     <Tr key={item.id}>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {index + 1}
-                      </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {item.nomor}
-                      </Td>{" "}
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                      <Td>{index + 1}</Td>
+                      <Td>{item.nomor}</Td>{" "}
+                      <Td>
                         {item.perjalanans[0] ? "Nota Dinas" : "Surat keluar"}
                       </Td>
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {item.tujuan}
-                      </Td>{" "}
-                      <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                        {item.perihal}
-                      </Td>{" "}
+                      <Td>{item.tujuan}</Td> <Td>{item.perihal}</Td>{" "}
                     </Tr>
                   );
                 })}

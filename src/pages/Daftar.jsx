@@ -243,7 +243,7 @@ function Daftar() {
       {isLoading && <Loading />}
       <Layout>
         {dataPerjalanan[0] ? (
-          <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+          <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
             <Box
               style={{ overflowX: "auto" }}
               bgColor={"white"}

@@ -3,8 +3,6 @@ import { buttonStyles as Button } from "./Components/buttonStyles";
 import { tableStyles as Table } from "./Components/tableStyles";
 import { selectStyles as Select2 } from "./Components/selectStyles";
 
-// import "@fontsource/work-sans";
-
 const breakpoints = {
   ss: "20em",
   sm: "30em",
@@ -22,12 +20,57 @@ export const myNewTheme = extendTheme({
     primaryGelap: "rgba(19, 122, 106, 1)",
     oren: "rgba(235, 92, 24, 1)",
     ungu: "rgba(73, 79, 171, 1)",
-    secondary: "rgba(244, 244, 237, 1)",
+    secondary: {
+      light: "rgb(245 245 245)",
+      dark: "black.900",
+    },
     danger: "rgba(198, 46, 46, 1)",
     gelap: "rgba(38, 38, 38, 1)",
     terang: "rgba(243, 243, 243, 1)",
     background: "rgba(243, 243, 243, 1)",
   },
+
+  config: {
+    initialColorMode: "light",
+    useSystemColorMode: false,
+  },
+
+  styles: {
+    global: (props) => ({
+      body: {
+        bg: props.colorMode === "dark" ? "gray.900" : "background",
+        color: props.colorMode === "dark" ? "white" : "gray.800",
+      },
+      ".chakra-card": {
+        bg: props.colorMode === "dark" ? "gray.800" : "white",
+      },
+      ".chakra-input": {
+        bg: props.colorMode === "dark" ? "gray.700" : "white",
+      },
+      ".chakra-select": {
+        bg: props.colorMode === "dark" ? "gray.700" : "white",
+      },
+      ".chakra-textarea": {
+        bg: props.colorMode === "dark" ? "gray.700" : "white",
+      },
+      ".chakra-modal__content": {
+        bg: props.colorMode === "dark" ? "gray.800" : "white",
+      },
+      ".chakra-menu__menu-list": {
+        bg: props.colorMode === "dark" ? "gray.800" : "white",
+      },
+      ".chakra-accordion__button": {
+        bg: props.colorMode === "dark" ? "gray.800" : "white",
+        _hover: {
+          bg: props.colorMode === "dark" ? "gray.700" : "gray.100",
+        },
+      },
+      ".chakra-accordion__panel": {
+        bg: props.colorMode === "dark" ? "gray.800" : "white",
+      },
+    }),
+  },
+
   components: {
     Button,
     Table,

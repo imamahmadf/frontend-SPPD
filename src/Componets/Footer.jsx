@@ -22,7 +22,7 @@ import LogoPutih from "../assets/logo-putih.png";
 function Footer() {
   return (
     <>
-      <Box bgColor={"primary"}>
+      <Box bgColor={"primary"} zIndex={1001}>
         <Container py={"50px"} maxW={"1280px"}>
           <Image w={"350px"} src={LogoPutih} />
           <Box color={"white"} mt={"60px"}>

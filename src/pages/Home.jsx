@@ -35,6 +35,7 @@ import {
 import axios from "axios";
 import Layout from "../Componets/Layout";
 import { useSelector } from "react-redux";
+import Navbar from "../Componets/Navbar";
 import {
   userRedux,
   selectRole,
@@ -54,7 +55,7 @@ function Home() {
           content="Pena Dinkes adalah aplikasi administrasi di Dinas Kesehatan Kabupaten paser"
         />
       </Helmet>
-      <div>Konten halaman</div>
+
       <Layout>
         <Box
           height="100vh"

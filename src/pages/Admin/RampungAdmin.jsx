@@ -106,7 +106,7 @@ function RampungAdmin(props) {
 
   return (
     <Layout>
-      <Box pt={"140px"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           bgColor={"white"}
           borderRadius={"5px"}

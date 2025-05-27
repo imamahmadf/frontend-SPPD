@@ -8,8 +8,8 @@ export const tableStyles = {
         overflow: "hidden",
       },
       thead: {
-        bg: "primary",
-        color: "white",
+        bg: props.colorMode === "dark" ? "primary" : "primary",
+        color: props.colorMode === "dark" ? "white" : "white",
         th: {
           py: "12px",
           px: "16px",
@@ -21,14 +21,16 @@ export const tableStyles = {
       tbody: {
         tr: {
           _hover: {
-            bg: "gray.50",
+            bg: props.colorMode === "dark" ? "gray.700" : "gray.50",
           },
           td: {
             py: "12px",
             px: "16px",
             borderBottom: "1px solid",
-            borderColor: "gray.200",
+            borderColor: props.colorMode === "dark" ? "black" : "gray.200",
             fontSize: "14px",
+            color: props.colorMode === "dark" ? "white" : "inherit",
+            bg: props.colorMode === "dark" ? "gray.800" : "white",
           },
         },
       },
@@ -40,30 +42,31 @@ export const tableStyles = {
         borderRadius: "8px",
         overflow: "hidden",
         border: "1px solid",
-        borderColor: "gray.200",
+        borderColor: props.colorMode === "dark" ? "gray.700" : "gray.200",
       },
       thead: {
-        bg: "gray.100",
+        bg: props.colorMode === "dark" ? "gray.700" : "gray.100",
         th: {
           py: "12px",
           px: "16px",
           textAlign: "left",
           fontWeight: "600",
           fontSize: "14px",
-          color: "gray.700",
+          color: props.colorMode === "dark" ? "white" : "gray.700",
         },
       },
       tbody: {
         tr: {
           _hover: {
-            bg: "primaryTerang",
+            bg: props.colorMode === "dark" ? "gray.700" : "primaryTerang",
           },
           td: {
             py: "12px",
             px: "16px",
             borderBottom: "1px solid",
-            borderColor: "gray.200",
+            borderColor: props.colorMode === "dark" ? "gray.700" : "gray.200",
             fontSize: "14px",
+            color: props.colorMode === "dark" ? "white" : "inherit",
           },
         },
       },

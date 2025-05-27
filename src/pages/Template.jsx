@@ -60,13 +60,7 @@ const Template = () => {
   }, []);
   return (
     <Layout>
-      <Box
-        pt={"140px"}
-        bgColor={"secondary"}
-        pb={"40px"}
-        px={"30px"}
-        minH={"90vh"}
-      >
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"90vh"}>
         <Container
           border={"1px"}
           borderRadius={"6px"}
