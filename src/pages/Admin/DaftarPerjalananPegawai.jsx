@@ -52,7 +52,7 @@ function DaftarPerjalanan() {
   const [dataPegawai, setDataPegawai] = useState([]);
   const history = useHistory();
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(15);
+  const [limit, setLimit] = useState(50);
   const [keyword, setKeyword] = useState("");
   const [alfabet, setAlfabet] = useState("");
   const [pages, setPages] = useState(0);
@@ -128,15 +128,8 @@ function DaftarPerjalanan() {
   }, [page, keyword]);
   return (
     <Layout>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"2880px"}
-          bgColor={"white"}
-          p={"30px"}
-        >
+      <Box pb={"40px"} px={"30px"}>
+        <Container variant={"primary"} maxW={"2880px"} p={"30px"}>
           <Flex mb={"30px"}>
             <Box>
               <FormControl>

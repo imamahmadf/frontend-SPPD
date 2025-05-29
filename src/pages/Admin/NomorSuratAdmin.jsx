@@ -107,15 +107,7 @@ function NomorSuratAdmin() {
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          p={"30px"}
-          my={"30px"}
-        >
+        <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
           <Table variant={"primary"}>
             <Thead>
               <Tr>

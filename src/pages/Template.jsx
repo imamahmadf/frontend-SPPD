@@ -14,6 +14,12 @@ import {
   FormLabel,
   Select,
   Container,
+  Thead,
+  Table,
+  Tr,
+  Th,
+  Td,
+  Tbody,
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
@@ -35,7 +41,7 @@ const Template = () => {
       )
       .then((res) => {
         setDataTemplate(res.data.result);
-        console.log(res.data);
+        console.log(res.data.result);
       })
       .catch((err) => {
         console.error(err.message);
@@ -55,21 +61,43 @@ const Template = () => {
       ),
   });
 
+  const handleDownload = async (fileName) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/download`,
+        {
+          params: { fileName },
+
+          responseType: "blob",
+        }
+      );
+
+      // Membuat URL untuk file yang akan diunduh
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      toast({
+        title: "Gagal Mengunduh",
+        description: "Terjadi kesalahan saat mengunduh file",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   useEffect(() => {
     fetchTemplate();
   }, []);
   return (
     <Layout>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"90vh"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          bgColor={"white"}
-          p={"30px"}
-          my={"30px"}
-          minW={"1000px"}
-        >
+      <Box>
+        <Container variant={"primary"} p={"30px"} my={"30px"} minW={"1000px"}>
           <Box
             mx="auto"
             mt={10}
@@ -115,6 +143,7 @@ const Template = () => {
 
                   resetForm();
                   setSelectedFile(null);
+                  fetchTemplate();
                 } catch (error) {
                   toast({
                     title: "Gagal Mengunggah",
@@ -180,7 +209,7 @@ const Template = () => {
 
                     <Button
                       type="submit"
-                      colorScheme="blue"
+                      variant={"primary"}
                       isLoading={isSubmitting}
                       isDisabled={!selectedFile}
                     >
@@ -190,6 +219,69 @@ const Template = () => {
                 </Form>
               )}
             </Formik>
+          </Box>
+          <Box>
+            <Box mt={"30px"}>
+              <Table variant={"primary"}>
+                <Thead>
+                  <Tr>
+                    <Th>Unit Kerja</Th>
+                    <Th>Nota Dinas</Th>
+                    <Th>Surat Tugas & SPD</Th>
+                    <Th>Surat Tugas</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  <Tr>
+                    <Td>{dataTemplate.indukUnitKerja}</Td>
+                    <Td>
+                      {dataTemplate.templateNotaDinas ? (
+                        <Button
+                          variant={"primary"}
+                          onClick={() =>
+                            handleDownload(dataTemplate.templateNotaDinas)
+                          }
+                        >
+                          lihat
+                        </Button>
+                      ) : (
+                        "-"
+                      )}
+                    </Td>
+                    <Td>
+                      {dataTemplate.templateSuratTugas ? (
+                        <Button
+                          variant={"primary"}
+                          onClick={() =>
+                            handleDownload(dataTemplate.templateSuratTugas)
+                          }
+                        >
+                          lihat
+                        </Button>
+                      ) : (
+                        "-"
+                      )}
+                    </Td>
+                    <Td>
+                      {dataTemplate.templateSuratTugasSingkat ? (
+                        <Button
+                          variant={"primary"}
+                          onClick={() =>
+                            handleDownload(
+                              dataTemplate.templateSuratTugasSingkat
+                            )
+                          }
+                        >
+                          lihat
+                        </Button>
+                      ) : (
+                        "-"
+                      )}
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+            </Box>
           </Box>
         </Container>
       </Box>

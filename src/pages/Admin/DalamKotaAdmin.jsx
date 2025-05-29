@@ -204,21 +204,8 @@ function DalamKotaAdmin() {
         <Loading />
       ) : (
         <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-          <Container
-            border={"1px"}
-            borderRadius={"6px"}
-            borderColor={"rgba(229, 231, 235, 1)"}
-            maxW={"1280px"}
-            bgColor={"white"}
-            pt={"30px"}
-            px={"0px"}
-          >
-            <Button
-              ms={"30px"}
-              onClick={onTambahOpen}
-              mb={"30px"}
-              variant={"primary"}
-            >
+          <Container maxW={"1280px"} variant={"primary"} pt={"30px"} px={"0px"}>
+            <Button ms={"30px"} onClick={onTambahOpen} variant={"primary"}>
               Tambah +
             </Button>
             <Box p={"30px"}>
@@ -426,10 +413,10 @@ function DalamKotaAdmin() {
                   </FormControl>
                 </ModalBody>
                 <ModalFooter>
-                  <Button colorScheme="blue" mr={3} onClick={handleSave}>
+                  <Button variant={"primary"} mr={3} onClick={handleSave}>
                     Simpan
                   </Button>
-                  <Button variant="ghost" onClick={handleClose}>
+                  <Button variant={"cancle"} onClick={handleClose}>
                     Batal
                   </Button>
                 </ModalFooter>
@@ -488,7 +475,7 @@ function DalamKotaAdmin() {
                   placeholder="4 jam"
                 />
               </FormControl>
-              <FormControl border={0} bgColor={"white"} flex="1">
+              <FormControl border={0} flex="1">
                 <FormLabel fontSize={"24px"}>Induk Unit Kerja</FormLabel>
                 <Select2
                   options={dataIndukUnitKerja?.map((val) => ({
@@ -528,7 +515,9 @@ function DalamKotaAdmin() {
                 />
               </FormControl>
             </Box>
-            <Button onClick={tambahTujuan}>Tambah</Button>
+            <Button variant={"primary"} onClick={tambahTujuan}>
+              Tambah
+            </Button>
           </ModalBody>
 
           <ModalFooter pe={"60px"} pb={"30px"}></ModalFooter>

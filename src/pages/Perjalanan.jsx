@@ -338,11 +338,8 @@ function Perjalanan() {
           {dataTemplate.templateNotaDinas ? (
             <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
               <Container
-                border={"1px"}
-                borderRadius={"6px"}
-                borderColor={"rgba(229, 231, 235, 1)"}
                 maxW={"1280px"}
-                bgColor={"white"}
+                variant={"primary"}
                 pt={"30px"}
                 ps={"0px"}
               >
@@ -467,16 +464,12 @@ function Perjalanan() {
                 </Box>
               </Container>
               <Container
-                border={"1px"}
-                borderRadius={"6px"}
-                borderColor={"rgba(229, 231, 235, 1)"}
                 maxW={"1280px"}
-                bgColor={"white"}
+                variant={"primary"}
                 pt={"30px"}
                 ps={"0px"}
                 my={"30px"}
               >
-                {" "}
                 <HStack>
                   <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
                   <Heading color={"primary"}>Daftar Personil</Heading>
@@ -690,11 +683,8 @@ function Perjalanan() {
                 </SimpleGrid>
               </Container>
               <Container
-                border={"1px"}
-                borderRadius={"6px"}
-                borderColor={"rgba(229, 231, 235, 1)"}
                 maxW={"1280px"}
-                bgColor={"white"}
+                variant={"primary"}
                 pt={"30px"}
                 ps={"0px"}
               >
@@ -703,12 +693,7 @@ function Perjalanan() {
                   <Heading color={"primary"}>Daftar Tanda Tangan</Heading>
                 </HStack>
                 <SimpleGrid columns={2} spacing={4} p={"30px"}>
-                  <FormControl
-                    border={0}
-                    bgColor={"white"}
-                    flex="1"
-                    my={"15px"}
-                  >
+                  <FormControl border={0} flex="1" my={"15px"}>
                     <FormLabel fontSize={"24px"}>
                       Tanda Tangan Nota Dinas
                     </FormLabel>
@@ -754,12 +739,7 @@ function Perjalanan() {
                       }}
                     />
                   </FormControl>
-                  <FormControl
-                    border={0}
-                    bgColor={"white"}
-                    flex="1"
-                    my={"15px"}
-                  >
+                  <FormControl border={0} flex="1" my={"15px"}>
                     <FormLabel fontSize={"24px"}>
                       Tanda tangan Surat Tugas
                     </FormLabel>
@@ -829,12 +809,7 @@ function Perjalanan() {
                       }}
                     />
                   </FormControl>
-                  <FormControl
-                    border={0}
-                    bgColor={"white"}
-                    flex="1"
-                    my={"15px"}
-                  >
+                  <FormControl border={0} flex="1" my={"15px"}>
                     <FormLabel fontSize={"24px"}>
                       Tanda Tangan Pengguna Anggaran
                     </FormLabel>
@@ -881,12 +856,7 @@ function Perjalanan() {
                     />
                   </FormControl>
 
-                  <FormControl
-                    border={0}
-                    bgColor={"white"}
-                    flex="1"
-                    my={"15px"}
-                  >
+                  <FormControl border={0} flex="1" my={"15px"}>
                     <FormLabel fontSize={"24px"}>Tanda Tangan PPTK</FormLabel>
                     <Select2
                       options={
@@ -933,11 +903,8 @@ function Perjalanan() {
                 </SimpleGrid>
               </Container>
               <Container
-                border={"1px"}
-                borderRadius={"6px"}
-                borderColor={"rgba(229, 231, 235, 1)"}
                 maxW={"1280px"}
-                bgColor={"white"}
+                variant={"primary"}
                 pt={"30px"}
                 ps={"0px"}
                 mt={"30px"}
@@ -1040,13 +1007,9 @@ function Perjalanan() {
               </Container>
               {dataSumberDana ? (
                 <>
-                  {" "}
                   <Container
-                    border={"1px"}
-                    borderRadius={"6px"}
-                    borderColor={"rgba(229, 231, 235, 1)"}
+                    variant={"primary"}
                     maxW={"1280px"}
-                    bgColor={"white"}
                     pt={"30px"}
                     ps={"0px"}
                     my={"30px"}
@@ -1449,12 +1412,10 @@ function Perjalanan() {
                             Tanggal Pengajuan
                           </FormLabel>
                           <Input
-                            bgColor={"terang"}
-                            height="60px"
-                            placeholder="Select Date and Time"
                             defaultValue={tanggalPengajuan}
                             type="date"
-                            border={"none"}
+                            height={"60px"}
+                            variant={"primary"}
                             onChange={(e) => handleChange(e, "pengajuan")}
                           />
                         </FormControl>
@@ -1465,10 +1426,9 @@ function Perjalanan() {
                             onChange={(e) => {
                               setAsal(e.target.value);
                             }}
-                            bgColor={"terang"}
-                            height="60px"
-                            placeholder="isi dengan asal "
                             defaultValue={asal}
+                            height={"60px"}
+                            variant={"primary"}
                           />
                         </FormControl>
                       </Flex>
@@ -1478,11 +1438,8 @@ function Perjalanan() {
               ) : null}
               {selectedPegawai.length > 0 && (
                 <Container
-                  border={"1px"}
-                  borderRadius={"6px"}
-                  borderColor={"rgba(229, 231, 235, 1)"}
+                  variant={"primary"}
                   maxW={"1280px"}
-                  bgColor={"white"}
                   pt={"30px"}
                   ps={"0px"}
                   my={"20px"}
@@ -1519,7 +1476,6 @@ function Perjalanan() {
                                   {pegawai.value.daftarGolongan.golongan}
                                 </Td>
                                 <Td>
-                                  {" "}
                                   {pegawai.value.daftarTingkatan.tingkatan}
                                 </Td>
                                 <Td>{pegawai.value.jabatan}</Td>
@@ -1534,8 +1490,7 @@ function Perjalanan() {
                 </Container>
               )}
 
-              <Container maxW={"1280px"} p={0}>
-                {" "}
+              <Container maxW={"1280px"} variant={"primary"} p={0}>
                 <Button
                   variant={"primary"}
                   onClick={submitPerjalanan}
@@ -1551,14 +1506,7 @@ function Perjalanan() {
           ) : (
             <>
               <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-                <Container
-                  border={"1px"}
-                  borderRadius={"6px"}
-                  borderColor={"rgba(229, 231, 235, 1)"}
-                  maxW={"1280px"}
-                  bgColor={"white"}
-                  p={"30px"}
-                >
+                <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
                   <Center minH={"80vh"}>
                     <Button
                       onClick={() => {
@@ -1566,8 +1514,7 @@ function Perjalanan() {
                       }}
                       variant={"primary"}
                     >
-                      {" "}
-                      Upload Template Surat{" "}
+                      Upload Template Surat
                     </Button>
                   </Center>
                 </Container>

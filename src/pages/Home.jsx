@@ -35,6 +35,7 @@ import {
 import axios from "axios";
 import Layout from "../Componets/Layout";
 import { useSelector } from "react-redux";
+import Footer from "../Componets/Footer";
 import Navbar from "../Componets/Navbar";
 import {
   userRedux,
@@ -93,6 +94,7 @@ function Home() {
           </Box>
         </Box>
       </Layout>
+      <Footer />
     </>
   );
 }

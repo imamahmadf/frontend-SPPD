@@ -246,7 +246,7 @@ function Navbar() {
                                 _hover={{ bg: "gray.100" }}
                                 borderRadius="md"
                               >
-                                Daftar
+                                Daftar Perjalanan
                               </Box>
                             </Link>
                             <Link to="/admin/keuangan/perjalanan">
@@ -256,7 +256,7 @@ function Navbar() {
                                 _hover={{ bg: "gray.100" }}
                                 borderRadius="md"
                               >
-                                Perjalanan
+                                Perjalanan Pegawai
                               </Box>
                             </Link>
                             <Link to="/admin/keuangan/template">
@@ -266,7 +266,7 @@ function Navbar() {
                                 _hover={{ bg: "gray.100" }}
                                 borderRadius="md"
                               >
-                                Template
+                                Template Keuangan
                               </Box>
                             </Link>
                             <Link to="/admin/dalam-kota">
@@ -276,7 +276,7 @@ function Navbar() {
                                 _hover={{ bg: "gray.100" }}
                                 borderRadius="md"
                               >
-                                Daftar Dalam Kota
+                                Daftar Tujuan Dalam Kota
                               </Box>
                             </Link>
                             <Link to="/admin/keuangan/sumber-dana">
@@ -362,7 +362,7 @@ function Navbar() {
                                 _hover={{ bg: "gray.100" }}
                                 borderRadius="md"
                               >
-                                Template
+                                Template Surat Tugas
                               </Box>
                             </Link>
                           </VStack>
@@ -391,6 +391,18 @@ function Navbar() {
                                 Induk Unit Kerja
                               </Box>
                             </Link>
+
+                            <Link to="/unit-kerja/daftar-pegawai">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                Daftar Pegawai
+                              </Box>
+                            </Link>
+
                             <Link to="/admin/daftar-bendahara">
                               <Box
                                 px={4}
@@ -408,7 +420,7 @@ function Navbar() {
                                 _hover={{ bg: "gray.100" }}
                                 borderRadius="md"
                               >
-                                Template
+                                Template Surat
                               </Box>
                             </Link>
                             <Link to="/admin/sub-kegiatan">
@@ -490,7 +502,7 @@ function Navbar() {
                                 _hover={{ bg: "gray.100" }}
                                 borderRadius="md"
                               >
-                                Pengaturan Pengguna
+                                Tambah pengguna
                               </Box>
                             </Link>
                             <Link to="/admin/daftar-user">

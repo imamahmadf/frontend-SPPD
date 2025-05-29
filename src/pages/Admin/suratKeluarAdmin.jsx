@@ -174,15 +174,7 @@ function suratKeluarAdmin() {
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
-        >
+        <Container maxW={"1280px"} variant={"primary"} pt={"30px"} ps={"0px"}>
           <Button onClick={onTambahOpen} ms={"30px"} variant={"primary"}>
             Tambah +
           </Button>

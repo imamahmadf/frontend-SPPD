@@ -93,9 +93,7 @@ const TemplateKeuangan = () => {
   const handleDownload = async (fileName) => {
     try {
       const response = await axios.get(
-        `${
-          import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/template/download-keuangan`,
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/download`,
         {
           params: { fileName },
 
@@ -128,15 +126,7 @@ const TemplateKeuangan = () => {
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"90vh"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          bgColor={"white"}
-          p={"30px"}
-          my={"30px"}
-          minW={"1000px"}
-        >
+        <Container variant={"primary"} p={"30px"} my={"30px"} minW={"1000px"}>
           <Flex gap={"50px"}>
             <Box
               w={"50%"}

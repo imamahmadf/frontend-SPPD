@@ -111,16 +111,7 @@ function DaftarAdmin() {
         {isLoading ? (
           <Loading />
         ) : (
-          <Container
-            border={"1px"}
-            borderRadius={"6px"}
-            borderColor={"rgba(229, 231, 235, 1)"}
-            maxW={"2280px"}
-            bgColor={"white"}
-            pt={"30px"}
-            ps={"0px"}
-            my={"30px"}
-          >
+          <Container maxW={"2280px"} variant={"primary"} ps={"0px"} my={"30px"}>
             <Box style={{ overflowX: "auto" }} p={"30px"}>
               <FormControl my={"15px"}>
                 <Select2

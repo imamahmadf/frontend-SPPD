@@ -358,11 +358,8 @@ function IndukUnitKerjaAdmin() {
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
-          bgColor={"white"}
+          variant={"primary"}
           pt={"30px"}
           px={"20px"}
           my={"30px"}

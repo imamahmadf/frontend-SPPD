@@ -1,4 +1,4 @@
-export const selectStyles = {
+export const select2Styles = {
   baseStyle: {
     chakraStyles: {
       container: (provided) => ({

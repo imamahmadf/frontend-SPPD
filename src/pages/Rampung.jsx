@@ -143,6 +143,17 @@ function Rampung(props) {
       });
   };
 
+  const daftarTempat = dataRampung?.result?.perjalanan?.tempats?.map(
+    (tempat, index) =>
+      `${
+        dataRampung.result.perjalanan.jenisPerjalanan?.tipePerjalananId === 1
+          ? tempat.dalamKota.nama
+          : tempat.tempat
+      }${
+        index < dataRampung?.result?.perjalanan?.tempats.length - 1 ? `, ` : ``
+      }`
+  );
+
   const handleFile = (event) => {
     if (event.target.files[0].size / 1024 > 1024) {
       setFileSizeMsg("File size is greater than maximum limit");
@@ -178,7 +189,7 @@ function Rampung(props) {
           subKegiatan:
             dataRampung.result.perjalanan.daftarSubKegiatan.subKegiatan,
           // kodeRekening: `${dataRampung.result.perjalanan.daftarSubKegiatan.kegiatan.kodeRekening}${dataRampung.result.perjalanan.daftarSubKegiatan.kodeRekening}`,
-          uangHarian: 170000,
+          uangHarian: dataRampung?.resultUangHarian[0].nilai,
           uangTransport: maxTransport.dalamKota.uangTransport,
           tempatNama: maxTransport.dalamKota.nama,
           asal: dataRampung.result.perjalanan.asal,
@@ -444,15 +455,7 @@ function Rampung(props) {
     <Layout>
       {isPrinting && <Loading />}
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
-        >
+        <Container variant={"primary"} maxW={"1280px"} pt={"30px"} ps={"0px"}>
           <HStack>
             <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
             <Heading color={"primary"}>Data Rampung</Heading>
@@ -462,7 +465,6 @@ function Rampung(props) {
               height={"50px"}
               borderRadius={"3px"}
               p={"5px"}
-              color={"white"}
               w={"160px"}
               bgColor={
                 dataRampung?.result?.status.id === 1
@@ -497,9 +499,26 @@ function Rampung(props) {
                 <Text fontWeight={"600"} fontSize={"18px"}>
                   Asal: {dataRampung?.result?.perjalanan?.asal}
                 </Text>
+                <Text fontWeight={"600"} fontSize={"18px"}>
+                  Tujuan: {daftarTempat}
+                </Text>
 
+                <Text>Nomor SPD: {dataRampung?.result?.nomorSPD || "-"}</Text>
                 <Text>
-                  Status: {dataRampung?.result?.status.statusKuitansi}
+                  PPTK: {dataRampung?.result?.perjalanan.PPTK.pegawai_PPTK.nama}
+                </Text>
+                <Text>
+                  PA: {dataRampung?.result?.perjalanan.KPA.pegawai_KPA.nama}
+                </Text>
+                <Text>
+                  Bendahara:
+                  {
+                    dataRampung?.result?.perjalanan.bendahara.pegawai_bendahara
+                      .nama
+                  }
+                </Text>
+                <Text>
+                  {`Untuk Pembayaran: Belanja ${dataRampung?.result?.perjalanan.jenisPerjalanan?.jenis} dalam rangka untuk ${dataRampung?.result?.perjalanan.untuk} ke ${daftarTempat}, sub kegiatan ${dataRampung?.result?.perjalanan.daftarSubKegiatan?.subKegiatan} ${dataRampung?.result?.perjalanan.bendahara?.sumberDana?.kalimat1}, tahun anggaran`}
                 </Text>
                 <Text>
                   Catatan: {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
@@ -595,11 +614,8 @@ function Rampung(props) {
           </HStack>
         </Container> */}
         <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"1280px"}
-          bgColor={"white"}
+          variant={"primary"}
           pt={"30px"}
           ps={"0px"}
           mt={"30px"}

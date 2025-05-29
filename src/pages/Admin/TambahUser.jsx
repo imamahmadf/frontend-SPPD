@@ -110,14 +110,7 @@ function TambahUser() {
     <Layout>
       <Box bgColor={"secondary"} minH={"90vh"} pb={"40px"} px={"30px"}>
         {/* {JSON.stringify(selectedPegawai)} */}
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          p={"30px"}
-        >
+        <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
           {isLoading ? (
             <Loading />
           ) : (

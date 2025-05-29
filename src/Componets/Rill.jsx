@@ -76,25 +76,18 @@ function Rill(props) {
           <ModalCloseButton />
 
           <ModalBody pb={6}>
-            <Table>
-              <Thead bgColor={"primary"}>
+            <Table variant={"primary"}>
+              <Thead>
                 <Tr>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Item
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Nilai
-                  </Th>
+                  <Th>Item</Th>
+                  <Th>Nilai</Th>
                 </Tr>
               </Thead>
               <Tbody bgColor={"secondary"}>
                 {props?.data?.map((item) => (
                   <Tr key={item.id}>
-                    <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                      {item.item}
-                    </Td>
-                    <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                      {" "}
+                    <Td>{item.item}</Td>
+                    <Td>
                       {new Intl.NumberFormat("id-ID", {
                         style: "currency",
                         currency: "IDR",
@@ -105,7 +98,7 @@ function Rill(props) {
               </Tbody>
             </Table>
             {props.status === 3 || props.status === 2 ? null : (
-              <HStack spacing={4} mt={4}>
+              <HStack spacing={4} mt={"30px"}>
                 <Input
                   placeholder="Item"
                   onChange={(e) => setItem(e.target.value)}
@@ -115,7 +108,7 @@ function Rill(props) {
                   type="number"
                   onChange={(e) => setNilai(e.target.value)}
                 />
-                <Button onClick={submitRill} colorScheme="blue">
+                <Button onClick={submitRill} variant={"primary"}>
                   Tambah
                 </Button>
               </HStack>

@@ -46,6 +46,7 @@ function SumberDanaAdmin() {
   const [dataSumberDana, setDataSumberDana] = useState(null);
   const [dataJenisPerjalanan, setDataJenisPerjalanan] = useState(null);
   const [dataPelayanan, setDataPelayanan] = useState(null);
+  const [dataUangharian, setDataUangHarian] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({
     sumber: "",
@@ -62,7 +63,14 @@ function SumberDanaAdmin() {
     jenis: "",
     uangTransport: 0,
   });
+  const [editUangHarian, setEditUangHarian] = useState({
+    nilai: 0,
+  });
   const [editingPelayananId, setEditingPelayananId] = useState(null);
+  const [editingUangHarianId, setEditingUangHarianId] = useState(null);
+  const [editUangHarianForm, setEditUangHarianForm] = useState({
+    nilai: 0,
+  });
   const toast = useToast();
 
   async function fetchDataSumberDana() {
@@ -77,6 +85,7 @@ function SumberDanaAdmin() {
         setDataSumberDana(res.data.result);
         setDataJenisPerjalanan(res.data.resultJenisPerjalanan);
         setDataPelayanan(res.data.resultPelayanan);
+        setDataUangHarian(res.data.resultUangHarian);
       })
       .catch((err) => {
         console.error(err); // Tangani error
@@ -215,18 +224,51 @@ function SumberDanaAdmin() {
     setEditingPelayananId(null);
   };
 
+  const handleEditUangHarian = (item) => {
+    setEditingUangHarianId(item.id);
+    setEditUangHarianForm({
+      nilai: item.nilai,
+    });
+  };
+
+  const handleSaveUangHarian = async (id) => {
+    try {
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/keuangan/edit/uang-harian/${id}`,
+        editUangHarianForm
+      );
+
+      toast({
+        title: "Berhasil",
+        description: "Data uang harian berhasil diperbarui",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      setEditingUangHarianId(null);
+      fetchDataSumberDana();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui data uang harian",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const handleCancelUangHarian = () => {
+    setEditingUangHarianId(null);
+  };
+
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          p={"30px"}
-          my={"30px"}
-        >
+        <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
           <Box>
             <Heading mb={"20px"}>Sumber Dana</Heading>
             <Table variant={"primary"}>
@@ -320,15 +362,7 @@ function SumberDanaAdmin() {
             </Table>
           </Box>
         </Container>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          p={"30px"}
-          my={"30px"}
-        >
+        <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
           <Heading mb={"20px"}>Jenis Perjalanan</Heading>
           <Table variant={"primary"}>
             <Thead>
@@ -393,15 +427,7 @@ function SumberDanaAdmin() {
             </Tbody>
           </Table>
         </Container>{" "}
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          p={"30px"}
-          my={"30px"}
-        >
+        <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
           <Heading mb={"20px"}>Pelayanan kesehatan</Heading>
           <Table variant={"primary"}>
             <Thead>
@@ -461,6 +487,59 @@ function SumberDanaAdmin() {
                       </HStack>
                     ) : (
                       <Button onClick={() => handleEditPelayanan(item)}>
+                        Edit
+                      </Button>
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Container>
+        <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
+          <Heading mb={"20px"}>Uang Harian</Heading>
+          <Table variant={"primary"}>
+            <Thead>
+              <Tr>
+                <Th>Nilai</Th>
+                <Th>Aksi</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {dataUangharian?.map((item, index) => (
+                <Tr key={item.id}>
+                  <Td>
+                    {editingUangHarianId === item.id ? (
+                      <Input
+                        type="number"
+                        value={editUangHarianForm.nilai}
+                        onChange={(e) =>
+                          setEditUangHarianForm({
+                            ...editUangHarianForm,
+                            nilai: parseInt(e.target.value),
+                          })
+                        }
+                      />
+                    ) : (
+                      new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }).format(item.nilai)
+                    )}
+                  </Td>
+                  <Td>
+                    {editingUangHarianId === item.id ? (
+                      <HStack>
+                        <Button
+                          colorScheme="green"
+                          onClick={() => handleSaveUangHarian(item.id)}
+                        >
+                          Simpan
+                        </Button>
+                        <Button onClick={handleCancelUangHarian}>Batal</Button>
+                      </HStack>
+                    ) : (
+                      <Button onClick={() => handleEditUangHarian(item)}>
                         Edit
                       </Button>
                     )}

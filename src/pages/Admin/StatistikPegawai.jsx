@@ -65,13 +65,9 @@ function StatistikPegawai() {
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
           maxW={"4880px"}
-          bgColor={"white"}
+          variant={"primary"}
           p={"30px"}
-          my={"30px"}
           style={{ overflowX: "auto" }}
         >
           {dataPegawai?.map((unit, index) => (
@@ -85,6 +81,9 @@ function StatistikPegawai() {
               <HStack spacing={6} mb={4}>
                 <Text>
                   <strong>PNS:</strong> {unit.statusPegawai?.PNS || 0}
+                </Text>
+                <Text>
+                  <strong>CPNS:</strong> {unit.statusPegawai?.CPNS || 0}
                 </Text>
                 <Text>
                   <strong>P3K:</strong> {unit.statusPegawai?.P3K || 0}
@@ -106,7 +105,7 @@ function StatistikPegawai() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {["PNS", "P3K", "PTT"].map((status) => {
+                  {["PNS", "CPNS", "P3K", "PTT"].map((status) => {
                     let totalPerStatus = 0;
 
                     return (
@@ -134,6 +133,7 @@ function StatistikPegawai() {
                     {Object.values(unit.profesi).map((profesi) => {
                       const totalProfesi =
                         (profesi.jumlah.PNS || 0) +
+                        (profesi.jumlah.CPNS || 0) +
                         (profesi.jumlah.P3K || 0) +
                         (profesi.jumlah.PTT || 0);
 

@@ -31,15 +31,8 @@ function Detail(props) {
   return (
     <>
       <Layout>
-        <Box bgColor={"rgba(249, 250, 251, 1)"} pb={"40px"}>
-          <Container
-            bgColor={"white"}
-            borderRadius={"5px"}
-            border={"1px"}
-            borderColor={"rgba(229, 231, 235, 1)"}
-            maxW={"1280px"}
-            p={"30px"}
-          >
+        <Box>
+          <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
             {detailPerjalanan?.personils?.map((item, index) => {
               return (
                 <>

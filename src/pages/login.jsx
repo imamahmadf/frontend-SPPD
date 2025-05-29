@@ -39,6 +39,7 @@ import {
   Spacer,
   Image,
   useDisclosure,
+  useColorMode,
 } from "@chakra-ui/react";
 import {
   selectIsAuthenticated,
@@ -54,6 +55,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const [error, setError] = useState("");
+  const { colorMode, toggleColorMode } = useColorMode();
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -77,10 +79,14 @@ const Login = () => {
         <Center
           transform="translateY(-2px)"
           boxShadow="md"
-          bgColor={"white"}
+          bgColor={colorMode === "dark" ? "gray.800" : "white"}
           borderRadius={"8px"}
           p={"100px"}
         >
+          {" "}
+          <Button onClick={toggleColorMode}>
+            {colorMode === "light" ? "🌙" : "☀️"}
+          </Button>
           <VStack p={"0px"}>
             {" "}
             <Image
@@ -97,7 +103,7 @@ const Login = () => {
               <Input
                 value={namaPengguna}
                 onChange={(e) => setNamaPengguna(e.target.value)}
-                bgColor={"terang"}
+                variant={"primary"}
                 height="60px"
                 placeholder="contoh: sifulan"
                 w={"600px"}
@@ -109,7 +115,7 @@ const Login = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                bgColor={"terang"}
+                variant={"primary"}
                 height="60px"
                 w={"100%"}
                 type="password"

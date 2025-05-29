@@ -193,16 +193,8 @@ function DetailIndukUnitKerja(props) {
       {isLoading ? (
         <Loading />
       ) : (
-        <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-          <Container
-            border={"1px"}
-            borderRadius={"6px"}
-            borderColor={"rgba(229, 231, 235, 1)"}
-            maxW={"1280px"}
-            bgColor={"white"}
-            p={"30px"}
-            my={"30px"}
-          >
+        <Box pb={"40px"} px={"30px"}>
+          <Container variant={"primary"} maxW={"1280px"} p={"30px"} my={"30px"}>
             <VStack align="start" spacing={2} mb={6} px={4}>
               <Flex justify="space-between" width="100%" align="center">
                 <Heading size="lg">{data?.indukUnitKerja}</Heading>
@@ -287,17 +279,12 @@ function DetailIndukUnitKerja(props) {
                       {editingId === item.id ? (
                         <HStack spacing={2}>
                           <Button
-                            colorScheme="green"
-                            size="sm"
+                            variant={"primary"}
                             onClick={() => handleSave(item.id)}
                           >
                             Simpan
                           </Button>
-                          <Button
-                            colorScheme="red"
-                            size="sm"
-                            onClick={handleCancel}
-                          >
+                          <Button variant={"cancle"} onClick={handleCancel}>
                             Batal
                           </Button>
                         </HStack>
@@ -343,10 +330,10 @@ function DetailIndukUnitKerja(props) {
                   </Stack>
                 </ModalBody>
                 <ModalFooter>
-                  <Button colorScheme="blue" mr={3} onClick={handleSaveInduk}>
+                  <Button variant={"primary"} mr={3} onClick={handleSaveInduk}>
                     Simpan
                   </Button>
-                  <Button variant="ghost" onClick={onClose}>
+                  <Button variant={"cancle"} onClick={onClose}>
                     Batal
                   </Button>
                 </ModalFooter>

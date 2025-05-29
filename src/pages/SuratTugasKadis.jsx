@@ -168,11 +168,11 @@ function SuratTugasKadis() {
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Box
+        <Container
+          maxWidth={"3500px"}
           style={{ overflowX: "auto" }}
-          bgColor={"white"}
           p={"30px"}
-          borderRadius={"5px"}
+          variant={"primary"}
         >
           <Table variant={"primary"}>
             <Thead>
@@ -328,7 +328,7 @@ function SuratTugasKadis() {
               previousClassName={"item previous"}
             />
           </div>
-        </Box>
+        </Container>
       </Box>
     </Layout>
   );

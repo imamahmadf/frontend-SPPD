@@ -37,12 +37,13 @@ import DaftarUserAdmin from "./pages/Admin/DaftarUserAdmin.jsx";
 import EditJenisSurat from "./pages/Admin/EditJenisSurat.jsx";
 import TemplateKeuangan from "./pages/Admin/TemplateKeuangan.jsx";
 import DetailIndukUnitKerja from "./pages/Admin/DetailIndukUnitKerja.jsx";
-import DaftarPerjalanan from "./pages/Admin/DaftarPerjalanan.jsx";
+import DaftarPerjalananPegawai from "./pages/Admin/DaftarPerjalananPegawai.jsx";
 import SumberDanaAdmin from "./pages/Admin/SumberDanaAdmin.jsx";
 import StatistikPegawai from "./pages/Admin/StatistikPegawai.jsx";
 import SuratTugasKadis from "./pages/SuratTugasKadis.jsx";
 import Profile from "./pages/Profile.jsx";
 import TemplateKadis from "./pages/TemplateKadis.jsx";
+import PegawaiUnitKerja from "./pages/PegawaiUnitKerja.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -199,7 +200,7 @@ function App() {
             roleRoute={[3]}
           />
           <ProtectedRoute
-            component={DaftarPerjalanan}
+            component={DaftarPerjalananPegawai}
             path="/admin/keuangan/perjalanan"
             exact
             roleRoute={[3]}
@@ -266,6 +267,7 @@ function App() {
             exact
             roleRoute={[2]}
           />
+
           <ProtectedRoute
             component={TambahBendahara}
             path="/admin/tambah-bendahara"
@@ -283,6 +285,13 @@ function App() {
             path="/admin/sub-kegiatan"
             exact
             roleRoute={[2]}
+          />
+
+          <ProtectedRoute
+            component={PegawaiUnitKerja}
+            path="/unit-kerja/daftar-pegawai"
+            exact
+            roleRoute={[5]}
           />
           <Route component={Home} path="/" />
         </Switch>

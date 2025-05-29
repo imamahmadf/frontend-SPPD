@@ -34,6 +34,7 @@ import {
   Input,
   Spacer,
   useToast,
+  useColorMode,
 } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -50,7 +51,7 @@ function Daftar() {
   const [time, setTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
-
+  const { colorMode, toggleColorMode } = useColorMode();
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
 
@@ -249,6 +250,7 @@ function Daftar() {
               bgColor={"white"}
               p={"30px"}
               borderRadius={"5px"}
+              bg={colorMode === "dark" ? "gray.800" : "white"}
             >
               <Table variant={"primary"}>
                 <Thead>

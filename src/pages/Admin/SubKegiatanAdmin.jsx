@@ -178,14 +178,7 @@ function SubKegiatanAdmin() {
   return (
     <Layout>
       <Box bgColor={"secondary"} px={"30px"}>
-        <Container
-          bgColor={"white"}
-          borderRadius={"5px"}
-          border={"1px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"2880px"}
-          p={"30px"}
-        >
+        <Container variant={"primary"} maxW={"2880px"} p={"30px"}>
           {" "}
           <Button onClick={onTambahOpen} mb={"30px"} variant={"primary"}>
             Tambah +
@@ -356,7 +349,9 @@ function SubKegiatanAdmin() {
                   />
                 </FormControl>
               </Box>
-              <Button onClick={tambahSubKegiatan}>Tambah</Button>
+              <Button variant={"primary"} onClick={tambahSubKegiatan}>
+                Tambah
+              </Button>
             </ModalBody>
 
             <ModalFooter pe={"60px"} pb={"30px"}></ModalFooter>

@@ -44,6 +44,9 @@ function EditPegawai(props) {
     daftarGolongan: { id: "", golongan: "" },
     daftarPangkat: { id: "", golongan: "" },
     daftarTingaktan: { id: "", tingkatan: "" },
+    pendidikan: "",
+    profesi: { id: "", nama: "" },
+    statusPegawai: { id: "", status: "" },
   });
 
   const handleSelectChange = (name, value) => {
@@ -91,6 +94,11 @@ function EditPegawai(props) {
           nama: res.data.result.nama,
           jabatan: res.data.result.jabatan,
           nip: res.data.result.nip,
+          pendidikan: res.data.result.pendidikan,
+          profesi: {
+            id: res.data.result.profesi.id,
+            nama: res.data.result.profesi.nama,
+          },
           daftarGolongan: {
             id: res.data.result.daftarGolongan.id,
             golongan: res.data.result.daftarGolongan.golongan,
@@ -102,6 +110,10 @@ function EditPegawai(props) {
           daftarTingkatan: {
             id: res.data.result.daftarTingkatan.id,
             tingkatan: res.data.result.daftarTingkatan.tingkatan,
+          },
+          statusPegawai: {
+            id: res.data.result.statusPegawai.id,
+            status: res.data.result.statusPegawai.status,
           },
         });
 
@@ -120,15 +132,7 @@ function EditPegawai(props) {
     <Layout>
       {/* {JSON.stringify(dataPegawai)} */}
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
-        >
+        <Container maxW={"1280px"} variant={"primary"} pt={"30px"} ps={"0px"}>
           <Box p={"30px"}>
             <Table>
               <Thead>
@@ -175,6 +179,30 @@ function EditPegawai(props) {
                       ) : (
                         <>
                           <Text as="span">{dataPegawai.nip}</Text>
+                        </>
+                      )}
+                    </Flex>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Th minWidth={"100px"}>Pendidikan</Th>
+                  <Td>
+                    <Flex>
+                      {isEditing ? (
+                        <>
+                          <Input
+                            value={dataPegawai.pendidikan}
+                            onChange={(e) =>
+                              setDataPegawai({
+                                ...dataPegawai,
+                                pendidikan: e.target.value,
+                              })
+                            }
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Text as="span">{dataPegawai.pendidikan}</Text>
                         </>
                       )}
                     </Flex>
@@ -260,6 +288,62 @@ function EditPegawai(props) {
                     ) : (
                       <>
                         <Text>{dataPegawai.daftarTingkatan?.tingkatan}</Text>
+                      </>
+                    )}
+                  </Td>
+                </Tr>
+
+                <Tr>
+                  <Th>Status Pegawai</Th>
+                  <Td>
+                    {isEditing ? (
+                      <>
+                        <Select
+                          defaultValue={dataPegawai?.statusPegawai.id}
+                          onChange={(e) =>
+                            handleSelectChange("statusPegawai", e.target.value)
+                          }
+                        >
+                          <option value="">Pilih Status Pegawai</option>
+                          {dataSeed.resultStatusPegawai &&
+                            dataSeed.resultStatusPegawai.map((val) => (
+                              <option key={val.id} value={val.id}>
+                                {val.status}
+                              </option>
+                            ))}
+                        </Select>
+                      </>
+                    ) : (
+                      <>
+                        <Text>{dataPegawai.statusPegawai?.status}</Text>
+                      </>
+                    )}
+                  </Td>
+                </Tr>
+
+                <Tr>
+                  <Th>Profesi</Th>
+                  <Td>
+                    {isEditing ? (
+                      <>
+                        <Select
+                          defaultValue={dataPegawai?.profesi.id}
+                          onChange={(e) =>
+                            handleSelectChange("daftarProfesi", e.target.value)
+                          }
+                        >
+                          <option value="">Pilih Profesi</option>
+                          {dataSeed.resultProfesi &&
+                            dataSeed.resultProfesi.map((val) => (
+                              <option key={val.id} value={val.id}>
+                                {val.nama}
+                              </option>
+                            ))}
+                        </Select>
+                      </>
+                    ) : (
+                      <>
+                        <Text>{dataPegawai.profesi?.nama}</Text>
                       </>
                     )}
                   </Td>

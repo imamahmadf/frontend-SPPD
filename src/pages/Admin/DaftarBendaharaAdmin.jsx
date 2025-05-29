@@ -92,15 +92,7 @@ function DaftarBendaharaAdmin() {
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          p={"30px"}
-          my={"30px"}
-        >
+        <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
           <Button
             mb={"30px"}
             variant={"primary"}
@@ -113,24 +105,14 @@ function DaftarBendaharaAdmin() {
           {isLoading ? (
             <Loading />
           ) : (
-            <Table>
-              <Thead bgColor={"primary"}>
+            <Table variant={"primary"}>
+              <Thead>
                 <Tr>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    No
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Sumber Dana
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Jabatan
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Nama
-                  </Th>
-                  <Th fontSize={"14px"} color={"secondary"} py={"15px"}>
-                    Aksi
-                  </Th>
+                  <Th>No</Th>
+                  <Th>Sumber Dana</Th>
+                  <Th>Jabatan</Th>
+                  <Th>Nama</Th>
+                  <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody bgColor={"secondary"}>
@@ -138,19 +120,11 @@ function DaftarBendaharaAdmin() {
                   dataBendahara.map((item, index) =>
                     item.bendaharas.map((b, idx) => (
                       <Tr key={`${index}-${idx}`}>
-                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                          {index + 1}
-                        </Td>
-                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                          {item.sumber}
-                        </Td>
-                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                          {b.jabatan}
-                        </Td>
-                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
-                          {b.pegawai_bendahara?.nama || "-"}
-                        </Td>
-                        <Td fontSize={"14px"} color={"primary"} py={"10px"}>
+                        <Td>{index + 1}</Td>
+                        <Td>{item.sumber}</Td>
+                        <Td>{b.jabatan}</Td>
+                        <Td>{b.pegawai_bendahara?.nama || "-"}</Td>
+                        <Td>
                           <Flex gap={"20px"}>
                             <Button variant={"primary"}>Edit</Button>
                             <Button

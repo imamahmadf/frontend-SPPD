@@ -208,6 +208,29 @@ function DaftarPegawai() {
       setPendidikan(val);
     }
   };
+
+  const downloadExcelPegawai = async (unitKerjaId = null) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get/download`,
+        {
+          params: unitKerjaId ? { unitKerjaId } : {},
+          responseType: "blob", // agar respons dibaca sebagai file
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "data-pegawai.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Gagal mengunduh file Excel:", error);
+      alert("Terjadi kesalahan saat mengunduh file.");
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([fetchDataPegawai(), fetchSeed()]);
@@ -252,6 +275,7 @@ function DaftarPegawai() {
                 Tambah +
               </Button>
               <Spacer />
+              <Button onClick={downloadExcelPegawai}>DL</Button>
             </Flex>
             <Table variant={"primary"}>
               <Thead>
