@@ -112,19 +112,26 @@ function DaftarPegawai() {
   }
 
   const tambahPegawai = () => {
+    axios;
     axios
-      .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/post`, {
-        nama,
-        nip,
-        jabatan,
-        pangkatId,
-        golonganId,
-        tingkatanId,
-        unitKerjaId,
-        statusPegawaiId,
-        profesiId,
-        pendidikan,
-      })
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/post`,
+        {
+          nama,
+          nip,
+          jabatan,
+          pangkatId,
+          golonganId,
+          tingkatanId,
+          unitKerjaId,
+          statusPegawaiId,
+          profesiId,
+          pendidikan,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
         onTambahClose();
@@ -216,6 +223,7 @@ function DaftarPegawai() {
         {
           params: unitKerjaId ? { unitKerjaId } : {},
           responseType: "blob", // agar respons dibaca sebagai file
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 

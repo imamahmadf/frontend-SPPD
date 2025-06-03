@@ -38,12 +38,16 @@ import axios from "axios";
 function PegawaiUnitKerja() {
   const user = useSelector(userRedux);
   const [dataPegawai, setDataPegawai] = useState(null);
+  const token = localStorage.getItem("token");
   async function fetchDataPegawai() {
     await axios
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/pegawai/get/unit-kerja/${user[0]?.unitKerja_profile?.id}`
+        }/pegawai/get/unit-kerja/${user[0]?.unitKerja_profile?.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");

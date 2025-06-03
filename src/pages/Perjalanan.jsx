@@ -744,38 +744,35 @@ function Perjalanan() {
                       Tanda tangan Surat Tugas
                     </FormLabel>
                     <Select2
-                      options={[
-                        {
+                      options={(() => {
+                        // Dapatkan semua indukUnitKerjaId unik
+                        const uniqueIndukUnitKerjaIds = [
+                          ...new Set(
+                            dataSeed?.resultTtdSuratTugas?.map(
+                              (item) => item.indukUnitKerjaId
+                            ) || []
+                          ),
+                        ];
+
+                        // Filter dan buat options berdasarkan indukUnitKerjaId unik
+                        return uniqueIndukUnitKerjaIds.map((id) => ({
                           label:
-                            dataSeed?.resultTtdSuratTugas?.find(
-                              (val) =>
-                                val.indukUnitKerjaId ===
+                            id === 1
+                              ? "Dinas Kesehatan"
+                              : id ===
                                 user[0]?.unitKerja_profile.indukUnitKerja.id
-                            )?.["indukUnitKerja-ttdSuratTugas"]
-                              ?.indukUnitKerja || "Unit Kerja 2",
+                              ? user[0]?.unitKerja_profile.indukUnitKerja
+                                  .indukUnitKerja
+                              : `Unit Kerja ${id}`,
                           options:
                             dataSeed?.resultTtdSuratTugas
-                              ?.filter((val) => val.indukUnitKerjaId === 2)
+                              ?.filter((val) => val.indukUnitKerjaId === id)
                               .map((val) => ({
                                 value: val,
-                                label: `${val?.pegawai?.nama}`,
+                                label: `${val?.pegawai?.nama} (${val.jabatan})`,
                               })) || [],
-                        },
-                        {
-                          label:
-                            dataSeed?.resultTtdSuratTugas?.find(
-                              (val) => val.unitKerjaId === 1
-                            )?.["indukUnitKerja-ttdSuratTugas"]
-                              ?.indukUnitKerja || "Unit Kerja 1",
-                          options:
-                            dataSeed?.resultTtdSuratTugas
-                              ?.filter((val) => val.indukUnitKerjaId === 1)
-                              .map((val) => ({
-                                value: val,
-                                label: `${val?.pegawai?.nama}`,
-                              })) || [],
-                        },
-                      ]}
+                        }));
+                      })()}
                       placeholder="Ttd Surat Tugas"
                       focusBorderColor="red"
                       value={dataTtdSuratTugas}
