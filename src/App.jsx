@@ -241,7 +241,7 @@ function App() {
             component={DetailPegawaiAdmin}
             path="/admin/detail-pegawai/:id"
             exact
-            roleRoute={[3]}
+            roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={NomorSuratAdmin}

@@ -59,6 +59,8 @@ function suratKeluarAdmin() {
   const [tujuan, setTujuan] = useState("");
   const [perihal, setPerihal] = useState("");
   const [tanggalSurat, setTanggalSurat] = useState("");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedSurat, setSelectedSurat] = useState(0);
 
   const {
     isOpen: isTambahOpen,
@@ -116,6 +118,22 @@ function suratKeluarAdmin() {
       });
   };
 
+  const hapusSurat = (e) => {
+    console.log(e);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/admin/delete/surat-keluar/${e}`
+      )
+      .then((res) => {
+        console.log(res.status, res.data, "tessss");
+        fetchDataSuratKeluar();
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
   async function fetchKlasifikasi() {
     await axios
       .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/klasifikasi/get`)
@@ -186,6 +204,8 @@ function suratKeluarAdmin() {
                   <Th>Nomor Surat</Th> <Th>Jenis Surat</Th>
                   <Th>Tujuan</Th>
                   <Th>Perihal</Th>
+                  <Th>Tanggal</Th>
+                  <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -193,11 +213,25 @@ function suratKeluarAdmin() {
                   return (
                     <Tr key={item.id}>
                       <Td>{index + 1}</Td>
-                      <Td>{item.nomor}</Td>{" "}
+                      <Td>{item.nomor}</Td>
                       <Td>
                         {item.perjalanans[0] ? "Nota Dinas" : "Surat keluar"}
                       </Td>
-                      <Td>{item.tujuan}</Td> <Td>{item.perihal}</Td>{" "}
+                      <Td>{item.tujuan}</Td> <Td>{item.perihal}</Td>
+                      <Td>{item.tanggalSurat || "-"}</Td>
+                      <Td>
+                        {item.perjalanans[0] ? null : (
+                          <Button
+                            variant={"cancle"}
+                            onClick={() => {
+                              setSelectedSurat(item.id);
+                              onOpen();
+                            }}
+                          >
+                            hapus
+                          </Button>
+                        )}
+                      </Td>
                     </Tr>
                   );
                 })}
@@ -394,7 +428,7 @@ function suratKeluarAdmin() {
                     }
                     placeholder="Perihal"
                   />
-                </FormControl>{" "}
+                </FormControl>
                 <FormControl my={"30px"}>
                   <FormLabel fontSize={"24px"}>Tanggal Surat</FormLabel>
                   <Input
@@ -420,6 +454,27 @@ function suratKeluarAdmin() {
                 }}
               >
                 Submit
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>{" "}
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Konfirmasi Hapus</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody>Apakah Anda yakin ingin menghapus data ini?</ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="red"
+                mr={3}
+                onClick={() => hapusSurat(selectedSurat)}
+              >
+                Ya, Hapus
+              </Button>
+              <Button variant="ghost" onClick={onClose}>
+                Batal
               </Button>
             </ModalFooter>
           </ModalContent>

@@ -467,18 +467,18 @@ function Rampung(props) {
               p={"5px"}
               w={"160px"}
               bgColor={
-                dataRampung?.result?.status.id === 1
+                dataRampung?.result?.status?.id === 1
                   ? "grey"
-                  : dataRampung?.result?.status.id === 2
+                  : dataRampung?.result?.status?.id === 2
                   ? "primary"
-                  : dataRampung?.result?.status.id === 3
+                  : dataRampung?.result?.status?.id === 3
                   ? "ungu"
-                  : dataRampung?.result?.status.id === 4
+                  : dataRampung?.result?.status?.id === 4
                   ? "oren"
-                  : dataRampung?.result?.status.id === 5
+                  : dataRampung?.result?.status?.id === 5
               }
             >
-              <Text> {dataRampung?.result?.status.statusKuitansi}</Text>
+              <Text> {dataRampung?.result?.status?.statusKuitansi}</Text>
             </Center>
           </HStack>
 
@@ -488,7 +488,7 @@ function Rampung(props) {
                 <TambahBuktiKegiatan
                   pic={dataRampung?.result?.perjalanan?.pic}
                   id={dataRampung?.result?.perjalanan?.id}
-                  status={dataRampung?.result?.status.id}
+                  status={dataRampung?.result?.status?.id}
                   randomNumber={setRandomNumber}
                 />
               </Box>

@@ -26,8 +26,7 @@ import {
   Textarea,
   Input,
   Heading,
-  SimpleGrid,
-  Spinner,
+  useDisclosure,
 } from "@chakra-ui/react";
 import ReactPaginate from "react-paginate";
 import "../../Style/pagination.css";
@@ -42,7 +41,24 @@ function DetailPegawaiAdmin(props) {
   const [dataPegawai, setDataPegawai] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedPegawai, setSelectedPegawai] = useState(0);
+  const hapusPerjalanan = (e) => {
+    console.log(e);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/keuangan/delete/perjalanan/${e}`
+      )
+      .then((res) => {
+        console.log(res.status, res.data, "tessss");
+        fetchDataPegawai();
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
   async function fetchDataPegawai() {
     try {
       const res = await axios.get(
@@ -110,6 +126,7 @@ function DetailPegawaiAdmin(props) {
                 <Th>Tanggal Pulang</Th>
                 <Th>Tujuan</Th>
                 <Th>Biaya Perjalanan</Th>
+                <Th>Aksi</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -146,11 +163,46 @@ function DetailPegawaiAdmin(props) {
                       currency: "IDR",
                     }).format(item?.totaluang) || "-"}
                   </Td>
+                  <Td>
+                    <Flex gap={"10px"}>
+                      <Button variant={"primary"}>detail</Button>
+                      <Button
+                        variant={"cancle"}
+                        onClick={() => {
+                          setSelectedPegawai(item.id);
+                          onOpen();
+                        }}
+                      >
+                        Hapus
+                      </Button>
+                    </Flex>
+                  </Td>
                 </Tr>
               ))}
             </Tbody>
           </Table>
-        </Container>
+        </Container>{" "}
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Konfirmasi Hapus</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody>Apakah Anda yakin ingin menghapus data ini?</ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="red"
+                mr={3}
+                onClick={() => hapusPerjalanan(selectedPegawai)}
+              >
+                Ya, Hapus
+              </Button>
+              <Button variant="ghost" onClick={onClose}>
+                Batal
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Box>
     </Layout>
   );
