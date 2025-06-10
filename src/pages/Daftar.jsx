@@ -63,38 +63,33 @@ function Daftar() {
   };
 
   const postNotaDinas = (val) => {
+    console.log(val);
     setIsLoading(true);
 
     axios
       .post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/perjalanan/post/nota-dinas`,
+        }/perjalanan/post/daftar/nota-dinas`,
         {
+          indukUnitKerjaId: user[0]?.unitKerja_profile.indukUnitKerja.id,
           pegawai: val.personils,
-          dataTtdSurTug: dataTtdSuratTugas,
-          dataTtdNotaDinas,
-          PPTKId: dataPPTK.value.id,
-          tanggalPengajuan,
-          noSurat: dataSeed?.resultDaftarNomorSurat,
-          subKegiatanId: dataSubKegiatan.value.id,
-          untuk,
-          dasar,
-          asal,
-          kodeRekeningFE: `${dataSubKegiatan?.value?.kodeRekening}.${jenisPerjalanan.value.kodeRekening}`,
-          ttdNotDis: dataTtdNotaDinas,
-          perjalananKota,
+          dataTtdSurTug: val.ttdSuratTuga,
+          dataTtdNotaDinas: val.ttdNotaDina,
+
+          tanggalPengajuan: val.tanggalPengajuan,
+          noSurTug: val.noSuratTugas,
+          noNotDis: val.noNotaDinas,
+
+          subKegiatan: val.daftarSubKegiatan.subKegiatan,
+          untuk: val.untuk,
+          dasar: val.dasar,
+          asal: val.asal,
+          kodeRekeningFE: `${val.daftarSubKegiatan.kodeRekening}${val.jenisPerjalanan.kodeRekening}`,
+          tempat: val.tempats,
           // sumber: dataKegiatan.value.sumber,
-          jenis: jenisPerjalanan.value,
-          dalamKota: dataKota,
-          tanggalBerangkat,
-          tanggalPulang,
-          indukUnitKerjaFE: user[0]?.unitKerja_profile,
-          KPAId: dataKPA.value.id,
-          kodeKlasifikasi: dataKodeKlasifikasi,
-          dataBendaharaId: dataBendahara.id,
-          pelayananKesehatanId: jenisPelayananKesehatan,
-          isSrikandi,
+          jenis: val.jenisPerjalanan.id,
+          jenisPerjalanan: val.jenisPerjalanan.jenis,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -310,7 +305,12 @@ function Daftar() {
                         {item.tempats?.[0]?.tanggalBerangkat
                           ? new Date(
                               item.tempats[0].tanggalBerangkat
-                            ).toLocaleDateString()
+                            ).toLocaleDateString("id-ID", {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
                           : "-"}
                       </Td>
                       <Td>
@@ -319,7 +319,12 @@ function Daftar() {
                               item.tempats[
                                 item.tempats.length - 1
                               ].tanggalPulang
-                            ).toLocaleDateString()
+                            ).toLocaleDateString("id-ID", {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
                           : "-"}
                       </Td>
                       <Td>
@@ -378,8 +383,10 @@ function Daftar() {
                           {item.noSuratTugas && (
                             <Button
                               variant={"primary"}
-                              p={"0px"}
-                              fontSize={"14px"}
+                              w="30px"
+                              h="30px"
+                              p="0"
+                              fontSize="12px"
                               onClick={() =>
                                 history.push(`/detail-perjalanan/${item.id}`)
                               }
@@ -388,22 +395,45 @@ function Daftar() {
                             </Button>
                           )}
 
-                          <Button
-                            variant={"secondary"}
-                            p={"0px"}
-                            fontSize={"14px"}
-                            h={"40px"}
-                            onClick={() => postSuratTugas(item)}
+                          <Tooltip
+                            label={"cetak Surat Tugas"}
+                            aria-label="A tooltip"
+                            bgColor={"primary"}
                           >
-                            <BsFileEarmarkArrowDown />
-                          </Button>
-
+                            <Button
+                              variant={"secondary"}
+                              p={"0px"}
+                              fontSize={"10px"}
+                              height={"30px"}
+                              width={"30px"}
+                              onClick={() => postSuratTugas(item)}
+                            >
+                              <BsFileEarmarkArrowDown />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip
+                            label={"cetak Nota Dinas"}
+                            aria-label="A tooltip"
+                            bgColor={"primary"}
+                          >
+                            <Button
+                              variant={"secondary"}
+                              p={"0px"}
+                              fontSize={"10px"}
+                              height={"30px"}
+                              width={"30px"}
+                              onClick={() => postNotaDinas(item)}
+                            >
+                              <BsFileEarmarkArrowDown />
+                            </Button>
+                          </Tooltip>
                           {item.personils?.some((p) => p?.statusId === 1) && (
                             <Button
                               variant={"cancle"}
                               p={"0px"}
-                              fontSize={"14px"}
-                              h={"40px"}
+                              fontSize={"10px"}
+                              height={"30px"}
+                              width={"30px"}
                               onClick={() => {
                                 setSelectedPerjalanan(item.id);
                                 onOpen();

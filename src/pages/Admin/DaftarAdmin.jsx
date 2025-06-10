@@ -192,14 +192,24 @@ function DaftarAdmin() {
                         {item.tempats?.[0]?.tanggalBerangkat
                           ? new Date(
                               item.tempats[0].tanggalBerangkat
-                            ).toLocaleDateString()
+                            ).toLocaleDateString("id-ID", {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
                           : "-"}
                       </Td>
                       <Td>
                         {item.tempats?.[0]?.tanggalPulang
                           ? new Date(
                               item.tempats[0].tanggalPulang
-                            ).toLocaleDateString()
+                            ).toLocaleDateString("id-ID", {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
                           : "-"}
                       </Td>
                       {Array.from({ length: 5 }).map((_, i) => (

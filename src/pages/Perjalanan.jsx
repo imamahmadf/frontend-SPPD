@@ -113,7 +113,7 @@ function Perjalanan() {
 
   const submitPerjalanan = () => {
     setIsLoading(true);
-    console.log(dataKota, perjalananKota);
+    console.log(selectedPegawai);
     axios
       .post(
         `${
@@ -150,18 +150,16 @@ function Perjalanan() {
         }
       )
       .then((res) => {
-        console.log(res.data); // Log respons dari backend
+        const blob = new Blob([res.data]);
+        const url = window.URL.createObjectURL(blob);
+        const fileLink = document.createElement("a");
+        fileLink.href = url;
+        fileLink.download = "nota_dinas.docx";
+        document.body.appendChild(fileLink);
+        fileLink.click();
+        fileLink.remove();
+        URL.revokeObjectURL(url); // Bersihkan blob dari memori
 
-        // Buat URL untuk file yang diunduh
-        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "nota_dinas.docx"); // Nama file yang diunduh
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        // Tampilkan toast sukses
         toast({
           title: "Berhasil",
           description: "File nota dinas berhasil diunduh",
@@ -170,10 +168,11 @@ function Perjalanan() {
           isClosable: true,
           position: "top",
         });
-
-        // Redirect setelah download selesai
-        history.push(`/daftar`);
+        setTimeout(() => {
+          history.push("/daftar");
+        }, 1000); // delay 1 detik setelah klik
       })
+
       .catch((err) => {
         console.error(err); // Tangani error
         setIsLoading(false);
