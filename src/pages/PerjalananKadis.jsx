@@ -43,7 +43,7 @@ import { userRedux, selectRole } from "../Redux/Reducers/auth";
 import { Link, useHistory } from "react-router-dom";
 import Loading from "../Componets/Loading";
 
-function Perjalanan() {
+function PerjalananKadis() {
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
   const [dataPegawai, setDataPegawai] = useState([]);
@@ -479,7 +479,7 @@ function Perjalanan() {
                     <FormLabel fontSize={"24px"}>Personil 1</FormLabel>
                     <Select2
                       options={dataPegawai.result
-                        ?.filter((val) => val.profesiId !== 1)
+                        ?.filter((val) => val.profesiId == 1)
                         .map((val) => ({
                           value: val,
                           label: `${val.nama}`,
@@ -488,170 +488,6 @@ function Perjalanan() {
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         handleSelectChange(selectedOption, 0);
-                      }}
-                      components={{
-                        DropdownIndicator: () => null, // Hilangkan tombol panah
-                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                      }}
-                      chakraStyles={{
-                        container: (provided) => ({
-                          ...provided,
-                          borderRadius: "6px",
-                        }),
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "terang",
-                          border: "0px",
-                          height: "60px",
-                          _hover: {
-                            borderColor: "yellow.700",
-                          },
-                          minHeight: "40px",
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          bg: state.isFocused ? "primary" : "white",
-                          color: state.isFocused ? "white" : "black",
-                        }),
-                      }}
-                    />
-                  </FormControl>
-                  <FormControl my={"15px"}>
-                    <FormLabel fontSize={"24px"}>Personil 2</FormLabel>
-                    <Select2
-                      options={dataPegawai.result
-                        ?.filter((val) => val.profesiId !== 1)
-                        .map((val) => ({
-                          value: val,
-                          label: `${val.nama}`,
-                        }))}
-                      placeholder="Cari Nama Pegawai"
-                      focusBorderColor="red"
-                      onChange={(selectedOption) => {
-                        handleSelectChange(selectedOption, 1);
-                      }}
-                      components={{
-                        DropdownIndicator: () => null, // Hilangkan tombol panah
-                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                      }}
-                      chakraStyles={{
-                        container: (provided) => ({
-                          ...provided,
-                          borderRadius: "6px",
-                        }),
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "terang",
-                          border: "0px",
-                          height: "60px",
-                          _hover: {
-                            borderColor: "yellow.700",
-                          },
-                          minHeight: "40px",
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          bg: state.isFocused ? "primary" : "white",
-                          color: state.isFocused ? "white" : "black",
-                        }),
-                      }}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel fontSize={"24px"}>Personil 3</FormLabel>
-                    <Select2
-                      options={dataPegawai.result
-                        ?.filter((val) => val.profesiId !== 1)
-                        .map((val) => ({
-                          value: val,
-                          label: `${val.nama}`,
-                        }))}
-                      placeholder="Cari Nama Pegawai"
-                      focusBorderColor="red"
-                      onChange={(selectedOption) => {
-                        handleSelectChange(selectedOption, 2);
-                      }}
-                      components={{
-                        DropdownIndicator: () => null, // Hilangkan tombol panah
-                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                      }}
-                      chakraStyles={{
-                        container: (provided) => ({
-                          ...provided,
-                          borderRadius: "6px",
-                        }),
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "terang",
-                          border: "0px",
-                          height: "60px",
-                          _hover: {
-                            borderColor: "yellow.700",
-                          },
-                          minHeight: "40px",
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          bg: state.isFocused ? "primary" : "white",
-                          color: state.isFocused ? "white" : "black",
-                        }),
-                      }}
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel fontSize={"24px"}>Personil 4</FormLabel>
-                    <Select2
-                      options={dataPegawai.result
-                        ?.filter((val) => val.profesiId !== 1)
-                        .map((val) => ({
-                          value: val,
-                          label: `${val.nama}`,
-                        }))}
-                      placeholder="Cari Nama Pegawai"
-                      focusBorderColor="red"
-                      onChange={(selectedOption) => {
-                        handleSelectChange(selectedOption, 3);
-                      }}
-                      components={{
-                        DropdownIndicator: () => null, // Hilangkan tombol panah
-                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                      }}
-                      chakraStyles={{
-                        container: (provided) => ({
-                          ...provided,
-                          borderRadius: "6px",
-                        }),
-                        control: (provided) => ({
-                          ...provided,
-                          backgroundColor: "terang",
-                          border: "0px",
-                          height: "60px",
-                          _hover: {
-                            borderColor: "yellow.700",
-                          },
-                          minHeight: "40px",
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          bg: state.isFocused ? "primary" : "white",
-                          color: state.isFocused ? "white" : "black",
-                        }),
-                      }}
-                    />
-                  </FormControl>
-                  <FormControl my={"15px"}>
-                    <FormLabel fontSize={"24px"}>Personil 5</FormLabel>
-                    <Select2
-                      options={dataPegawai.result
-                        ?.filter((val) => val.profesiId !== 1)
-                        .map((val) => ({
-                          value: val,
-                          label: `${val.nama}`,
-                        }))}
-                      placeholder="Cari Nama Pegawai"
-                      focusBorderColor="red"
-                      onChange={(selectedOption) => {
-                        handleSelectChange(selectedOption, 4);
                       }}
                       components={{
                         DropdownIndicator: () => null, // Hilangkan tombol panah
@@ -1524,4 +1360,4 @@ function Perjalanan() {
   );
 }
 
-export default Perjalanan;
+export default PerjalananKadis;

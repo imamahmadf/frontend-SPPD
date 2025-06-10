@@ -44,6 +44,7 @@ import SuratTugasKadis from "./pages/SuratTugasKadis.jsx";
 import Profile from "./pages/Profile.jsx";
 import TemplateKadis from "./pages/TemplateKadis.jsx";
 import PegawaiUnitKerja from "./pages/PegawaiUnitKerja.jsx";
+import PerjalananKadis from "./pages/PerjalananKadis.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -140,6 +141,12 @@ function App() {
             path="/template-kadis"
             exact
             roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={PerjalananKadis}
+            path="/perjalanan-kadis"
+            exact
+            roleRoute={[5, 6]}
           />
           <ProtectedRoute
             component={RampungAdmin}

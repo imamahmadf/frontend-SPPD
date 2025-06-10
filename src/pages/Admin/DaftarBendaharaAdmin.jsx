@@ -78,6 +78,7 @@ function DaftarBendaharaAdmin() {
       .then((res) => {
         console.log(res.status, res.data, "tessss");
         fetchDataBendahara();
+        onClose();
       })
       .catch((err) => {
         console.error(err.message);

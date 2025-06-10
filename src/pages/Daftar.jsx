@@ -34,6 +34,7 @@ import {
   Input,
   Spacer,
   useToast,
+  useDisclosure,
   useColorMode,
 } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
@@ -54,6 +55,8 @@ function Daftar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
+  const [selectedPerjalanan, setSelectedPerjalanan] = useState(0);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const changePage = ({ selected }) => {
     setPage(selected);
@@ -135,6 +138,21 @@ function Daftar() {
           isClosable: true,
           position: "top",
         });
+      });
+  };
+  const hapusPerjalanan = (e) => {
+    console.log(e);
+    axios
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/perjalanan/delete/${e}`
+      )
+      .then((res) => {
+        console.log(res.status, res.data, "tessss");
+        fetchDataPerjalanan();
+        onClose();
+      })
+      .catch((err) => {
+        console.error(err.message);
       });
   };
 
@@ -357,7 +375,7 @@ function Daftar() {
                       ))}
                       <Td>
                         <Flex gap={"10px"}>
-                          {item.noSuratTugas ? (
+                          {item.noSuratTugas && (
                             <Button
                               variant={"primary"}
                               p={"0px"}
@@ -368,19 +386,32 @@ function Daftar() {
                             >
                               <BsEyeFill />
                             </Button>
-                          ) : null}
+                          )}
 
                           <Button
                             variant={"secondary"}
                             p={"0px"}
                             fontSize={"14px"}
                             h={"40px"}
-                            onClick={() => {
-                              postSuratTugas(item);
-                            }}
+                            onClick={() => postSuratTugas(item)}
                           >
                             <BsFileEarmarkArrowDown />
                           </Button>
+
+                          {item.personils?.some((p) => p?.statusId === 1) && (
+                            <Button
+                              variant={"cancle"}
+                              p={"0px"}
+                              fontSize={"14px"}
+                              h={"40px"}
+                              onClick={() => {
+                                setSelectedPerjalanan(item.id);
+                                onOpen();
+                              }}
+                            >
+                              X
+                            </Button>
+                          )}
                         </Flex>
                       </Td>
                     </Tr>
@@ -414,7 +445,30 @@ function Daftar() {
                   pageRangeDisplayed={2}
                   previousClassName={"item previous"}
                 />
-              </div>
+              </div>{" "}
+              <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                  <ModalHeader>Konfirmasi Hapus</ModalHeader>
+                  <ModalCloseButton />
+
+                  <ModalBody>
+                    Apakah Anda yakin ingin menghapus data ini?
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button
+                      colorScheme="red"
+                      mr={3}
+                      onClick={() => hapusPerjalanan(selectedPerjalanan)}
+                    >
+                      Ya, Hapus
+                    </Button>
+                    <Button variant="ghost" onClick={onClose}>
+                      Batal
+                    </Button>
+                  </ModalFooter>
+                </ModalContent>
+              </Modal>
             </Box>
           </Box>
         ) : (
