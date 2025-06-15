@@ -33,7 +33,11 @@ import { FaRoute } from "react-icons/fa";
 import Logout from "./Logout";
 import { Link, useHistory } from "react-router-dom";
 import { BiWallet } from "react-icons/bi";
+import { BsHouseDoor } from "react-icons/bs";
 import { useSelector } from "react-redux";
+import { BsStar } from "react-icons/bs";
+import { BsEnvelope } from "react-icons/bs";
+import { GoShieldLock } from "react-icons/go";
 import {
   selectIsAuthenticated,
   userRedux,
@@ -217,6 +221,16 @@ function Navbar() {
                                 Daftar Perjalanan
                               </Box>
                             </Link>
+                            <Link to="/rekap-perjalanan">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                Rekap Perjalanan
+                              </Box>
+                            </Link>
                           </VStack>
                         </AccordionPanel>
                       </AccordionItem>
@@ -338,13 +352,30 @@ function Navbar() {
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
                         >
-                          <Box flex="1" textAlign="left" fontWeight="semibold">
-                            KEPALA DINAS
-                          </Box>
+                          <HStack
+                            gap={3}
+                            flex="1"
+                            textAlign="left"
+                            fontWeight="semibold"
+                          >
+                            <BsStar /> <Text>Kepala Dinas</Text>
+                          </HStack>
+
                           <AccordionIcon />
                         </AccordionButton>
                         <AccordionPanel pb={4}>
                           <VStack spacing={2} align="stretch">
+                            {" "}
+                            <Link to="/perjalanan-kadis">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                Perjalanan
+                              </Box>
+                            </Link>
                             <Link to="/daftar/kadis">
                               <Box
                                 px={4}
@@ -374,9 +405,17 @@ function Navbar() {
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
                         >
-                          <Box flex="1" textAlign="left" fontWeight="semibold">
-                            ADMIN
-                          </Box>
+                          <HStack
+                            gap={3}
+                            flex="1"
+                            textAlign="left"
+                            fontWeight="semibold"
+                          >
+                            <BsHouseDoor />
+
+                            <Text>Unit Kerja</Text>
+                          </HStack>
+
                           <AccordionIcon />
                         </AccordionButton>
                         <AccordionPanel pb={4}>
@@ -442,9 +481,15 @@ function Navbar() {
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
                         >
-                          <Box flex="1" textAlign="left" fontWeight="semibold">
-                            SURAT
-                          </Box>
+                          <HStack
+                            gap={3}
+                            flex="1"
+                            textAlign="left"
+                            fontWeight="semibold"
+                          >
+                            <BsEnvelope />
+                            <Text>Surat</Text>
+                          </HStack>
                           <AccordionIcon />
                         </AccordionButton>
                         <AccordionPanel pb={4}>
@@ -478,9 +523,15 @@ function Navbar() {
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
                         >
-                          <Box flex="1" textAlign="left" fontWeight="semibold">
-                            ADMIN PUSAT
-                          </Box>
+                          <HStack
+                            gap={3}
+                            flex="1"
+                            textAlign="left"
+                            fontWeight="semibold"
+                          >
+                            <GoShieldLock />
+                            <Text>Administrator</Text>
+                          </HStack>
                           <AccordionIcon />
                         </AccordionButton>
                         <AccordionPanel pb={4}>

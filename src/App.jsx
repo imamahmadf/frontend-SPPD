@@ -45,6 +45,7 @@ import Profile from "./pages/Profile.jsx";
 import TemplateKadis from "./pages/TemplateKadis.jsx";
 import PegawaiUnitKerja from "./pages/PegawaiUnitKerja.jsx";
 import PerjalananKadis from "./pages/PerjalananKadis.jsx";
+import RekapPerjalanan from "./pages/RekapPerjalanan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -299,6 +300,12 @@ function App() {
             path="/unit-kerja/daftar-pegawai"
             exact
             roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={RekapPerjalanan}
+            path="/rekap-perjalanan"
+            exact
+            roleRoute={[1, 5]}
           />
           <Route component={Home} path="/" />
         </Switch>

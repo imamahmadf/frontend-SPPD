@@ -44,7 +44,9 @@ function PegawaiUnitKerja() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/pegawai/get/unit-kerja/${user[0]?.unitKerja_profile?.id}`,
+        }/pegawai/get/unit-kerja/${
+          user[0]?.unitKerja_profile?.indukUnitKerja.id
+        }`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

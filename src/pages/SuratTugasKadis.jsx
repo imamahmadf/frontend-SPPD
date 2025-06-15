@@ -34,6 +34,8 @@ import {
   Input,
   Spacer,
   useToast,
+  useDisclosure,
+  useColorMode,
 } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -49,6 +51,9 @@ function SuratTugasKadis() {
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedPerjalanan, setSelectedPerjalanan] = useState(0);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const toast = useToast();
 
   const user = useSelector(userRedux);
@@ -57,7 +62,95 @@ function SuratTugasKadis() {
   const changePage = ({ selected }) => {
     setPage(selected);
   };
+  const hapusPerjalanan = (e) => {
+    console.log(e);
+    axios
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/perjalanan/delete/${e}`
+      )
+      .then((res) => {
+        console.log(res.status, res.data, "tessss");
+        fetchDataPerjalanan();
+        onClose();
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
+  };
 
+  const postNotaDinas = (val) => {
+    console.log(val);
+    setIsLoading(true);
+
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perjalanan/post/daftar/nota-dinas`,
+        {
+          indukUnitKerjaId: user[0]?.unitKerja_profile.indukUnitKerja.id,
+          pegawai: val.personils,
+          dataTtdSurTug: val.ttdSuratTuga,
+          dataTtdNotaDinas: val.ttdNotaDina,
+
+          tanggalPengajuan: val.tanggalPengajuan,
+          noSurTug: val.noSuratTugas,
+          noNotDis: val.noNotaDinas,
+
+          subKegiatan: val.daftarSubKegiatan.subKegiatan,
+          untuk: val.untuk,
+          dasar: val.dasar,
+          asal: val.asal,
+          kodeRekeningFE: `${val.daftarSubKegiatan.kodeRekening}${val.jenisPerjalanan.kodeRekening}`,
+          tempat: val.tempats,
+          // sumber: dataKegiatan.value.sumber,
+          jenis: val.jenisPerjalanan.id,
+          jenisPerjalanan: val.jenisPerjalanan.jenis,
+        },
+        {
+          responseType: "blob", // Penting untuk menerima file sebagai blob
+        }
+      )
+      .then((res) => {
+        console.log(res.data); // Log respons dari backend
+
+        // Buat URL untuk file yang diunduh
+        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "nota_dinas.docx"); // Nama file yang diunduh
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // Tampilkan toast sukses
+        toast({
+          title: "Berhasil",
+          description: "File nota dinas berhasil diunduh",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
+
+        // Redirect setelah download selesai
+        history.push(`/daftar`);
+      })
+      .catch((err) => {
+        console.error(err); // Tangani error
+        setIsLoading(false);
+
+        // Tampilkan toast error
+        toast({
+          title: "Gagal",
+          description: "Terjadi kesalahan saat mengunduh file",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
+      });
+  };
   const postSuratTugas = (val) => {
     console.log(val.personils[0].pegawai);
     setIsLoading(true);
@@ -270,30 +363,68 @@ function SuratTugasKadis() {
                   ))}
                   <Td>
                     <Flex gap={"10px"}>
-                      {item.noSuratTugas ? (
+                      {item.noSuratTugas && (
                         <Button
                           variant={"primary"}
-                          p={"0px"}
-                          fontSize={"14px"}
+                          w="30px"
+                          h="30px"
+                          p="0"
+                          fontSize="12px"
                           onClick={() =>
                             history.push(`/detail-perjalanan/${item.id}`)
                           }
                         >
                           <BsEyeFill />
                         </Button>
-                      ) : null}
+                      )}
 
-                      <Button
-                        variant={"secondary"}
-                        p={"0px"}
-                        fontSize={"14px"}
-                        h={"40px"}
-                        onClick={() => {
-                          postSuratTugas(item);
-                        }}
+                      <Tooltip
+                        label={"cetak Surat Tugas"}
+                        aria-label="A tooltip"
+                        bgColor={"primary"}
                       >
-                        <BsFileEarmarkArrowDown />
-                      </Button>
+                        <Button
+                          variant={"secondary"}
+                          p={"0px"}
+                          fontSize={"10px"}
+                          height={"30px"}
+                          width={"30px"}
+                          onClick={() => postSuratTugas(item)}
+                        >
+                          <BsFileEarmarkArrowDown />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip
+                        label={"cetak Nota Dinas"}
+                        aria-label="A tooltip"
+                        bgColor={"primary"}
+                      >
+                        <Button
+                          variant={"secondary"}
+                          p={"0px"}
+                          fontSize={"10px"}
+                          height={"30px"}
+                          width={"30px"}
+                          onClick={() => postNotaDinas(item)}
+                        >
+                          <BsFileEarmarkArrowDown />
+                        </Button>
+                      </Tooltip>
+                      {item.personils?.some((p) => p?.statusId === 1) && (
+                        <Button
+                          variant={"cancle"}
+                          p={"0px"}
+                          fontSize={"10px"}
+                          height={"30px"}
+                          width={"30px"}
+                          onClick={() => {
+                            setSelectedPerjalanan(item.id);
+                            onOpen();
+                          }}
+                        >
+                          X
+                        </Button>
+                      )}
                     </Flex>
                   </Td>
                 </Tr>
@@ -328,7 +459,28 @@ function SuratTugasKadis() {
               previousClassName={"item previous"}
             />
           </div>
-        </Container>
+        </Container>{" "}
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Konfirmasi Hapus</ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody>Apakah Anda yakin ingin menghapus data ini?</ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="red"
+                mr={3}
+                onClick={() => hapusPerjalanan(selectedPerjalanan)}
+              >
+                Ya, Hapus
+              </Button>
+              <Button variant="ghost" onClick={onClose}>
+                Batal
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Box>
     </Layout>
   );

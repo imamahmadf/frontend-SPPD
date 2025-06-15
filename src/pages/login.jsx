@@ -99,13 +99,13 @@ const Login = () => {
               mb={"50px"}
             />
             <FormControl>
-              <FormLabel fontSize={"24px"}>Nama Pengguna</FormLabel>
+              <FormLabel fontSize={"24px"}>Akun Pengguna</FormLabel>
               <Input
                 value={namaPengguna}
                 onChange={(e) => setNamaPengguna(e.target.value)}
                 variant={"primary"}
                 height="60px"
-                placeholder="contoh: sifulan"
+                placeholder="masukkan NIP"
                 w={"600px"}
               />
             </FormControl>

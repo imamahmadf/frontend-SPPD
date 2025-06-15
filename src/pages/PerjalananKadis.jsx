@@ -172,7 +172,7 @@ function PerjalananKadis() {
         });
 
         // Redirect setelah download selesai
-        history.push(`/daftar`);
+        history.push(`/daftar/kadis`);
       })
       .catch((err) => {
         console.error(err); // Tangani error
