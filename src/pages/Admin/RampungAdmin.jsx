@@ -127,10 +127,20 @@ function RampungAdmin(props) {
             </Box>
             <Box>
               <Text>Asal: {detailPerjalanan.asal}</Text>
-              <Text>Dasar: {detailPerjalanan.dasar || "-"}</Text>
-              <Text>Nota Dinas: {detailPerjalanan.noNotaDinas}</Text>
-              <Text>Surat Tugas: {detailPerjalanan.noSuratTugas}</Text>
-
+              <Text>Dasar: {detailPerjalanan.dasar || "-"}</Text>{" "}
+              <Text>No. Surat Tugas: {detailPerjalanan.noSuratTugas}</Text>
+              <Text>
+                No. Nota Dinas:{" "}
+                {detailPerjalanan.isNotaDinas
+                  ? detailPerjalanan.noNotaDinas
+                  : "-"}
+              </Text>{" "}
+              <Text>
+                No. Telaahan Staf:{" "}
+                {detailPerjalanan.isNotaDinas
+                  ? "-"
+                  : detailPerjalanan.noNotaDinas}
+              </Text>
               <Text>
                 Tanggal Pengajuan:
                 {new Date(detailPerjalanan.tanggalPengajuan).toLocaleDateString(
@@ -167,7 +177,6 @@ function RampungAdmin(props) {
                   year: "numeric",
                 })}
               </Text>
-
               <Text>
                 Sumber Dana: {detailPerjalanan.bendahara?.sumberDana?.sumber}
               </Text>

@@ -36,6 +36,27 @@ import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import Loading from "../../Componets/Loading";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import { parseISO, addDays } from "date-fns";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import moment from "moment";
+import "moment/locale/id"; // Tambahkan ini
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+
+moment.locale("id");
+const localizer = momentLocalizer(moment);
+
+const formats = {
+  dayFormat: (date, culture, localizer) =>
+    format(date, "EEEE", { locale: idLocale }), // Senin, Selasa, ...
+  weekdayFormat: (date, culture, localizer) =>
+    format(date, "EEEEEE", { locale: idLocale }), // S, S, R, K, ...
+  monthHeaderFormat: (date, culture, localizer) =>
+    format(date, "MMMM yyyy", { locale: idLocale }), // Juni 2025
+  dayHeaderFormat: (date, culture, localizer) =>
+    format(date, "EEEE, d MMMM", { locale: idLocale }), // Senin, 16 Juni
+};
 
 function DetailPegawaiAdmin(props) {
   const [dataPegawai, setDataPegawai] = useState(null);
@@ -43,6 +64,7 @@ function DetailPegawaiAdmin(props) {
   const [error, setError] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedPegawai, setSelectedPegawai] = useState(0);
+  const [events, setEvents] = useState([]);
   const hapusPerjalanan = (e) => {
     console.log(e);
     axios
@@ -67,7 +89,26 @@ function DetailPegawaiAdmin(props) {
         }/pegawai/get/detail-pegawai/${props.match.params.id}`
       );
       setDataPegawai(res.data.result);
-      console.log(res.data);
+      console.log(res.data.result[0].personils);
+
+      const formattedEvents = res.data.result[0].personils.map((item) => {
+        const startDate = item.tanggalBerangkat
+          ? parseISO(item.tanggalBerangkat)
+          : new Date();
+
+        const endDate = item.tanggalPulang
+          ? addDays(parseISO(item.tanggalPulang), 1)
+          : startDate;
+
+        return {
+          title: item.tujuan,
+          start: startDate,
+          end: endDate,
+          allDay: true,
+          resource: item,
+        };
+      });
+      setEvents(formattedEvents);
     } catch (err) {
       console.error(err);
       setError("Gagal memuat data pegawai");
@@ -117,7 +158,14 @@ function DetailPegawaiAdmin(props) {
           </Heading>
           <Text>NIP. : {dataPegawai[0]?.nip}</Text>
           <Text mb={5}>Jabatan: {dataPegawai[0]?.jabatan}</Text>
-
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: 500 }}
+            formats={formats} // Tambahkan ini
+          />
           <Table variant={"primary"}>
             <Thead>
               <Tr>

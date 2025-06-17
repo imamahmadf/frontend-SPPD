@@ -230,6 +230,16 @@ function Navbar() {
                               >
                                 Rekap Perjalanan
                               </Box>
+                            </Link>{" "}
+                            <Link to="/kalender-kadis">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                Perjalanan Kepala Dinas
+                              </Box>
                             </Link>
                           </VStack>
                         </AccordionPanel>

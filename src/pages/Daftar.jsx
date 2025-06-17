@@ -57,6 +57,8 @@ function Daftar() {
   const role = useSelector(selectRole);
   const [selectedPerjalanan, setSelectedPerjalanan] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [tanggalAwal, setTanggalAwal] = useState("");
+  const [tanggalAkhir, setTanggalAkhir] = useState("");
 
   const changePage = ({ selected }) => {
     setPage(selected);
@@ -235,7 +237,7 @@ function Daftar() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/get/all-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${
           user[0]?.unitKerja_profile?.id
-        }`
+        }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`
       )
       .then((res) => {
         setDataPerjalanan(res.data.result);
@@ -251,7 +253,7 @@ function Daftar() {
 
   useEffect(() => {
     fetchDataPerjalanan();
-  }, [page]);
+  }, [page, tanggalAkhir, tanggalAwal]);
   return (
     <>
       {isLoading && <Loading />}
@@ -265,6 +267,24 @@ function Daftar() {
               borderRadius={"5px"}
               bg={colorMode === "dark" ? "gray.800" : "white"}
             >
+              <Flex gap={4} mb={4}>
+                <FormControl>
+                  <FormLabel>Tanggal Berangkat (Awal)</FormLabel>
+                  <Input
+                    type="date"
+                    value={tanggalAwal}
+                    onChange={(e) => setTanggalAwal(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Tanggal Pulang (Akhir)</FormLabel>
+                  <Input
+                    type="date"
+                    value={tanggalAkhir}
+                    onChange={(e) => setTanggalAkhir(e.target.value)}
+                  />
+                </FormControl>
+              </Flex>
               <Table variant={"primary"}>
                 <Thead>
                   <Tr>
@@ -274,6 +294,7 @@ function Daftar() {
                     <Th>Unit Kerja Surat Tugas</Th>
                     <Th>No Surat Tugas</Th>
                     <Th>No Nota Dinas</Th>
+                    <Th>No Telaahan Staf</Th>
                     <Th>Tanggal Berangkat</Th>
                     <Th>tanggal Pulang</Th>
                     <Th>Tujuan</Th>
@@ -299,7 +320,17 @@ function Daftar() {
                       </Td>
                       <Td>{item.noSuratTugas ? item.noSuratTugas : "-"}</Td>
                       <Td>
-                        {item.suratKeluar.nomor ? item.suratKeluar.nomor : "-"}
+                        {/* Kolom 1: jika nomor ada dan isNotaDinas 1 atau null */}
+                        {item.suratKeluar.nomor &&
+                        (item.isNotaDinas === 1 || item.isNotaDinas == null)
+                          ? item.suratKeluar.nomor
+                          : "-"}
+                      </Td>
+                      <Td>
+                        {/* Kolom 2: jika nomor ada dan isNotaDinas === 0 */}
+                        {item.suratKeluar.nomor && item.isNotaDinas === 0
+                          ? item.suratKeluar.nomor
+                          : "-"}
                       </Td>
                       <Td>
                         {item.tempats?.[0]?.tanggalBerangkat
@@ -427,7 +458,9 @@ function Daftar() {
                               <BsFileEarmarkArrowDown />
                             </Button>
                           </Tooltip>
-                          {item.personils?.some((p) => p?.statusId === 1) && (
+                          {!item.personils?.some(
+                            (p) => p?.statusId === 2 || p?.statusId === 3
+                          ) && (
                             <Button
                               variant={"cancle"}
                               p={"0px"}

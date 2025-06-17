@@ -12,6 +12,7 @@ import {
   Image,
   ModalCloseButton,
   Container,
+  Switch,
   FormControl,
   FormLabel,
   Center,
@@ -79,6 +80,7 @@ function Perjalanan() {
   const [jenisPelayananKesehatan, setJenisPelayananKesehatan] = useState(1);
   const [dataJenisPerjalanan, setDataJenisPerjalanan] = useState([]);
   const [isSrikandi, setIsSrikandi] = useState(1);
+  const [isNotaDinas, setIsNotaDinas] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const [dataTemplate, setDataTemplate] = useState([]);
@@ -131,6 +133,7 @@ function Perjalanan() {
           dasar,
           asal,
           kodeRekeningFE: `${dataSubKegiatan?.value?.kodeRekening}${jenisPerjalanan.value.kodeRekening}`,
+          subKegiatan: dataSubKegiatan.value.subKegiatan,
           ttdNotDis: dataTtdNotaDinas,
           perjalananKota,
           // sumber: dataKegiatan.value.sumber,
@@ -144,6 +147,7 @@ function Perjalanan() {
           dataBendaharaId: dataBendahara.id,
           pelayananKesehatanId: jenisPelayananKesehatan,
           isSrikandi,
+          isNotaDinas,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -391,7 +395,7 @@ function Perjalanan() {
 
                   {dataKlasifikasi[0] ? (
                     <FormControl my={"30px"}>
-                      <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
+                      <FormLabel fontSize={"24px"}>Kode Klasifikasi</FormLabel>
                       <Select2
                         options={dataKlasifikasi.map((val) => ({
                           value: val,
@@ -454,12 +458,20 @@ function Perjalanan() {
                       minHeight={"160px"}
                     />
                   </FormControl>
-                  <Checkbox
-                    isChecked={isSrikandi === 1}
-                    onChange={(e) => setIsSrikandi(e.target.checked ? 1 : 0)}
-                  >
-                    Srikandi
-                  </Checkbox>
+                  <Flex gap={4}>
+                    <Checkbox
+                      isChecked={isSrikandi === 1}
+                      onChange={(e) => setIsSrikandi(e.target.checked ? 1 : 0)}
+                    >
+                      Srikandi
+                    </Checkbox>
+                    <Checkbox
+                      isChecked={isNotaDinas === 1}
+                      onChange={(e) => setIsNotaDinas(e.target.checked ? 1 : 0)}
+                    >
+                      Nota Dinas
+                    </Checkbox>
+                  </Flex>
                 </Box>
               </Container>
               <Container
@@ -694,7 +706,7 @@ function Perjalanan() {
                 <SimpleGrid columns={2} spacing={4} p={"30px"}>
                   <FormControl border={0} flex="1" my={"15px"}>
                     <FormLabel fontSize={"24px"}>
-                      Tanda Tangan Nota Dinas
+                      Tanda Tangan Nota Dinas/Telahaan Staf
                     </FormLabel>
                     <Select2
                       options={

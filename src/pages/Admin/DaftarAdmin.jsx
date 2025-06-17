@@ -56,6 +56,7 @@ function DaftarAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [dataUnitKerja, setDataUnitKerja] = useState(null);
   const [filterUnitKerjaId, setFilterUnitKerjaId] = useState(0);
+  const [pegawaiId, setPegawaiId] = useState(0);
 
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
@@ -85,7 +86,7 @@ function DaftarAdmin() {
         .get(
           `${
             import.meta.env.VITE_REACT_APP_API_BASE_URL
-          }/admin/get/keuangan/daftar-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${filterUnitKerjaId}`
+          }/admin/get/keuangan/daftar-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${filterUnitKerjaId}&pegawaiId=${pegawaiId}`
         )
         .then((res) => {
           setDataPerjalanan(res.data.result);
@@ -104,7 +105,7 @@ function DaftarAdmin() {
   useEffect(() => {
     fetchDataPerjalanan();
     fetchUnitkerja();
-  }, [page, filterUnitKerjaId]);
+  }, [page, filterUnitKerjaId, pegawaiId]);
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
@@ -113,47 +114,100 @@ function DaftarAdmin() {
         ) : (
           <Container maxW={"2280px"} variant={"primary"} ps={"0px"} my={"30px"}>
             <Box style={{ overflowX: "auto" }} p={"30px"}>
-              <FormControl my={"15px"}>
-                <Select2
-                  options={dataUnitKerja?.map((val) => ({
-                    value: val.id,
-                    label: `${val.unitKerja}`,
-                  }))}
-                  focusBorderColor="red"
-                  onChange={(selectedOption) => {
-                    setFilterUnitKerjaId(selectedOption.value);
-                  }}
-                  components={{
-                    DropdownIndicator: () => null, // Hilangkan tombol panah
-                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                  }}
-                  chakraStyles={{
-                    container: (provided) => ({
-                      ...provided,
-                      borderRadius: "0px",
-                    }),
-                    control: (provided) => ({
-                      ...provided,
-                      backgroundColor: "terang",
-                      color: "gelap",
-                      textTransform: "none",
-                      border: "0px",
-                      width: "500px",
-                      height: "30px",
-                      _hover: {
-                        borderColor: "yellow.700",
-                      },
-                      minHeight: "30px",
-                    }),
-                    option: (provided, state) => ({
-                      ...provided,
-                      bg: state.isFocused ? "primary" : "white",
-                      color: state.isFocused ? "white" : "gelap",
-                      textTransform: "none",
-                    }),
-                  }}
-                />
-              </FormControl>
+              <Flex gap={4} my={"30px"}>
+                {" "}
+                <FormControl>
+                  <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                  <AsyncSelect
+                    loadOptions={async (inputValue) => {
+                      if (!inputValue) return [];
+                      try {
+                        const res = await axios.get(
+                          `${
+                            import.meta.env.VITE_REACT_APP_API_BASE_URL
+                          }/pegawai/search?q=${inputValue}`
+                        );
+                        return res.data.result.map((val) => ({
+                          value: val,
+                          label: val.nama,
+                        }));
+                      } catch (err) {
+                        console.error("Failed to load options:", err.message);
+                        return [];
+                      }
+                    }}
+                    placeholder="Ketik Nama Pegawai"
+                    onChange={(selectedOption) => {
+                      setPegawaiId(selectedOption.value.id);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: { borderColor: "yellow.700" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                  <Select2
+                    options={dataUnitKerja?.map((val) => ({
+                      value: val.id,
+                      label: `${val.unitKerja}`,
+                    }))}
+                    focusBorderColor="red"
+                    onChange={(selectedOption) => {
+                      setFilterUnitKerjaId(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null, // Hilangkan tombol panah
+                      IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "0px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        color: "gelap",
+                        textTransform: "none",
+                        border: "0px",
+
+                        height: "30px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "60px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "gelap",
+                        textTransform: "none",
+                      }),
+                    }}
+                  />
+                </FormControl>
+              </Flex>
               <Table variant={"primary"}>
                 <Thead>
                   <Tr>

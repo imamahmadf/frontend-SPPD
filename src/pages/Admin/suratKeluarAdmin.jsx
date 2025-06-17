@@ -44,7 +44,7 @@ function suratKeluarAdmin() {
   const [dataSuratKeluar, setDataSuratKeluar] = useState([]);
   const history = useHistory();
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(15);
+  const [limit, setLimit] = useState(50);
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
@@ -61,6 +61,8 @@ function suratKeluarAdmin() {
   const [tanggalSurat, setTanggalSurat] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedSurat, setSelectedSurat] = useState(0);
+  const [tanggalAwal, setTanggalAwal] = useState("");
+  const [tanggalAkhir, setTanggalAkhir] = useState("");
 
   const {
     isOpen: isTambahOpen,
@@ -154,7 +156,7 @@ function suratKeluarAdmin() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/admin/get/surat-keluar?&time=${time}&page=${page}&limit=${limit}&indukUnitKerjaId=${
           user[0]?.unitKerja_profile?.indukUnitKerja.id
-        }`
+        }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`
       )
       .then((res) => {
         setDataSuratKeluar(res.data.result);
@@ -193,9 +195,27 @@ function suratKeluarAdmin() {
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container maxW={"1280px"} variant={"primary"} pt={"30px"} ps={"0px"}>
+          <Flex gap={4} p={"30px"}>
+            <FormControl>
+              <FormLabel>Tanggal Awal</FormLabel>
+              <Input
+                type="date"
+                value={tanggalAwal}
+                onChange={(e) => setTanggalAwal(e.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Tanggal Akhir</FormLabel>
+              <Input
+                type="date"
+                value={tanggalAkhir}
+                onChange={(e) => setTanggalAkhir(e.target.value)}
+              />
+            </FormControl>
+          </Flex>{" "}
           <Button onClick={onTambahOpen} ms={"30px"} variant={"primary"}>
             Tambah +
-          </Button>
+          </Button>{" "}
           <Box p={"30px"}>
             <Table variant="primary">
               <Thead>
@@ -215,10 +235,26 @@ function suratKeluarAdmin() {
                       <Td>{index + 1}</Td>
                       <Td>{item.nomor}</Td>
                       <Td>
-                        {item.perjalanans[0] ? "Nota Dinas" : "Surat keluar"}
+                        {!item.perjalanans[0]
+                          ? "Surat keluar"
+                          : item.perjalanans[0].isNotaDinas === 0
+                          ? "Telaahan Staff"
+                          : "Nota Dinas"}
                       </Td>
                       <Td>{item.tujuan}</Td> <Td>{item.perihal}</Td>
-                      <Td>{item.tanggalSurat || "-"}</Td>
+                      <Td>
+                        {item.tanggalSurat
+                          ? new Date(item.tanggalSurat).toLocaleDateString(
+                              "id-ID",
+                              {
+                                weekday: "long",
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )
+                          : "-"}
+                      </Td>
                       <Td>
                         {item.perjalanans[0] ? null : (
                           <Button
