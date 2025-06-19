@@ -77,6 +77,20 @@ function DaftarUserAdmin() {
       });
   };
 
+  const deleteUser = async (val) => {
+    await axios
+      .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/delete/${val}`)
+      .then((res) => {
+        // console.log(res.data.result);
+        fetchDataUser();
+        setSelectedRole("");
+        setAvailableRoles([]);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   const addUserRole = async () => {
     await axios
       .post(
@@ -200,6 +214,24 @@ function DaftarUserAdmin() {
                           bg="danger"
                         >
                           <BsXCircle />
+                        </Center>{" "}
+                        <Center
+                          onClick={() => {
+                            deleteUser(user?.id);
+                          }}
+                          borderRadius={"5px"}
+                          as="button"
+                          h="35px"
+                          px="10px"
+                          fontSize="14px"
+                          transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+                          color="white"
+                          _hover={{
+                            bg: "black",
+                          }}
+                          bg="danger"
+                        >
+                          Hapus
                         </Center>
                       </Flex>
                     </Td>

@@ -126,7 +126,12 @@ function TambahUser() {
                           import.meta.env.VITE_REACT_APP_API_BASE_URL
                         }/pegawai/search?q=${inputValue}`
                       );
-                      return res.data.result.map((val) => ({
+
+                      const filtered = res.data.result.filter(
+                        (val) => val.nip && val.nip.trim() !== "-"
+                      );
+
+                      return filtered.map((val) => ({
                         value: val,
                         label: val.nama,
                       }));

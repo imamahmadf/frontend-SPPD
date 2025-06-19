@@ -216,7 +216,7 @@ function DaftarAdmin() {
 
                     <Th>Unit Kerja Surat Tugas</Th>
                     <Th>No Surat Tugas</Th>
-                    <Th>No Nota Dinas</Th>
+
                     <Th>Tanggal Berangkat</Th>
                     <Th>tanggal Pulang</Th>
                     <Th>Personil 1</Th>
@@ -239,9 +239,6 @@ function DaftarAdmin() {
                         }
                       </Td>
                       <Td>{item.noSuratTugas ? item.noSuratTugas : "-"}</Td>
-                      <Td>
-                        {item.suratKeluar.nomor ? item.suratKeluar.nomor : "-"}
-                      </Td>
                       <Td>
                         {item.tempats?.[0]?.tanggalBerangkat
                           ? new Date(

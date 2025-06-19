@@ -65,9 +65,12 @@ function PegawaiUnitKerja() {
       const response = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/pegawai/get/download?unitKerjaId=${user[0]?.unitKerja_profile?.id}`,
+        }/pegawai/get/download?indukUnitKerjaId=${
+          user[0]?.unitKerja_profile?.indukUnitKerja.id
+        }`,
         {
           responseType: "blob", // agar respons dibaca sebagai file
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 

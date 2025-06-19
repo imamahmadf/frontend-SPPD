@@ -8,6 +8,14 @@ import { Box, Text, Button, Container } from "@chakra-ui/react";
 
 function Detail(props) {
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
+  const daftarTempat = detailPerjalanan.tempats?.map(
+    (tempat, index) =>
+      `${
+        detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1
+          ? tempat.dalamKota.nama
+          : tempat.tempat
+      }${index < detailPerjalanan.tempats.length - 1 ? `, ` : ``}`
+  );
   async function fetchDataPerjalan() {
     await axios
       .get(
@@ -33,6 +41,65 @@ function Detail(props) {
       <Layout>
         <Box>
           <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
+            <Box>
+              <Text>Asal: {detailPerjalanan.asal}</Text>
+              <Text>Dasar: {detailPerjalanan.dasar || "-"}</Text>{" "}
+              <Text>No. Surat Tugas: {detailPerjalanan.noSuratTugas}</Text>{" "}
+              <Text>
+                No. Nota Dinas:{" "}
+                {detailPerjalanan.isNotaDinas
+                  ? detailPerjalanan.noNotaDinas
+                  : "-"}
+              </Text>{" "}
+              <Text>
+                No. Telaahan Staf:{" "}
+                {detailPerjalanan.isNotaDinas
+                  ? "-"
+                  : detailPerjalanan.noNotaDinas}
+              </Text>
+              <Text>
+                Tanggal Pengajuan:
+                {new Date(detailPerjalanan.tanggalPengajuan).toLocaleDateString(
+                  "id-ID",
+                  {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  }
+                )}
+              </Text>
+              <Text>
+                Tanggal Berangkat:{" "}
+                {new Date(
+                  detailPerjalanan.tempats?.[0]?.tanggalBerangkat
+                ).toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
+              <Text>
+                Tanggal Pulang:{" "}
+                {new Date(
+                  detailPerjalanan.tempats?.[
+                    detailPerjalanan.tempats?.length - 1
+                  ]?.tanggalPulang
+                ).toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
+              <Text>
+                Sumber Dana: {detailPerjalanan.bendahara?.sumberDana?.sumber}
+              </Text>
+              <Text>Tujuan: {daftarTempat}</Text>
+            </Box>
+          </Container>
+          <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
             {detailPerjalanan?.personils?.map((item, index) => {
               return (
                 <>
@@ -44,7 +111,7 @@ function Detail(props) {
                     m={"15px"}
                   >
                     <Text>{item.pegawai.nama}</Text>
-                    <Text>{item.total}</Text>
+
                     <Button
                       onClick={() => {
                         history.push(`/rampung/${item.id}`);

@@ -738,21 +738,26 @@ function Rampung(props) {
                                 </HStack>
                               ) : (
                                 <HStack>
-                                  <Button
-                                    colorScheme="blue"
-                                    onClick={() => handleEdit(item)}
-                                  >
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    colorScheme="red"
-                                    onClick={() => {
-                                      setItemToDelete(item);
-                                      onDeleteOpen();
-                                    }}
-                                  >
-                                    Delete
-                                  </Button>
+                                  {jenis === "Rill" ? null : (
+                                    <>
+                                      {" "}
+                                      <Button
+                                        colorScheme="blue"
+                                        onClick={() => handleEdit(item)}
+                                      >
+                                        Edit
+                                      </Button>
+                                      <Button
+                                        colorScheme="red"
+                                        onClick={() => {
+                                          setItemToDelete(item);
+                                          onDeleteOpen();
+                                        }}
+                                      >
+                                        Delete
+                                      </Button>
+                                    </>
+                                  )}
                                 </HStack>
                               )}
                             </Td>

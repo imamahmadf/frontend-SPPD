@@ -16,7 +16,7 @@ import { loginSuccess, logout } from "./Redux/Reducers/auth.js";
 import ProtectedRoute from "./Componets/ProtectedRoute";
 import Template from "./pages/Template.jsx";
 import RampungAdmin from "./pages/Admin/RampungAdmin.jsx";
-import Perjalanan from "./pages/Perjalanan.jsx";
+import Perjalanan from "./pages/Perjalanan/Perjalanan.jsx";
 import suratKeluarAdmin from "./pages/Admin/suratKeluarAdmin.jsx";
 import PengaturanPegawai from "./pages/PengaturanPegawai.jsx";
 import DaftarPegawai from "./pages/DaftarPegawai.jsx";
