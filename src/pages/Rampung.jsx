@@ -215,8 +215,10 @@ function Rampung(props) {
         }/kwitansi/post/cetak-kwitansi`,
         {
           id: dataRampung.result.id,
-
+          indukUnitKerja:
+            user[0]?.unitKerja_profile.indukUnitKerja.indukUnitKerja,
           nomorSPD: dataRampung.result.nomorSPD,
+          nomorST: dataRampung?.result?.perjalanan.noSuratTugas,
           pegawaiNama: dataRampung.result.pegawai.nama,
           pegawaiNip: dataRampung.result.pegawai.nip,
           pegawaiJabatan: dataRampung.result.pegawai.jabatan,
@@ -502,7 +504,10 @@ function Rampung(props) {
                 <Text fontWeight={"600"} fontSize={"18px"}>
                   Tujuan: {daftarTempat}
                 </Text>
-
+                <Text>
+                  Nomor ST:{" "}
+                  {dataRampung?.result?.perjalanan.noSuratTugas || "-"}
+                </Text>
                 <Text>Nomor SPD: {dataRampung?.result?.nomorSPD || "-"}</Text>
                 <Text>
                   PPTK: {dataRampung?.result?.perjalanan.PPTK.pegawai_PPTK.nama}

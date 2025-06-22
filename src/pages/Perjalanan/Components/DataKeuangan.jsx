@@ -1,4 +1,3 @@
-// src/pages/Perjalanan/components/DataKeuangan.jsx
 import React from "react";
 import {
   Box,
@@ -7,34 +6,44 @@ import {
   Container,
   FormControl,
   FormLabel,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { Select as Select2 } from "chakra-react-select";
+import { useFormikContext, getIn } from "formik";
 
-const DataKeuangan = ({ dataSeed, state, actions }) => {
+const DataKeuangan = ({ dataSeed, actions }) => {
+  const { values, errors, touched, setFieldValue } = useFormikContext();
+
+  const sumberDanaError = getIn(errors, "sumberDana");
+  const sumberDanaTouched = getIn(touched, "sumberDana");
+
+  const bendaharaError = getIn(errors, "bendahara");
+  const bendaharaTouched = getIn(touched, "bendahara");
+
   return (
-    <Container
-      maxW={"1280px"}
-      variant={"primary"}
-      pt={"30px"}
-      ps={"0px"}
-      mt={"30px"}
-    >
+    <Container maxW="1280px" variant="primary" pt="30px" ps="0px" mt="30px">
       <HStack>
-        <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-        <Heading color={"primary"}>Data Keuangan</Heading>
+        <Box bgColor="primary" width="30px" height="30px" />
+        <Heading color="primary">Data Keuangan</Heading>
       </HStack>
-      <Box p={"30px"}>
-        <FormControl my={"15px"}>
-          <FormLabel fontSize={"24px"}>Sumber Dana</FormLabel>
+      <Box p="30px">
+        {/* Sumber Dana */}
+        <FormControl
+          my="15px"
+          isInvalid={!!sumberDanaError && sumberDanaTouched}
+        >
+          <FormLabel fontSize="24px">Sumber Dana</FormLabel>
           <Select2
+            name="sumberDana"
             options={dataSeed?.resultSumberDana?.map((val) => ({
               value: val,
               label: `${val.sumber}`,
             }))}
-            placeholder="sumber dana"
-            focusBorderColor="red"
+            placeholder="Pilih Sumber Dana"
+            value={values.sumberDana}
             onChange={(selectedOption) => {
-              actions.setDataSumberDana(selectedOption);
+              setFieldValue("sumberDana", selectedOption);
+              setFieldValue("bendahara", null); // reset bendahara jika ganti sumber dana
               actions.fetchJenisPerjalanan(selectedOption.value.id);
             }}
             components={{
@@ -63,20 +72,27 @@ const DataKeuangan = ({ dataSeed, state, actions }) => {
               }),
             }}
           />
+          <FormErrorMessage>{sumberDanaError}</FormErrorMessage>
         </FormControl>
 
-        {state.dataSumberDana?.value && (
-          <FormControl border={0} bgColor={"white"} flex="1">
+        {/* Bendahara */}
+        {values.sumberDana?.value && (
+          <FormControl
+            isInvalid={!!bendaharaError && bendaharaTouched}
+            mt="20px"
+          >
+            <FormLabel fontSize="24px">Bendahara</FormLabel>
             <Select2
-              options={state.dataSumberDana?.value?.bendaharas.map((val) => ({
+              name="bendahara"
+              options={values.sumberDana?.value?.bendaharas?.map((val) => ({
                 value: val,
                 label: `${val.jabatan} - ${val.pegawai_bendahara.nama}`,
               }))}
-              placeholder="Cari Bendahara"
-              focusBorderColor="red"
-              onChange={(selectedOption) => {
-                actions.setDataBendahara(selectedOption.value);
-              }}
+              placeholder="Pilih Bendahara"
+              value={values.bendahara}
+              onChange={(selectedOption) =>
+                setFieldValue("bendahara", selectedOption)
+              }
               components={{
                 DropdownIndicator: () => null,
                 IndicatorSeparator: () => null,
@@ -103,6 +119,7 @@ const DataKeuangan = ({ dataSeed, state, actions }) => {
                 }),
               }}
             />
+            <FormErrorMessage>{bendaharaError}</FormErrorMessage>
           </FormControl>
         )}
       </Box>

@@ -1,12 +1,13 @@
+// src/pages/Perjalanan/components/SubmitButton.jsx
 import React from "react";
 import { Button, Container } from "@chakra-ui/react";
 
-const SubmitButton = ({ actions, isLoading }) => {
+const SubmitButton = ({ isLoading }) => {
   return (
     <Container maxW="1280px" variant="primary" p={0}>
       <Button
+        type="submit" // ✅ ini penting agar Formik menangani validasi
         variant="primary"
-        onClick={actions?.submitPerjalanan}
         isLoading={isLoading}
         loadingText="Mengunduh..."
         width="100%"

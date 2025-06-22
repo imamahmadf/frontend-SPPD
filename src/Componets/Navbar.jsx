@@ -56,7 +56,7 @@ function Navbar() {
   // console.log("Is Authenticated:", isAuthenticated);
   console.log("User Data:", user);
   const history = useHistory();
-
+  const jumlahNotifikasi = 1;
   return (
     <>
       {/* Top Navbar */}
@@ -96,7 +96,30 @@ function Navbar() {
               <Menu>
                 <MenuButton as={Button} variant="ghost">
                   <HStack>
-                    <Avatar size="sm" name={user[0]?.nama} />
+                    <Box position="relative">
+                      <Avatar size="sm" name={user[0]?.nama} />
+                      {jumlahNotifikasi > 0 && (
+                        <Box
+                          position="absolute"
+                          top="-1"
+                          right="-1"
+                          bg="red.500"
+                          color="white"
+                          fontSize="xs"
+                          fontWeight="bold"
+                          px={2}
+                          py={0.5}
+                          borderRadius="full"
+                          minW="5"
+                          h="5"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          {jumlahNotifikasi}
+                        </Box>
+                      )}
+                    </Box>
                     <Text>{user[0]?.nama}</Text>
                   </HStack>
                 </MenuButton>
@@ -149,6 +172,7 @@ function Navbar() {
                   alignItems="center"
                   width="100%"
                   mb={"20px"}
+                  onClick={() => history.push("/")}
                 >
                   <Image
                     height="50px"
@@ -160,29 +184,10 @@ function Navbar() {
                   />
                 </VStack>
 
-                <VStack spacing={4} width="100%">
-                  <Box
-                    as="button"
-                    px={4}
-                    py={2}
-                    width="100%"
-                    textAlign="left"
-                    borderRadius="md"
-                    transition="all 0.2s"
-                    _hover={{
-                      bg: "secondary",
-                      color: "black",
-                      transform: "translateX(5px)",
-                      boxShadow: "md",
-                    }}
-                    onClick={() => history.push("/")}
-                  >
-                    <Text fontWeight="semibold">HOME</Text>
-                  </Box>
-
+                <VStack spacing={2} width="100%">
                   {isAuthenticated ? (
                     <Accordion allowMultiple width="100%">
-                      <AccordionItem my={"20px"} border="none">
+                      <AccordionItem my={"10px"} border="none">
                         <AccordionButton
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
@@ -245,7 +250,7 @@ function Navbar() {
                         </AccordionPanel>
                       </AccordionItem>
 
-                      <AccordionItem my={"20px"} border="none">
+                      <AccordionItem my={"10px"} border="none">
                         <AccordionButton
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
@@ -317,7 +322,7 @@ function Navbar() {
                         </AccordionPanel>
                       </AccordionItem>
 
-                      <AccordionItem my={"20px"} border="none">
+                      <AccordionItem my={"10px"} border="none">
                         <AccordionButton
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
@@ -357,7 +362,7 @@ function Navbar() {
                         </AccordionPanel>
                       </AccordionItem>
 
-                      <AccordionItem my={"20px"} border="none">
+                      <AccordionItem my={"10px"} border="none">
                         <AccordionButton
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
@@ -410,7 +415,7 @@ function Navbar() {
                         </AccordionPanel>
                       </AccordionItem>
 
-                      <AccordionItem my={"20px"} border="none">
+                      <AccordionItem my={"10px"} border="none">
                         <AccordionButton
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
@@ -486,7 +491,7 @@ function Navbar() {
                         </AccordionPanel>
                       </AccordionItem>
 
-                      <AccordionItem my={"20px"} border="none">
+                      <AccordionItem my={"10px"} border="none">
                         <AccordionButton
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"
@@ -528,7 +533,7 @@ function Navbar() {
                         </AccordionPanel>
                       </AccordionItem>
 
-                      <AccordionItem my={"20px"} border="none">
+                      <AccordionItem my={"10px"} border="none">
                         <AccordionButton
                           _hover={{ bg: "primary", color: "white" }}
                           borderRadius="md"

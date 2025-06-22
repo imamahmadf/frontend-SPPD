@@ -88,7 +88,9 @@ const usePerjalananData = (user) => {
     ]);
   };
 
-  const submitPerjalanan = () => {
+  const submitPerjalanan = (values) => {
+    console.log(values);
+    console.log(selectedPegawai);
     setIsLoading(true);
     axios
       .post(
@@ -96,16 +98,16 @@ const usePerjalananData = (user) => {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/post/nota-dinas`,
         {
-          pegawai: selectedPegawai,
+          pegawai: values.personil,
           dataTtdSurTug: dataTtdSuratTugas,
           dataTtdNotaDinas,
           PPTKId: dataPPTK.value.id,
-          tanggalPengajuan,
+          tanggalPengajuan: values.pengajuan,
           noSurat: dataSeed?.resultDaftarNomorSurat,
-          subKegiatanId: dataSubKegiatan.value.id,
-          untuk,
-          dasar,
-          asal,
+          subKegiatanId: values.subKegiatan.value.id,
+          untuk: values.untuk,
+          dasar: values.dasar,
+          asal: values.asal,
           kodeRekeningFE: `${dataSubKegiatan?.value?.kodeRekening}${jenisPerjalanan.value.kodeRekening}`,
           subKegiatan: dataSubKegiatan.value.subKegiatan,
           ttdNotDis: dataTtdNotaDinas,
@@ -117,7 +119,7 @@ const usePerjalananData = (user) => {
           indukUnitKerjaFE: user[0]?.unitKerja_profile,
           KPAId: dataKPA.value.id,
           kodeKlasifikasi: dataKodeKlasifikasi,
-          dataBendaharaId: dataBendahara.id,
+          dataBendaharaId: values.bendahara.value.id,
           pelayananKesehatanId: jenisPelayananKesehatan,
           isSrikandi,
           isNotaDinas,
@@ -221,6 +223,7 @@ const usePerjalananData = (user) => {
         }/perjalanan/get/jenis-perjalanan/${id}`
       );
       setDataJenisPerjalanan(res.data.result);
+      console.log(res.data.result, "JENIS PERJALANANNN!!!!");
     } catch (err) {
       console.error(err.message);
     }

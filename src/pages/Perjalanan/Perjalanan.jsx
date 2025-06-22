@@ -1,4 +1,5 @@
-// src/pages/Perjalanan/Perjalanan.jsx
+// --- Perjalanan.jsx ---
+
 import React from "react";
 import { Box, Container, useToast, Center, Button } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
@@ -14,36 +15,13 @@ import DataKeuangan from "./Components/DataKeuangan";
 import DataPerjalanan from "./Components/DataPerjalanan";
 import PreviewPersonil from "./Components/PreviewPersonil";
 import SubmitButton from "./Components/SubmitButton";
-import { Formik } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
 function Perjalanan() {
   const user = useSelector(userRedux);
   const history = useHistory();
   const toast = useToast();
-  const initialValues = {
-    notaDinas: "",
-    personil: [null, null, null, null, null], // Untuk 5 orang
-    tandaTangan: {
-      kepala: "",
-      pptk: "",
-      kpa: "",
-    },
-    // Tambahkan field lain sesuai form lainnya
-  };
-
-  const validationSchema = Yup.object().shape({
-    notaDinas: Yup.string().required("Nota Dinas wajib diisi"),
-    personil: Yup.array()
-      .of(Yup.object().nullable())
-      .min(1, "Minimal 1 personil dipilih"),
-    tandaTangan: Yup.object().shape({
-      kepala: Yup.string().required("Kepala wajib diisi"),
-      pptk: Yup.string().required("PPTK wajib diisi"),
-      kpa: Yup.string().required("KPA wajib diisi"),
-    }),
-    // Tambah validasi lain
-  });
 
   const {
     state,
@@ -75,41 +53,118 @@ function Perjalanan() {
     );
   }
 
+  const initialValues = {
+    klasifikasi: null,
+    kodeKlasifikasi: null,
+    subKegiatan: null,
+    untuk: "",
+    pengajuan: "",
+    asal: state.asal,
+    sumberDana: null,
+    bendahara: null,
+    personil: [null],
+    jenisPerjalanan: null,
+  };
+
+  const validationSchema = Yup.object().shape({
+    klasifikasi: Yup.mixed().nullable().required("Klasifikasi wajib diisi"),
+    kodeKlasifikasi: Yup.mixed()
+      .nullable()
+      .required("Kode Klasifikasi wajib diisi"),
+    jenisPerjalanan: Yup.mixed()
+      .nullable()
+      .required("Jenis Perjalanan wajib diisi"),
+    untuk: Yup.string().required("Untuk wajib diisi"),
+    asal: Yup.string().required("Asal wajib diisi"),
+    pengajuan: Yup.string()
+      .nullable()
+      .required("Tanggal pengajuan wajib diisi")
+      .matches(
+        /^\d{4}-\d{2}-\d{2}$/,
+        "Format tanggal tidak valid (YYYY-MM-DD)"
+      ),
+    sumberDana: Yup.mixed().nullable().required("Sumber Dana wajib dipilih"),
+    bendahara: Yup.mixed().nullable().required("Bendahara wajib dipilih"),
+    personil: Yup.array()
+      .of(Yup.mixed().nullable())
+      .test(
+        "personil-0-required",
+        "Personil 1 wajib dipilih",
+        (arr) => arr[0] !== null
+      ),
+    subKegiatan: Yup.mixed().nullable().required("Sub kegiatan wajib diisi"),
+  });
+
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <DataNotaDinas
-          dataSeed={dataSeed}
-          state={state}
-          actions={actions}
-          dataKlasifikasi={state.dataKlasifikasi}
-        />
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={(values, { setSubmitting }) => {
+            console.log("🟢 Form berhasil dikirim:", values); // ✅ Tambahkan ini
+            actions.submitPerjalanan(values); // Panggil function API
+            setSubmitting(false);
+          }}
+        >
+          {({ isSubmitting, values, errors, touched, setFieldValue }) => (
+            <Form>
+              <DataNotaDinas
+                dataSeed={dataSeed}
+                state={state}
+                actions={actions}
+                dataKlasifikasi={state.dataKlasifikasi}
+                values={values}
+                errors={errors}
+                touched={touched}
+                setFieldValue={setFieldValue}
+              />
 
-        <DaftarPersonil
-          dataPegawai={state.dataPegawai}
-          selectedPegawai={selectedPegawai}
-          handleSelectChange={actions.handleSelectChange}
-        />
+              <DaftarPersonil
+                dataPegawai={state.dataPegawai}
+                selectedPegawai={selectedPegawai}
+                handleSelectChange={actions.handleSelectChange}
+                values={values}
+                errors={errors}
+                touched={touched}
+              />
 
-        <TandaTangan dataSeed={dataSeed} state={state} actions={actions} />
+              <TandaTangan
+                dataSeed={dataSeed}
+                state={state}
+                actions={actions}
+              />
 
-        <DataKeuangan dataSeed={dataSeed} state={state} actions={actions} />
+              <DataKeuangan
+                dataSeed={dataSeed}
+                state={state}
+                actions={actions}
+                values={values}
+                errors={errors}
+                touched={touched}
+              />
 
-        {state.dataSumberDana && (
-          <DataPerjalanan
-            dataSeed={dataSeed}
-            state={state}
-            actions={actions}
-            dataKota={dataKota}
-            perjalananKota={perjalananKota}
-          />
-        )}
+              {values.sumberDana && (
+                <DataPerjalanan
+                  dataSeed={dataSeed}
+                  state={state}
+                  actions={actions}
+                  dataKota={dataKota}
+                  perjalananKota={perjalananKota}
+                  values={values}
+                  errors={errors}
+                  touched={touched}
+                />
+              )}
 
-        {selectedPegawai.length > 0 && (
-          <PreviewPersonil selectedPegawai={selectedPegawai} />
-        )}
+              {values.personil?.filter(Boolean).length > 0 && (
+                <PreviewPersonil />
+              )}
 
-        <SubmitButton actions={actions} isLoading={isLoading} />
+              <SubmitButton isLoading={isSubmitting || isLoading} />
+            </Form>
+          )}
+        </Formik>
       </Box>
     </Layout>
   );

@@ -10,8 +10,10 @@ import {
   Box,
   Heading,
   Text,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { Select as Select2 } from "chakra-react-select";
+import { useFormikContext } from "formik";
 
 const DataPerjalanan = ({
   state,
@@ -20,6 +22,7 @@ const DataPerjalanan = ({
   dataSeed,
   perjalananKota,
 }) => {
+  const { values, errors, touched, setFieldValue } = useFormikContext();
   return (
     <Container
       variant={"primary"}
@@ -35,7 +38,10 @@ const DataPerjalanan = ({
       {/* {JSON.stringify(jenisPelayananKesehatan)} */}
 
       <Box p={"30px"}>
-        <FormControl my={"15px"}>
+        <FormControl
+          my={"15px"}
+          isInvalid={touched.jenisPerjalanan && errors.jenisPerjalanan}
+        >
           <FormLabel fontSize={"24px"}>Jenis Perjalanan</FormLabel>
           <Select2
             options={state.dataJenisPerjalanan?.map((val) => {
@@ -48,6 +54,7 @@ const DataPerjalanan = ({
             focusBorderColor="red"
             onChange={(selectedOption) => {
               actions.setJenisPerjalanan(selectedOption);
+              setFieldValue("jenisPerjalanan", selectedOption);
             }}
             components={{
               DropdownIndicator: () => null, // Hilangkan tombol panah
@@ -74,7 +81,8 @@ const DataPerjalanan = ({
                 color: state.isFocused ? "white" : "black",
               }),
             }}
-          />
+          />{" "}
+          <FormErrorMessage>{errors.jenisPerjalanan}</FormErrorMessage>
         </FormControl>
         {state.jenisPerjalanan?.value?.jenis?.includes("Pelayanan") ? (
           <FormControl my={"30px"}>
@@ -292,7 +300,10 @@ const DataPerjalanan = ({
           </Box>
         ) : null}
 
-        <FormControl my={"30px"}>
+        <FormControl
+          my={"30px"}
+          isInvalid={touched.subKegiatan && errors.subKegiatan}
+        >
           <FormLabel fontSize={"24px"}> Sub Kegiatan</FormLabel>
           <Select2
             options={dataSeed?.resultDaftarSubKegiatan?.map((val) => {
@@ -304,6 +315,7 @@ const DataPerjalanan = ({
             placeholder="Cari Kegiatan"
             focusBorderColor="red"
             onChange={(selectedOption) => {
+              setFieldValue("subKegiatan", selectedOption);
               actions.setDataSubKegiatan(selectedOption);
             }}
             components={{
@@ -331,80 +343,43 @@ const DataPerjalanan = ({
                 color: state.isFocused ? "white" : "black",
               }),
             }}
-          />
+          />{" "}
+          <FormErrorMessage>{errors.subKegiatan}</FormErrorMessage>
         </FormControl>
         {/* {JSON.stringify(dataKota)} */}
-        {state.dataKegiatan?.value && (
-          <>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Sub Kegiatan</FormLabel>
-              <Select2
-                options={state.dataKegiatan?.value?.subKegiatan.map((val) => {
-                  return {
-                    value: val,
-                    label: `${val.subKegiatan} - ${val.kodeRekening}`,
-                  };
-                })}
-                placeholder="Cari Sub Kegiatan"
-                focusBorderColor="red"
-                onChange={(selectedOption) => {
-                  setDataSubKegiatan(selectedOption);
-                }}
-                components={{
-                  DropdownIndicator: () => null, // Hilangkan tombol panah
-                  IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: {
-                      borderColor: "yellow.700",
-                    },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "primary" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-          </>
-        )}
+
         {state.dataSubKegiatan.value ? (
           <Text>{`Kode Rekening: ${state.dataSubKegiatan?.value?.kodeRekening}${state.jenisPerjalanan?.value?.kodeRekening}`}</Text>
         ) : null}
 
         <Flex mt={"40px"} gap={4}>
-          <FormControl>
+          <FormControl isInvalid={touched.pengajuan && errors.pengajuan}>
             <FormLabel fontSize={"24px"}>Tanggal Pengajuan</FormLabel>
             <Input
-              defaultValue={state.tanggalPengajuan}
+              name="tanggalPengajuan"
               type="date"
-              height={"60px"}
-              variant={"primary"}
-              onChange={(e) => actions.handleChange(e, "pengajuan")}
+              value={values.pengajuan}
+              onChange={(e) => setFieldValue("pengajuan", e.target.value)}
             />
+            <FormErrorMessage>{errors.pengajuan}</FormErrorMessage>
           </FormControl>
 
           <FormControl>
-            <FormLabel fontSize={"24px"}>Asal</FormLabel>
+            <FormLabel
+              fontSize={"24px"}
+              isInvalid={touched.asal && errors.asal}
+            >
+              Asal
+            </FormLabel>
             <Input
               onChange={(e) => {
                 setAsal(e.target.value);
+                setFieldValue("asal", e.target.value);
               }}
-              defaultValue={state.asal}
+              defaultValue={values.asal}
               height={"60px"}
-              variant={"primary"}
-            />
+            />{" "}
+            <FormErrorMessage>{errors.asal}</FormErrorMessage>
           </FormControl>
         </Flex>
       </Box>

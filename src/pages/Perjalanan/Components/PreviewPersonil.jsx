@@ -11,8 +11,12 @@ import {
   Box,
   Heading,
 } from "@chakra-ui/react";
+import { useFormikContext } from "formik";
 
-const PreviewPersonil = ({ selectedPegawai }) => {
+const PreviewPersonil = () => {
+  const { values } = useFormikContext();
+  const selectedPegawai = values.personil || [];
+
   return (
     <Container maxW="1280px" variant="primary" pt="30px" ps="0px" my="20px">
       <HStack>
@@ -31,15 +35,17 @@ const PreviewPersonil = ({ selectedPegawai }) => {
             </Tr>
           </Thead>
           <Tbody>
-            {selectedPegawai.map((pegawai, index) => (
-              <Tr key={index}>
-                <Td>{index + 1}</Td>
-                <Td>{pegawai.value.nama}</Td>
-                <Td>{pegawai.value.daftarPangkat.pangkat}</Td>
-                <Td>{pegawai.value.jabatan}</Td>
-                <Td>{pegawai.value.nip}</Td>
-              </Tr>
-            ))}
+            {selectedPegawai
+              .filter((p) => p) // hanya tampilkan jika tidak null
+              .map((pegawai, index) => (
+                <Tr key={index}>
+                  <Td>{index + 1}</Td>
+                  <Td>{pegawai?.value?.nama || "-"}</Td>
+                  <Td>{pegawai?.value?.daftarPangkat?.pangkat || "-"}</Td>
+                  <Td>{pegawai?.value?.jabatan || "-"}</Td>
+                  <Td>{pegawai?.value?.nip || "-"}</Td>
+                </Tr>
+              ))}
           </Tbody>
         </Table>
       </Box>
