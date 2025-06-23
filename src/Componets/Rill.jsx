@@ -68,13 +68,17 @@ function Rill(props) {
         console.error(err);
       });
   }
-  const handleSave = (id) => {
-    console.log(editedData);
+  const handleSave = (val) => {
+    console.log(val);
     axios
-      .post(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/rill/update`,
-        editedData
-      )
+      .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/rill/update`, {
+        nilai: editedData.nilai,
+        id: editedData.id,
+        item: editedData.item,
+        oldNilai: val.nilai,
+        rincianBPDId: val.rincianBPD.id,
+        nilaiBPD: val.rincianBPD.nilai,
+      })
       .then((res) => {
         setEditMode(null);
         props.randomNumber(Math.random());
@@ -159,7 +163,7 @@ function Rill(props) {
                         <HStack>
                           <Button
                             colorScheme="green"
-                            onClick={() => handleSave(item.id)}
+                            onClick={() => handleSave(item)}
                           >
                             Save
                           </Button>

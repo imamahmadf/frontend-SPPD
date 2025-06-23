@@ -12,7 +12,10 @@ import {
   AsyncSelect,
 } from "chakra-react-select";
 import { useFormik } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { BsFileEarmark } from "react-icons/bs";
+
 import YupPassword from "yup-password";
 import {
   Box,
@@ -46,6 +49,8 @@ import {
   Input,
   FormHelperText,
   Spacer,
+  VStack,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
@@ -83,6 +88,52 @@ function Rampung(props) {
     onClose: onInputClose,
   } = useDisclosure();
   const [isPrinting, setIsPrinting] = useState(false);
+  const validationSchema = Yup.object().shape({
+    file: Yup.mixed()
+      .required("File harus diunggah")
+      .test(
+        "fileType",
+        "Format file tidak valid. Harap unggah file .pdf",
+        (value) => value && value.type === "application/pdf"
+      )
+      .test(
+        "fileSize",
+        "Ukuran file terlalu besar. Maksimal 2 MB",
+        (value) => value && value.size <= 2 * 1024 * 1024
+      ),
+  });
+
+  const handleDownload = async (fileName) => {
+    try {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/template/download-undangan`,
+        {
+          params: { fileName },
+
+          responseType: "blob",
+        }
+      );
+
+      // Membuat URL untuk file yang akan diunduh
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      toast({
+        title: "Gagal Mengunduh",
+        description: "Terjadi kesalahan saat mengunduh file",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   function renderTemplate() {
     return dataRampung.template?.map((val) => {
@@ -452,6 +503,9 @@ function Rampung(props) {
       acc[jenis].push(item);
       return acc;
     }, {}) || {};
+  const grandTotal = Object.values(groupedData)
+    .flat()
+    .reduce((sum, item) => sum + item.nilai, 0);
 
   return (
     <Layout>
@@ -486,13 +540,125 @@ function Rampung(props) {
 
           <Box p={"30px"}>
             <Flex gap={"30px"}>
-              <Box>
+              <Box minW={"40%"}>
                 <TambahBuktiKegiatan
                   pic={dataRampung?.result?.perjalanan?.pic}
                   id={dataRampung?.result?.perjalanan?.id}
                   status={dataRampung?.result?.status?.id}
                   randomNumber={setRandomNumber}
-                />
+                />{" "}
+                {dataRampung?.result?.perjalanan?.undangan ? (
+                  <Button
+                    gap={"10px"}
+                    mt={"30px"}
+                    px={"15px"}
+                    variant={"primary"}
+                    onClick={() =>
+                      handleDownload(dataRampung?.result?.perjalanan?.undangan)
+                    }
+                  >
+                    <BsFileEarmark /> Undangan
+                  </Button>
+                ) : (
+                  <Box
+                    mx="auto"
+                    p={5}
+                    borderWidth="1px"
+                    borderRadius="lg"
+                    boxShadow="lg"
+                    mt={"20px"}
+                  >
+                    <Formik
+                      initialValues={{ file: null, jenis: null }}
+                      validationSchema={validationSchema}
+                      onSubmit={async (
+                        values,
+                        { setSubmitting, resetForm }
+                      ) => {
+                        console.log("Nilai yang dikirim:", values.jenis);
+                        const formData = new FormData();
+                        formData.append("file", values.file);
+                        formData.append("id", dataRampung.result.perjalanan.id);
+
+                        try {
+                          const response = await axios.post(
+                            `${
+                              import.meta.env.VITE_REACT_APP_API_BASE_URL
+                            }/template/upload-undangan`,
+                            formData,
+                            {
+                              headers: {
+                                "Content-Type": "multipart/form-data",
+                              },
+                            }
+                          );
+
+                          toast({
+                            title: "Sukses!",
+                            description: response.data.message,
+                            status: "success",
+                            duration: 3000,
+                            isClosable: true,
+                          });
+
+                          resetForm();
+                          setSelectedFile(null);
+                          fetchTemplate();
+                        } catch (error) {
+                          toast({
+                            title: "Gagal Mengunggah",
+                            description:
+                              "Terjadi kesalahan saat mengunggah file",
+                            status: "error",
+                            duration: 3000,
+                            isClosable: true,
+                          });
+                        }
+
+                        setSubmitting(false);
+                      }}
+                    >
+                      {({ setFieldValue, isSubmitting, errors, touched }) => (
+                        <Form>
+                          <VStack spacing={4} align="stretch">
+                            <FormControl
+                              isInvalid={errors.file && touched.file}
+                            >
+                              <Input
+                                type="file"
+                                accept=".pdf"
+                                onChange={(event) => {
+                                  setFieldValue(
+                                    "file",
+                                    event.currentTarget.files[0]
+                                  );
+                                  setSelectedFile(event.currentTarget.files[0]);
+                                }}
+                                p={1}
+                              />
+                              <FormErrorMessage>{errors.file}</FormErrorMessage>
+                            </FormControl>
+
+                            {selectedFile && (
+                              <Text fontSize="sm" color="gray.600">
+                                File: {selectedFile.name}
+                              </Text>
+                            )}
+
+                            <Button
+                              type="submit"
+                              variant={"primary"}
+                              isLoading={isSubmitting}
+                              isDisabled={!selectedFile}
+                            >
+                              Upload
+                            </Button>
+                          </VStack>
+                        </Form>
+                      )}
+                    </Formik>
+                  </Box>
+                )}
               </Box>
               <Box>
                 <Text fontWeight={"600"} fontSize={"18px"}>
@@ -576,32 +742,6 @@ function Rampung(props) {
             dataRampung?.result?.statusId === 2 ? null : (
               <Box></Box>
             )}{" "}
-            <Flex mt={"30px"} gap={5}>
-              <Rill
-                data={dataRampung?.daftarRill}
-                personilId={dataRampung?.result?.id}
-                randomNumber={setRandomNumber}
-                status={dataRampung?.result?.statusId}
-              />
-              {dataRampung?.result?.statusId === 3 ? (
-                <Button variant={"primary"} onClick={cetak}>
-                  CETAK
-                </Button>
-              ) : null}
-              {dataRampung?.result?.statusId === 3 ||
-              dataRampung?.result?.statusId === 2 ? null : (
-                <Button onClick={onInputOpen} variant={"primary"}>
-                  Tambah +
-                </Button>
-              )}{" "}
-              {dataRampung?.result?.perjalanan?.jenisPerjalanan
-                .tipePerjalananId === 1 &&
-              dataRampung?.result?.rincianBPDs.length == 0 ? (
-                <Button variant={"primary"} onClick={buatOtomatis}>
-                  buat otomatis
-                </Button>
-              ) : null}
-            </Flex>
           </Box>
         </Container>
         {/* <Container
@@ -628,8 +768,35 @@ function Rampung(props) {
           <HStack>
             <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
             <Heading color={"primary"}>Detail Rampung</Heading>
+            <Spacer />
+            <Flex mt={"30px"} gap={5}>
+              <Rill
+                data={dataRampung?.daftarRill}
+                personilId={dataRampung?.result?.id}
+                randomNumber={setRandomNumber}
+                status={dataRampung?.result?.statusId}
+              />
+              {dataRampung?.result?.statusId === 3 ? (
+                <Button variant={"primary"} onClick={cetak}>
+                  CETAK
+                </Button>
+              ) : null}
+              {dataRampung?.result?.statusId === 3 ||
+              dataRampung?.result?.statusId === 2 ? null : (
+                <Button onClick={onInputOpen} variant={"primary"}>
+                  Tambah +
+                </Button>
+              )}{" "}
+              {dataRampung?.result?.perjalanan?.jenisPerjalanan
+                .tipePerjalananId === 1 &&
+              dataRampung?.result?.rincianBPDs.length == 0 ? (
+                <Button variant={"primary"} onClick={buatOtomatis}>
+                  buat otomatis
+                </Button>
+              ) : null}
+            </Flex>
           </HStack>
-          <Box p={"30px"} style={{ overflowX: "auto" }}>
+          <Box py={"30px"} ps={"30px"} style={{ overflowX: "auto" }}>
             {Object.keys(groupedData).length > 0 ? (
               Object.keys(groupedData).map((jenis) => (
                 <Box key={jenis} mt={4}>
@@ -699,10 +866,23 @@ function Rampung(props) {
                           </Td>{" "}
                           <Td>
                             {editMode === item.id ? (
-                              <Input
-                                value={editedData.satuan}
-                                onChange={(e) => handleChange(e, "satuan")}
-                              />
+                              <Box>
+                                <Image
+                                  borderRadius={"5px"}
+                                  alt="foto obat"
+                                  width="120px"
+                                  height="80px"
+                                  overflow="hiden"
+                                  objectFit="cover"
+                                  src={
+                                    item.bukti
+                                      ? import.meta.env
+                                          .VITE_REACT_APP_API_BASE_URL +
+                                        item.bukti
+                                      : Foto
+                                  }
+                                />
+                              </Box>
                             ) : (
                               <Box>
                                 <Image
@@ -729,7 +909,7 @@ function Rampung(props) {
                               {editMode === item.id ? (
                                 <HStack>
                                   <Button
-                                    colorScheme="green"
+                                    variant="primary"
                                     onClick={() => handleSave(item.id)}
                                   >
                                     Save
@@ -777,19 +957,34 @@ function Rampung(props) {
               <Text>Tidak ada data untuk ditampilkan.</Text>
             )}
           </Box>
-          {dataRampung?.result?.statusId === 1 ||
-          dataRampung?.result?.statusId == 4 ? (
-            <Button
-              ms={"30px"}
-              mb={"30px"}
-              variant={"primary"}
-              onClick={() => {
-                pengajuan();
-              }}
-            >
-              Ajukan
-            </Button>
-          ) : null}
+
+          <Flex>
+            <Box>
+              {dataRampung?.result?.statusId === 1 ||
+              dataRampung?.result?.statusId == 4 ? (
+                <Button
+                  ms={"30px"}
+                  mb={"30px"}
+                  variant={"primary"}
+                  onClick={() => {
+                    pengajuan();
+                  }}
+                >
+                  Ajukan
+                </Button>
+              ) : null}
+            </Box>
+            <Spacer />
+            <Box mt={"15px"}>
+              <Text fontSize="lg" fontWeight={800} color="primary">
+                TOTAL:{" "}
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                }).format(grandTotal)}
+              </Text>
+            </Box>
+          </Flex>
         </Container>
       </Box>
 

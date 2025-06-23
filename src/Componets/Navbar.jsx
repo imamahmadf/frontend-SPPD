@@ -3,21 +3,12 @@ import {
   Box,
   Text,
   Container,
-  FormControl,
-  FormLabel,
-  Center,
   HStack,
-  Table,
-  Spacer,
   Image,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
-  MenuItemOption,
-  MenuGroup,
-  MenuOptionGroup,
-  MenuDivider,
   Button,
   Flex,
   Avatar,
@@ -46,6 +37,10 @@ import {
 import Logo from "../assets/logo.png";
 import LogoPena from "../assets/Logo Pena.png";
 import { HiOutlineUsers } from "react-icons/hi2";
+import { io } from "socket.io-client";
+const socket = io("http://localhost:8000", {
+  transports: ["websocket"],
+});
 
 function Navbar() {
   const isAuthenticated =
@@ -56,7 +51,35 @@ function Navbar() {
   // console.log("Is Authenticated:", isAuthenticated);
   console.log("User Data:", user);
   const history = useHistory();
-  const jumlahNotifikasi = 1;
+  const [jumlahNotifikasi, setJumlahNotifikasi] = useState(0);
+
+  useEffect(() => {
+    socket.on("notifikasi:terbaru", (data) => {
+      console.log("📡 Notifikasi baru diterima di React:", data);
+      if (data.count !== undefined) {
+        console.log("🧠 Update state jumlahNotifikasi ke:", data.count);
+        setJumlahNotifikasi(data.count);
+      }
+    });
+
+    return () => {
+      socket.off("notifikasi:terbaru");
+    };
+  }, []);
+
+  useEffect(() => {
+    socket.on("notifikasi:terbaru", (data) => {
+      console.log("📡 Notifikasi baru:", data);
+      if (data.count !== undefined) {
+        setJumlahNotifikasi(data.count);
+      }
+    });
+
+    return () => {
+      socket.off("notifikasi:terbaru");
+    };
+  }, []);
+
   return (
     <>
       {/* Top Navbar */}
@@ -87,6 +110,11 @@ function Navbar() {
                 Kabupaten Paser
               </Text>
             </Box>
+            {/* <Button
+              onClick={() => fetch("http://localhost:8000/api/notifikasi/get")}
+            >
+              Test Emit
+            </Button> */}
           </Flex>
           {isAuthenticated ? (
             <HStack spacing={4}>

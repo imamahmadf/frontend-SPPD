@@ -45,6 +45,37 @@ function RampungAdmin(props) {
           : tempat.tempat
       }${index < detailPerjalanan.tempats.length - 1 ? `, ` : ``}`
   );
+  const handleDownload = async (fileName) => {
+    try {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/template/download-undangan`,
+        {
+          params: { fileName },
+
+          responseType: "blob",
+        }
+      );
+
+      // Membuat URL untuk file yang akan diunduh
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      toast({
+        title: "Gagal Mengunduh",
+        description: "Terjadi kesalahan saat mengunduh file",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   const terimaVerifikasi = (personilId) => {
     axios
@@ -189,6 +220,14 @@ function RampungAdmin(props) {
                 Kode Rekening:
                 {`${detailPerjalanan?.daftarSubKegiatan?.kodeRekening}${detailPerjalanan?.jenisPerjalanan?.kodeRekening}`}
               </Text>
+              {detailPerjalanan?.undangan ? (
+                <Button
+                  variant={"primary"}
+                  onClick={() => handleDownload(detailPerjalanan?.undangan)}
+                >
+                  lihat
+                </Button>
+              ) : null}
               {/* <Text>
             Personil: {JSON.stringify(detailPerjalanan.personils[0].status)}
           </Text> */}

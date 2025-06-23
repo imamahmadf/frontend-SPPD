@@ -311,18 +311,18 @@ function SubKegiatanAdmin() {
             <ModalBody>
               <HStack>
                 <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-                <Heading color={"primary"}>Tambah Tujuan</Heading>
+                <Heading color={"primary"}>Tambah Sub Kegiatan</Heading>
               </HStack>
               <Box p={"30px"}>
                 <FormControl my={"30px"}>
-                  <FormLabel fontSize={"24px"}>Nama Tujuan</FormLabel>
+                  <FormLabel fontSize={"24px"}>Kode Rekening</FormLabel>
                   <Input
                     height={"60px"}
                     bgColor={"terang"}
                     onChange={(e) =>
                       handleSubmitChange("kodeRekening", e.target.value)
                     }
-                    placeholder="Contoh: 1.00.12"
+                    placeholder="Contoh: 1.02.01.2.05.05"
                   />
                 </FormControl>
                 <FormControl my={"30px"}>
@@ -333,7 +333,7 @@ function SubKegiatanAdmin() {
                     onChange={(e) =>
                       handleSubmitChange("subKegiatan", e.target.value)
                     }
-                    placeholder="Contoh: xxx"
+                    placeholder="Contoh: Monitoring, Evaluasi, dan Penilaian Kinerja Pegawai"
                   />
                 </FormControl>
                 <FormControl my={"30px"}>

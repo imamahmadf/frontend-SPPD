@@ -194,7 +194,7 @@ function suratKeluarAdmin() {
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container maxW={"1280px"} variant={"primary"} pt={"30px"} ps={"0px"}>
+        <Container maxW={"2880px"} variant={"primary"} pt={"30px"} ps={"0px"}>
           <Flex gap={4} p={"30px"}>
             <FormControl>
               <FormLabel>Tanggal Awal</FormLabel>
@@ -316,7 +316,7 @@ function suratKeluarAdmin() {
             <ModalBody>
               <HStack>
                 <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-                <Heading color={"primary"}>Data Nota Dinas</Heading>
+                <Heading color={"primary"}>Tambah Surat Keluar</Heading>
               </HStack>
               <Box p={"30px"}>
                 <FormControl my={"30px"}>
