@@ -26,7 +26,7 @@ export const tableStyles = {
           td: {
             py: "12px",
             px: "16px",
-            borderBottom: "1px solid",
+            border: "1px solid",
             borderColor: props.colorMode === "dark" ? "black" : "gray.200",
             fontSize: "14px",
             color: props.colorMode === "dark" ? "white" : "inherit",
