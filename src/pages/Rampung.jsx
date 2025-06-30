@@ -546,7 +546,7 @@ function Rampung(props) {
                   id={dataRampung?.result?.perjalanan?.id}
                   status={dataRampung?.result?.status?.id}
                   randomNumber={setRandomNumber}
-                />{" "}
+                />
                 {dataRampung?.result?.perjalanan?.undangan ? (
                   <Button
                     gap={"10px"}

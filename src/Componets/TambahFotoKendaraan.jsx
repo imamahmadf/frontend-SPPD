@@ -33,7 +33,7 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
-function TambahBuktiKegiatan(props) {
+function TambahFotoKendaraan(props) {
   const inputFileRef = useRef(null);
   const [fileSizeMsg, setFileSizeMsg] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -71,12 +71,12 @@ function TambahBuktiKegiatan(props) {
       formData.append("id", props.id);
 
       formData.append("pic", selectedFile);
-      formData.append("old_img", props.pic);
+      formData.append("old_img", props.foto);
       await axios
         .post(
           `${
             import.meta.env.VITE_REACT_APP_API_BASE_URL
-          }/kwitansi/post/bukti-perjalanan`,
+          }/kendaraan/post/foto-kendaraan`,
           formData
         )
         .then((res) => {
@@ -112,23 +112,22 @@ function TambahBuktiKegiatan(props) {
         overflow="hiden"
         objectFit="cover"
         src={
-          props?.pic
-            ? import.meta.env.VITE_REACT_APP_API_BASE_URL + props?.pic
+          props?.foto
+            ? import.meta.env.VITE_REACT_APP_API_BASE_URL + props?.foto
             : Foto
         }
       />
-      {props.status === 1 || props.status == 4 ? (
-        <Button
-          onClick={onInputOpen}
-          position="absolute"
-          bottom="0px"
-          left="0px"
-          h={"40px"}
-          variant={"secondary"}
-        >
-          Tambah +
-        </Button>
-      ) : null}
+
+      <Button
+        onClick={onInputOpen}
+        position="absolute"
+        bottom="0px"
+        left="0px"
+        h={"40px"}
+        variant={"secondary"}
+      >
+        Tambah +
+      </Button>
 
       <Modal
         closeOnOverlayClick={false}
@@ -193,4 +192,4 @@ function TambahBuktiKegiatan(props) {
   );
 }
 
-export default TambahBuktiKegiatan;
+export default TambahFotoKendaraan;

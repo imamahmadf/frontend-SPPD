@@ -29,6 +29,7 @@ import { useSelector } from "react-redux";
 import { BsStar } from "react-icons/bs";
 import { BsEnvelope } from "react-icons/bs";
 import { GoShieldLock } from "react-icons/go";
+import { BiCar } from "react-icons/bi";
 import {
   selectIsAuthenticated,
   userRedux,
@@ -515,6 +516,16 @@ function Navbar() {
                                 Sub Kegiatan
                               </Box>
                             </Link>
+                            <Link to="/sijaka/kendaraan/unit-kerja">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                Aset Kendaraan
+                              </Box>
+                            </Link>
                           </VStack>
                         </AccordionPanel>
                       </AccordionItem>
@@ -617,6 +628,57 @@ function Navbar() {
                                 borderRadius="md"
                               >
                                 Daftar Induk Unit Kerja
+                              </Box>
+                            </Link>
+                          </VStack>
+                        </AccordionPanel>
+                      </AccordionItem>
+                      <AccordionItem my={"10px"} border="none">
+                        <AccordionButton
+                          _hover={{ bg: "primary", color: "white" }}
+                          borderRadius="md"
+                        >
+                          <HStack
+                            gap={3}
+                            flex="1"
+                            textAlign="left"
+                            fontWeight="semibold"
+                          >
+                            <BiCar />
+                            <Text>Aset Kendaraan</Text>
+                          </HStack>
+                          <AccordionIcon />
+                        </AccordionButton>
+                        <AccordionPanel pb={4}>
+                          <VStack spacing={2} align="stretch">
+                            <Link to="/sijaka/daftar-kendaraan">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                Daftar Kendaraan
+                              </Box>
+                            </Link>
+                            <Link to="/sijaka/daftar-kendaraan">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                Surat Pengantar
+                              </Box>
+                            </Link>
+                            <Link to="/sijaka/template">
+                              <Box
+                                px={4}
+                                py={2}
+                                _hover={{ bg: "gray.100" }}
+                                borderRadius="md"
+                              >
+                                template Surat
                               </Box>
                             </Link>
                           </VStack>

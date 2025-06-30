@@ -47,6 +47,10 @@ import PegawaiUnitKerja from "./pages/PegawaiUnitKerja.jsx";
 import PerjalananKadis from "./pages/PerjalananKadis.jsx";
 import RekapPerjalanan from "./pages/RekapPerjalanan.jsx";
 import KadisKalender from "./pages/KadisKalender.jsx";
+import DaftarKendaraan from "./pages/Sijaka/DaftarKendaraan.jsx";
+import DetailKendaraan from "./pages/Sijaka/DetailKendaraan.jsx";
+import KendaraanUnitKerja from "./pages/Sijaka/KendaraanUnitKerja.jsx";
+import TemplateAset from "./pages/Sijaka/TemplateAset.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -313,6 +317,31 @@ function App() {
             path="/rekap-perjalanan"
             exact
             roleRoute={[1, 5]}
+          />
+
+          <ProtectedRoute
+            component={DaftarKendaraan}
+            path="/sijaka/daftar-kendaraan"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={TemplateAset}
+            path="/sijaka/template"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={DetailKendaraan}
+            path="/sijaka/detail-kendaraan/:id"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={KendaraanUnitKerja}
+            path="/sijaka/kendaraan/unit-kerja"
+            exact
+            roleRoute={[5]}
           />
           <Route component={Home} path="/" />
         </Switch>
