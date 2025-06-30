@@ -266,32 +266,32 @@ function App() {
             component={NomorSuratAdmin}
             path="/admin/nomor-surat"
             exact
-            roleRoute={[4]}
+            roleRoute={[4, 5]}
           />
           <ProtectedRoute
             component={TtdSuratTugasAdmin}
             path="/admin/ttd-surat-tugas"
             exact
-            roleRoute={[2]}
+            roleRoute={[2, 5]}
           />
           <ProtectedRoute
             component={UnitKerjaAdmin}
             path="/admin/unit-kerja/:id"
             exact
-            roleRoute={[2]}
+            roleRoute={[2, 5]}
           />
           <ProtectedRoute
             component={DaftarBendaharaAdmin}
             path="/admin/daftar-bendahara"
             exact
-            roleRoute={[2]}
+            roleRoute={[2, 5]}
           />
 
           <ProtectedRoute
             component={TambahBendahara}
             path="/admin/tambah-bendahara"
             exact
-            roleRoute={[2]}
+            roleRoute={[2, 5]}
           />
           <ProtectedRoute
             component={EditJenisSurat}
@@ -303,14 +303,14 @@ function App() {
             component={SubKegiatanAdmin}
             path="/admin/sub-kegiatan"
             exact
-            roleRoute={[2]}
+            roleRoute={[2, 1]}
           />
 
           <ProtectedRoute
             component={PegawaiUnitKerja}
             path="/unit-kerja/daftar-pegawai"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 2]}
           />
           <ProtectedRoute
             component={RekapPerjalanan}
@@ -323,25 +323,25 @@ function App() {
             component={DaftarKendaraan}
             path="/sijaka/daftar-kendaraan"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 8]}
           />
           <ProtectedRoute
             component={TemplateAset}
             path="/sijaka/template"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 8]}
           />
           <ProtectedRoute
             component={DetailKendaraan}
             path="/sijaka/detail-kendaraan/:id"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 8]}
           />
           <ProtectedRoute
             component={KendaraanUnitKerja}
             path="/sijaka/kendaraan/unit-kerja"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 2]}
           />
           <Route component={Home} path="/" />
         </Switch>
