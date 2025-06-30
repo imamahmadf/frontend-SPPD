@@ -107,8 +107,8 @@ function TambahFotoKendaraan(props) {
       <Image
         borderRadius={"5px"}
         alt="foto obat"
-        width="520px"
-        height="320px"
+        width="620px"
+        height="820px"
         overflow="hiden"
         objectFit="cover"
         src={

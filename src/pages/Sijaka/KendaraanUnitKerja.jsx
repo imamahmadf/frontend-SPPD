@@ -5,6 +5,7 @@ import ReactPaginate from "react-paginate";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
+import Foto from "../../assets/add_photo.png";
 import {
   Box,
   Text,
@@ -47,7 +48,6 @@ import { useDisclosure } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
-import Loading from "../../Componets/Loading";
 
 function KendaraanUnitKerja() {
   const [DataKendaraan, setDataKendaraan] = useState([]);
@@ -69,7 +69,7 @@ function KendaraanUnitKerja() {
   const [nomor, setNomor] = useState(0);
   const [seri, setSeri] = useState("");
   const [time, setTime] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingItems, setLoadingItems] = useState({});
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
   const [dataPegawai, setDataPegawai] = useState(null);
@@ -99,64 +99,6 @@ function KendaraanUnitKerja() {
     }
   };
 
-  const cektakSurat = (val) => {
-    axios
-      .post(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/surat/post`,
-        {
-          nomorRangka: val.nomorRangka,
-          nomorMesin: val.nomorMesin,
-          unitKerja: val.pegawai.daftarUnitKerja.unitKerja,
-          plat: `KT ${val.nomor} ${val.seri}`,
-          jenis: val.jeni.nama,
-          updatedAt: val.surats[0].updatedAt,
-          kendaraanId: val.id,
-        },
-        {
-          responseType: "blob", // Penting untuk menerima file sebagai blob
-        }
-      )
-      .then((res) => {
-        console.log(res.data); // Log respons dari backend
-
-        // Buat URL untuk file yang diunduh
-        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "nota_dinas.docx"); // Nama file yang diunduh
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        // Tampilkan toast sukses
-        toast({
-          title: "Berhasil",
-          description: "File nota dinas berhasil diunduh",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-          position: "top",
-        });
-
-        // Redirect setelah download selesai
-        history.push(`/daftar`);
-      })
-      .catch((err) => {
-        console.error(err); // Tangani error
-        setIsLoading(false);
-
-        // Tampilkan toast error
-        toast({
-          title: "Gagal",
-          description: "Terjadi kesalahan saat mengunduh file",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-          position: "top",
-        });
-      });
-  };
-
   async function fetchDataKendaraan() {
     await axios
       .get(
@@ -178,12 +120,49 @@ function KendaraanUnitKerja() {
       });
   }
 
+  const cekPajak = (val) => {
+    setLoadingItems((prev) => ({ ...prev, [val.id]: true }));
+    axios
+      .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/cek`, {
+        id: val.id,
+        nomor: val.nomor,
+        seri: val.seri,
+        phone: 6281350617579,
+        kt: "KT",
+      })
+      .then((res) => {
+        // Buat URL untuk file yang diunduh
+        console.log(res.data);
+        fetchDataKendaraan();
+
+        toast({
+          title: "Berhasil",
+          description: res.data.message,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .catch((err) => {
+        console.error(err); // Tangani error
+        toast({
+          title: "Gagal",
+          description: "Gagal mengakses SIMPATOR  ",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setLoadingItems((prev) => ({ ...prev, [val.id]: false }));
+      });
+  };
+
   useEffect(() => {
     fetchDataKendaraan();
   }, [page]);
   return (
     <>
-      {isLoading && <Loading />}
       <Layout>
         <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Box
@@ -195,24 +174,15 @@ function KendaraanUnitKerja() {
           >
             {" "}
             <Flex gap={5}>
-              <Button
-                onClick={onTambahOpen}
-                mb={"30px"}
-                variant={"primary"}
-                px={"50px"}
-              >
-                Tambah +
-              </Button>
               <Spacer />
             </Flex>
             <Table variant={"primary"}>
               <Thead>
                 <Tr>
+                  <Th>Foto</Th>
                   <Th maxWidth={"20px"}>Unit Kerja</Th>
-
                   <Th>Nama Pemilik</Th>
                   <Th>NIP </Th>
-
                   <Th>Nomor Plat</Th>
                   <Th>Jenis Kendaraan</Th>
                   <Th>tanggal Pajak</Th>
@@ -221,25 +191,58 @@ function KendaraanUnitKerja() {
                   <Th>status</Th>
                   <Th>kondisi</Th>
                   <Th>kontak</Th>
-
                   <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {DataKendaraan?.map((item, index) => (
                   <Tr key={item.id}>
+                    {" "}
+                    <Td>
+                      <Image
+                        borderRadius={"5px"}
+                        alt="foto obat"
+                        width="80px"
+                        height="100px"
+                        overflow="hiden"
+                        objectFit="cover"
+                        src={
+                          item?.foto
+                            ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                              item?.foto
+                            : Foto
+                        }
+                      />
+                    </Td>
                     <Td>{item?.kendaraanUK.unitKerja}</Td>
                     <Td>{item?.pegawai?.nama}</Td>
                     <Td>{item?.pegawai?.nip}</Td>
                     <Td>{`KT ${item?.nomor} ${item?.seri}`}</Td>
                     <Td>{item?.jenisKendaraan?.jenis}</Td>
-                    <Td>{item?.tg_pkb}</Td>
-                    <Td>{item?.tg_stnk}</Td>
+                    <Td>
+                      {item?.tgl_pkb
+                        ? new Date(item?.tgl_pkb).toLocaleDateString("id-ID", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "-"}
+                    </Td>
+                    <Td>
+                      {item?.tg_stnk
+                        ? new Date(item?.tg_stnk).toLocaleDateString("id-ID", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "-"}
+                    </Td>{" "}
                     <Td>{item?.total}</Td>
                     <Td>{item?.statusKendaraan?.status}</Td>
                     <Td>{item?.kondisi?.nama}</Td>
                     <Td>{item?.noKontak}</Td>
-
                     <Td>
                       <Flex gap={"10px"}>
                         {item.id ? (
@@ -249,35 +252,26 @@ function KendaraanUnitKerja() {
                             fontSize={"14px"}
                             onClick={() =>
                               history.push(
-                                `/sijaka/detail-kendaraan/${item.id}`
+                                `/sijaka/detail-kendaraan/unit-kerja/${item.id}`
                               )
                             }
                           >
                             <BsEyeFill />
                           </Button>
-                        ) : null}
-
+                        ) : null}{" "}
                         <Button
-                          variant={"secondary"}
-                          p={"0px"}
+                          variant={"primary"}
+                          px={"15px"}
                           fontSize={"14px"}
                           h={"40px"}
+                          isLoading={loadingItems[item.id]}
+                          loadingText="Mengecek..."
                           onClick={() => {
                             cekPajak(item);
                           }}
+                          disabled={loadingItems[item.id]}
                         >
-                          <BsFileEarmarkArrowDown />
-                        </Button>
-                        <Button
-                          variant={"secondary"}
-                          p={"0px"}
-                          fontSize={"14px"}
-                          h={"40px"}
-                          onClick={() => {
-                            cektakSurat(item);
-                          }}
-                        >
-                          <BsFileEarmarkArrowDown />
+                          Cek Pajak
                         </Button>
                       </Flex>
                     </Td>

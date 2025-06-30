@@ -5,6 +5,7 @@ import ReactPaginate from "react-paginate";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
+import Foto from "../../assets/add_photo.png";
 import {
   Box,
   Text,
@@ -47,7 +48,6 @@ import { useDisclosure } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
-import Loading from "../../Componets/Loading";
 
 function DaftarKendaraan() {
   const [DataKendaraan, setDataKendaraan] = useState([]);
@@ -69,7 +69,8 @@ function DaftarKendaraan() {
   const [nomor, setNomor] = useState(0);
   const [seri, setSeri] = useState("");
   const [time, setTime] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingItems, setLoadingItems] = useState({});
+  const [loadingSurat, setLoadingSurat] = useState({});
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
   const [dataPegawai, setDataPegawai] = useState(null);
@@ -114,7 +115,7 @@ function DaftarKendaraan() {
       });
   }
   const cekPajak = (val) => {
-    setIsLoading(true);
+    setLoadingItems((prev) => ({ ...prev, [val.id]: true }));
     axios
       .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/cek`, {
         id: val.id,
@@ -147,10 +148,11 @@ function DaftarKendaraan() {
         });
       })
       .finally(() => {
-        setIsLoading(false);
+        setLoadingItems((prev) => ({ ...prev, [val.id]: false }));
       });
   };
   const cektakSurat = (val) => {
+    setLoadingSurat((prev) => ({ ...prev, [val.id]: true }));
     axios
       .post(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/surat`,
@@ -193,7 +195,6 @@ function DaftarKendaraan() {
       })
       .catch((err) => {
         console.error(err); // Tangani error
-        setIsLoading(false);
 
         // Tampilkan toast error
         toast({
@@ -204,6 +205,9 @@ function DaftarKendaraan() {
           isClosable: true,
           position: "top",
         });
+      })
+      .finally(() => {
+        setLoadingSurat((prev) => ({ ...prev, [val.id]: false }));
       });
   };
   const tambahkendaraan = () => {
@@ -287,7 +291,6 @@ function DaftarKendaraan() {
   }, [page, unitKerjaFilterId, pegawaiFilterId, nomorPlat]);
   return (
     <>
-      {isLoading && <Loading />}
       <Layout>
         <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Box
@@ -414,12 +417,12 @@ function DaftarKendaraan() {
             <Table variant={"primary"}>
               <Thead>
                 <Tr>
+                  <Th>Foto</Th>
                   <Th>Nomor Plat</Th>
                   <Th>Jenis Kendaraan</Th>
                   <Th>tanggal Pajak</Th>
                   <Th>tanggal STNK</Th> <Th maxWidth={"20px"}>Unit Kerja</Th>
                   <Th>Nama Pemilik</Th>
-                  <Th>NIP </Th>
                   <Th>nominal Pajak</Th>
                   <Th>status</Th>
                   <Th>kondisi</Th>
@@ -430,6 +433,22 @@ function DaftarKendaraan() {
               <Tbody>
                 {DataKendaraan?.map((item, index) => (
                   <Tr key={item.id}>
+                    <Td>
+                      <Image
+                        borderRadius={"5px"}
+                        alt="foto obat"
+                        width="80px"
+                        height="100px"
+                        overflow="hiden"
+                        objectFit="cover"
+                        src={
+                          item?.foto
+                            ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                              item?.foto
+                            : Foto
+                        }
+                      />
+                    </Td>
                     <Td>{`KT ${item?.nomor} ${item?.seri}`}</Td>
                     <Td>{item?.jenisKendaraan?.jenis}</Td>
                     <Td>
@@ -454,7 +473,6 @@ function DaftarKendaraan() {
                     </Td>{" "}
                     <Td>{item?.kendaraanUK.unitKerja}</Td>
                     <Td>{item?.pegawai?.nama}</Td>
-                    <Td>{item?.pegawai?.nip}</Td>
                     <Td>{item?.total}</Td>
                     <Td>{item?.statusKendaraan?.status}</Td>
                     <Td>{item?.kondisi?.nama}</Td>
@@ -481,9 +499,12 @@ function DaftarKendaraan() {
                           px={"15px"}
                           fontSize={"14px"}
                           h={"40px"}
+                          isLoading={loadingItems[item.id]}
+                          loadingText="Mengecek..."
                           onClick={() => {
                             cekPajak(item);
                           }}
+                          disabled={loadingItems[item.id]}
                         >
                           Cek Pajak
                         </Button>
@@ -492,9 +513,12 @@ function DaftarKendaraan() {
                           p={"0px"}
                           fontSize={"14px"}
                           h={"40px"}
+                          isLoading={loadingSurat[item.id]}
+                          loadingText="Mencetak..."
                           onClick={() => {
                             cektakSurat(item);
                           }}
+                          disabled={loadingSurat[item.id]}
                         >
                           <BsFileEarmarkArrowDown />
                         </Button>
