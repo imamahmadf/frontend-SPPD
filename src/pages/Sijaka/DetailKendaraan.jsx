@@ -26,25 +26,45 @@ import {
   ModalHeader,
   ModalFooter,
   Select,
+  Flex,
   ModalCloseButton,
   ModalBody,
+  Textarea,
+  useToast,
+  HStack,
+  Heading,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import {
+  Select as Select2,
+  CreatableSelect,
+  AsyncSelect,
+} from "chakra-react-select";
 
 function DetailKendaraan(props) {
   const [detailKendaraan, setDetailKendaraan] = useState([]);
   const [nomorSurat, setNomorSurat] = useState("");
   const [randomNumber, setRandomNumber] = useState(0);
   const [jenisList, setJenisList] = useState([]);
-
+  const [pegawaiId, setPegawaiId] = useState(null);
+  const [unitKerjaId, setUnitKerjaId] = useState(null);
+  const [tanggal, setTanggal] = useState(new Date());
+  const [keterangan, setKeterangan] = useState("");
+  const toast = useToast();
   const [seed, setSeed] = useState(null);
 
   const {
     isOpen: isEditOpen,
     onOpen: onEditOpen,
     onClose: onEditClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isMutasiOpen,
+    onOpen: onMutasiOpen,
+    onClose: onMutasiClose,
   } = useDisclosure();
 
   const fetchDataKendaraan = async () => {
@@ -57,11 +77,49 @@ function DetailKendaraan(props) {
       const result = res.data.result;
       setDetailKendaraan(result);
       setNomorSurat(res.data.resultTemplate[0]?.nomorSurat || "");
+      console.log(result);
     } catch (err) {
       console.error(err);
     }
   };
-
+  const mutasi = () => {
+    axios
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/post/mutasi`,
+        {
+          keterangan,
+          unitKerjaId,
+          pegawaiId,
+          kendaraanId: props.match.params.id,
+          tanggal,
+          asalUnitKerjaId: detailKendaraan?.kendaraanUK?.id,
+          asalPegawaiId: detailKendaraan?.pegawaiId,
+        }
+      )
+      .then((res) => {
+        console.log(res.status, res.data, "tessss");
+        toast({
+          title: "Berhasil!",
+          description: "Pengajuan berhasil dikirim.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        onMutasiClose();
+        fetchDataKendaraan();
+      })
+      .catch((err) => {
+        console.error(err.message);
+        toast({
+          title: "Error!",
+          description: "Data Kendaraan Tidak Ditemukan",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        onMutasiClose();
+      });
+  };
   const fetchSeed = async () => {
     try {
       const res = await axios.get(
@@ -111,7 +169,7 @@ function DetailKendaraan(props) {
 
   return (
     <Layout>
-      <Box>
+      <Box pb={"60px"}>
         <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
           <Box display="flex" gap={5}>
             <Box>
@@ -159,40 +217,198 @@ function DetailKendaraan(props) {
               <Text>Nomor Mesin: {detailKendaraan?.noMesin}</Text>
             </Box>
             <Spacer />
-            <Box>
-              <Button onClick={onEditOpen}>Edit</Button>
-            </Box>
+            <Flex gap={5}>
+              <Button variant={"primary"} onClick={onEditOpen}>
+                Edit
+              </Button>
+              <Button variant={"primary"} onClick={onMutasiOpen}>
+                Mutasi
+              </Button>
+            </Flex>
           </Box>
         </Container>
 
-        <Container variant={"primary"} maxW={"1280px"} p={"30px"} mt={"30px"}>
-          <Table variant={"primary"}>
-            <Thead>
-              <Tr>
-                <Th>Nomor Surat</Th>
-                <Th>Tanggal</Th>
-                <Th>Pembuat Surat</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {detailKendaraan?.suratPengantars?.map((item, index) => (
-                <Tr key={index}>
-                  <Td>{nomorSurat.replace("NOMOR", item.noLoket)}</Td>
-                  <Td>
-                    {item?.updatedAt
-                      ? new Date(item?.updatedAt).toLocaleDateString("id-ID", {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })
-                      : "-"}
-                  </Td>
-                  <Td>{item.noLoket}</Td>
+        <Container
+          variant={"primary"}
+          maxW={"1280px"}
+          p={"0px"}
+          pt={"30px"}
+          mt={"30px"}
+        >
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Riwayat Surat Pengantar</Heading>
+          </HStack>
+          <Box p={"30px"}>
+            <Table variant={"primary"}>
+              <Thead>
+                <Tr>
+                  <Th>Nomor Surat</Th>
+                  <Th>Tanggal</Th>
+                  <Th>Pembuat Surat</Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
+              </Thead>
+              <Tbody>
+                {detailKendaraan?.suratPengantars?.map((item, index) => (
+                  <Tr key={index}>
+                    <Td>{nomorSurat.replace("NOMOR", item.noLoket)}</Td>
+                    <Td>
+                      {item?.updatedAt
+                        ? new Date(item?.updatedAt).toLocaleDateString(
+                            "id-ID",
+                            {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
+                        : "-"}
+                    </Td>
+                    <Td>{item?.user?.nama}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
+        </Container>
+
+        <Container
+          variant={"primary"}
+          maxW={"1280px"}
+          ps={"0px"}
+          pt={"30px"}
+          mt={"30px"}
+        >
+          <HStack>
+            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"primary"}>Riwayat Mutasi Kendaraan</Heading>
+          </HStack>
+          <Box px={"30px"} pb={"30px"} pt={"20px"}>
+            <Table variant={"primary"}>
+              <Thead>
+                <Tr>
+                  <Th
+                    colSpan={2}
+                    borderColor={"white"}
+                    border={"1px"}
+                    style={{ textAlign: "center" }}
+                  >
+                    unit kerja
+                  </Th>
+                  <Th
+                    colSpan={2}
+                    style={{ textAlign: "center" }}
+                    borderColor={"white"}
+                    border={"1px"}
+                  >
+                    pegawai
+                  </Th>
+                  <Th
+                    rowSpan={2}
+                    style={{ textAlign: "center" }}
+                    borderColor={"white"}
+                    border={"1px"}
+                  >
+                    tanggal BAST
+                  </Th>
+                  <Th
+                    rowSpan={2}
+                    style={{ textAlign: "center" }}
+                    borderColor={"white"}
+                    border={"1px"}
+                  >
+                    keterangan
+                  </Th>
+                </Tr>
+                <Tr>
+                  <Th
+                    style={{ textAlign: "center" }}
+                    borderColor={"white"}
+                    border={"1px"}
+                  >
+                    asal
+                  </Th>
+                  <Th
+                    style={{ textAlign: "center" }}
+                    borderColor={"white"}
+                    border={"1px"}
+                  >
+                    tujuan
+                  </Th>
+                  <Th
+                    style={{ textAlign: "center" }}
+                    borderColor={"white"}
+                    border={"1px"}
+                  >
+                    asal
+                  </Th>
+                  <Th
+                    style={{ textAlign: "center" }}
+                    borderColor={"white"}
+                    border={"1px"}
+                  >
+                    tujuan
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {detailKendaraan?.mutasiKendaraans?.map((item, index) => (
+                  <Tr key={index}>
+                    <Td
+                      style={{ textAlign: "center" }}
+                      borderColor={"white"}
+                      border={"1px"}
+                    >
+                      {item.unitKerjaAsal?.unitKerja}
+                    </Td>
+                    <Td
+                      style={{ textAlign: "center" }}
+                      borderColor={"white"}
+                      border={"1px"}
+                    >
+                      {item.unitKerjaTujuan?.unitKerja}
+                    </Td>
+                    <Td
+                      style={{ textAlign: "center" }}
+                      borderColor={"white"}
+                      border={"1px"}
+                    >
+                      {item.pegawaiAsal?.nama}
+                    </Td>
+                    <Td
+                      style={{ textAlign: "center" }}
+                      borderColor={"white"}
+                      border={"1px"}
+                    >
+                      {item.pegawaiTujuan?.nama}
+                    </Td>{" "}
+                    <Td
+                      style={{ textAlign: "center" }}
+                      borderColor={"white"}
+                      border={"1px"}
+                    >
+                      {item?.tanggal
+                        ? new Date(item?.tanggal).toLocaleDateString("id-ID", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "-"}
+                    </Td>
+                    <Td
+                      style={{ textAlign: "center" }}
+                      borderColor={"white"}
+                      border={"1px"}
+                    >
+                      {item?.keterangan}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Box>
         </Container>
 
         {/* Modal Edit */}
@@ -418,6 +634,135 @@ function DetailKendaraan(props) {
                 </Form>
               )}
             </Formik>
+          </ModalContent>
+        </Modal>
+
+        <Modal
+          closeOnOverlayClick={false}
+          isOpen={isMutasiOpen}
+          onClose={onMutasiClose}
+        >
+          <ModalOverlay />
+          <ModalContent borderRadius={0} maxWidth="800px">
+            <ModalHeader>Mutasi Kendaraan</ModalHeader>
+            <ModalCloseButton />{" "}
+            <Box p={"30px"}>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                <AsyncSelect
+                  loadOptions={async (inputValue) => {
+                    if (!inputValue) return [];
+                    try {
+                      const res = await axios.get(
+                        `${
+                          import.meta.env.VITE_REACT_APP_API_BASE_URL
+                        }/pegawai/search?q=${inputValue}`
+                      );
+
+                      const filtered = res.data.result;
+
+                      return filtered.map((val) => ({
+                        value: val.id,
+                        label: val.nama,
+                      }));
+                    } catch (err) {
+                      console.error("Failed to load options:", err.message);
+                      return [];
+                    }
+                  }}
+                  placeholder="Ketik Nama Pegawai"
+                  onChange={(selectedOption) => {
+                    setPegawaiId(selectedOption.value);
+                  }}
+                  components={{
+                    DropdownIndicator: () => null,
+                    IndicatorSeparator: () => null,
+                  }}
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "6px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "terang",
+                      border: "0px",
+                      height: "60px",
+                      _hover: { borderColor: "yellow.700" },
+                      minHeight: "40px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused ? "primary" : "white",
+                      color: state.isFocused ? "white" : "black",
+                    }),
+                  }}
+                />
+              </FormControl>
+              <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                <Select2
+                  options={seed?.unitKerja?.map((val) => ({
+                    value: val.id,
+                    label: `${val.unitKerja}`,
+                  }))}
+                  placeholder="Contoh: Laboratorium kesehatan daerah"
+                  focusBorderColor="red"
+                  onChange={(selectedOption) => {
+                    setUnitKerjaId(selectedOption.value);
+                  }}
+                  components={{
+                    DropdownIndicator: () => null, // Hilangkan tombol panah
+                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                  }}
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "6px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "terang",
+                      border: "0px",
+                      height: "60px",
+                      _hover: {
+                        borderColor: "yellow.700",
+                      },
+                      minHeight: "40px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused ? "primary" : "white",
+                      color: state.isFocused ? "white" : "black",
+                    }),
+                  }}
+                />
+              </FormControl>{" "}
+              <FormControl mt={"30px"}>
+                <FormLabel fontSize={"24px"}>Tanggal BAST</FormLabel>
+                <Input
+                  bgColor={"terang"}
+                  type="date"
+                  height={"60px"}
+                  onChange={(e) => setTanggal(e.target.value)}
+                  placeholder="Contoh: mutasi ke BKAD"
+                />
+              </FormControl>
+              <FormControl mt={"30px"}>
+                <FormLabel fontSize={"24px"}>keterangan</FormLabel>
+                <Textarea
+                  bgColor={"terang"}
+                  height={"100px"}
+                  onChange={(e) => setKeterangan(e.target.value)}
+                  placeholder="Contoh: mutasi ke BKAD"
+                />
+              </FormControl>
+            </Box>{" "}
+            <ModalFooter pe={"30px"} pb={"30px"}>
+              <Button onClick={mutasi} variant={"primary"}>
+                Mutasi
+              </Button>
+            </ModalFooter>
           </ModalContent>
         </Modal>
       </Box>

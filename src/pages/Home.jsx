@@ -43,6 +43,7 @@ import {
   selectIsAuthenticated,
 } from "../Redux/Reducers/auth";
 import HomeFoto from "../assets/home.png";
+import FotoDinkes from "../assets/dinkes.jpg";
 
 function Home() {
   const isAuthenticated =
@@ -60,7 +61,7 @@ function Home() {
       <Layout>
         <Box
           height="100vh"
-          backgroundImage={`url(${HomeFoto})`}
+          backgroundImage={`url(${FotoDinkes})`}
           backgroundSize="cover"
           display="flex"
           alignItems="center"

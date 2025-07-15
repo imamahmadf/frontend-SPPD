@@ -44,6 +44,7 @@ function EditPegawai(props) {
     daftarGolongan: { id: "", golongan: "" },
     daftarPangkat: { id: "", golongan: "" },
     daftarTingaktan: { id: "", tingkatan: "" },
+    daftarUnitKerja: { id: "", unitKerja: "" },
     pendidikan: "",
     profesi: { id: "", nama: "" },
     statusPegawai: { id: "", status: "" },
@@ -114,6 +115,10 @@ function EditPegawai(props) {
           statusPegawai: {
             id: res.data.result.statusPegawai.id,
             status: res.data.result.statusPegawai.status,
+          },
+          daftarUnitKerja: {
+            id: res.data.result.daftarUnitKerja.id,
+            unitKerja: res.data.result.daftarUnitKerja.unitKerja,
           },
         });
 
@@ -292,7 +297,6 @@ function EditPegawai(props) {
                     )}
                   </Td>
                 </Tr>
-
                 <Tr>
                   <Th>Status Pegawai</Th>
                   <Td>
@@ -320,7 +324,6 @@ function EditPegawai(props) {
                     )}
                   </Td>
                 </Tr>
-
                 <Tr>
                   <Th>Profesi</Th>
                   <Td>
@@ -344,6 +347,36 @@ function EditPegawai(props) {
                     ) : (
                       <>
                         <Text>{dataPegawai.profesi?.nama}</Text>
+                      </>
+                    )}
+                  </Td>
+                </Tr>{" "}
+                <Tr>
+                  <Th>Unit Kerja</Th>
+                  <Td>
+                    {isEditing ? (
+                      <>
+                        <Select
+                          defaultValue={dataPegawai?.daftarUnitKerja.id}
+                          onChange={(e) =>
+                            handleSelectChange(
+                              "daftarUnitKerja",
+                              e.target.value
+                            )
+                          }
+                        >
+                          <option value="">Pilih Unit Kerja</option>
+                          {dataSeed.resultUnitKerja &&
+                            dataSeed.resultUnitKerja.map((val) => (
+                              <option key={val.id} value={val.id}>
+                                {val.unitKerja}
+                              </option>
+                            ))}
+                        </Select>
+                      </>
+                    ) : (
+                      <>
+                        <Text>{dataPegawai.daftarUnitKerja?.unitKerja}</Text>
                       </>
                     )}
                   </Td>

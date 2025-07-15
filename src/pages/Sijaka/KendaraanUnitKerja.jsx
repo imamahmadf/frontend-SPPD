@@ -279,34 +279,6 @@ function KendaraanUnitKerja() {
                 ))}
               </Tbody>
             </Table>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-
-                boxSizing: "border-box",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <ReactPaginate
-                previousLabel={"+"}
-                nextLabel={"-"}
-                pageCount={pages}
-                onPageChange={changePage}
-                activeClassName={"item active "}
-                breakClassName={"item break-me "}
-                breakLabel={"..."}
-                containerClassName={"pagination"}
-                disabledClassName={"disabled-page"}
-                marginPagesDisplayed={1}
-                nextClassName={"item next "}
-                pageClassName={"item pagination-page "}
-                pageRangeDisplayed={2}
-                previousClassName={"item previous"}
-              />
-            </div>
           </Box>
         </Box>
       </Layout>

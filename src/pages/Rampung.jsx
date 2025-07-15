@@ -304,7 +304,10 @@ function Rampung(props) {
         const url = window.URL.createObjectURL(new Blob([res.data]));
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "letter.docx");
+        link.setAttribute(
+          "download",
+          `kuitansi_${dataRampung?.result?.pegawai?.nama}${props.match.params.id}.docx`
+        );
         document.body.appendChild(link);
         link.click();
         link.remove();

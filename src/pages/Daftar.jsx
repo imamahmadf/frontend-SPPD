@@ -163,7 +163,7 @@ function Daftar() {
         {
           asal: val.asal,
           jenis: val.jenisPerjalanan.id,
-          kode: `${val.daftarSubKegiatan.kodeRekening}.${val.jenisPerjalanan.kodeRekening}`,
+          kode: `${val.daftarSubKegiatan.kodeRekening}${val.jenisPerjalanan.kodeRekening}`,
           personilFE: val.personils,
           ttdSurTug: val.ttdSuratTuga,
           id: val.id,

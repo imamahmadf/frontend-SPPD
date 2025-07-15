@@ -176,7 +176,7 @@ function DaftarKendaraan() {
         const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", "nota_dinas.docx"); // Nama file yang diunduh
+        link.setAttribute("download", `surat_pengantar_KT${val.nomor}.docx`); // Nama file yang diunduh
         document.body.appendChild(link);
         link.click();
         link.remove();

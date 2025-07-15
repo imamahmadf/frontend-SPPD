@@ -165,7 +165,7 @@ function App() {
             component={RampungAdmin}
             path="/admin/rampung/:id"
             exact
-            roleRoute={[4]}
+            roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={Perjalanan}
@@ -181,14 +181,14 @@ function App() {
             component={DaftarPegawai}
             path="/daftar-pegawai"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 7]}
           />
 
           <ProtectedRoute
             component={StatistikPegawai}
             path="/statistik-pegawai"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 7]}
           />
           <ProtectedRoute
             component={EditPegawai}
@@ -205,13 +205,13 @@ function App() {
             component={DaftarAdmin}
             path="/admin/keuangan/daftar-perjalanan"
             exact
-            roleRoute={[3]}
+            roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={TemplateKeuangan}
             path="/admin/keuangan/template"
             exact
-            roleRoute={[3]}
+            roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={SumberDanaAdmin}

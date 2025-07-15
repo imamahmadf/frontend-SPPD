@@ -289,6 +289,12 @@ function DaftarPegawai() {
               <Thead>
                 <Tr>
                   <Th>
+                    No.
+                    <Box>
+                      <Box></Box>
+                    </Box>
+                  </Th>
+                  <Th>
                     nama
                     <Box>
                       <Box>
@@ -650,6 +656,7 @@ function DaftarPegawai() {
               <Tbody>
                 {dataPegawai?.result?.map((item, index) => (
                   <Tr>
+                    <Td>{page * limit + index + 1}</Td>
                     <Td>{item.nama}</Td>
                     <Td minWidth={"200px"}>{item.nip}</Td>
                     <Td>{item.daftarPangkat.pangkat}</Td>

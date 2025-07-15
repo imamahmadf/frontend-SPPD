@@ -137,10 +137,10 @@ function TambahBuktiKegiatan(props) {
       >
         <ModalOverlay />
         <ModalContent borderRadius={0} maxWidth="1200px">
-          <ModalHeader>Rill </ModalHeader>
+          <ModalHeader>Foto Kegiatan </ModalHeader>
           <ModalCloseButton />
 
-          <ModalBody pb={6}>
+          <ModalBody pb={0}>
             <Box>
               <FormControl>
                 <Input
@@ -182,7 +182,14 @@ function TambahBuktiKegiatan(props) {
                   </Alert>
                 ) : null}
               </FormControl>{" "}
-              <Button onClick={formik.handleSubmit}>submit</Button>
+              <Button
+                mt={"30px"}
+                variant={"primary"}
+                onClick={formik.handleSubmit}
+                w={"100%"}
+              >
+                submit
+              </Button>
             </Box>
           </ModalBody>
 
