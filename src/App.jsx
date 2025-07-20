@@ -52,6 +52,8 @@ import DetailKendaraan from "./pages/Sijaka/DetailKendaraan.jsx";
 import KendaraanUnitKerja from "./pages/Sijaka/KendaraanUnitKerja.jsx";
 import TemplateAset from "./pages/Sijaka/TemplateAset.jsx";
 import DetailKendaraanUnitKerja from "./pages/Sijaka/DetailKendaraanUnitkerja.jsx";
+import pegawaiProfile from "./pages/pegawaiProfile.jsx";
+import UsulanPegawai from "./pages/UsulanPegawai.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -180,6 +182,13 @@ function App() {
           <ProtectedRoute
             component={DaftarPegawai}
             path="/daftar-pegawai"
+            exact
+            roleRoute={[5, 7]}
+          />
+
+          <ProtectedRoute
+            component={UsulanPegawai}
+            path="/pegawai/usulan"
             exact
             roleRoute={[5, 7]}
           />
@@ -347,6 +356,12 @@ function App() {
           <ProtectedRoute
             component={KendaraanUnitKerja}
             path="/sijaka/kendaraan/unit-kerja"
+            exact
+            roleRoute={[5, 2]}
+          />
+          <ProtectedRoute
+            component={pegawaiProfile}
+            path="/kepegawaian/profile"
             exact
             roleRoute={[5, 2]}
           />

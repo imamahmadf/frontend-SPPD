@@ -86,7 +86,7 @@ function RekapPerjalanan() {
       const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/rekap/get?time=${time}&page=${page}&limit=${limit}&subKegiatanId=${subKegiatanId}&indukUnitKerjaId=${
+        }/rekap/get?time=${time}&page=${page}&limit=${limit}&subKegiatanId=${subKegiatanId}&unitKerjaId=${
           user[0]?.unitKerja_profile?.id
         }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}&pegawaiId=${pegawaiId}`
       );

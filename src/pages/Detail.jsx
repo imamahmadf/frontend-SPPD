@@ -36,6 +36,7 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
+import Loading from "../Componets/Loading";
 
 function Detail(props) {
   const user = useSelector(userRedux);
@@ -43,6 +44,7 @@ function Detail(props) {
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [dataSubKegiatan, setDataSubKegiatan] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Tambah state loading
   const {
     isOpen: isEditOpen,
     onOpen: onEditOpen,
@@ -63,6 +65,7 @@ function Detail(props) {
       }${index < detailPerjalanan.tempats.length - 1 ? `, ` : ``}`
   );
   async function fetchDataPerjalan() {
+    setIsLoading(true); // Set loading true sebelum fetch
     await axios
       .get(
         `${
@@ -97,8 +100,13 @@ function Detail(props) {
   const history = useHistory();
 
   useEffect(() => {
-    fetchDataPerjalan();
-    fetchSubKegiatan();
+    // Jalankan kedua fetch dan set loading false setelah keduanya selesai
+    const fetchAll = async () => {
+      setIsLoading(true);
+      await Promise.all([fetchDataPerjalan(), fetchSubKegiatan()]);
+      setIsLoading(false);
+    };
+    fetchAll();
   }, []);
 
   const [pegawaiId, setPegawaiId] = useState(null); // id pegawai baru
@@ -148,6 +156,8 @@ function Detail(props) {
 
   // Cek apakah ada statusId yang 2 atau 3
   const adaStatusDuaAtauTiga = statusIds?.includes(2) || statusIds?.includes(3);
+
+  if (isLoading) return <Loading />;
 
   return (
     <>

@@ -13,12 +13,12 @@ import {
   Flex,
   Avatar,
   VStack,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
   useColorMode,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverBody,
+  PopoverArrow,
 } from "@chakra-ui/react";
 import { FaRoute } from "react-icons/fa";
 import Logout from "./Logout";
@@ -83,13 +83,13 @@ function Navbar() {
 
   return (
     <>
-      {/* Top Navbar */}
+      {/* Main Navbar */}
       <Box
         position="fixed"
         top={0}
-        left={isAuthenticated ? "250px" : "0px"}
+        left={0}
         right={0}
-        height="100px"
+        height="80px"
         bg={colorMode === "dark" ? "gray.800" : "white"}
         zIndex={999}
         boxShadow="sm"
@@ -98,30 +98,503 @@ function Navbar() {
         display="flex"
         alignItems="center"
         px={4}
-        mx={"20px"}
       >
         <HStack spacing={4} width="100%" justifyContent="space-between">
-          <Flex gap={3}>
-            <Image height="60px" src={Logo} alt="Logo" />
+          {/* Logo dan Brand */}
+          <Flex gap={3} alignItems="center">
+            <Image height="50px" src={Logo} alt="Logo" />
             <Box>
-              <Text fontSize={"20px"} fontWeight={700}>
+              <Text fontSize={"18px"} fontWeight={700}>
                 Dinas Kesehatan
               </Text>
-              <Text mt={0} fontSize={"18px"}>
+              <Text mt={0} fontSize={"16px"}>
                 Kabupaten Paser
               </Text>
             </Box>
-            {/* <Button
-              onClick={() => fetch("http://localhost:8000/api/notifikasi/get")}
-            >
-              Test Emit
-            </Button> */}
           </Flex>
-          {isAuthenticated ? (
-            <HStack spacing={4}>
-              <Button onClick={toggleColorMode}>
-                {colorMode === "light" ? "🌙" : "☀️"}
-              </Button>
+
+          {/* Navigation Menu */}
+          {isAuthenticated && (
+            <HStack spacing={2} flex={1} justifyContent="center">
+              {/* Perjalanan */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<FaRoute />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Perjalanan
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/perjalanan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Perjalanan
+                        </Box>
+                      </Link>
+                      <Link to="/daftar">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Perjalanan
+                        </Box>
+                      </Link>
+                      <Link to="/rekap-perjalanan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Rekap Perjalanan
+                        </Box>
+                      </Link>
+                      <Link to="/kalender-kadis">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Perjalanan Kepala Dinas
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+
+              {/* Keuangan */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<BiWallet />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Keuangan
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/admin/keuangan/daftar-perjalanan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Perjalanan
+                        </Box>
+                      </Link>
+                      <Link to="/admin/keuangan/perjalanan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Perjalanan Pegawai
+                        </Box>
+                      </Link>
+                      <Link to="/admin/keuangan/template">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Template Keuangan
+                        </Box>
+                      </Link>
+                      <Link to="/admin/dalam-kota">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Tujuan Dalam Kota
+                        </Box>
+                      </Link>
+                      <Link to="/admin/keuangan/sumber-dana">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Sumber Dana
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+
+              {/* Kepegawaian */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<HiOutlineUsers />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Kepegawaian
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/daftar-pegawai">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Pegawai
+                        </Box>
+                      </Link>
+                      <Link to="/statistik-pegawai">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Statistik Pegawai
+                        </Box>
+                      </Link>
+                      <Link to="/kepegawaian/profile">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Data Saya
+                        </Box>
+                      </Link>
+                      <Link to="/pegawai/usulan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Usulan Pegawai
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+
+              {/* Kepala Dinas */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<BsStar />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Kepala Dinas
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/perjalanan-kadis">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Perjalanan
+                        </Box>
+                      </Link>
+                      <Link to="/daftar/kadis">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Perjalanan
+                        </Box>
+                      </Link>
+                      <Link to="/template-kadis">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Template Surat Tugas
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+
+              {/* Unit Kerja */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<BsHouseDoor />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Unit Kerja
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/admin/induk-unit-kerja">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Induk Unit Kerja
+                        </Box>
+                      </Link>
+                      <Link to="/unit-kerja/daftar-pegawai">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Pegawai
+                        </Box>
+                      </Link>
+                      <Link to="/admin/daftar-bendahara">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Bendahara
+                        </Box>
+                      </Link>
+                      <Link to="/admin/template">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Template Surat
+                        </Box>
+                      </Link>
+                      <Link to="/admin/sub-kegiatan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Sub Kegiatan
+                        </Box>
+                      </Link>
+                      <Link to="/sijaka/kendaraan/unit-kerja">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Aset Kendaraan
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+
+              {/* Surat */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<BsEnvelope />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Surat
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/admin/nomor-surat">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Pengaturan
+                        </Box>
+                      </Link>
+                      <Link to="/admin/surat-keluar">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Surat Keluar
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+
+              {/* Administrator */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<GoShieldLock />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Administrator
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/admin/edit-jenis-surat">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Jenis Surat
+                        </Box>
+                      </Link>
+                      <Link to="/admin/tambah-user">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Tambah pengguna
+                        </Box>
+                      </Link>
+                      <Link to="/admin/daftar-user">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Pengguna
+                        </Box>
+                      </Link>
+                      <Link to="/admin/daftar-induk-unit-kerja">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Induk Unit Kerja
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+
+              {/* Aset Kendaraan */}
+              <Popover placement="bottom-start">
+                <PopoverTrigger>
+                  <Button
+                    variant="ghost"
+                    leftIcon={<BiCar />}
+                    _hover={{ bg: "primary", color: "white" }}
+                  >
+                    Aset Kendaraan
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  <PopoverArrow />
+                  <PopoverBody p={2}>
+                    <VStack spacing={1} align="stretch">
+                      <Link to="/sijaka/daftar-kendaraan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Daftar Kendaraan
+                        </Box>
+                      </Link>
+                      <Link to="/sijaka/daftar-kendaraan">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          Surat Pengantar
+                        </Box>
+                      </Link>
+                      <Link to="/sijaka/template">
+                        <Box
+                          px={3}
+                          py={2}
+                          _hover={{ bg: "gray.100" }}
+                          borderRadius="md"
+                        >
+                          template Surat
+                        </Box>
+                      </Link>
+                    </VStack>
+                  </PopoverBody>
+                </PopoverContent>
+              </Popover>
+            </HStack>
+          )}
+
+          {/* User Menu dan Actions */}
+          <HStack spacing={4}>
+            <Button onClick={toggleColorMode}>
+              {colorMode === "light" ? "🌙" : "☀️"}
+            </Button>
+
+            {isAuthenticated ? (
               <Menu>
                 <MenuButton as={Button} variant="ghost">
                   <HStack>
@@ -161,545 +634,17 @@ function Navbar() {
                   </MenuItem>
                 </MenuList>
               </Menu>
-            </HStack>
-          ) : (
-            <HStack spacing={4}>
-              <Button onClick={toggleColorMode}>
-                {colorMode === "light" ? "🌙" : "☀️"}
-              </Button>
+            ) : (
               <Link to="/login">
-                <Button me={"20px"} variant={"primary"}>
-                  Login
-                </Button>
+                <Button variant={"primary"}>Login</Button>
               </Link>
-            </HStack>
-          )}
+            )}
+          </HStack>
         </HStack>
       </Box>
 
-      {/* Sidebar */}
-      {isAuthenticated ? (
-        <>
-          {" "}
-          <Box
-            position="fixed"
-            top={0}
-            left={0}
-            height="100vh"
-            bg={colorMode === "dark" ? "gray.800" : "white"}
-            zIndex={1000}
-            boxShadow="lg"
-            borderRight="1px"
-            borderColor={colorMode === "dark" ? "gray.900" : "gray.200"}
-            width="250px"
-            pt={"10px"}
-          >
-            <Container py={"15px"} maxW={"2480px"}>
-              <VStack spacing={5} alignItems="flex-start">
-                <VStack
-                  spacing={2}
-                  alignItems="center"
-                  width="100%"
-                  mb={"20px"}
-                  onClick={() => history.push("/")}
-                >
-                  <Image
-                    height="50px"
-                    overflow="hidden"
-                    objectFit="cover"
-                    src={LogoPena}
-                    transition="transform 0.3s ease"
-                    _hover={{ transform: "scale(1.05)" }}
-                  />
-                </VStack>
-
-                <VStack spacing={2} width="100%">
-                  {isAuthenticated ? (
-                    <Accordion allowMultiple width="100%">
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            gap={3}
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <FaRoute />
-
-                            <Text>Perjalanan</Text>
-                          </HStack>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            <Link to="/perjalanan">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Perjalanan
-                              </Box>
-                            </Link>
-                            <Link to="/daftar">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Perjalanan
-                              </Box>
-                            </Link>
-                            <Link to="/rekap-perjalanan">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Rekap Perjalanan
-                              </Box>
-                            </Link>{" "}
-                            <Link to="/kalender-kadis">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Perjalanan Kepala Dinas
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            gap={3}
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <BiWallet />
-                            <Text>Keuangan</Text>
-                          </HStack>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            <Link to="/admin/keuangan/daftar-perjalanan">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Perjalanan
-                              </Box>
-                            </Link>
-                            <Link to="/admin/keuangan/perjalanan">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Perjalanan Pegawai
-                              </Box>
-                            </Link>
-                            <Link to="/admin/keuangan/template">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Template Keuangan
-                              </Box>
-                            </Link>
-                            <Link to="/admin/dalam-kota">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Tujuan Dalam Kota
-                              </Box>
-                            </Link>
-                            <Link to="/admin/keuangan/sumber-dana">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Sumber Dana
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <HiOutlineUsers /> <Text>Kepegawaian</Text>
-                          </HStack>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            <Link to="/daftar-pegawai">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Pegawai
-                              </Box>
-                            </Link>
-                            <Link to="/statistik-pegawai">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Statistik Pegawai
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            gap={3}
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <BsStar /> <Text>Kepala Dinas</Text>
-                          </HStack>
-
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            {" "}
-                            <Link to="/perjalanan-kadis">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Perjalanan
-                              </Box>
-                            </Link>
-                            <Link to="/daftar/kadis">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Perjalanan
-                              </Box>
-                            </Link>
-                            <Link to="/template-kadis">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Template Surat Tugas
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            gap={3}
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <BsHouseDoor />
-
-                            <Text>Unit Kerja</Text>
-                          </HStack>
-
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            <Link to="/admin/induk-unit-kerja">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Induk Unit Kerja
-                              </Box>
-                            </Link>
-
-                            <Link to="/unit-kerja/daftar-pegawai">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Pegawai
-                              </Box>
-                            </Link>
-
-                            <Link to="/admin/daftar-bendahara">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Bendahara
-                              </Box>
-                            </Link>
-                            <Link to="/admin/template">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Template Surat
-                              </Box>
-                            </Link>
-                            <Link to="/admin/sub-kegiatan">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Sub Kegiatan
-                              </Box>
-                            </Link>
-                            <Link to="/sijaka/kendaraan/unit-kerja">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Aset Kendaraan
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            gap={3}
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <BsEnvelope />
-                            <Text>Surat</Text>
-                          </HStack>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            <Link to="/admin/nomor-surat">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Pengaturan
-                              </Box>
-                            </Link>
-                            <Link to="/admin/surat-keluar">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Surat Keluar
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            gap={3}
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <GoShieldLock />
-                            <Text>Administrator</Text>
-                          </HStack>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            <Link to="/admin/edit-jenis-surat">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Jenis Surat
-                              </Box>
-                            </Link>
-                            <Link to="/admin/tambah-user">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Tambah pengguna
-                              </Box>
-                            </Link>
-                            <Link to="/admin/daftar-user">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Pengguna
-                              </Box>
-                            </Link>
-                            <Link to="/admin/daftar-induk-unit-kerja">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Induk Unit Kerja
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-                      <AccordionItem my={"10px"} border="none">
-                        <AccordionButton
-                          _hover={{ bg: "primary", color: "white" }}
-                          borderRadius="md"
-                        >
-                          <HStack
-                            gap={3}
-                            flex="1"
-                            textAlign="left"
-                            fontWeight="semibold"
-                          >
-                            <BiCar />
-                            <Text>Aset Kendaraan</Text>
-                          </HStack>
-                          <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel pb={4}>
-                          <VStack spacing={2} align="stretch">
-                            <Link to="/sijaka/daftar-kendaraan">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Daftar Kendaraan
-                              </Box>
-                            </Link>
-                            <Link to="/sijaka/daftar-kendaraan">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                Surat Pengantar
-                              </Box>
-                            </Link>
-                            <Link to="/sijaka/template">
-                              <Box
-                                px={4}
-                                py={2}
-                                _hover={{ bg: "gray.100" }}
-                                borderRadius="md"
-                              >
-                                template Surat
-                              </Box>
-                            </Link>
-                          </VStack>
-                        </AccordionPanel>
-                      </AccordionItem>
-                    </Accordion>
-                  ) : (
-                    <Link to="/login" style={{ width: "100%" }}>
-                      <Button variant="primary" width="100%">
-                        Login
-                      </Button>
-                    </Link>
-                  )}
-                </VStack>
-              </VStack>
-            </Container>
-          </Box>
-        </>
-      ) : null}
-
-      {/* Main Content Spacing */}
+      {/* Spacing untuk konten utama */}
+      <Box height="80px" />
     </>
   );
 }

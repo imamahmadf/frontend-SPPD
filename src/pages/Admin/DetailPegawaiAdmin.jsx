@@ -97,7 +97,7 @@ function DetailPegawaiAdmin(props) {
           : new Date();
 
         const endDate = item.tanggalPulang
-          ? addDays(parseISO(item.tanggalPulang), 1)
+          ? parseISO(item.tanggalPulang)
           : startDate;
 
         return {

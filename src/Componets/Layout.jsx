@@ -17,8 +17,8 @@ function Layout({ children }) {
       <Box
         bgColor={"secondary"}
         minH={"75vh"}
-        ms={isAuthenticated ? "250px" : "0"}
-        pt={isAuthenticated ? "140px" : "0"}
+        // ms={isAuthenticated ? "250px" : "0"}
+        pt={isAuthenticated ? "80px" : "0"}
       >
         <Navbar />
         {children}
