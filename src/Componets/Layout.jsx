@@ -22,6 +22,7 @@ function Layout({ children }) {
       >
         <Navbar />
         {children}
+        <Footer />
       </Box>
     </Box>
   );

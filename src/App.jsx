@@ -97,19 +97,19 @@ function App() {
         <Switch>
           <ProtectedRoute
             component={Daftar}
-            path="/daftar"
+            path="/perjalanan/daftar"
             exact
             roleRoute={[5, 1]}
           />
           <ProtectedRoute
             component={SuratTugasKadis}
-            path="/daftar/kadis"
+            path="/kepala-dinas/daftar-kadis"
             exact
             roleRoute={[5, 1]}
           />
           <ProtectedRoute
             component={KadisKalender}
-            path="/kalender-kadis"
+            path="/perjalanan/kalender-kadis"
             exact
             roleRoute={[5, 1]}
           />
@@ -127,7 +127,7 @@ function App() {
           />
           <ProtectedRoute
             component={suratKeluarAdmin}
-            path="/admin/surat-keluar"
+            path="/surat/surat-keluar"
             exact
             roleRoute={[5, 4]}
           />
@@ -147,19 +147,19 @@ function App() {
           <Route component={Register} path="/register" />
           <ProtectedRoute
             component={Template}
-            path="/admin/template"
+            path="/unit-kerja/template"
             exact
             roleRoute={[5, 1]}
           />
           <ProtectedRoute
             component={TemplateKadis}
-            path="/template-kadis"
+            path="/kepala-dinas/template-kadis"
             exact
             roleRoute={[5, 1]}
           />
           <ProtectedRoute
             component={PerjalananKadis}
-            path="/perjalanan-kadis"
+            path="/kepala-dinas/perjalanan-kadis"
             exact
             roleRoute={[5, 6]}
           />
@@ -181,21 +181,21 @@ function App() {
           />
           <ProtectedRoute
             component={DaftarPegawai}
-            path="/daftar-pegawai"
+            path="/kepegawaian/daftar-pegawai"
             exact
             roleRoute={[5, 7]}
           />
 
           <ProtectedRoute
             component={UsulanPegawai}
-            path="/pegawai/usulan"
+            path="/kepegawaian/usulan"
             exact
             roleRoute={[5, 7]}
           />
 
           <ProtectedRoute
             component={StatistikPegawai}
-            path="/statistik-pegawai"
+            path="/kepegawaian/statistik-pegawai"
             exact
             roleRoute={[5, 7]}
           />
@@ -207,36 +207,36 @@ function App() {
           />
           <ProtectedRoute
             component={DalamKotaAdmin}
-            path="/admin/dalam-kota"
-            roleRoute={[3]}
+            path="/keuangan/dalam-kota"
+            roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={DaftarAdmin}
-            path="/admin/keuangan/daftar-perjalanan"
+            path="/keuangan/daftar-perjalanan"
             exact
             roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={TemplateKeuangan}
-            path="/admin/keuangan/template"
+            path="/keuangan/template"
             exact
             roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={SumberDanaAdmin}
-            path="/admin/keuangan/sumber-dana"
+            path="/keuangan/sumber-dana"
             exact
-            roleRoute={[3]}
+            roleRoute={[3, 5]}
           />
           <ProtectedRoute
             component={DaftarPerjalananPegawai}
-            path="/admin/keuangan/perjalanan"
+            path="/keuangan/perjalanan-pegawai"
             exact
             roleRoute={[3]}
           />
           <ProtectedRoute
             component={IndukUnitKerjaAdmin}
-            path="/admin/induk-unit-kerja"
+            path="/unit-kerja/induk-unit-kerja"
             exact
             roleRoute={[2]}
           />
@@ -274,7 +274,7 @@ function App() {
           />
           <ProtectedRoute
             component={NomorSuratAdmin}
-            path="/admin/nomor-surat"
+            path="/surat/nomor"
             exact
             roleRoute={[4, 5]}
           />
@@ -292,7 +292,7 @@ function App() {
           />
           <ProtectedRoute
             component={DaftarBendaharaAdmin}
-            path="/admin/daftar-bendahara"
+            path="/unit-kerja/daftar-bendahara"
             exact
             roleRoute={[2, 5]}
           />
@@ -311,7 +311,7 @@ function App() {
           />
           <ProtectedRoute
             component={SubKegiatanAdmin}
-            path="/admin/sub-kegiatan"
+            path="/unit-kerja/sub-kegiatan"
             exact
             roleRoute={[2, 1]}
           />
@@ -324,7 +324,7 @@ function App() {
           />
           <ProtectedRoute
             component={RekapPerjalanan}
-            path="/rekap-perjalanan"
+            path="/perjalanan/rekap"
             exact
             roleRoute={[1, 5]}
           />
@@ -355,7 +355,7 @@ function App() {
           />
           <ProtectedRoute
             component={KendaraanUnitKerja}
-            path="/sijaka/kendaraan/unit-kerja"
+            path="/unit-kerja/kendaraan/sijaka"
             exact
             roleRoute={[5, 2]}
           />

@@ -42,6 +42,71 @@ import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
 import Loading from "../Componets/Loading";
 import DataKosong from "../Componets/DataKosong";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from "moment";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+import "moment/locale/id";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+
+// Fungsi untuk menghasilkan warna unik dari nama pegawai
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = "#";
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += ("00" + value.toString(16)).slice(-2);
+  }
+  return color;
+}
+
+function KalenderPerjalanan({ events, colorMode, formats, localizer }) {
+  return (
+    <Box
+      bgColor={"white"}
+      p={"30px"}
+      borderRadius={"5px"}
+      mb={"30px"}
+      bg={colorMode === "dark" ? "gray.800" : "white"}
+    >
+      <Calendar
+        localizer={localizer}
+        events={events}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: 700 }}
+        formats={formats}
+        popup={false}
+        eventPropGetter={(event) => {
+          const backgroundColor = stringToColor(event.title || "");
+          return {
+            style: {
+              backgroundColor,
+              color: "white",
+              borderRadius: "4px",
+              border: "none",
+            },
+          };
+        }}
+      />
+      <style>{`
+        .rbc-month-row {
+          min-height: 140px !important;
+        }
+        .rbc-date-cell {
+          vertical-align: top !important;
+        }
+        .rbc-event {
+          font-size: 12px;
+          padding: 2px 4px;
+        }
+      `}</style>
+    </Box>
+  );
+}
 function Daftar() {
   const [dataPerjalanan, setDataPerjalanan] = useState([]);
   const history = useHistory();
@@ -254,10 +319,50 @@ function Daftar() {
   useEffect(() => {
     fetchDataPerjalanan();
   }, [page, tanggalAkhir, tanggalAwal]);
+
+  // Mapping dataPerjalanan ke events untuk kalender, setiap personil jadi event terpisah
+  const events = dataPerjalanan.flatMap((item) => {
+    const start = item.tempats?.[0]?.tanggalBerangkat
+      ? new Date(item.tempats[0].tanggalBerangkat)
+      : null;
+    const end = item.tempats?.[item.tempats.length - 1]?.tanggalPulang
+      ? new Date(item.tempats[item.tempats.length - 1].tanggalPulang)
+      : start;
+    return (item.personils || []).map((p) => ({
+      title: p.pegawai?.nama || "-",
+      start,
+      end,
+      allDay: true,
+      resource: item,
+    }));
+  });
+
+  moment.locale("id");
+  const localizer = momentLocalizer(moment);
+  const formats = {
+    dayFormat: (date, culture, localizer) =>
+      format(date, "EEEE", { locale: idLocale }),
+    weekdayFormat: (date, culture, localizer) =>
+      format(date, "EEEEEE", { locale: idLocale }),
+    monthHeaderFormat: (date, culture, localizer) =>
+      format(date, "MMMM yyyy", { locale: idLocale }),
+    dayHeaderFormat: (date, culture, localizer) =>
+      format(date, "EEEE, d MMMM", { locale: idLocale }),
+  };
+
   return (
     <>
       {isLoading && <Loading />}
       <Layout>
+        {/* Kalender Perjalanan */}
+        <Box bgColor={"secondary"} pb={"20px"} px={"30px"}>
+          <KalenderPerjalanan
+            events={events}
+            colorMode={colorMode}
+            formats={formats}
+            localizer={localizer}
+          />
+        </Box>
         {dataPerjalanan[0] ? (
           <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
             <Box
