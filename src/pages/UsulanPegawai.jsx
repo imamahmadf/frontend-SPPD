@@ -59,6 +59,22 @@ import {
 } from "../Redux/Reducers/auth";
 
 function UsulanPegawai() {
+  const [dataUsulan, setDataUsulan] = useState(null);
+  async function fetchUsulan() {
+    axios
+      .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get/usulan`)
+      .then((res) => {
+        // Tindakan setelah berhasil
+        setDataUsulan(res.data.result);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+  useEffect(() => {
+    fetchUsulan();
+  }, []);
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
@@ -66,11 +82,44 @@ function UsulanPegawai() {
           border={"1px"}
           borderRadius={"6px"}
           borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
+          maxW={"2880px"}
           bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
-        ></Container>
+          p={"30px"}
+        >
+          <Table variant={"primary"}>
+            <Thead>
+              <Tr>
+                <Th>nama</Th>
+                <Th>Pangkat/golongan</Th>
+                <Th>Unit Kerja</Th>
+                <Th>Dokumen</Th>
+                <Th>Aksi</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {dataUsulan?.map((item, index) => (
+                <Tr key={index}>
+                  <Td>{item?.pegawai.nama || "-"}</Td>
+                  <Td>
+                    {`${item?.pegawai.daftarPangkat.pangkat}/${item?.pegawai.daftarGolongan.golongan}`}
+                  </Td>
+                  <Td>{item?.pegawai.daftarUnitKerja.unitKerja}</Td>
+                  <Td>
+                    {item?.tujuan?.map((val, idx) => (
+                      <Text key={idx}>{val || "-"}</Text>
+                    ))}
+                  </Td>
+                  <Td>
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(item?.totaluang) || "-"}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Container>
       </Box>
     </Layout>
   );
