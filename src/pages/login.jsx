@@ -56,18 +56,41 @@ const Login = () => {
   const history = useHistory();
   const [error, setError] = useState("");
   const { colorMode, toggleColorMode } = useColorMode();
+  const roles = useSelector(selectRole); // This returns the array of role objects
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await dispatch(login(namaPengguna, password));
-      history.push("/");
+      // Ambil roles terbaru setelah login
+      let currentRoles =
+        useSelector(selectRole) || JSON.parse(localStorage.getItem("role"));
+      // Jika hanya ada satu role dan roleId-nya 9, redirect ke dashboard pegawai
+      if (
+        Array.isArray(currentRoles) &&
+        currentRoles.length === 1 &&
+        currentRoles[0].roleId === 9
+      ) {
+        history.push("/pegawai/dashboard");
+      } else {
+        history.push("/");
+      }
     } catch (err) {
       setError("Email atau password salah!");
     }
   };
 
   if (isAuthenticated) {
-    history.push("/");
+    // Ambil roles terbaru
+    let currentRoles = roles || JSON.parse(localStorage.getItem("role"));
+    if (
+      Array.isArray(currentRoles) &&
+      currentRoles.length === 1 &&
+      currentRoles[0].roleId === 9
+    ) {
+      history.push("/pegawai/dashboard");
+    } else {
+      history.push("/");
+    }
   }
 
   return (

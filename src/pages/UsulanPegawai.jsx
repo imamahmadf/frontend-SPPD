@@ -60,6 +60,7 @@ import {
 
 function UsulanPegawai() {
   const [dataUsulan, setDataUsulan] = useState(null);
+  const history = useHistory();
   async function fetchUsulan() {
     axios
       .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get/usulan`)
@@ -110,10 +111,15 @@ function UsulanPegawai() {
                     ))}
                   </Td>
                   <Td>
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                    }).format(item?.totaluang) || "-"}
+                    <Button
+                      onClick={() =>
+                        history.push(
+                          `/pegawai/detail-usulan/${item.pegawai.id}`
+                        )
+                      }
+                    >
+                      Detail
+                    </Button>
                   </Td>
                 </Tr>
               ))}

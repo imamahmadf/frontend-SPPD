@@ -54,6 +54,9 @@ import TemplateAset from "./pages/Sijaka/TemplateAset.jsx";
 import DetailKendaraanUnitKerja from "./pages/Sijaka/DetailKendaraanUnitkerja.jsx";
 import pegawaiProfile from "./pages/pegawaiProfile.jsx";
 import UsulanPegawai from "./pages/UsulanPegawai.jsx";
+import DashboradPegawai from "./pages/DashboradPegawai.jsx";
+import NaikGolongan from "./pages/Pegawai/NaikGolongan.jsx";
+import DetailUsulan from "./pages/Pegawai/DetailUsulan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -364,6 +367,25 @@ function App() {
             path="/kepegawaian/profile"
             exact
             roleRoute={[5, 2]}
+          />
+
+          <ProtectedRoute
+            component={DashboradPegawai}
+            path="/pegawai/dashboard"
+            exact
+            roleRoute={[9]}
+          />
+          <ProtectedRoute
+            component={NaikGolongan}
+            path="/pegawai/naik-golongan"
+            exact
+            roleRoute={[9, 5]}
+          />
+          <ProtectedRoute
+            component={DetailUsulan}
+            path="/pegawai/detail-usulan/:id"
+            exact
+            roleRoute={[9, 5]}
           />
           <Route component={Home} path="/" />
         </Switch>

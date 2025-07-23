@@ -57,14 +57,22 @@ function TambahUser() {
   const [dataUnitKerja, setDataUnitKerja] = useState(null);
   const [unitKerjaId, setUnitKerjaId] = useState(null);
   const [dataRole, setDataRole] = useState(null);
+  const [pegawaiId, setPegawaiId] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const cleanNamaPengguna = namaPengguna.replace(/\s+/g, "");
+      const cleanNamaPengguna = namaPengguna;
       await dispatch(
-        register(nama, password, cleanNamaPengguna, role, unitKerjaId)
+        register(
+          nama,
+          password,
+          cleanNamaPengguna,
+          role,
+          unitKerjaId,
+          pegawaiId
+        )
       );
       history.push("/admin/daftar-user");
     } catch (error) {
@@ -128,9 +136,9 @@ function TambahUser() {
                       );
 
                       const filtered = res.data.result.filter(
-                        (val) => val.nip && val.nip.trim() !== "-"
+                        (val) => val.statusPegawaiId === 4
                       );
-
+                      console.log(filtered);
                       return filtered.map((val) => ({
                         value: val,
                         label: val.nama,
@@ -143,7 +151,7 @@ function TambahUser() {
                   placeholder="Ketik Nama Pegawai"
                   onChange={(selectedOption) => {
                     setNama(selectedOption.value.nama);
-                    setNamaPengguna(selectedOption.value.nip);
+                    setPegawaiId(selectedOption.value.id);
                   }}
                   components={{
                     DropdownIndicator: () => null,
@@ -248,6 +256,15 @@ function TambahUser() {
                       color: state.isFocused ? "white" : "black",
                     }),
                   }}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize={"24px"}>Nama Pengguna</FormLabel>
+                <Input
+                  height={"60px"}
+                  bgColor={"terang"}
+                  onChange={(e) => setNamaPengguna(e.target.value)}
+                  placeholder="Nama Pengguna"
                 />
               </FormControl>
               <FormControl>
