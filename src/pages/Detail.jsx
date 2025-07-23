@@ -39,14 +39,12 @@ import {
 import Loading from "../Componets/Loading";
 
 function Detail(props) {
-  // Semua deklarasi hook di sini
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [dataSubKegiatan, setDataSubKegiatan] = useState(null);
-  const [dataDalamKota, setDataDalamKota] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Tambah state loading
   const {
     isOpen: isEditOpen,
     onOpen: onEditOpen,
@@ -82,23 +80,6 @@ function Detail(props) {
         console.error(err);
       });
   }
-  async function fetchDalamKota() {
-    await axios
-      .get(
-        `${
-          import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/dalam-kota/get/dalam-kota/${
-          user[0]?.unitKerja_profile?.indukUnitKerja.id
-        }`
-      )
-      .then((res) => {
-        setDataDalamKota(res.data.result);
-        console.log(res.data.result, "Dalam Kota");
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  }
 
   async function fetchSubKegiatan() {
     await axios
@@ -122,11 +103,7 @@ function Detail(props) {
     // Jalankan kedua fetch dan set loading false setelah keduanya selesai
     const fetchAll = async () => {
       setIsLoading(true);
-      await Promise.all([
-        fetchDataPerjalan(),
-        fetchSubKegiatan(),
-        fetchDalamKota(),
-      ]);
+      await Promise.all([fetchDataPerjalan(), fetchSubKegiatan()]);
       setIsLoading(false);
     };
     fetchAll();
@@ -155,7 +132,6 @@ function Detail(props) {
       );
       onEditClose();
       fetchDataPerjalan(); // refresh data
-      setIsLoading(false);
     } catch (err) {
       console.error(err);
     }
@@ -180,15 +156,6 @@ function Detail(props) {
 
   // Cek apakah ada statusId yang 2 atau 3
   const adaStatusDuaAtauTiga = statusIds?.includes(2) || statusIds?.includes(3);
-
-  const [isEditTempatOpen, setIsEditTempatOpen] = useState(false);
-  const [editTempatList, setEditTempatList] = useState([]);
-  const [editTempatIndex, setEditTempatIndex] = useState(null);
-  const [editTempatData, setEditTempatData] = useState({
-    tempat: "",
-    tanggalBerangkat: "",
-    tanggalPulang: "",
-  });
 
   if (isLoading) return <Loading />;
 
@@ -274,108 +241,66 @@ function Detail(props) {
                     edit
                   </Button>
                 )}
-                <Button
-                  onClick={() => {
-                    setEditTempatList(
-                      detailPerjalanan.tempats.map((tempat) => ({
-                        ...tempat,
-                        tempat: tempat.dalamKota?.nama || tempat.tempat,
-                        dalamKotaId: tempat.dalamKota?.id || "",
-                        tanggalBerangkat: tempat.tanggalBerangkat.slice(0, 10),
-                        tanggalPulang: tempat.tanggalPulang.slice(0, 10),
-                      }))
-                    );
-                    setIsEditTempatOpen(true);
-                  }}
-                >
-                  Edit Tempat Perjalanan
-                </Button>
               </Box>
             </Flex>
           </Container>
           <Container mt={"30px"} variant={"primary"} maxW={"1280px"} p={"30px"}>
-            {detailPerjalanan?.tempats?.map((tempat, idx) => (
-              <Box
-                key={idx}
-                borderRadius={"5px"}
-                border={"1px"}
-                borderColor={"gray.800"}
-                p={"10px"}
-                my={"15px"}
-              >
-                <HStack>
-                  <Box>
-                    <Text>
-                      Tempat: {tempat.dalamKota?.nama || tempat.tempat}
-                    </Text>
-                    <Text>
-                      Tanggal Berangkat:{" "}
-                      {new Date(tempat.tanggalBerangkat).toLocaleDateString(
-                        "id-ID"
-                      )}
-                    </Text>
-                    <Text>
-                      Tanggal Pulang:{" "}
-                      {new Date(tempat.tanggalPulang).toLocaleDateString(
-                        "id-ID"
-                      )}
-                    </Text>
-                    <Button
-                      onClick={() => {
-                        setEditTempatIndex(idx);
-                        setEditTempatData({
-                          tempat: tempat.dalamKota?.nama || tempat.tempat,
-                          tanggalBerangkat: tempat.tanggalBerangkat.slice(
-                            0,
-                            10
-                          ),
-                          tanggalPulang: tempat.tanggalPulang.slice(0, 10),
-                        });
-                        setIsEditTempatOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </Box>
-                  <Spacer />
-                  <Flex gap={2}>
-                    <Button
-                      variant={"primary"}
-                      onClick={() => {
-                        history.push(`/rampung/${tempat.id}`);
-                      }}
-                    >
-                      Rampung
-                    </Button>
+            {detailPerjalanan?.personils?.map((item, index) => {
+              return (
+                <>
+                  <Box
+                    borderRadius={"5px"}
+                    border={"1px"}
+                    borderColor={"gray.800"}
+                    p={"10px"}
+                    my={"15px"}
+                  >
+                    <HStack>
+                      <Box>
+                        <Text>Nama: {item.pegawai.nama}</Text>
+                        <Text>Nomor SPD: {item.nomorSPD}</Text>
+                      </Box>
+                      <Spacer />
+                      <Flex gap={2}>
+                        <Button
+                          variant={"primary"}
+                          onClick={() => {
+                            history.push(`/rampung/${item.id}`);
+                          }}
+                        >
+                          Rampung
+                        </Button>
 
-                    {tempat.statusId !== 2 && tempat.statusId !== 3 ? (
-                      <>
-                        <Button
-                          variant={"secondary"}
-                          onClick={() => {
-                            setPersonilId(tempat.id);
-                            setPegawaiLamaId(tempat.pegawai.id);
-                            onEditOpen();
-                          }}
-                        >
-                          edit
-                        </Button>
-                        <Button
-                          variant={"cancle"}
-                          onClick={() => {
-                            setPersonilHapusId(tempat.id);
-                            setNamaPegawaiHapus(tempat.pegawai.nama);
-                            onHapusOpen();
-                          }}
-                        >
-                          X
-                        </Button>
-                      </>
-                    ) : null}
-                  </Flex>
-                </HStack>
-              </Box>
-            ))}
+                        {item.statusId !== 2 && item.statusId !== 3 ? (
+                          <>
+                            <Button
+                              variant={"secondary"}
+                              onClick={() => {
+                                setPersonilId(item.id);
+                                setPegawaiLamaId(item.pegawai.id);
+                                onEditOpen();
+                              }}
+                            >
+                              edit
+                            </Button>
+                            <Button
+                              variant={"cancle"}
+                              onClick={() => {
+                                setPersonilHapusId(item.id);
+                                setNamaPegawaiHapus(item.pegawai.nama);
+                                onHapusOpen();
+                              }}
+                            >
+                              X
+                            </Button>
+                          </>
+                        ) : null}
+                      </Flex>
+                    </HStack>
+                  </Box>
+                </>
+              );
+            })}
           </Container>
         </Box>
 
@@ -540,103 +465,6 @@ function Detail(props) {
                 Simpan
               </Button>
               <Button ml={3} onClick={() => setIsEditUntukOpen(false)}>
-                Batal
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {/* Modal Edit Tempat */}
-        <Modal
-          isOpen={isEditTempatOpen}
-          onClose={() => setIsEditTempatOpen(false)}
-        >
-          <ModalOverlay />
-          <ModalContent borderRadius={0} maxWidth="700px">
-            <ModalHeader>Edit Semua Tempat Perjalanan</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              {editTempatList.map((tempat, idx) => (
-                <Box
-                  key={idx}
-                  mb={4}
-                  p={3}
-                  border="1px solid #eee"
-                  borderRadius="md"
-                >
-                  <FormControl mb={2}>
-                    <FormLabel>Tempat</FormLabel>
-                    <Select
-                      placeholder="Pilih Tempat"
-                      value={tempat.dalamKotaId || ""}
-                      onChange={(e) => {
-                        const newList = [...editTempatList];
-                        // Simpan id dan nama tempat yang dipilih
-                        const selected = dataDalamKota.find(
-                          (item) => item.id === parseInt(e.target.value)
-                        );
-                        newList[idx].dalamKotaId = selected?.id;
-                        newList[idx].tempat = selected?.nama || "";
-                        setEditTempatList(newList);
-                      }}
-                    >
-                      {dataDalamKota &&
-                        dataDalamKota.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.nama}
-                          </option>
-                        ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl mb={2}>
-                    <FormLabel>Tanggal Berangkat</FormLabel>
-                    <Input
-                      type="date"
-                      value={tempat.tanggalBerangkat}
-                      onChange={(e) => {
-                        const newList = [...editTempatList];
-                        newList[idx].tanggalBerangkat = e.target.value;
-                        setEditTempatList(newList);
-                      }}
-                    />
-                  </FormControl>
-                  {JSON.stringify(tempat)}
-                  <FormControl>
-                    <FormLabel>Tanggal Pulang</FormLabel>
-                    <Input
-                      type="date"
-                      value={tempat.tanggalPulang}
-                      onChange={(e) => {
-                        const newList = [...editTempatList];
-                        newList[idx].tanggalPulang = e.target.value;
-                        setEditTempatList(newList);
-                      }}
-                    />
-                  </FormControl>
-                </Box>
-              ))}
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                variant="primary"
-                onClick={async () => {
-                  try {
-                    await axios.post(
-                      `${
-                        import.meta.env.VITE_REACT_APP_API_BASE_URL
-                      }/perjalanan/edit-tempats/${detailPerjalanan.id}`,
-                      { tempats: editTempatList }
-                    );
-                    setIsEditTempatOpen(false);
-                    fetchDataPerjalan();
-                  } catch (err) {
-                    console.error(err);
-                  }
-                }}
-              >
-                Simpan
-              </Button>
-              <Button ml={3} onClick={() => setIsEditTempatOpen(false)}>
                 Batal
               </Button>
             </ModalFooter>
