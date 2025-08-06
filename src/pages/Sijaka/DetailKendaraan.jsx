@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Layout from "../../Componets/Layout";
+
+import LayoutAset from "../../Componets/Aset/LayoutAset";
 import TambahFotoKendaraan from "../../Componets/TambahFotoKendaraan";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -143,6 +144,9 @@ function DetailKendaraan(props) {
     noKontak: Yup.number().required("Nomor kendaraan wajib diisi"),
     noRangka: Yup.string().required("Nomor rangka wajib diisi"),
     noMesin: Yup.string().required("Nomor mesin wajib diisi"),
+
+    merek: Yup.string().required("Merek wajib diisi"),
+    warna: Yup.string().required("warna wajib diisi"),
     tgl_pkb: Yup.date().required("Tanggal PKB wajib diisi"),
     tg_stnk: Yup.date().required("Tanggal STNK wajib diisi"),
     jenisKendaraanId: Yup.string().required("Jenis kendaraan wajib dipilih"),
@@ -151,6 +155,7 @@ function DetailKendaraan(props) {
   });
 
   const handleSubmitEdit = async (values, actions) => {
+    console.log(values);
     try {
       await axios.post(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/edit/${
@@ -168,7 +173,7 @@ function DetailKendaraan(props) {
   };
 
   return (
-    <Layout>
+    <LayoutAset>
       <Box pb={"60px"}>
         <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
           <Box display="flex" gap={5}>
@@ -179,52 +184,112 @@ function DetailKendaraan(props) {
                 randomNumber={setRandomNumber}
               />
             </Box>
-            <Box>
-              <Text>Nomor Kendaraan: KT {detailKendaraan?.nomor}</Text>
-              <Text>
-                Unit Kerja: {detailKendaraan?.kendaraanUK?.unitKerja || "-"}
-              </Text>
-              <Text>
-                Jenis Kendaraan: {detailKendaraan?.jenisKendaraan?.jenis}
-              </Text>
-              <Text>
-                Tanggal STNK:
-                {detailKendaraan?.tgl_pkb &&
-                  new Date(detailKendaraan?.tgl_pkb).toLocaleDateString(
-                    "id-ID",
-                    {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
-              </Text>
-              <Text>
-                Tanggal BPKB:
-                {detailKendaraan?.tg_stnk &&
-                  new Date(detailKendaraan?.tg_stnk).toLocaleDateString(
-                    "id-ID",
-                    {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
-              </Text>
-              <Text>Nomor Rangka: {detailKendaraan?.noRangka}</Text>
-              <Text>Nomor Mesin: {detailKendaraan?.noMesin}</Text>
-            </Box>
             <Spacer />
-            <Flex gap={5}>
-              <Button variant={"primary"} onClick={onEditOpen}>
-                Edit
-              </Button>
-              <Button variant={"primary"} onClick={onMutasiOpen}>
-                Mutasi
-              </Button>
-            </Flex>
+            <Box p={4} borderWidth="1px" boxShadow="md" bg="gray.50">
+              <Heading as="h1" size="xl" mb={4} color="aset">
+                Detail Kendaraan
+              </Heading>
+              <VStack align="start" spacing={3}>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Nomor Kendaraan:
+                  </Text>
+                  <Text>
+                    KT {detailKendaraan?.nomor} {detailKendaraan?.seri}
+                  </Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Unit Kerja:
+                  </Text>
+                  <Text>{detailKendaraan?.kendaraanUK?.unitKerja || "-"}</Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Jenis Kendaraan:
+                  </Text>
+                  <Text>{detailKendaraan?.jenisKendaraan?.jenis}</Text>
+                </HStack>{" "}
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Merek Mobil:
+                  </Text>
+                  <Text>{detailKendaraan?.merek}</Text>
+                </HStack>{" "}
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Warna Mobil:
+                  </Text>
+                  <Text>{detailKendaraan?.warna}</Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Tanggal STNK:
+                  </Text>
+                  <Text>
+                    {detailKendaraan?.tgl_pkb &&
+                      new Date(detailKendaraan?.tgl_pkb).toLocaleDateString(
+                        "id-ID",
+                        {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )}
+                  </Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Tanggal BPKB:
+                  </Text>
+                  <Text>
+                    {detailKendaraan?.tg_stnk &&
+                      new Date(detailKendaraan?.tg_stnk).toLocaleDateString(
+                        "id-ID",
+                        {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )}
+                  </Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Nomor Rangka:
+                  </Text>
+                  <Text>{detailKendaraan?.noRangka}</Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Nomor Mesin:
+                  </Text>
+                  <Text>{detailKendaraan?.noMesin}</Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Kondisi:
+                  </Text>
+                  <Text>{detailKendaraan?.kondisi?.nama}</Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Status:
+                  </Text>
+                  <Text>{detailKendaraan?.statusKendaraan?.status}</Text>
+                </HStack>
+              </VStack>
+              <Flex mt={"30px"} gap={5}>
+                <Button variant={"primary"} onClick={onEditOpen}>
+                  Edit
+                </Button>
+                <Button variant={"primary"} onClick={onMutasiOpen}>
+                  Mutasi
+                </Button>
+              </Flex>
+            </Box>
           </Box>
         </Container>
 
@@ -236,11 +301,11 @@ function DetailKendaraan(props) {
           mt={"30px"}
         >
           <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Riwayat Surat Pengantar</Heading>
+            <Box bgColor={"aset"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"aset"}>Riwayat Surat Pengantar</Heading>
           </HStack>
           <Box p={"30px"}>
-            <Table variant={"primary"}>
+            <Table variant={"aset"}>
               <Thead>
                 <Tr>
                   <Th>Nomor Surat</Th>
@@ -281,11 +346,11 @@ function DetailKendaraan(props) {
           mt={"30px"}
         >
           <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Riwayat Mutasi Kendaraan</Heading>
+            <Box bgColor={"aset"} width={"30px"} height={"30px"}></Box>
+            <Heading color={"aset"}>Riwayat Mutasi Kendaraan</Heading>
           </HStack>
           <Box px={"30px"} pb={"30px"} pt={"20px"}>
-            <Table variant={"primary"}>
+            <Table variant={"aset"}>
               <Thead>
                 <Tr>
                   <Th
@@ -427,6 +492,8 @@ function DetailKendaraan(props) {
                 noKontak: detailKendaraan?.noKontak || 0,
                 noRangka: detailKendaraan?.noRangka || "",
                 noMesin: detailKendaraan?.noMesin || "",
+                merek: detailKendaraan?.merek || "",
+                warna: detailKendaraan?.warna || "",
                 tgl_pkb: detailKendaraan?.tgl_pkb?.split("T")[0] || "",
                 tg_stnk: detailKendaraan?.tg_stnk?.split("T")[0] || "",
                 jenisKendaraanId:
@@ -545,6 +612,32 @@ function DetailKendaraan(props) {
                           </FormControl>
                         )}
                       </Field>
+                      <Field name="merek">
+                        {({ field, form }) => (
+                          <FormControl
+                            isInvalid={form.errors.merek && form.touched.merek}
+                          >
+                            <FormLabel>Merek</FormLabel>
+                            <Input {...field} />
+                            <FormErrorMessage>
+                              {form.errors.merek}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="warna">
+                        {({ field, form }) => (
+                          <FormControl
+                            isInvalid={form.errors.warna && form.touched.warna}
+                          >
+                            <FormLabel>warna</FormLabel>
+                            <Input {...field} />
+                            <FormErrorMessage>
+                              {form.errors.warna}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
                       <Field name="statusKendaraanId">
                         {({ field, form }) => (
                           <FormControl
@@ -624,8 +717,8 @@ function DetailKendaraan(props) {
                     <Button
                       colorScheme="blue"
                       mr={3}
-                      isLoading={props.isSubmitting}
-                      type="submit"
+                      isLoading={props.isSubmitting} // gunakan ini jika ingin loading state otomatis
+                      type="submit" // cukup type submit tanpa onClick
                     >
                       Simpan
                     </Button>
@@ -766,7 +859,7 @@ function DetailKendaraan(props) {
           </ModalContent>
         </Modal>
       </Box>
-    </Layout>
+    </LayoutAset>
   );
 }
 

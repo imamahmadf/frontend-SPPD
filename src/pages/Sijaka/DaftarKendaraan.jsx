@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Layout from "../../Componets/Layout";
+
+import LayoutAset from "../../Componets/Aset/LayoutAset";
 import ReactPaginate from "react-paginate";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
 import Foto from "../../assets/add_photo.png";
+import { BsDownload } from "react-icons/bs";
 import {
   Box,
   Text,
@@ -79,6 +81,8 @@ function DaftarKendaraan() {
   const [nomorPlat, setNomorPlat] = useState("");
   const [unitKerjaFilterId, setUnitKerjaFilterId] = useState(0);
   const [pegawaiFilterId, setPegawaiFilterId] = useState(0);
+  const [tanggalAwal, setTanggalAwal] = useState("");
+  const [tanggalAkhir, setTanggalAkhir] = useState("");
   const {
     isOpen: isTambahOpen,
     onOpen: onTambahOpen,
@@ -264,7 +268,7 @@ function DaftarKendaraan() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/kendaraan/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&nomor=${nomorPlat}`
+        }/kendaraan/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&nomor=${nomorPlat}&startDate=${tanggalAwal}&endDate=${tanggalAkhir}`
       )
       .then((res) => {
         setDataKendaraan(res.data.result);
@@ -277,6 +281,30 @@ function DaftarKendaraan() {
         console.error(err);
       });
   }
+
+  const downloadExcel = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/get/download`,
+        {
+          responseType: "blob", // agar respons dibaca sebagai file
+          // headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "data-Kendaraan-dinas.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Gagal mengunduh file Excel:", error);
+      alert("Terjadi kesalahan saat mengunduh file.");
+    }
+  };
+
   function inputHandler(event, field) {
     const tes = setTimeout(() => {
       const { value } = event.target;
@@ -288,10 +316,17 @@ function DaftarKendaraan() {
     fetchDataKendaraan();
     fetchSeed();
     fetchDataPegawai();
-  }, [page, unitKerjaFilterId, pegawaiFilterId, nomorPlat]);
+  }, [
+    page,
+    unitKerjaFilterId,
+    pegawaiFilterId,
+    nomorPlat,
+    tanggalAkhir,
+    tanggalAwal,
+  ]);
   return (
     <>
-      <Layout>
+      <LayoutAset>
         <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Box
             style={{ overflowX: "auto" }}
@@ -303,9 +338,15 @@ function DaftarKendaraan() {
             <HStack gap={5} mb={"30px"}>
               <Button onClick={onTambahOpen} variant={"primary"} px={"50px"}>
                 Tambah +
-              </Button>
-
+              </Button>{" "}
               <Spacer />
+              <Button
+                variant={"primary"}
+                fontWeight={900}
+                onClick={downloadExcel}
+              >
+                <BsDownload />
+              </Button>{" "}
             </HStack>{" "}
             <Flex
               borderRadius={"5px"}
@@ -359,7 +400,7 @@ function DaftarKendaraan() {
                     }),
                     option: (provided, state) => ({
                       ...provided,
-                      bg: state.isFocused ? "primary" : "white",
+                      bg: state.isFocused ? "aset" : "white",
                       color: state.isFocused ? "white" : "black",
                     }),
                   }}
@@ -398,7 +439,7 @@ function DaftarKendaraan() {
                     }),
                     option: (provided, state) => ({
                       ...provided,
-                      bg: state.isFocused ? "primary" : "white",
+                      bg: state.isFocused ? "aset" : "white",
                       color: state.isFocused ? "white" : "black",
                     }),
                   }}
@@ -412,14 +453,38 @@ function DaftarKendaraan() {
                   onChange={inputHandler}
                   placeholder="Contoh : 3321"
                 />
+              </FormControl>{" "}
+              <FormControl>
+                <FormLabel fontSize={"24px"}>Awal</FormLabel>
+                <Input
+                  minWidth={"200px"}
+                  bgColor={"terang"}
+                  height={"60px"}
+                  type="date"
+                  value={tanggalAwal}
+                  onChange={(e) => setTanggalAwal(e.target.value)}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize={"24px"}> Akhir</FormLabel>
+                <Input
+                  type="date"
+                  minWidth={"200px"}
+                  bgColor={"terang"}
+                  height={"60px"}
+                  value={tanggalAkhir}
+                  onChange={(e) => setTanggalAkhir(e.target.value)}
+                />
               </FormControl>
             </Flex>
-            <Table variant={"primary"}>
+            <Table variant={"aset"}>
               <Thead>
                 <Tr>
                   <Th>Foto</Th>
                   <Th>Nomor Plat</Th>
                   <Th>Jenis Kendaraan</Th>
+                  <Th>Merek</Th>
+                  <Th>Warna</Th>
                   <Th>tanggal Pajak</Th>
                   <Th>tanggal STNK</Th> <Th maxWidth={"20px"}>Unit Kerja</Th>
                   <Th>Nama Pemilik</Th>
@@ -451,6 +516,8 @@ function DaftarKendaraan() {
                     </Td>
                     <Td>{`KT ${item?.nomor} ${item?.seri}`}</Td>
                     <Td>{item?.jenisKendaraan?.jenis}</Td>
+                    <Td>{item?.merek}</Td>
+                    <Td>{item?.warna}</Td>
                     <Td>
                       {item?.tgl_pkb
                         ? new Date(item?.tgl_pkb).toLocaleDateString("id-ID", {
@@ -619,58 +686,13 @@ function DaftarKendaraan() {
                           }),
                           option: (provided, state) => ({
                             ...provided,
-                            bg: state.isFocused ? "primary" : "white",
+                            bg: state.isFocused ? "aset" : "white",
                             color: state.isFocused ? "white" : "black",
                           }),
                         }}
                       />
                     </FormControl>
 
-                    {/* <FormControl
-                      my={"30px"}
-                      border={0}
-                      bgColor={"white"}
-                      flex="1"
-                    >
-                      <FormLabel fontSize={"24px"}>Pemilik Kendaraan</FormLabel>
-                      <Select2
-                        options={dataPegawai.map((val) => ({
-                          value: val.id,
-                          label: `${val.nama}`,
-                        }))}
-                        placeholder="Contoh: sifulan"
-                        focusBorderColor="red"
-                        onChange={(selectedOption) => {
-                          setPegawaiId(selectedOption.value);
-                          fetchDataPegawai(selectedOption.value);
-                        }}
-                        components={{
-                          DropdownIndicator: () => null, // Hilangkan tombol panah
-                          IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                        }}
-                        chakraStyles={{
-                          container: (provided) => ({
-                            ...provided,
-                            borderRadius: "6px",
-                          }),
-                          control: (provided) => ({
-                            ...provided,
-                            backgroundColor: "terang",
-                            border: "0px",
-                            height: "60px",
-                            _hover: {
-                              borderColor: "yellow.700",
-                            },
-                            minHeight: "40px",
-                          }),
-                          option: (provided, state) => ({
-                            ...provided,
-                            bg: state.isFocused ? "primary" : "white",
-                            color: state.isFocused ? "white" : "black",
-                          }),
-                        }}
-                      />
-                    </FormControl> */}
                     <FormControl my={"30px"}>
                       <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
                       <AsyncSelect
@@ -720,7 +742,7 @@ function DaftarKendaraan() {
                           }),
                           option: (provided, state) => ({
                             ...provided,
-                            bg: state.isFocused ? "primary" : "white",
+                            bg: state.isFocused ? "aset" : "white",
                             color: state.isFocused ? "white" : "black",
                           }),
                         }}
@@ -820,7 +842,7 @@ function DaftarKendaraan() {
                           }),
                           option: (provided, state) => ({
                             ...provided,
-                            bg: state.isFocused ? "primary" : "white",
+                            bg: state.isFocused ? "aset" : "white",
                             color: state.isFocused ? "white" : "black",
                           }),
                         }}
@@ -865,7 +887,7 @@ function DaftarKendaraan() {
                           }),
                           option: (provided, state) => ({
                             ...provided,
-                            bg: state.isFocused ? "primary" : "white",
+                            bg: state.isFocused ? "aset" : "white",
                             color: state.isFocused ? "white" : "black",
                           }),
                         }}
@@ -909,7 +931,7 @@ function DaftarKendaraan() {
                           }),
                           option: (provided, state) => ({
                             ...provided,
-                            bg: state.isFocused ? "primary" : "white",
+                            bg: state.isFocused ? "aset" : "white",
                             color: state.isFocused ? "white" : "black",
                           }),
                         }}
@@ -927,7 +949,7 @@ function DaftarKendaraan() {
             </ModalContent>
           </Modal>
         </Box>
-      </Layout>
+      </LayoutAset>
     </>
   );
 }

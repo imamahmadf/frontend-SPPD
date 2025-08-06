@@ -37,6 +37,7 @@ import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import Loading from "../../Componets/Loading";
+import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 
 function StatistikPegawai() {
   const [dataPegawai, setDataPegawai] = useState(null);
@@ -62,7 +63,7 @@ function StatistikPegawai() {
     fetchDataPegawai();
   }, []);
   return (
-    <Layout>
+    <LayoutPegawai>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           maxW={"4880px"}
@@ -92,7 +93,7 @@ function StatistikPegawai() {
                   <strong>PTT:</strong> {unit.statusPegawai?.PTT || 0}
                 </Text>
               </HStack>
-              <Table variant="primary" size="sm" mb={6}>
+              <Table variant="pegawai" size="sm" mb={6}>
                 <Thead>
                   <Tr>
                     <Th>Status</Th>
@@ -157,7 +158,7 @@ function StatistikPegawai() {
           ))}
         </Container>
       </Box>
-    </Layout>
+    </LayoutPegawai>
   );
 }
 

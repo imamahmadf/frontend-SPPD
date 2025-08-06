@@ -53,7 +53,7 @@ import {
   selectRole,
 } from "../../Redux/Reducers/auth";
 import Loading from "../../Componets/Loading";
-
+import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 import Layout from "../../Componets/Layout";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -103,34 +103,9 @@ function DetailUsulan(props) {
         console.error(err);
       });
   };
-  const handleDownload = async (fileName) => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/download`,
-        {
-          params: { fileName },
-
-          responseType: "blob",
-        }
-      );
-
-      // Membuat URL untuk file yang akan diunduh
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      toast({
-        title: "Gagal Mengunduh",
-        description: "Terjadi kesalahan saat mengunduh file",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
+  const handlePreview = (fileName) => {
+    const url = `${import.meta.env.VITE_REACT_APP_API_BASE_URL}${fileName}`;
+    window.open(url, "_blank");
   };
 
   useEffect(() => {
@@ -139,7 +114,7 @@ function DetailUsulan(props) {
   }, []);
   if (isLoading) return <Loading />;
   return (
-    <Layout>
+    <LayoutPegawai>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
@@ -165,7 +140,17 @@ function DetailUsulan(props) {
             </Box>
             <Spacer />
             <Box>
-              <Text>Status</Text>
+              <Text>
+                Status:
+                {dataUsulan?.status === 0
+                  ? " Pengajuan"
+                  : dataUsulan?.status === 1
+                  ? " Diterima"
+                  : dataUsulan.status === 2
+                  ? "   Ditolak"
+                  : null}{" "}
+              </Text>
+              {JSON.stringify()}
             </Box>
           </Flex>
           <Box>
@@ -190,7 +175,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.formulirUsulan)}
+                    onClick={() => handlePreview(dataUsulan.formulirUsulan)}
                   >
                     Lihat
                   </Button>
@@ -203,7 +188,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.skCpns)}
+                    onClick={() => handlePreview(dataUsulan.skCpns)}
                   >
                     Lihat
                   </Button>
@@ -216,7 +201,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.skPns)}
+                    onClick={() => handlePreview(dataUsulan.skPns)}
                   >
                     Lihat
                   </Button>
@@ -229,7 +214,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.PAK)}
+                    onClick={() => handlePreview(dataUsulan.PAK)}
                   >
                     Lihat
                   </Button>
@@ -242,7 +227,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.skMutasi)}
+                    onClick={() => handlePreview(dataUsulan.skMutasi)}
                   >
                     Lihat
                   </Button>
@@ -257,7 +242,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.skJafung)}
+                    onClick={() => handlePreview(dataUsulan.skJafung)}
                   >
                     Lihat
                   </Button>
@@ -270,7 +255,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.skp)}
+                    onClick={() => handlePreview(dataUsulan.skp)}
                   >
                     Lihat
                   </Button>
@@ -283,7 +268,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.str)}
+                    onClick={() => handlePreview(dataUsulan.str)}
                   >
                     Lihat
                   </Button>
@@ -296,7 +281,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.suratCuti)}
+                    onClick={() => handlePreview(dataUsulan.suratCuti)}
                   >
                     Lihat
                   </Button>
@@ -309,7 +294,7 @@ function DetailUsulan(props) {
                 <Box width="50%" textAlign="end" py={2}>
                   <Button
                     variant={"primary"}
-                    onClick={() => handleDownload(dataUsulan.gelar)}
+                    onClick={() => handlePreview(dataUsulan.gelar)}
                   >
                     Lihat
                   </Button>
@@ -317,7 +302,7 @@ function DetailUsulan(props) {
               </Center>
             </Box>
           </Center>
-          {dataUsulan?.satus == 0 ? (
+          {dataUsulan?.status == 0 ? (
             <Flex mt={"20px"} gap={"20px"}>
               <Button
                 variant={"primary"}
@@ -366,7 +351,7 @@ function DetailUsulan(props) {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </Layout>
+    </LayoutPegawai>
   );
 }
 

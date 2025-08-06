@@ -51,12 +51,13 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
-import Layout from "../Componets/Layout";
+
+import LayoutPegawai from "../Componets/Pegawai/LayoutPegawai";
 
 export default function DashboradPegawai() {
   const history = useHistory();
   return (
-    <Layout>
+    <LayoutPegawai>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
@@ -88,6 +89,6 @@ export default function DashboradPegawai() {
           </Center>
         </Container>
       </Box>
-    </Layout>
+    </LayoutPegawai>
   );
 }

@@ -25,8 +25,9 @@ import {
   Input,
   FormHelperText,
   Spacer,
+  useToast,
 } from "@chakra-ui/react";
-import { useToast } from "@chakra-ui/react";
+
 import { useSelector } from "react-redux";
 import {
   selectIsAuthenticated,
@@ -38,6 +39,7 @@ function TambahFotoKendaraan(props) {
   const [fileSizeMsg, setFileSizeMsg] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(Foto);
+  const toast = useToast();
   const {
     isOpen: isInputOpen,
     onOpen: onInputOpen,
@@ -107,7 +109,7 @@ function TambahFotoKendaraan(props) {
       <Image
         borderRadius={"5px"}
         alt="foto obat"
-        width="620px"
+        width="720px"
         height="820px"
         overflow="hiden"
         objectFit="cover"
@@ -136,7 +138,7 @@ function TambahFotoKendaraan(props) {
       >
         <ModalOverlay />
         <ModalContent borderRadius={0} maxWidth="1200px">
-          <ModalHeader>Rill </ModalHeader>
+          <ModalHeader>Edit Foto Kendaraan </ModalHeader>
           <ModalCloseButton />
 
           <ModalBody pb={6}>
@@ -181,7 +183,14 @@ function TambahFotoKendaraan(props) {
                   </Alert>
                 ) : null}
               </FormControl>{" "}
-              <Button onClick={formik.handleSubmit}>submit</Button>
+              <Button
+                variant={"primary"}
+                w={"100%"}
+                mt={"30px"}
+                onClick={formik.handleSubmit}
+              >
+                submit
+              </Button>
             </Box>
           </ModalBody>
 

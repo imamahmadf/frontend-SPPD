@@ -48,7 +48,7 @@ import { useDisclosure } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
-
+import LayoutAset from "../../Componets/Aset/LayoutAset";
 function KendaraanUnitKerja() {
   const [DataKendaraan, setDataKendaraan] = useState([]);
   const history = useHistory();
@@ -163,7 +163,7 @@ function KendaraanUnitKerja() {
   }, [page]);
   return (
     <>
-      <Layout>
+      <LayoutAset>
         <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Box
             style={{ overflowX: "auto" }}
@@ -176,7 +176,7 @@ function KendaraanUnitKerja() {
             <Flex gap={5}>
               <Spacer />
             </Flex>
-            <Table variant={"primary"}>
+            <Table variant={"aset"}>
               <Thead>
                 <Tr>
                   <Th>Foto</Th>
@@ -184,7 +184,10 @@ function KendaraanUnitKerja() {
                   <Th>Nama Pemilik</Th>
                   <Th>NIP </Th>
                   <Th>Nomor Plat</Th>
+
                   <Th>Jenis Kendaraan</Th>
+                  <Th>Merek</Th>
+                  <Th>Warna</Th>
                   <Th>tanggal Pajak</Th>
                   <Th>tanggal STNK</Th>
                   <Th>nominal Pajak</Th>
@@ -219,6 +222,8 @@ function KendaraanUnitKerja() {
                     <Td>{item?.pegawai?.nip}</Td>
                     <Td>{`KT ${item?.nomor} ${item?.seri}`}</Td>
                     <Td>{item?.jenisKendaraan?.jenis}</Td>
+                    <Td>{item?.merek}</Td>
+                    <Td>{item?.warna}</Td>
                     <Td>
                       {item?.tgl_pkb
                         ? new Date(item?.tgl_pkb).toLocaleDateString("id-ID", {
@@ -281,7 +286,7 @@ function KendaraanUnitKerja() {
             </Table>
           </Box>
         </Box>
-      </Layout>
+      </LayoutAset>
     </>
   );
 }

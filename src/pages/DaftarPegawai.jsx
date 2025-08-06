@@ -41,15 +41,12 @@ import ReactPaginate from "react-paginate";
 import "../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
 import Loading from "../Componets/Loading";
-import {
-  Select as Select2,
-  CreatableSelect,
-  AsyncSelect,
-} from "chakra-react-select";
+import { Select as Select2 } from "chakra-react-select";
 import axios from "axios";
 import Layout from "../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
+import LayoutPegawai from "../Componets/Pegawai/LayoutPegawai";
 
 function DaftarPegawai() {
   const [dataPegawai, setDataPegawai] = useState([]);
@@ -82,6 +79,7 @@ function DaftarPegawai() {
   const [filterPendidikan, setFilterPendidikan] = useState("");
   const [filterNip, setFilterNip] = useState("");
   const [filterJabatan, setFilterJabatan] = useState("");
+  const [tanggalTMT, setTanggalTMT] = useState("");
   const {
     isOpen: isTambahOpen,
     onOpen: onTambahOpen,
@@ -127,6 +125,8 @@ function DaftarPegawai() {
           statusPegawaiId,
           profesiId,
           pendidikan,
+          tanggalTMT,
+          password: "paserkab",
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -258,7 +258,7 @@ function DaftarPegawai() {
     filterNip,
   ]);
   return (
-    <Layout>
+    <LayoutPegawai>
       {isLoading ? (
         <Loading />
       ) : (
@@ -285,7 +285,7 @@ function DaftarPegawai() {
               <Spacer />
               <Button onClick={downloadExcelPegawai}>DL</Button>
             </Flex>
-            <Table variant={"primary"}>
+            <Table variant={"pegawai"}>
               <Thead>
                 <Tr>
                   <Th>
@@ -364,7 +364,7 @@ function DaftarPegawai() {
                             }),
                             option: (provided, state) => ({
                               ...provided,
-                              bg: state.isFocused ? "primary" : "white",
+                              bg: state.isFocused ? "pegawai" : "white",
                               color: state.isFocused ? "white" : "gelap",
                               textTransform: "none",
                             }),
@@ -409,7 +409,7 @@ function DaftarPegawai() {
                             }),
                             option: (provided, state) => ({
                               ...provided,
-                              bg: state.isFocused ? "primary" : "white",
+                              bg: state.isFocused ? "pegawai" : "white",
                               color: state.isFocused ? "white" : "black",
                               textTransform: "none",
                             }),
@@ -471,7 +471,7 @@ function DaftarPegawai() {
                             }),
                             option: (provided, state) => ({
                               ...provided,
-                              bg: state.isFocused ? "primary" : "white",
+                              bg: state.isFocused ? "pegawai" : "white",
                               color: state.isFocused ? "white" : "black",
                               textTransform: "none",
                             }),
@@ -517,7 +517,7 @@ function DaftarPegawai() {
                             }),
                             option: (provided, state) => ({
                               ...provided,
-                              bg: state.isFocused ? "primary" : "white",
+                              bg: state.isFocused ? "pegawai" : "white",
                               color: state.isFocused ? "white" : "black",
                               textTransform: "none",
                             }),
@@ -584,7 +584,7 @@ function DaftarPegawai() {
                             }),
                             option: (provided, state) => ({
                               ...provided,
-                              bg: state.isFocused ? "primary" : "white",
+                              bg: state.isFocused ? "pegawai" : "white",
                               color: state.isFocused ? "white" : "black",
                               textTransform: "none",
                             }),
@@ -629,7 +629,7 @@ function DaftarPegawai() {
                             }),
                             option: (provided, state) => ({
                               ...provided,
-                              bg: state.isFocused ? "primary" : "white",
+                              bg: state.isFocused ? "pegawai" : "white",
                               color: state.isFocused ? "white" : "black",
                               textTransform: "none",
                             }),
@@ -733,12 +733,12 @@ function DaftarPegawai() {
           <ModalBody>
             <Box>
               <HStack>
-                <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-                <Heading color={"primary"}>Tambah Pegawai</Heading>
+                <Box bgColor={"pegawai"} width={"30px"} height={"30px"}></Box>
+                <Heading color={"pegawai"}>Tambah Pegawai</Heading>
               </HStack>
 
               <SimpleGrid columns={2} spacing={10} p={"30px"}>
-                <FormControl my={"30px"}>
+                <FormControl my={"15px"}>
                   <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
                   <Input
                     height={"60px"}
@@ -747,7 +747,7 @@ function DaftarPegawai() {
                     placeholder="Contoh: Sifulan, SKM"
                   />
                 </FormControl>
-                <FormControl my={"30px"}>
+                <FormControl my={"15px"}>
                   <FormLabel fontSize={"24px"}>NIP</FormLabel>
                   <Input
                     height={"60px"}
@@ -756,7 +756,7 @@ function DaftarPegawai() {
                     placeholder="Contoh: 19330722 195502 1 003"
                   />
                 </FormControl>
-                <FormControl my={"30px"}>
+                <FormControl my={"15px"}>
                   <FormLabel fontSize={"24px"}>Pangkat</FormLabel>
                   <Select2
                     options={dataSeed?.resultPangkat?.map((val) => ({
@@ -789,13 +789,13 @@ function DaftarPegawai() {
                       }),
                       option: (provided, state) => ({
                         ...provided,
-                        bg: state.isFocused ? "primary" : "white",
+                        bg: state.isFocused ? "pegawai" : "white",
                         color: state.isFocused ? "white" : "black",
                       }),
                     }}
                   />
                 </FormControl>
-                <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                <FormControl my={"15px"} border={0} bgColor={"white"} flex="1">
                   <FormLabel fontSize={"24px"}>Golongan</FormLabel>
                   <Select2
                     options={dataSeed?.resultGolongan?.map((val) => ({
@@ -828,13 +828,13 @@ function DaftarPegawai() {
                       }),
                       option: (provided, state) => ({
                         ...provided,
-                        bg: state.isFocused ? "primary" : "white",
+                        bg: state.isFocused ? "pegawai" : "white",
                         color: state.isFocused ? "white" : "black",
                       }),
                     }}
                   />
                 </FormControl>
-                <FormControl my={"30px"}>
+                <FormControl my={"15px"}>
                   <FormLabel fontSize={"24px"}>Jabatan</FormLabel>
                   <Input
                     height={"60px"}
@@ -845,7 +845,7 @@ function DaftarPegawai() {
                     placeholder="Contoh: bendahara"
                   />
                 </FormControl>
-                <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                <FormControl my={"15px"} border={0} bgColor={"white"} flex="1">
                   <FormLabel fontSize={"24px"}>Tingkatan</FormLabel>
                   <Select2
                     options={dataSeed?.resultTingkatan?.map((val) => ({
@@ -878,13 +878,13 @@ function DaftarPegawai() {
                       }),
                       option: (provided, state) => ({
                         ...provided,
-                        bg: state.isFocused ? "primary" : "white",
+                        bg: state.isFocused ? "pegawai" : "white",
                         color: state.isFocused ? "white" : "black",
                       }),
                     }}
                   />
                 </FormControl>
-                <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                <FormControl my={"15px"} border={0} bgColor={"white"} flex="1">
                   <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
                   <Select2
                     options={dataSeed?.resultUnitKerja?.map((val) => ({
@@ -917,13 +917,13 @@ function DaftarPegawai() {
                       }),
                       option: (provided, state) => ({
                         ...provided,
-                        bg: state.isFocused ? "primary" : "white",
+                        bg: state.isFocused ? "pegawai" : "white",
                         color: state.isFocused ? "white" : "black",
                       }),
                     }}
                   />
                 </FormControl>
-                <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                <FormControl my={"15px"} border={0} bgColor={"white"} flex="1">
                   <FormLabel fontSize={"24px"}>Status Pegawai</FormLabel>
                   <Select2
                     options={dataSeed?.resultStatusPegawai?.map((val) => ({
@@ -956,13 +956,13 @@ function DaftarPegawai() {
                       }),
                       option: (provided, state) => ({
                         ...provided,
-                        bg: state.isFocused ? "primary" : "white",
+                        bg: state.isFocused ? "pegawai" : "white",
                         color: state.isFocused ? "white" : "black",
                       }),
                     }}
                   />
                 </FormControl>
-                <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
+                <FormControl my={"15px"} border={0} bgColor={"white"} flex="1">
                   <FormLabel fontSize={"24px"}>Profesi</FormLabel>
                   <Select2
                     options={dataSeed?.resultProfesi?.map((val) => ({
@@ -995,13 +995,13 @@ function DaftarPegawai() {
                       }),
                       option: (provided, state) => ({
                         ...provided,
-                        bg: state.isFocused ? "primary" : "white",
+                        bg: state.isFocused ? "pegawai" : "white",
                         color: state.isFocused ? "white" : "black",
                       }),
                     }}
                   />
                 </FormControl>
-                <FormControl my={"30px"}>
+                <FormControl my={"15px"}>
                   <FormLabel fontSize={"24px"}>Pendidikan</FormLabel>
                   <Input
                     height={"60px"}
@@ -1010,6 +1010,17 @@ function DaftarPegawai() {
                       handleSubmitChange("pendidikan", e.target.value)
                     }
                     placeholder="Contoh: S-1 Ekonomi"
+                  />
+                </FormControl>{" "}
+                <FormControl>
+                  <FormLabel fontSize={"24px"}>Tanggal TMT Golongan</FormLabel>
+                  <Input
+                    minWidth={"200px"}
+                    bgColor={"terang"}
+                    height={"60px"}
+                    type="date"
+                    value={tanggalTMT}
+                    onChange={(e) => setTanggalTMT(e.target.value)}
                   />
                 </FormControl>
               </SimpleGrid>
@@ -1023,7 +1034,7 @@ function DaftarPegawai() {
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </Layout>
+    </LayoutPegawai>
   );
 }
 

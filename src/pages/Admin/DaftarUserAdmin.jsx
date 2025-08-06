@@ -47,6 +47,14 @@ function DaftarUserAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUserRoles, setSelectedUserRoles] = useState([]); // Tambahkan state baru untuk menyimpan role pengguna yang dipilih
   const [availableRoles, setAvailableRoles] = useState([]);
+
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(50);
+  const [pages, setPages] = useState(0);
+  const [rows, setRows] = useState(0);
+  const changePage = ({ selected }) => {
+    setPage(selected);
+  };
   const {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
@@ -124,10 +132,16 @@ function DaftarUserAdmin() {
 
   async function fetchDataUser() {
     await axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/get/user`)
+      .get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/user/get/user?page=${page}&limit=${limit}`
+      )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
-
+        setPage(res.data.page);
+        setPages(res.data.totalPage);
+        setRows(res.data.totalRows);
         setDataUser(res.data.result);
         setIsLoading(false);
       })
@@ -139,7 +153,7 @@ function DaftarUserAdmin() {
   useEffect(() => {
     fetchDataUser();
     fetchRole();
-  }, []);
+  }, [page]);
   return (
     <Layout>
       {isLoading ? (
@@ -161,7 +175,7 @@ function DaftarUserAdmin() {
               <Tbody>
                 {dataUser?.map((user, index) => (
                   <Tr>
-                    <Td>{index + 1}</Td>
+                    <Td>{page * limit + index + 1}</Td>
                     <Td>{user.nama}</Td>
                     <Td>{user.namaPengguna}</Td>
                     <Td>{user.profiles[0].unitKerja_profile.unitKerja}</Td>
@@ -238,7 +252,35 @@ function DaftarUserAdmin() {
                   </Tr>
                 ))}
               </Tbody>
-            </Table>
+            </Table>{" "}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+
+                boxSizing: "border-box",
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <ReactPaginate
+                previousLabel={"+"}
+                nextLabel={"-"}
+                pageCount={pages}
+                onPageChange={changePage}
+                activeClassName={"item active "}
+                breakClassName={"item break-me "}
+                breakLabel={"..."}
+                containerClassName={"pagination"}
+                disabledClassName={"disabled-page"}
+                marginPagesDisplayed={1}
+                nextClassName={"item next "}
+                pageClassName={"item pagination-page "}
+                pageRangeDisplayed={2}
+                previousClassName={"item previous"}
+              />
+            </div>
           </Container>
         </Box>
       )}

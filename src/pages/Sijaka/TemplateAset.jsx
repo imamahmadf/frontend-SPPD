@@ -23,7 +23,8 @@ import {
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
-import Layout from "../../Componets/Layout";
+
+import LayoutAset from "../../Componets/Aset/LayoutAset";
 const TemplateAset = () => {
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
@@ -95,7 +96,7 @@ const TemplateAset = () => {
     fetchTemplate();
   }, []);
   return (
-    <Layout>
+    <LayoutAset>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"90vh"}>
         <Container variant={"primary"} p={"30px"} my={"30px"} minW={"1000px"}>
           <Box
@@ -200,7 +201,7 @@ const TemplateAset = () => {
           </Box>
 
           <Box mt={"30px"}>
-            <Table variant={"primary"}>
+            <Table variant={"aset"}>
               <Thead>
                 <Tr>
                   <Th>Nomor Surat</Th>
@@ -226,7 +227,7 @@ const TemplateAset = () => {
           </Box>
         </Container>
       </Box>
-    </Layout>
+    </LayoutAset>
   );
 };
 

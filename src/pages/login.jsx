@@ -1,9 +1,6 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { login } from "../Redux/Reducers/auth"; // Import action creator
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
-import LogoPena from "../assets/Logo Pena.png";
 import {
   Box,
   Center,
@@ -11,67 +8,47 @@ import {
   Button,
   FormControl,
   FormLabel,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Container,
-  HStack,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Heading,
-  Stack,
-  Card,
-  CardBody,
-  CardHeader,
   Input,
-  useToast,
-  Badge,
   VStack,
-  Divider,
-  Spacer,
   Image,
-  useDisclosure,
+  Select,
   useColorMode,
 } from "@chakra-ui/react";
-import {
-  selectIsAuthenticated,
-  userRedux,
-  selectRole,
-} from "../Redux/Reducers/auth";
+import LogoPena from "../assets/Logo Pena.png";
+import { login } from "../Redux/Reducers/auth";
+import { selectIsAuthenticated, selectRole } from "../Redux/Reducers/auth";
 
 const Login = () => {
-  const isAuthenticated =
-    useSelector(selectIsAuthenticated) || localStorage.getItem("token");
-  const [namaPengguna, setNamaPengguna] = useState("");
-  const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const history = useHistory();
+  const isAuthenticated =
+    useSelector(selectIsAuthenticated) || localStorage.getItem("token");
+  const roles = useSelector(selectRole);
+  const { colorMode } = useColorMode();
+
+  const [namaPengguna, setNamaPengguna] = useState("");
+  const [password, setPassword] = useState("");
+  const [pilihanAplikasi, setPilihanAplikasi] = useState("");
   const [error, setError] = useState("");
-  const { colorMode, toggleColorMode } = useColorMode();
-  const roles = useSelector(selectRole); // This returns the array of role objects
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!pilihanAplikasi) {
+      setError("Silakan pilih aplikasi terlebih dahulu.");
+      return;
+    }
+
     try {
       await dispatch(login(namaPengguna, password));
-      // Ambil roles terbaru setelah login
-      let currentRoles =
-        useSelector(selectRole) || JSON.parse(localStorage.getItem("role"));
-      // Jika hanya ada satu role dan roleId-nya 9, redirect ke dashboard pegawai
-      if (
-        Array.isArray(currentRoles) &&
-        currentRoles.length === 1 &&
-        currentRoles[0].roleId === 9
-      ) {
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      if (pilihanAplikasi === "pegawai") {
         history.push("/pegawai/dashboard");
-      } else {
+      } else if (pilihanAplikasi === "aset") {
+        history.push("/aset/dashboard");
+      } else if (pilihanAplikasi === "pena") {
         history.push("/");
       }
     } catch (err) {
@@ -80,83 +57,103 @@ const Login = () => {
   };
 
   if (isAuthenticated) {
-    // Ambil roles terbaru
     let currentRoles = roles || JSON.parse(localStorage.getItem("role"));
+
     if (
       Array.isArray(currentRoles) &&
       currentRoles.length === 1 &&
-      currentRoles[0].roleId === 9
+      (currentRoles[0].roleId === 9 || currentRoles[0].id === 9)
     ) {
       history.push("/pegawai/dashboard");
+    } else if (
+      Array.isArray(currentRoles) &&
+      currentRoles.length === 1 &&
+      (currentRoles[0].roleId === 10 || currentRoles[0].id === 10)
+    ) {
+      history.push("/aset/dashboard");
     } else {
       history.push("/");
     }
   }
 
   return (
-    <>
+    <Center
+      bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
+      height={"100vh"}
+    >
       <Center
-        bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
-        height={"100vh"}
+        transform="translateY(-2px)"
+        boxShadow="md"
+        bgColor={colorMode === "dark" ? "gray.800" : "white"}
+        borderRadius={"8px"}
+        p={"100px"}
       >
-        <Center
-          transform="translateY(-2px)"
-          boxShadow="md"
-          bgColor={colorMode === "dark" ? "gray.800" : "white"}
-          borderRadius={"8px"}
-          p={"100px"}
-        >
-          {" "}
-          <Button onClick={toggleColorMode}>
-            {colorMode === "light" ? "🌙" : "☀️"}
-          </Button>
-          <VStack p={"0px"}>
-            {" "}
-            <Image
-              height="150px"
-              overflow="hidden"
-              objectFit="cover"
-              src={LogoPena}
-              transition="transform 0.3s ease"
-              _hover={{ transform: "scale(1.05)" }}
-              mb={"50px"}
+        <VStack p={"0px"} spacing={6}>
+          <Image
+            height="150px"
+            objectFit="cover"
+            src={LogoPena}
+            transition="transform 0.3s ease"
+            _hover={{ transform: "scale(1.05)" }}
+            mb={"30px"}
+          />
+
+          <FormControl>
+            <FormLabel fontSize={"24px"}>Akun Pengguna</FormLabel>
+            <Input
+              value={namaPengguna}
+              onChange={(e) => setNamaPengguna(e.target.value)}
+              height="60px"
+              placeholder="Masukkan NIP"
+              w={"600px"}
             />
-            <FormControl>
-              <FormLabel fontSize={"24px"}>Akun Pengguna</FormLabel>
-              <Input
-                value={namaPengguna}
-                onChange={(e) => setNamaPengguna(e.target.value)}
-                variant={"primary"}
-                height="60px"
-                placeholder="masukkan NIP"
-                w={"600px"}
-              />
-            </FormControl>
-            <FormControl mt={"50px"}>
-              <FormLabel fontSize={"24px"}>Password</FormLabel>
-              <Input
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                variant={"primary"}
-                height="60px"
-                w={"100%"}
-                type="password"
-              />
-            </FormControl>
-            <Button
-              mt={"30px"}
-              w={"100%"}
-              onClick={handleSubmit}
-              variant={"primary"}
-              h={"60px"}
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontSize={"24px"}>Password</FormLabel>
+            <Input
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              height="60px"
+              w={"600px"}
+              type="password"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel fontSize={"24px"}>Pilih Aplikasi</FormLabel>
+            <Select
+              placeholder="Pilih aplikasi"
+              value={pilihanAplikasi}
+              onChange={(e) => setPilihanAplikasi(e.target.value)}
+              height="60px"
+              w={"600px"}
             >
-              Login
-            </Button>
-          </VStack>
-        </Center>
+              <option value="pegawai">Kepegawaian</option>
+              <option value="aset">Aset</option>
+              <option value="pena">Pena</option>
+            </Select>
+          </FormControl>
+
+          {error && (
+            <Text color="red.500" fontSize="lg" mt="2">
+              {error}
+            </Text>
+          )}
+
+          <Button
+            mt={"10px"}
+            w={"600px"}
+            onClick={handleSubmit}
+            variant={"primary"}
+            height="60px"
+          >
+            Login
+          </Button>
+        </VStack>
       </Center>
-    </>
+    </Center>
   );
 };
 

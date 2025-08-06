@@ -356,7 +356,7 @@ function DaftarAdmin() {
                         </Tooltip>
                       </Td>
                     ))}
-                    <Td>{item.kodeRekening?.kode || "-"}</Td>
+                    <Td>{item?.bendahara?.sumberDana?.sumber || "-"}</Td>
                     <Td>
                       <Button
                         variant={"primary"}

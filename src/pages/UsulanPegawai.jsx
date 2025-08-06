@@ -57,6 +57,7 @@ import {
   userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
+import LayoutPegawai from "../Componets/Pegawai/LayoutPegawai";
 
 function UsulanPegawai() {
   const [dataUsulan, setDataUsulan] = useState(null);
@@ -77,7 +78,7 @@ function UsulanPegawai() {
     fetchUsulan();
   }, []);
   return (
-    <Layout>
+    <LayoutPegawai>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container
           border={"1px"}
@@ -87,7 +88,7 @@ function UsulanPegawai() {
           bgColor={"white"}
           p={"30px"}
         >
-          <Table variant={"primary"}>
+          <Table variant={"pegawai"}>
             <Thead>
               <Tr>
                 <Th>nama</Th>
@@ -127,7 +128,7 @@ function UsulanPegawai() {
           </Table>
         </Container>
       </Box>
-    </Layout>
+    </LayoutPegawai>
   );
 }
 

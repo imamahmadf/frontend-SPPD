@@ -139,15 +139,17 @@ function Detail(props) {
 
   const handleHapusPersonil = async () => {
     try {
-      await axios.delete(
+      await axios.post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/pegawai/personil/hapus/${personilHapusId}`
       );
       onHapusClose();
       fetchDataPerjalan(); // refresh data
+      setIsLoading(false);
     } catch (err) {
       console.error(err);
+      setIsLoading(false);
     }
   };
 

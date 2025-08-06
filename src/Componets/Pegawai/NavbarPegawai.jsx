@@ -21,7 +21,7 @@ import {
   Spacer,
 } from "@chakra-ui/react";
 import { FaRoute } from "react-icons/fa";
-import Logout from "./Logout";
+import Logout from "../Logout";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { BiWallet } from "react-icons/bi";
 import { BsHouseDoor, BsStar, BsEnvelope } from "react-icons/bs";
@@ -32,8 +32,8 @@ import {
   selectIsAuthenticated,
   userRedux,
   selectRole,
-} from "../Redux/Reducers/auth";
-import Logo from "../assets/logo.png";
+} from "../../Redux/Reducers/auth";
+import Logo from "../../assets/logo.png";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { io } from "socket.io-client";
 
@@ -44,87 +44,19 @@ const socket = io("http://localhost:8000", {
 // Data menu untuk mapping
 const menuData = [
   {
-    title: "Perjalanan",
-    icon: FaRoute,
-    pathPrefix: "/perjalanan",
+    title: "Kepegawaian",
+    icon: HiOutlineUsers,
+    pathPrefix: "/kepegawaian",
     items: [
-      { label: "Perjalanan", path: "/perjalanan" },
-      { label: "Daftar Perjalanan", path: "/perjalanan/daftar" },
-      { label: "Rekap Perjalanan", path: "/perjalanan/rekap" },
-      { label: "Perjalanan Kepala Dinas", path: "/perjalanan/kalender-kadis" },
-    ],
-  },
-  {
-    title: "Keuangan",
-    icon: BiWallet,
-    pathPrefix: "/keuangan",
-    items: [
-      { label: "Daftar Perjalanan", path: "/keuangan/daftar-perjalanan" },
-      { label: "Perjalanan Pegawai", path: "/keuangan/perjalanan-pegawai" },
-      { label: "Template Keuangan", path: "/keuangan/template" },
-      { label: "Daftar Tujuan Dalam Kota", path: "/keuangan/dalam-kota" },
-      { label: "Sumber Dana", path: "/keuangan/sumber-dana" },
-    ],
-  },
-  // {
-  //   title: "Kepegawaian",
-  //   icon: HiOutlineUsers,
-  //   pathPrefix: "/kepegawaian",
-  //   items: [
-  //     { label: "Daftar Pegawai", path: "/kepegawaian/daftar-pegawai" },
-  //     { label: "Statistik Pegawai", path: "/kepegawaian/statistik-pegawai" },
-  //     { label: "Data Saya", path: "/kepegawaian/profile" },
-  //     { label: "Usulan Pegawai", path: "/kepegawaian/usulan" },
-  //   ],
-  // },
-  {
-    title: "Kepala Dinas",
-    icon: BsStar,
-    pathPrefix: "/kepala-dinas",
-    items: [
-      { label: "Perjalanan", path: "/kepala-dinas/perjalanan-kadis" },
-      { label: "Daftar Perjalanan", path: "/kepala-dinas/daftar-kadis" },
-      { label: "Template Surat Tugas", path: "/kepala-dinas/template-kadis" },
-    ],
-  },
-  {
-    title: "Unit Kerja",
-    icon: BsHouseDoor,
-    pathPrefix: "/unit-kerja",
-    items: [
-      { label: "Induk Unit Kerja", path: "/unit-kerja/induk-unit-kerja" },
-      { label: "Daftar Pegawai", path: "/unit-kerja/daftar-pegawai" },
-      { label: "Daftar Bendahara", path: "/unit-kerja/daftar-bendahara" },
-      { label: "Template Surat", path: "/unit-kerja/template" },
-      { label: "Sub Kegiatan", path: "/unit-kerja/sub-kegiatan" },
-    ],
-  },
-  {
-    title: "Surat",
-    icon: BsEnvelope,
-    pathPrefix: "/surat",
-    items: [
-      { label: "Pengaturan", path: "/surat/nomor" },
-      { label: "Daftar Surat Keluar", path: "/surat/surat-keluar" },
-    ],
-  },
-  {
-    title: "Administrator",
-    icon: GoShieldLock,
-    pathPrefix: "/admin",
-    items: [
-      { label: "Jenis Surat", path: "/admin/edit-jenis-surat" },
-      { label: "Tambah pengguna", path: "/admin/tambah-user" },
-      { label: "Daftar Pengguna", path: "/admin/daftar-user" },
-      {
-        label: "Daftar Induk Unit Kerja",
-        path: "/admin/daftar-induk-unit-kerja",
-      },
+      { label: "Daftar Pegawai", path: "/kepegawaian/daftar-pegawai" },
+      { label: "Statistik Pegawai", path: "/kepegawaian/statistik-pegawai" },
+      { label: "Data Saya", path: "/kepegawaian/profile" },
+      { label: "Usulan Pegawai", path: "/kepegawaian/usulan" },
     ],
   },
 ];
 
-function Navbar() {
+function NavbarPegawai() {
   const isAuthenticated =
     useSelector(selectIsAuthenticated) || localStorage.getItem("token");
   const user = useSelector(userRedux);
@@ -188,7 +120,7 @@ function Navbar() {
           _hover={{ bg: "gray.100" }}
           borderRadius="md"
           borderBottom={isActive ? "2px solid" : "none"}
-          borderColor={isActive ? "primary" : "transparent"}
+          borderColor={isActive ? "pegawai" : "transparent"}
           fontWeight={isActive ? "semibold" : "normal"}
         >
           {item.label}
@@ -221,7 +153,8 @@ function Navbar() {
             variant="ghost"
             leftIcon={<IconComponent />}
             position="relative"
-            _hover={{ bg: "primary", color: "white" }}
+            color={"white"}
+            _hover={{ bg: "pegawai", color: "white" }}
             _after={{
               content: '""',
               position: "absolute",
@@ -230,7 +163,7 @@ function Navbar() {
               transform: "translateX(-50%)",
               width: isActive ? "80%" : "0%",
               height: "3px",
-              bg: "primary",
+              bg: "pegawai",
               transition: "width 0.2s ease-in-out",
             }}
             onMouseEnter={() => setIsOpen(true)}
@@ -263,7 +196,7 @@ function Navbar() {
       <Box position="fixed" top={0} left={0} right={0} zIndex={999}>
         {/* Header Oranye */}
         <Box
-          bg="primary"
+          bg="pegawai"
           px={4}
           py={4}
           height="100px"
@@ -300,47 +233,56 @@ function Navbar() {
               </Button>
 
               {isAuthenticated ? (
-                <Menu>
-                  <MenuButton as={Button} variant="ghost" size="sm">
-                    <HStack>
-                      <Box position="relative">
-                        <Avatar size="sm" name={user[0]?.nama} />
-                        {jumlahNotifikasi > 0 && (
-                          <Box
-                            position="absolute"
-                            top="-1"
-                            right="-1"
-                            bg="red.500"
-                            color="white"
-                            fontSize="xs"
-                            fontWeight="bold"
-                            px={2}
-                            py={0.5}
-                            borderRadius="full"
-                            minW="5"
-                            h="5"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                          >
-                            {jumlahNotifikasi}
-                          </Box>
-                        )}
-                      </Box>
-                      <Text color={"white"} fontSize="sm">
-                        {user[0]?.nama}
-                      </Text>
+                <>
+                  <Box>
+                    <HStack spacing={6}>
+                      {menuData.map((menu, index) => (
+                        <MenuDropdown key={index} menu={menu} />
+                      ))}
                     </HStack>
-                  </MenuButton>
-                  <MenuList>
-                    <Link to={"/profile"}>
-                      <MenuItem>Profile</MenuItem>
-                    </Link>
-                    <MenuItem>
-                      <Logout />
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+                  </Box>
+                  <Menu>
+                    <MenuButton as={Button} variant="ghost" size="sm">
+                      <HStack>
+                        <Box position="relative">
+                          <Avatar size="sm" name={user[0]?.nama} />
+                          {jumlahNotifikasi > 0 && (
+                            <Box
+                              position="absolute"
+                              top="-1"
+                              right="-1"
+                              bg="red.500"
+                              color="white"
+                              fontSize="xs"
+                              fontWeight="bold"
+                              px={2}
+                              py={0.5}
+                              borderRadius="full"
+                              minW="5"
+                              h="5"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                            >
+                              {jumlahNotifikasi}
+                            </Box>
+                          )}
+                        </Box>
+                        <Text color={"white"} fontSize="sm">
+                          {user[0]?.nama}
+                        </Text>
+                      </HStack>
+                    </MenuButton>
+                    <MenuList>
+                      <Link to={"/profile"}>
+                        <MenuItem>Profile</MenuItem>
+                      </Link>
+                      <MenuItem>
+                        <Logout />
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </>
               ) : (
                 <Link to="/login">
                   <Button variant={"primary"} size="sm">
@@ -350,29 +292,6 @@ function Navbar() {
               )}
             </HStack>
           </Flex>
-
-          {/* Bawah: Menu Putih */}
-          {isAuthenticated && (
-            <Box
-              bg="white"
-              boxShadow="md"
-              borderRadius="md"
-              px={6}
-              py={3}
-              width="95vw"
-              mx="auto"
-              mt={"20px"} // Jarak dari header ke menu
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <HStack spacing={6}>
-                {menuData.map((menu, index) => (
-                  <MenuDropdown key={index} menu={menu} />
-                ))}
-              </HStack>
-            </Box>
-          )}
         </Box>
       </Box>
       {/* Spacing untuk konten utama */}
@@ -381,4 +300,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default NavbarPegawai;

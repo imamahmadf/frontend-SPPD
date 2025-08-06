@@ -57,6 +57,11 @@ import UsulanPegawai from "./pages/UsulanPegawai.jsx";
 import DashboradPegawai from "./pages/DashboradPegawai.jsx";
 import NaikGolongan from "./pages/Pegawai/NaikGolongan.jsx";
 import DetailUsulan from "./pages/Pegawai/DetailUsulan.jsx";
+import DaftarPersediaan from "./pages/Aset/DaftarPersediaan.jsx";
+import PersediaanMasuk from "./pages/Aset/PersediaanMasuk.jsx";
+import PersediaanKeluar from "./pages/Aset/PersediaanKeluar.jsx";
+import DashboardAset from "./pages/Aset/DashboardAset.jsx";
+
 function App() {
   const dispatch = useDispatch();
 
@@ -354,13 +359,13 @@ function App() {
             component={DetailKendaraanUnitKerja}
             path="/sijaka/detail-kendaraan/unit-kerja/:id"
             exact
-            roleRoute={[5, 2]}
+            roleRoute={[5, 10, 8]}
           />
           <ProtectedRoute
             component={KendaraanUnitKerja}
-            path="/unit-kerja/kendaraan/sijaka"
+            path="/kendaraan/unit-kerja"
             exact
-            roleRoute={[5, 2]}
+            roleRoute={[5, 10, 8]}
           />
           <ProtectedRoute
             component={pegawaiProfile}
@@ -387,6 +392,32 @@ function App() {
             exact
             roleRoute={[9, 5]}
           />
+
+          <ProtectedRoute
+            component={DaftarPersediaan}
+            path="/aset/daftar-persediaan"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={PersediaanMasuk}
+            path="/aset/persediaan-masuk"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={PersediaanKeluar}
+            path="/aset/persediaan-keluar"
+            exact
+            roleRoute={[5]}
+          />
+          <ProtectedRoute
+            component={DashboardAset}
+            path="/aset/dashboard"
+            exact
+            roleRoute={[5, 10, 8]}
+          />
+
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>
