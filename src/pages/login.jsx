@@ -13,10 +13,12 @@ import {
   Image,
   Select,
   useColorMode,
+  Flex,
 } from "@chakra-ui/react";
 import LogoPena from "../assets/Logo Pena.png";
 import { login } from "../Redux/Reducers/auth";
 import { selectIsAuthenticated, selectRole } from "../Redux/Reducers/auth";
+import FotoLogin from "../assets/home.png";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -77,83 +79,89 @@ const Login = () => {
   }
 
   return (
-    <Center
-      bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
-      height={"100vh"}
-    >
+    <Flex>
+      <Box w={"50%"}>
+        <Image src={FotoLogin} />
+      </Box>{" "}
       <Center
-        transform="translateY(-2px)"
-        boxShadow="md"
-        bgColor={colorMode === "dark" ? "gray.800" : "white"}
-        borderRadius={"8px"}
-        p={"100px"}
+        bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
+        height={"100vh"}
+        w={"50%"}
       >
-        <VStack p={"0px"} spacing={6}>
-          <Image
-            height="150px"
-            objectFit="cover"
-            src={LogoPena}
-            transition="transform 0.3s ease"
-            _hover={{ transform: "scale(1.05)" }}
-            mb={"30px"}
-          />
-
-          <FormControl>
-            <FormLabel fontSize={"24px"}>Akun Pengguna</FormLabel>
-            <Input
-              value={namaPengguna}
-              onChange={(e) => setNamaPengguna(e.target.value)}
-              height="60px"
-              placeholder="Masukkan NIP"
-              w={"600px"}
+        <Center
+          transform="translateY(-2px)"
+          boxShadow="md"
+          bgColor={colorMode === "dark" ? "gray.800" : "white"}
+          borderRadius={"8px"}
+          p={"100px"}
+        >
+          <VStack p={"0px"} spacing={6}>
+            <Image
+              height="150px"
+              objectFit="cover"
+              src={LogoPena}
+              transition="transform 0.3s ease"
+              _hover={{ transform: "scale(1.05)" }}
+              mb={"30px"}
             />
-          </FormControl>
 
-          <FormControl>
-            <FormLabel fontSize={"24px"}>Password</FormLabel>
-            <Input
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              height="60px"
-              w={"600px"}
-              type="password"
-            />
-          </FormControl>
+            <FormControl>
+              <FormLabel fontSize={"24px"}>Akun Pengguna</FormLabel>
+              <Input
+                value={namaPengguna}
+                onChange={(e) => setNamaPengguna(e.target.value)}
+                height="60px"
+                placeholder="Masukkan NIP"
+                w={"600px"}
+              />
+            </FormControl>
 
-          <FormControl>
-            <FormLabel fontSize={"24px"}>Pilih Aplikasi</FormLabel>
-            <Select
-              placeholder="Pilih aplikasi"
-              value={pilihanAplikasi}
-              onChange={(e) => setPilihanAplikasi(e.target.value)}
-              height="60px"
+            <FormControl>
+              <FormLabel fontSize={"24px"}>Password</FormLabel>
+              <Input
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                height="60px"
+                w={"600px"}
+                type="password"
+              />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel fontSize={"24px"}>Pilih Aplikasi</FormLabel>
+              <Select
+                placeholder="Pilih aplikasi"
+                value={pilihanAplikasi}
+                onChange={(e) => setPilihanAplikasi(e.target.value)}
+                height="60px"
+                w={"600px"}
+              >
+                <option value="pegawai">Kepegawaian</option>
+                <option value="aset">Aset</option>
+                <option value="pena">Pena</option>
+              </Select>
+            </FormControl>
+
+            {error && (
+              <Text color="red.500" fontSize="lg" mt="2">
+                {error}
+              </Text>
+            )}
+
+            <Button
+              mt={"10px"}
               w={"600px"}
+              onClick={handleSubmit}
+              variant={"primary"}
+              height="60px"
             >
-              <option value="pegawai">Kepegawaian</option>
-              <option value="aset">Aset</option>
-              <option value="pena">Pena</option>
-            </Select>
-          </FormControl>
-
-          {error && (
-            <Text color="red.500" fontSize="lg" mt="2">
-              {error}
-            </Text>
-          )}
-
-          <Button
-            mt={"10px"}
-            w={"600px"}
-            onClick={handleSubmit}
-            variant={"primary"}
-            height="60px"
-          >
-            Login
-          </Button>
-        </VStack>
+              Login
+            </Button>
+          </VStack>
+        </Center>
       </Center>
-    </Center>
+    </Flex>
   );
 };
 

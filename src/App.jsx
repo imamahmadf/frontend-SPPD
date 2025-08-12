@@ -61,7 +61,8 @@ import DaftarPersediaan from "./pages/Aset/DaftarPersediaan.jsx";
 import PersediaanMasuk from "./pages/Aset/PersediaanMasuk.jsx";
 import PersediaanKeluar from "./pages/Aset/PersediaanKeluar.jsx";
 import DashboardAset from "./pages/Aset/DashboardAset.jsx";
-
+import LaporanPersediaan from "./pages/Aset/LaporanPersediaan.jsx";
+import DetailLaporan from "./pages/Aset/DetailLaporan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -418,6 +419,18 @@ function App() {
             roleRoute={[5, 10, 8]}
           />
 
+          <ProtectedRoute
+            component={LaporanPersediaan}
+            path="/aset/laporan-persediaan"
+            exact
+            roleRoute={[5, 10, 8]}
+          />
+          <ProtectedRoute
+            component={DetailLaporan}
+            path="/aset/detail-laporan/:id"
+            exact
+            roleRoute={[5, 10, 8]}
+          />
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>

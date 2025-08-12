@@ -136,7 +136,8 @@ function TambahUser() {
                       );
 
                       const filtered = res.data.result.filter(
-                        (val) => val.statusPegawaiId === 4
+                        (val) =>
+                          val.statusPegawaiId === 3 || val.statusPegawaiId === 4
                       );
                       console.log(filtered);
                       return filtered.map((val) => ({

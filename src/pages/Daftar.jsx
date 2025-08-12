@@ -77,7 +77,6 @@ function KalenderPerjalanan({ events, colorMode, formats, localizer }) {
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 700 }}
         formats={formats}
         popup={false}
         eventPropGetter={(event) => {
@@ -355,17 +354,20 @@ function Daftar() {
       {isLoading && <Loading />}
       <Layout>
         {/* Kalender Perjalanan */}
-        <Box bgColor={"secondary"} pb={"20px"} px={"30px"}>
-          <KalenderPerjalanan
-            events={events}
-            colorMode={colorMode}
-            formats={formats}
-            localizer={localizer}
-          />
-        </Box>
+
         {dataPerjalanan[0] ? (
           <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+            {" "}
+            <Box bgColor={"secondary"} pb={"20px"} px={"30px"}>
+              <KalenderPerjalanan
+                events={events}
+                colorMode={colorMode}
+                formats={formats}
+                localizer={localizer}
+              />
+            </Box>
             <Box
+              mt={"50px"}
               style={{ overflowX: "auto" }}
               bgColor={"white"}
               p={"30px"}
