@@ -153,13 +153,14 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             onChange={(e) => actions.setIsNotaDinas(e.target.checked ? 1 : 0)}
           >
             <option value="1">Nota Dinas</option>
-            <option value="0">Telaahan Staf</option>
+            <option value="0">Telaahan Staf</option>{" "}
+            <option value="2">Undangan</option>
           </Select>
         </FormControl>
         <Flex gap={4}>
           <Checkbox
-            isChecked={state.isSrikandi === 1}
-            onChange={(e) => actions.setIsSrikandi(e.target.checked ? 1 : 0)}
+            isChecked={state.isSrikandi === 0}
+            onChange={(e) => actions.setIsSrikandi(e.target.checked ? 0 : 1)}
           >
             Srikandi
           </Checkbox>

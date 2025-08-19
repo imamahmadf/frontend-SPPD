@@ -33,7 +33,7 @@ import {
   AsyncSelect,
 } from "chakra-react-select";
 import axios from "axios";
-
+import AsetBG from "../../assets/asetBG.png";
 import { useSelector } from "react-redux";
 
 import FooterAset from "../../Componets/Aset/FooterAset";
@@ -63,7 +63,7 @@ function DashboardAset() {
       <NavbarAset />
       <Box
         height="100vh"
-        backgroundImage={`url(${FotoDinkes})`}
+        backgroundImage={`url(${AsetBG})`}
         backgroundSize="cover"
         display="flex"
         alignItems="center"
@@ -76,19 +76,9 @@ function DashboardAset() {
           left="0"
           right="0"
           bottom="0"
-          backgroundColor="rgba(0, 0, 0, 0.5)"
+          // backgroundColor="rgba(0, 0, 0, 0.5)"
         />
         <Box>
-          <Text
-            color="white"
-            textAlign="center"
-            position="relative"
-            fontWeight={800}
-            fontSize={{ ss: "30px", sl: "60px" }}
-            mb={"20px"}
-          >
-            SELAMAT DATANG DI ASET DINKES
-          </Text>
           {/* {isAuthenticated ? null : (
             <>
               <Button variant={"primary"}>Login</Button>

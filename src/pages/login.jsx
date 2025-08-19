@@ -14,11 +14,16 @@ import {
   Select,
   useColorMode,
   Flex,
+  Divider,
 } from "@chakra-ui/react";
-import LogoPena from "../assets/Logo Pena.png";
+// import LogoPena from "../assets/Logo Pena.png";
 import { login } from "../Redux/Reducers/auth";
 import { selectIsAuthenticated, selectRole } from "../Redux/Reducers/auth";
 import FotoLogin from "../assets/home.png";
+import LogoDinkes from "../assets/logo.png";
+import LogoPena from "../assets/penaLogo.png";
+import LogoAset from "../assets/asetLogo.png";
+import LogoPegawai from "../assets/pegawaiLogo.png";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -81,7 +86,13 @@ const Login = () => {
   return (
     <Flex>
       <Box w={"50%"}>
-        <Image src={FotoLogin} />
+        <Image
+          h={"100%"}
+          w={"100%"}
+          overflow="hiden"
+          objectFit="cover"
+          src={FotoLogin}
+        />
       </Box>{" "}
       <Center
         bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
@@ -96,15 +107,55 @@ const Login = () => {
           p={"100px"}
         >
           <VStack p={"0px"} spacing={6}>
-            <Image
-              height="150px"
-              objectFit="cover"
-              src={LogoPena}
-              transition="transform 0.3s ease"
-              _hover={{ transform: "scale(1.05)" }}
-              mb={"30px"}
-            />
-
+            <Flex>
+              <Image
+                height="100px"
+                objectFit="cover"
+                src={LogoDinkes}
+                transition="transform 0.3s ease"
+                _hover={{ transform: "scale(1.05)" }}
+                me={"20px"}
+              />
+              <Box>
+                <Text
+                  color={"rgba(35, 178, 196, 1)"}
+                  fontSize={"30px"}
+                  fontWeight={900}
+                >
+                  DINAS KESEHATAN
+                </Text>
+                <Text fontSize={"25px"} fontWeight={700}>
+                  KABUPATEN PASER
+                </Text>
+              </Box>
+            </Flex>
+            <Divider orientation="horizontal" />
+            <Flex gap={"40px"}>
+              <Image
+                height="40px"
+                objectFit="cover"
+                src={LogoPena}
+                transition="transform 0.3s ease"
+                _hover={{ transform: "scale(1.05)" }}
+                mb={"30px"}
+              />
+              <Image
+                height="40px"
+                objectFit="cover"
+                src={LogoPegawai}
+                transition="transform 0.3s ease"
+                _hover={{ transform: "scale(1.05)" }}
+                mb={"30px"}
+              />
+              <Image
+                height="40px"
+                objectFit="cover"
+                src={LogoAset}
+                transition="transform 0.3s ease"
+                _hover={{ transform: "scale(1.05)" }}
+                mb={"30px"}
+              />
+            </Flex>
             <FormControl>
               <FormLabel fontSize={"24px"}>Akun Pengguna</FormLabel>
               <Input

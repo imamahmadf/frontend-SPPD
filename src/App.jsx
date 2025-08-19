@@ -63,6 +63,8 @@ import PersediaanKeluar from "./pages/Aset/PersediaanKeluar.jsx";
 import DashboardAset from "./pages/Aset/DashboardAset.jsx";
 import LaporanPersediaan from "./pages/Aset/LaporanPersediaan.jsx";
 import DetailLaporan from "./pages/Aset/DetailLaporan.jsx";
+import DaftarSPPD from "./pages/Surat/DaftarSPPD.jsx";
+import LaporanPersediaanKeluar from "./pages/Aset/LaporanPersediaanKeluar.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -287,6 +289,13 @@ function App() {
             exact
             roleRoute={[4, 5]}
           />
+
+          <ProtectedRoute
+            component={DaftarSPPD}
+            path="/surat/sppd"
+            exact
+            roleRoute={[4, 5]}
+          />
           <ProtectedRoute
             component={TtdSuratTugasAdmin}
             path="/admin/ttd-surat-tugas"
@@ -431,6 +440,14 @@ function App() {
             exact
             roleRoute={[5, 10, 8]}
           />
+
+          <ProtectedRoute
+            component={LaporanPersediaanKeluar}
+            path="/aset/detail-laporan-keluar/:id"
+            exact
+            roleRoute={[5, 10, 8]}
+          />
+
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>

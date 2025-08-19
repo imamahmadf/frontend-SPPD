@@ -58,6 +58,8 @@ function LaporanPersediaan() {
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
   const [nama, setNama] = useState("");
+  const [awal, setAwal] = useState("");
+  const [akhir, setAkhir] = useState("");
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
   const [spesifikasi, setSpesifikasi] = useState("");
@@ -119,6 +121,8 @@ function LaporanPersediaan() {
         }/laporan-persediaan/post`,
         {
           nama,
+          awal,
+          akhir,
         }
       )
       .then((res) => {
@@ -143,6 +147,41 @@ function LaporanPersediaan() {
           isClosable: true,
         });
         onTambahClose();
+      });
+  };
+
+  const ubahStatus = (id, status) => {
+    console.log(id, status);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/laporan-persediaan/edit`,
+        {
+          id,
+          status,
+        }
+      )
+      .then((res) => {
+        console.log(res.status, res.data, "tessss");
+        toast({
+          title: "Berhasil!",
+          description: "Status Berhasil diubah",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        fetchLaporanPersediaan();
+      })
+      .catch((err) => {
+        console.error(err.message);
+        toast({
+          title: "Error!",
+          description: "Status Gagal diubah",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       });
   };
 
@@ -173,6 +212,7 @@ function LaporanPersediaan() {
               <Thead>
                 <Tr>
                   <Th>Nama</Th>
+                  <Th>Tanggal Awal</Th> <Th>Tanggal Akhir</Th>
                   <Th>Status</Th>
                   <Th>Akses</Th>
                 </Tr>
@@ -182,6 +222,30 @@ function LaporanPersediaan() {
                   <Tr key={item.id}>
                     {" "}
                     <Td>{item?.nama}</Td>
+                    <Td>
+                      {item?.tanggalAwal
+                        ? new Date(item?.tanggalAwal).toLocaleDateString(
+                            "id-ID",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
+                        : "-"}
+                    </Td>{" "}
+                    <Td>
+                      {item?.tanggalAkhir
+                        ? new Date(item?.tanggalAkhir).toLocaleDateString(
+                            "id-ID",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
+                        : "-"}
+                    </Td>
                     <Td>{item?.status}</Td>
                     <Td>
                       <Button
@@ -191,6 +255,22 @@ function LaporanPersediaan() {
                         variant={"primary"}
                       >
                         Detail
+                      </Button>{" "}
+                      <Button
+                        onClick={() =>
+                          history.push(`/aset/detail-laporan-keluar/${item.id}`)
+                        }
+                        variant={"primary"}
+                      >
+                        Detail
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          ubahStatus(item.id, item.status);
+                        }}
+                        variant={"primary"}
+                      >
+                        Status
                       </Button>
                     </Td>
                   </Tr>
@@ -251,6 +331,26 @@ function LaporanPersediaan() {
                       height={"60px"}
                       bgColor={"terang"}
                       onChange={(e) => setNama(e.target.value)}
+                      placeholder="Contoh: Laporan TW 2 2025"
+                    />
+                  </FormControl>{" "}
+                  <FormControl my={"30px"}>
+                    <FormLabel fontSize={"24px"}>awal</FormLabel>
+                    <Input
+                      type="date"
+                      height={"60px"}
+                      bgColor={"terang"}
+                      onChange={(e) => setAwal(e.target.value)}
+                      placeholder="Contoh: Laporan TW 2 2025"
+                    />
+                  </FormControl>{" "}
+                  <FormControl my={"30px"}>
+                    <FormLabel fontSize={"24px"}>akhir</FormLabel>
+                    <Input
+                      type="date"
+                      height={"60px"}
+                      bgColor={"terang"}
+                      onChange={(e) => setAkhir(e.target.value)}
                       placeholder="Contoh: Laporan TW 2 2025"
                     />
                   </FormControl>

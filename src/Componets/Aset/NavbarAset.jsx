@@ -29,6 +29,9 @@ import { BsCart4 } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { GoShieldLock } from "react-icons/go";
 import { BiCar } from "react-icons/bi";
+import LogoPena from "../../assets/penaLogo.png";
+import LogoAset from "../../assets/asetLogo.png";
+import LogoPegawai from "../../assets/pegawaiLogo.png";
 import {
   selectIsAuthenticated,
   userRedux,
@@ -295,7 +298,28 @@ function NavbarAset() {
                     </MenuButton>
                     <MenuList>
                       <Link to={"/profile"}>
-                        <MenuItem>Profile</MenuItem>
+                        <MenuItem>
+                          <Avatar me={"10px"} w={"20px"} h={"20px"} />
+                          Profile
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoPena} />
+                          Pena
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/aset/dashboard"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoAset} />
+                          Aset
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/pegawai/dashboard"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoPegawai} />
+                          Kepegawaian
+                        </MenuItem>
                       </Link>
                       <MenuItem>
                         <Logout />
@@ -317,7 +341,6 @@ function NavbarAset() {
         </Box>
       </Box>
       {/* Spacing untuk konten utama */}
-      <Box height="140px" /> {/* Spacer untuk konten */}
     </>
   );
 }
