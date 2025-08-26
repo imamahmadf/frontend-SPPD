@@ -50,6 +50,54 @@ import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
 function DetailLaporan(props) {
+  // Fungsi untuk memformat nomor surat dengan mengganti BULAN dan TAHUN
+  const formatNomorSurat = (nomor, tanggal, nomorPesanan) => {
+    if (!nomor || !tanggal) return nomor || "-";
+
+    try {
+      const date = new Date(tanggal);
+      const bulanAngka = date.getMonth() + 1;
+      const tahun = date.getFullYear().toString();
+
+      // Konversi bulan ke angka romawi
+      const bulanRomawi = convertToRoman(bulanAngka);
+
+      // Ganti BULAN dan TAHUN dalam format nomor
+      return nomor
+        .replace(/BULAN/g, bulanRomawi)
+        .replace(/TAHUN/g, tahun)
+        .replace(/NOMOR/g, nomorPesanan);
+    } catch (error) {
+      console.error("Error formatting nomor surat:", error);
+      return nomor;
+    }
+  };
+
+  // Fungsi untuk mengkonversi angka ke romawi
+  const convertToRoman = (num) => {
+    const romanNumerals = [
+      { value: 12, numeral: "XII" },
+      { value: 11, numeral: "XI" },
+      { value: 10, numeral: "X" },
+      { value: 9, numeral: "IX" },
+      { value: 8, numeral: "VIII" },
+      { value: 7, numeral: "VII" },
+      { value: 6, numeral: "VI" },
+      { value: 5, numeral: "V" },
+      { value: 4, numeral: "IV" },
+      { value: 3, numeral: "III" },
+      { value: 2, numeral: "II" },
+      { value: 1, numeral: "I" },
+    ];
+
+    for (let i = 0; i < romanNumerals.length; i++) {
+      if (num >= romanNumerals[i].value) {
+        return romanNumerals[i].numeral;
+      }
+    }
+    return "I"; // fallback untuk bulan 1
+  };
+
   const [DataPersediaan, setDataPersediaan] = useState([]);
   const [page, setPage] = useState(0);
 
@@ -61,6 +109,11 @@ function DetailLaporan(props) {
   const [tanggal, setTanggal] = useState("");
   const [keterangan, setKeterangan] = useState("");
   const [persediaanId, setPersediaanId] = useState(0);
+  const [nomorPesanan, setNomorPesanan] = useState(0);
+  const [dataSumberDana, setDataSumberDana] = useState(null);
+  const [dataSuratPesanan, setDataSuratPesanan] = useState(null);
+  const [sumberDanaId, setSumberDanaId] = useState(null);
+  const [suratPesananId, setSuratPesananId] = useState(null);
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
   const {
@@ -80,6 +133,8 @@ function DetailLaporan(props) {
       setTanggal(val);
     } else if (field == "keterangan") {
       setKeterangan(val);
+    } else if (field == "nomorPesanan") {
+      setNomorPesanan(val);
     }
   };
   async function fetchPersediaanMasuk() {
@@ -87,10 +142,14 @@ function DetailLaporan(props) {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/laporan-persediaan/get/detail/${props.match.params.id}`
+        }/laporan-persediaan/get/detail/${props.match.params.id}?unitKerjaId=${
+          user[0]?.unitKerja_profile?.id
+        }`
       )
       .then((res) => {
         setDataPersediaan(res.data.result);
+        setDataSumberDana(res.data.resultSumberDana);
+        setDataSuratPesanan(res.data.resultSuratPesanan);
 
         console.log(res.data);
       })
@@ -111,6 +170,9 @@ function DetailLaporan(props) {
           keterangan,
           unitKerjaId: user[0]?.unitKerja_profile?.id,
           laporanPersediaanId: props.match.params.id,
+          suratPesananId,
+          nomorPesanan,
+          sumberDanaId,
         }
       )
       .then((res) => {
@@ -165,12 +227,13 @@ function DetailLaporan(props) {
 
               <Spacer />
             </HStack>
-
             <Table variant={"aset"}>
               <Thead>
                 <Tr>
                   <Th>No.</Th>
+                  <Th>Nomor Surat</Th>
                   <Th>tanggal</Th>
+                  <Th>Sumber Dana</Th>
                   <Th>Kode barang</Th>
                   <Th maxWidth={"20px"}>Nama barang</Th> <Th>NUSP</Th>
                   <Th>spesifikasi</Th>
@@ -183,8 +246,24 @@ function DetailLaporan(props) {
                 {DataPersediaan[0]?.stokMasuks.map((item, index) => (
                   <Tr key={item.id}>
                     {" "}
-                    <Td>{index + 1}</Td>
-                    <Td>{item?.tanggal}</Td>
+                    <Td>{index + 1}</Td>{" "}
+                    <Td>
+                      {formatNomorSurat(
+                        item?.suratPesanan.nomor,
+                        item?.tanggal,
+                        item?.nomorPesanan
+                      )}
+                    </Td>
+                    <Td>
+                      {item?.tanggal
+                        ? new Date(item?.tanggal).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })
+                        : "-"}
+                    </Td>
+                    <Td>{item?.sumberDana.sumber}</Td>
                     <Td>
                       {
                         item?.persediaan?.tipePersediaan?.rinObPersediaan
@@ -204,6 +283,7 @@ function DetailLaporan(props) {
                 ))}
               </Tbody>
             </Table>
+            xxxxxxxxxxxxxxxxxxxxxxxxxxxx
           </Box>
         </Container>
 
@@ -311,12 +391,113 @@ function DetailLaporan(props) {
                       }
                       placeholder="Contoh: 5000"
                     />
-                  </FormControl>
+                  </FormControl>{" "}
+                  <FormControl
+                    my={"30px"}
+                    border={0}
+                    bgColor={"white"}
+                    flex="1"
+                  >
+                    <FormLabel fontSize={"24px"}>Sumber Dana</FormLabel>
+                    <Select2
+                      options={dataSumberDana?.map((val) => ({
+                        value: val.id,
+                        label: `${val.sumber}`,
+                      }))}
+                      placeholder="Contoh: Lunas"
+                      focusBorderColor="red"
+                      onChange={(selectedOption) => {
+                        setSumberDanaId(selectedOption.value);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null, // Hilangkan tombol panah
+                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "60px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>{" "}
+                  <FormControl
+                    my={"30px"}
+                    border={0}
+                    bgColor={"white"}
+                    flex="1"
+                  >
+                    <FormLabel fontSize={"24px"}>Surat Pesanan</FormLabel>
+                    <Select2
+                      options={dataSuratPesanan?.map((val) => ({
+                        value: val.id,
+                        label: `${val.nomor}`,
+                      }))}
+                      placeholder="Contoh: Lunas"
+                      focusBorderColor="red"
+                      onChange={(selectedOption) => {
+                        setSuratPesananId(selectedOption.value);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null, // Hilangkan tombol panah
+                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "60px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>{" "}
+                  <FormControl my={"30px"}>
+                    <FormLabel fontSize={"24px"}>nomor Surat</FormLabel>
+                    <Input
+                      type="number"
+                      height={"60px"}
+                      bgColor={"terang"}
+                      onChange={(e) =>
+                        handleSubmitChange("nomorPesanan", e.target.value)
+                      }
+                      placeholder="Contoh: 5000"
+                    />
+                  </FormControl>{" "}
                   <FormControl my={"30px"}>
                     <FormLabel fontSize={"24px"}>tanggal</FormLabel>
                     <Input
                       height={"60px"}
                       bgColor={"terang"}
+                      max={DataPersediaan[0]?.tanggalAkhir.split("T")[0]}
                       type="date"
                       onChange={(e) =>
                         handleSubmitChange("tanggal", e.target.value)

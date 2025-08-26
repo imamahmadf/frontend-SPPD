@@ -64,8 +64,6 @@ const menuData = [
     items: [
       { label: "Daftar Persediaan", path: "/aset/daftar-persediaan" },
       { label: "Laporan Persediaan", path: "/aset/laporan-persediaan" },
-      { label: "Persediaan Masuk", path: "/aset/persediaan-masuk" },
-      { label: "Persediaan Keluar", path: "/aset/persediaan-keluar" },
     ],
   },
 

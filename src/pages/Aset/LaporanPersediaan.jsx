@@ -265,6 +265,16 @@ function LaporanPersediaan() {
                         Detail
                       </Button>
                       <Button
+                        onClick={() =>
+                          history.push(
+                            `/admin-aset/rekap-persediaan/${item.id}`
+                          )
+                        }
+                        variant={"primary"}
+                      >
+                        Detail
+                      </Button>
+                      <Button
                         onClick={() => {
                           ubahStatus(item.id, item.status);
                         }}

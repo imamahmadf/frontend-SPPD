@@ -63,7 +63,9 @@ function DaftarSPPD() {
   const [dataRekap, setDataRekap] = useState([]);
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
-
+  const [dataUnitKerja, setDataUnitKerja] = useState(null);
+  const [untuk, setUntuk] = useState("");
+  const [selectedUnitKerja, setSelectedUnitKerja] = useState(null);
   // State untuk modal Tambah
   const {
     isOpen: isTambahOpen,
@@ -217,6 +219,7 @@ function DaftarSPPD() {
           bg={colorMode === "dark" ? "gray.800" : "white"}
           mb={"40px"}
         >
+          {JSON.stringify(dataSeed)}
           <Flex gap={4} mb={4} zIndex={999} alignItems="flex-end">
             <FormControl my={"30px"}>
               <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
@@ -709,6 +712,55 @@ function DaftarSPPD() {
                   )}
                 </Box>
               ) : null}
+              <FormControl border={0} bgColor={"white"} flex="1">
+                <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                <Select2
+                  options={dataSeed?.resultUnitKerja?.map((val) => ({
+                    value: val,
+                    label: `${val.kode}`,
+                  }))}
+                  placeholder="Pilih Klasifikasi"
+                  focusBorderColor="red"
+                  onChange={(selectedOption) => {
+                    setSelectedUnitKerja(selectedOption.value);
+                  }}
+                  components={{
+                    DropdownIndicator: () => null, // Hilangkan tombol panah
+                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                  }}
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "6px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor: "terang",
+                      border: "0px",
+                      height: "60px",
+                      _hover: {
+                        borderColor: "yellow.700",
+                      },
+                      minHeight: "40px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused ? "primary" : "white",
+                      color: state.isFocused ? "white" : "black",
+                    }),
+                  }}
+                />
+              </FormControl>
+              <FormControl my={"30px"}>
+                <FormLabel fontSize={"24px"}>Maksud Perjalanan</FormLabel>
+                <Input
+                  value={untuk}
+                  height={"60px"}
+                  bgColor={"terang"}
+                  onChange={(e) => setUntuk(e.target.value)}
+                  placeholder="Perihal"
+                />
+              </FormControl>
             </ModalBody>
             <ModalFooter>
               <Button
@@ -787,11 +839,14 @@ function DaftarSPPD() {
                       }/rekap/post/sppd`,
                       {
                         pegawaiIds: selectedPegawaiIds,
+                        untuk,
                         jenisPerjalananId: selectedJenisPerjalanan.value.id,
                         tipePerjalananId:
                           selectedJenisPerjalanan.value.tipePerjalananId,
                         tempats,
-                        unitKerjaId: user[0]?.unitKerja_profile?.id,
+                        unitKerjaFE: selectedUnitKerja,
+                        indukUnitKerjaFE:
+                          user[0].unitKerja_profile.indukUnitKerja,
                       }
                     );
                     toast({

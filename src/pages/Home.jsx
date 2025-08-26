@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Helmet } from "react-helmet";
 import {
   Box,
   Text,
@@ -44,21 +43,14 @@ import {
 } from "../Redux/Reducers/auth";
 import HomeFoto from "../assets/home.png";
 import FotoDinkes from "../assets/dinkes.jpg";
+import { getSEOConfig } from "../config/seoConfig";
 
 function Home() {
   const isAuthenticated =
     useSelector(selectIsAuthenticated) || localStorage.getItem("token");
-  return (
-    <>
-      <Helmet>
-        <title>Aplikasi Dinas Kesehatan Kabupaten Paser</title>
-        <meta
-          name="description"
-          content="Pena Dinkes adalah aplikasi administrasi di Dinas Kesehatan Kabupaten paser"
-        />
-      </Helmet>
 
-      <Navbar />
+  return (
+    <Layout seoProps={getSEOConfig("home")}>
       <Box
         height="100vh"
         backgroundImage={`url(${FotoDinkes})`}
@@ -94,9 +86,7 @@ function Home() {
           )} */}
         </Box>
       </Box>
-
-      <Footer />
-    </>
+    </Layout>
   );
 }
 

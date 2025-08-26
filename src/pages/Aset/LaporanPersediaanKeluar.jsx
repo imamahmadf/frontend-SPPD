@@ -6,6 +6,7 @@ import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
 import Foto from "../../assets/add_photo.png";
+import ExcelJS from "exceljs";
 import {
   Box,
   Text,
@@ -128,7 +129,7 @@ function LaporanPersediaanKeluar(props) {
       });
       return;
     }
-
+    console.log(selectedItemId);
     axios
       .post(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/persediaan/post/keluar`,
@@ -163,6 +164,160 @@ function LaporanPersediaanKeluar(props) {
           isClosable: true,
         });
       });
+  };
+
+  const downloadExcel = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Laporan Persediaan Keluar");
+
+      // Set header style
+      const headerStyle = {
+        font: { bold: true, color: { argb: "FFFFFF" } },
+        fill: {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "4472C4" },
+        },
+        alignment: { horizontal: "center", vertical: "middle" },
+        border: {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        },
+      };
+
+      // Set data style
+      const dataStyle = {
+        border: {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        },
+        alignment: { vertical: "middle" },
+      };
+
+      // Set number style
+      const numberStyle = {
+        ...dataStyle,
+        alignment: { horizontal: "right", vertical: "middle" },
+      };
+
+      // Set currency style
+      const currencyStyle = {
+        ...dataStyle,
+        alignment: { horizontal: "right", vertical: "middle" },
+        numFmt: "#,##0",
+      };
+
+      // Add headers
+      const headers = [
+        "No.",
+        "Nama Persediaan",
+        "Kode Barang",
+        "Harga Satuan",
+        "Stok Awal",
+        "Tanggal",
+        "Tujuan",
+        "Jumlah Keluar",
+        "Sisa",
+      ];
+
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell) => {
+        cell.style = headerStyle;
+      });
+
+      // Add data rows
+      let rowNumber = 1;
+      grouped.forEach((group) => {
+        group.rows.forEach((row, idx) => {
+          const dataRow = worksheet.addRow([
+            rowNumber,
+            idx === 0 ? group.namaPersediaan : "",
+            idx === 0 ? group.kodeBarang : "",
+            group.isHargaSatuanUniform
+              ? group.mergedHargaSatuan
+              : row.hargaSatuan,
+            idx === 0 ? group.stokAwal : "",
+            row.tanggal
+              ? new Date(row.tanggal).toLocaleDateString("id-ID")
+              : "-",
+            row.tujuan || "-",
+            row.jumlahKeluar,
+            idx === 0 ? group.sisa : "",
+          ]);
+
+          // Apply styles
+          dataRow.eachCell((cell, colNumber) => {
+            if (colNumber === 1) {
+              // No.
+              cell.style = {
+                ...dataStyle,
+                alignment: { horizontal: "center", vertical: "middle" },
+              };
+            } else if (colNumber === 4) {
+              // Harga Satuan
+              cell.style = currencyStyle;
+            } else if (colNumber === 5 || colNumber === 8 || colNumber === 9) {
+              // Stok Awal, Jumlah Keluar, Sisa
+              cell.style = numberStyle;
+            } else {
+              cell.style = dataStyle;
+            }
+          });
+
+          if (idx === 0) rowNumber++;
+        });
+      });
+
+      // Auto-fit columns
+      worksheet.columns.forEach((column) => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const columnLength = cell.value ? cell.value.toString().length : 10;
+          if (columnLength > maxLength) {
+            maxLength = columnLength;
+          }
+        });
+        column.width = Math.min(maxLength + 2, 30);
+      });
+
+      // Generate filename
+      const currentDate = new Date().toISOString().split("T")[0];
+      const filename = `Laporan_Persediaan_Keluar_${currentDate}.xlsx`;
+
+      // Download file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Berhasil!",
+        description: "File Excel berhasil diunduh.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error downloading Excel:", error);
+      toast({
+        title: "Error!",
+        description: "Gagal mengunduh file Excel.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   useEffect(() => {
@@ -210,6 +365,7 @@ function LaporanPersediaanKeluar(props) {
         return {
           groupKey: item?.persediaanId ?? item?.kodeBarang ?? Math.random(),
           namaPersediaan: item?.namaPersediaan || "-",
+          stokMasukId: item?.stokMasukId,
           kodeBarang: item?.kodeBarang || "-",
           sisa: item?.sisa ?? 0,
           isHargaSatuanUniform,
@@ -239,6 +395,20 @@ function LaporanPersediaanKeluar(props) {
             borderRadius={"5px"}
             bg={colorMode === "dark" ? "gray.800" : "white"}
           >
+            {JSON.stringify(DataPersediaan?.periode?.statusLaporan)}
+
+            {/* Tombol Download Excel */}
+            <Flex justify="flex-end" mb={4}>
+              <Button
+                leftIcon={<BsFileEarmarkArrowDown />}
+                colorScheme="green"
+                onClick={downloadExcel}
+                size="md"
+              >
+                Download Excel
+              </Button>
+            </Flex>
+
             <Table variant={"aset"}>
               <Thead>
                 <Tr>
@@ -278,15 +448,17 @@ function LaporanPersediaanKeluar(props) {
                     );
                     const aksiCell = (
                       <Td rowSpan={rowCount}>
-                        <Button
-                          onClick={() =>
-                            handleTambahKeluar(group.groupStokMasukId)
-                          }
-                          size="sm"
-                          colorScheme="blue"
-                        >
-                          Tambah
-                        </Button>
+                        {DataPersediaan?.periode?.statusLaporan === "buka" ? (
+                          <Button
+                            onClick={() =>
+                              handleTambahKeluar(group.stokMasukId)
+                            }
+                            size="sm"
+                            colorScheme="blue"
+                          >
+                            Tambah
+                          </Button>
+                        ) : null}
                       </Td>
                     );
 
@@ -379,9 +551,11 @@ function LaporanPersediaanKeluar(props) {
                     type={"date"}
                     height={"60px"}
                     bgColor={"terang"}
-                    value={tujuan}
+                    value={tanggal}
                     onChange={(e) => setTanggal(e.target.value)}
                     placeholder="Masukkan tanggal"
+                    min={DataPersediaan?.periode?.tanggalAwal.split("T")[0]} // Mulai dari 1 Januari 2024
+                    max={DataPersediaan?.periode?.tanggalAkhir.split("T")[0]} // Sampai 31 Desember 2024
                   />
                 </FormControl>
                 <FormControl my={"20px"}>

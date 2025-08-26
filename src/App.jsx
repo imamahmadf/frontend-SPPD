@@ -65,6 +65,7 @@ import LaporanPersediaan from "./pages/Aset/LaporanPersediaan.jsx";
 import DetailLaporan from "./pages/Aset/DetailLaporan.jsx";
 import DaftarSPPD from "./pages/Surat/DaftarSPPD.jsx";
 import LaporanPersediaanKeluar from "./pages/Aset/LaporanPersediaanKeluar.jsx";
+import RekapAdminAset from "./pages/Aset/RekapAdminAset.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -402,7 +403,12 @@ function App() {
             exact
             roleRoute={[9, 5]}
           />
-
+          <ProtectedRoute
+            component={RekapAdminAset}
+            path="/admin-aset/rekap-persediaan/:id"
+            exact
+            roleRoute={[5]}
+          />
           <ProtectedRoute
             component={DaftarPersediaan}
             path="/aset/daftar-persediaan"
