@@ -269,7 +269,7 @@ function RampungAdmin(props) {
       {isPrinting && <Loading />}
       <Box pb={"40px"} px={"30px"}>
         <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
-          {JSON.stringify(detailPerjalanan)}
+          {/* {JSON.stringify(detailPerjalanan)} */}
           <Flex gap={"30px"} mb={"30px"}>
             <Box>
               <Image
