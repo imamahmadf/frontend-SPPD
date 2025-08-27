@@ -114,6 +114,10 @@ function DetailLaporan(props) {
   const [dataSuratPesanan, setDataSuratPesanan] = useState(null);
   const [sumberDanaId, setSumberDanaId] = useState(null);
   const [suratPesananId, setSuratPesananId] = useState(null);
+  const [dataSatuan, setDataSatuan] = useState(null);
+
+  const [satuanPersediaanId, setSatuanPersediaanId] = useState(0);
+
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
   const {
@@ -150,6 +154,7 @@ function DetailLaporan(props) {
         setDataPersediaan(res.data.result);
         setDataSumberDana(res.data.resultSumberDana);
         setDataSuratPesanan(res.data.resultSuratPesanan);
+        setDataSatuan(res.data.resultSatuan);
 
         console.log(res.data);
       })
@@ -173,6 +178,7 @@ function DetailLaporan(props) {
           suratPesananId,
           nomorPesanan,
           sumberDanaId,
+          satuanPersediaanId,
         }
       )
       .then((res) => {
@@ -238,6 +244,7 @@ function DetailLaporan(props) {
                   <Th maxWidth={"20px"}>Nama barang</Th> <Th>NUSP</Th>
                   <Th>spesifikasi</Th>
                   <Th>jumlah</Th>
+                  <Th>Satuan</Th>
                   <Th>harga satuan</Th>
                   <Th>Total</Th>
                 </Tr>
@@ -277,13 +284,23 @@ function DetailLaporan(props) {
                     <Td>{item?.persediaan?.NUSP || "-"}</Td>
                     <Td>{item?.spesifikasi}</Td>
                     <Td>{item?.jumlah}</Td>
-                    <Td>{item?.hargaSatuan}</Td>
-                    <Td>{item?.jumlah * item?.hargaSatuan}</Td>
+                    <Td>{item?.satuanPersediaan?.satuan}</Td>
+                    <Td>
+                      Rp
+                      {Number(item?.hargaSatuan).toLocaleString("id-ID")}
+                    </Td>
+                    <Td>
+                      {" "}
+                      Rp
+                      {Number(item?.jumlah * item?.hargaSatuan).toLocaleString(
+                        "id-ID"
+                      )}{" "}
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>
             </Table>
-            xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            xxxxxxxxxxxxxxxxxxxxxxxxxxxxa
           </Box>
         </Container>
 
@@ -378,6 +395,50 @@ function DetailLaporan(props) {
                         handleSubmitChange("jumlah", e.target.value)
                       }
                       placeholder="Contoh: 500"
+                    />
+                  </FormControl>
+                  <FormControl
+                    my={"30px"}
+                    border={0}
+                    bgColor={"white"}
+                    flex="1"
+                  >
+                    <FormLabel fontSize={"24px"}>Satuan</FormLabel>
+                    <Select2
+                      options={dataSatuan?.map((val) => ({
+                        value: val.id,
+                        label: `${val.satuan}`,
+                      }))}
+                      placeholder="Contoh: Lunas"
+                      focusBorderColor="red"
+                      onChange={(selectedOption) => {
+                        setSatuanPersediaanId(selectedOption.value);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null, // Hilangkan tombol panah
+                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "60px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
                     />
                   </FormControl>{" "}
                   <FormControl my={"30px"}>

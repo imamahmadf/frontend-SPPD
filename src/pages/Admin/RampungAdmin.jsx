@@ -31,6 +31,7 @@ import {
   FormControl,
   FormLabel,
   Select,
+  HStack,
 } from "@chakra-ui/react";
 import Loading from "../../Componets/Loading";
 import { useSelector } from "react-redux";
@@ -271,11 +272,11 @@ function RampungAdmin(props) {
         <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
           {/* {JSON.stringify(detailPerjalanan)} */}
           <Flex gap={"30px"} mb={"30px"}>
-            <Box>
+            <Box w={"60%"}>
               <Image
                 borderRadius={"5px"}
                 alt="foto obat"
-                width="620px"
+                width="100%"
                 height="480px"
                 overflow="hiden"
                 objectFit="cover"
@@ -287,7 +288,7 @@ function RampungAdmin(props) {
                 }
               />
             </Box>
-            <Box>
+            <Box w={"40%"}>
               <Text>Asal: {detailPerjalanan.asal}</Text>
               <Text>Dasar: {detailPerjalanan.dasar || "-"}</Text>{" "}
               <Text>No. Surat Tugas: {detailPerjalanan.noSuratTugas}</Text>
@@ -497,7 +498,10 @@ function RampungAdmin(props) {
                   ))}
                 </Tbody>
               </Table>
-              <Flex mt={"20px"} gap={"20px"}>
+
+              {/* Total Uang Perjalanan Per Pegawai */}
+
+              <HStack mt={"20px"} gap={"20px"}>
                 {item.statusId === 2 && (
                   <Button
                     variant={"primary"}
@@ -517,7 +521,6 @@ function RampungAdmin(props) {
                     batalkan
                   </Button>
                 )}
-
                 <Button
                   variant={"secondary"}
                   onClick={() => {
@@ -528,9 +531,72 @@ function RampungAdmin(props) {
                 >
                   Cetak
                 </Button>
-              </Flex>
+                <Spacer />
+                <Box
+                  mt={"15px"}
+                  p={"15px"}
+                  bg={"blue.50"}
+                  borderRadius={"8px"}
+                  border={"1px solid"}
+                  borderColor={"blue.200"}
+                >
+                  <Text fontWeight="bold" color="blue.700">
+                    Total Uang Perjalanan {item?.pegawai.nama}:{" "}
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(
+                      item.rincianBPDs.reduce((total, val) => {
+                        const rincianTotal = val.nilai * val.qty;
+                        const rillTotal = val.rills.reduce(
+                          (rillSum, rill) => rillSum + rill.nilai,
+                          0
+                        );
+                        return total + rincianTotal + rillTotal;
+                      }, 0)
+                    )}
+                  </Text>
+                </Box>
+              </HStack>
             </Box>
           ))}
+          {/* Total Uang Perjalanan Semua Pegawai */}
+          <Box
+            mt={"30px"}
+            p={"20px"}
+            bg={"green.50"}
+            borderRadius={"12px"}
+            border={"2px solid"}
+            borderColor={"green.300"}
+          >
+            <Text
+              fontSize="xl"
+              fontWeight="bold"
+              color="green.700"
+              textAlign="center"
+            >
+              Total Uang Perjalanan Semua Pegawai:{" "}
+              {new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+              }).format(
+                detailPerjalanan?.personils?.reduce((totalPersonil, item) => {
+                  const personilTotal = item.rincianBPDs.reduce(
+                    (total, val) => {
+                      const rincianTotal = val.nilai * val.qty;
+                      const rillTotal = val.rills.reduce(
+                        (rillSum, rill) => rillSum + rill.nilai,
+                        0
+                      );
+                      return total + rincianTotal + rillTotal;
+                    },
+                    0
+                  );
+                  return totalPersonil + personilTotal;
+                }, 0) || 0
+              )}
+            </Text>
+          </Box>
           {/* {JSON.stringify(detailPerjalanan)} */}
         </Container>
 

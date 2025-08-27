@@ -540,7 +540,11 @@ function DaftarKendaraan() {
                     </Td>{" "}
                     <Td>{item?.kendaraanUK.unitKerja}</Td>
                     <Td>{item?.pegawai?.nama}</Td>
-                    <Td>{item?.total}</Td>
+                    <Td>
+                      {" "}
+                      Rp
+                      {Number(item?.total).toLocaleString("id-ID")}
+                    </Td>
                     <Td>{item?.statusKendaraan?.status}</Td>
                     <Td>{item?.kondisi?.nama}</Td>
                     <Td>{item?.noKontak}</Td>

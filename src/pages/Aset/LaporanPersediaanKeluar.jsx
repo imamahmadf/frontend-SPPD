@@ -437,7 +437,7 @@ function LaporanPersediaanKeluar(props) {
                     const sisaCell = <Td rowSpan={rowCount}>{group.sisa}</Td>;
                     const hargaMergedCell = group.isHargaSatuanUniform ? (
                       <Td rowSpan={rowCount}>
-                        Rp{" "}
+                        Rp
                         {Number(group.mergedHargaSatuan).toLocaleString(
                           "id-ID"
                         )}
