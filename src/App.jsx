@@ -66,6 +66,7 @@ import DetailLaporan from "./pages/Aset/DetailLaporan.jsx";
 import DaftarSPPD from "./pages/Surat/DaftarSPPD.jsx";
 import LaporanPersediaanKeluar from "./pages/Aset/LaporanPersediaanKeluar.jsx";
 import RekapAdminAset from "./pages/Aset/RekapAdminAset.jsx";
+import SuratPesanan from "./pages/Aset/SuratPesanan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -389,7 +390,7 @@ function App() {
             component={DashboradPegawai}
             path="/pegawai/dashboard"
             exact
-            roleRoute={[9]}
+            roleRoute={[9, 5]}
           />
           <ProtectedRoute
             component={NaikGolongan}
@@ -407,7 +408,7 @@ function App() {
             component={RekapAdminAset}
             path="/admin-aset/rekap-persediaan/:id"
             exact
-            roleRoute={[5]}
+            roleRoute={[5, 10]}
           />
           <ProtectedRoute
             component={DaftarPersediaan}
@@ -415,6 +416,13 @@ function App() {
             exact
             roleRoute={[5]}
           />
+          <ProtectedRoute
+            component={SuratPesanan}
+            path="/aset/surat-pesanan"
+            exact
+            roleRoute={[5, 10]}
+          />
+
           <ProtectedRoute
             component={PersediaanMasuk}
             path="/aset/persediaan-masuk"

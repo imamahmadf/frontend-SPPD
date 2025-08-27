@@ -27,15 +27,32 @@ import {
   Textarea,
   Input,
   Spacer,
+  useToast,
+  FormControl,
+  FormLabel,
+  Select,
 } from "@chakra-ui/react";
+import Loading from "../../Componets/Loading";
+import { useSelector } from "react-redux";
+import {
+  selectIsAuthenticated,
+  userRedux,
+  selectRole,
+} from "../../Redux/Reducers/auth";
 
 function RampungAdmin(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
   const [selectedImage, setSelectedImage] = useState("");
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
   const [isModalBatalOpen, setIsModalBatalOpen] = useState(false);
   const [alasanBatal, setAlasanBatal] = useState("");
+  const [dataTemplate, setDataTemplate] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const user = useSelector(userRedux);
+  const [templateId, setTemplateId] = useState(null);
 
   const daftarTempat = detailPerjalanan.tempats?.map(
     (tempat, index) =>
@@ -124,11 +141,123 @@ function RampungAdmin(props) {
       )
       .then((res) => {
         setDetailPerjalanan(res.data.result);
+        setDataTemplate(res.data.template);
+        // Set templateId setelah data tersedia
+        if (res.data.result?.template?.[0]?.id) {
+          setTemplateId(res.data.result.template[0].id);
+        } else if (res.data.template?.[0]?.id) {
+          setTemplateId(res.data.template[0].id);
+        }
         console.log(res.data.result);
       })
       .catch((err) => {
         console.error(err);
       });
+  }
+  const totalDurasi =
+    detailPerjalanan?.tempats?.reduce(
+      (total, tempat) => total + (tempat?.dalamKota?.durasi || 0), // Asumsi durasi ada di dalamKota
+      0 // nilai awal
+    ) || 0;
+  const cetak = (val) => {
+    // Validasi templateId sebelum mencetak
+    if (!templateId) {
+      toast({
+        title: "Error!",
+        description:
+          "Template belum dipilih. Silakan pilih template terlebih dahulu.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsPrinting(true);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi/post/cetak-kwitansi`,
+        {
+          indukUnitKerja:
+            user[0]?.unitKerja_profile?.indukUnitKerja?.indukUnitKerja,
+          nomorSPD: val?.nomorSPD,
+          nomorST: detailPerjalanan?.noSuratTugas,
+          pegawaiNama: val?.pegawai?.nama,
+          pegawaiNip: val?.pegawai?.nip,
+          pegawaiJabatan: val?.pegawai?.jabatan,
+          untuk: detailPerjalanan?.untuk,
+          PPTKNama: detailPerjalanan?.PPTK?.pegawai_PPTK?.nama,
+          PPTKNip: detailPerjalanan?.PPTK?.pegawai_PPTK?.nip,
+          KPANama: detailPerjalanan?.KPA?.pegawai_KPA?.nama,
+          KPANip: detailPerjalanan?.KPA?.pegawai_KPA?.nip,
+          KPAJabatan: detailPerjalanan?.KPA?.jabatan,
+          templateId,
+          subKegiatan: detailPerjalanan?.daftarSubKegiatan?.subKegiatan,
+          kodeRekening: `${
+            detailPerjalanan?.daftarSubKegiatan?.kodeRekening || ""
+          }${detailPerjalanan?.jenisPerjalanan?.kodeRekening || ""}`,
+          rincianBPD: val?.rincianBPDs,
+          tanggalPengajuan: detailPerjalanan?.tanggalPengajuan,
+          totalDurasi,
+          jenis: detailPerjalanan?.jenisId,
+          tempat: detailPerjalanan?.tempats,
+          jenisPerjalanan: detailPerjalanan?.jenisPerjalanan?.jenis,
+          dataBendahara: detailPerjalanan?.bendahara,
+          tahun: detailPerjalanan?.tanggalPengajuan
+            ? new Date(detailPerjalanan.tanggalPengajuan).getFullYear()
+            : new Date().getFullYear(),
+          // untukPembayaran:
+          //   dataRampung.result.perjalanan.bendahara.sumberDana.untukPembayaran,
+        },
+        {
+          responseType: "blob",
+        }
+      )
+      .then((res) => {
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute(
+          "download",
+          `kuitansi_${val?.pegawai?.nama}${props.match.params.id}.docx`
+        );
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        toast({
+          title: "Berhasil!",
+          description: "File berhasil diunduh.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({
+          title: "Error!",
+          description: "Gagal mengunduh file.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsPrinting(false);
+      });
+  };
+
+  function renderTemplate() {
+    return dataTemplate?.map((val) => {
+      return (
+        <option key={val.id} value={val.id}>
+          {val.nama}
+        </option>
+      );
+    });
   }
 
   useEffect(() => {
@@ -137,8 +266,10 @@ function RampungAdmin(props) {
 
   return (
     <Layout>
+      {isPrinting && <Loading />}
       <Box pb={"40px"} px={"30px"}>
         <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
+          {JSON.stringify(detailPerjalanan)}
           <Flex gap={"30px"} mb={"30px"}>
             <Box>
               <Image
@@ -209,7 +340,7 @@ function RampungAdmin(props) {
                 })}
               </Text>
               <Text>
-                Sumber Dana: {detailPerjalanan.bendahara?.sumberDana?.sumber}
+                Sumber Dana: {detailPerjalanan?.bendahara?.sumberDana?.sumber}
               </Text>
               <Text>Tujuan: {daftarTempat}</Text>
               <Text>
@@ -232,7 +363,22 @@ function RampungAdmin(props) {
             Personil: {JSON.stringify(detailPerjalanan.personils[0].status)}
           </Text> */}
             </Box>
-          </Flex>
+          </Flex>{" "}
+          <FormControl>
+            <FormLabel fontSize={"24px"}>Template</FormLabel>
+            <Select
+              height={"60px"}
+              bgColor={"terang"}
+              borderRadius={"8px"}
+              borderColor={"rgba(229, 231, 235, 1)"}
+              value={templateId || ""}
+              onChange={(e) => {
+                setTemplateId(e.target.value);
+              }}
+            >
+              {renderTemplate()}
+            </Select>
+          </FormControl>
           {detailPerjalanan?.personils?.map((item, index) => (
             <Box
               borderRadius={"5px"}
@@ -371,10 +517,20 @@ function RampungAdmin(props) {
                     batalkan
                   </Button>
                 )}
+
+                <Button
+                  variant={"secondary"}
+                  onClick={() => {
+                    setSelectedItemId(item.id);
+                    setSelectedData(item);
+                    cetak(item);
+                  }}
+                >
+                  Cetak
+                </Button>
               </Flex>
             </Box>
           ))}
-
           {/* {JSON.stringify(detailPerjalanan)} */}
         </Container>
 

@@ -5,7 +5,10 @@ import ReactPaginate from "react-paginate";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
+import { BsCartDash } from "react-icons/bs";
 import Foto from "../../assets/add_photo.png";
+import { BsClipboard2Data } from "react-icons/bs";
+import { BsLock } from "react-icons/bs";
 import {
   Box,
   Text,
@@ -48,7 +51,7 @@ import { useDisclosure } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
-
+import { BsCartPlus } from "react-icons/bs";
 function LaporanPersediaan() {
   const [DataLaporanPersediaan, setDataLaporanPersediaan] = useState([]);
   const history = useHistory();
@@ -248,40 +251,76 @@ function LaporanPersediaan() {
                     </Td>
                     <Td>{item?.status}</Td>
                     <Td>
-                      <Button
-                        onClick={() =>
-                          history.push(`/aset/detail-laporan/${item.id}`)
-                        }
-                        variant={"primary"}
-                      >
-                        Detail
-                      </Button>{" "}
-                      <Button
-                        onClick={() =>
-                          history.push(`/aset/detail-laporan-keluar/${item.id}`)
-                        }
-                        variant={"primary"}
-                      >
-                        Detail
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          history.push(
-                            `/admin-aset/rekap-persediaan/${item.id}`
-                          )
-                        }
-                        variant={"primary"}
-                      >
-                        Detail
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          ubahStatus(item.id, item.status);
-                        }}
-                        variant={"primary"}
-                      >
-                        Status
-                      </Button>
+                      <Flex gap={"5px"}>
+                        <Button
+                          onClick={() =>
+                            history.push(`/aset/detail-laporan/${item.id}`)
+                          }
+                          fontSize={"16px"}
+                          color={"white"}
+                          bgColor={"aset"}
+                          _hover={{
+                            bg: "rgb(10, 108, 189)",
+                            borderColor: "white",
+                            transform: "translateY(-2px)",
+                            boxShadow: "md",
+                          }}
+                        >
+                          <BsCartPlus />
+                        </Button>{" "}
+                        <Button
+                          onClick={() =>
+                            history.push(
+                              `/aset/detail-laporan-keluar/${item.id}`
+                            )
+                          }
+                          fontSize={"16px"}
+                          color={"white"}
+                          bgColor={"primary"}
+                          _hover={{
+                            bg: "primaryGelap",
+                            borderColor: "white",
+                            transform: "translateY(-2px)",
+                            boxShadow: "md",
+                          }}
+                        >
+                          <BsCartDash />
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            history.push(
+                              `/admin-aset/rekap-persediaan/${item.id}`
+                            )
+                          }
+                          fontSize={"16px"}
+                          color={"white"}
+                          bgColor={"ungu"}
+                          _hover={{
+                            bg: "ungu",
+                            borderColor: "white",
+                            transform: "translateY(-2px)",
+                            boxShadow: "md",
+                          }}
+                        >
+                          <BsClipboard2Data />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            ubahStatus(item.id, item.status);
+                          }}
+                          fontSize={"16px"}
+                          color={"white"}
+                          bgColor={"ungu"}
+                          _hover={{
+                            bg: "ungu",
+                            borderColor: "white",
+                            transform: "translateY(-2px)",
+                            boxShadow: "md",
+                          }}
+                        >
+                          <BsLock />
+                        </Button>
+                      </Flex>
                     </Td>
                   </Tr>
                 ))}

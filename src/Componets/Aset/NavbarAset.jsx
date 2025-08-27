@@ -64,6 +64,7 @@ const menuData = [
     items: [
       { label: "Daftar Persediaan", path: "/aset/daftar-persediaan" },
       { label: "Laporan Persediaan", path: "/aset/laporan-persediaan" },
+      { label: "Surat Pesanan", path: "/aset/surat-pesanan" },
     ],
   },
 
