@@ -6,6 +6,7 @@ import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
 import { BsXCircle } from "react-icons/bs";
 import { BsPlusCircle } from "react-icons/bs";
+import { BsTrash } from "react-icons/bs";
 import { useDisclosure } from "@chakra-ui/react";
 import {
   Box,
@@ -47,7 +48,7 @@ function DaftarUserAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUserRoles, setSelectedUserRoles] = useState([]); // Tambahkan state baru untuk menyimpan role pengguna yang dipilih
   const [availableRoles, setAvailableRoles] = useState([]);
-
+  const [namaPengguna, setNamaPengguna] = useState("");
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(50);
   const [pages, setPages] = useState(0);
@@ -66,6 +67,14 @@ function DaftarUserAdmin() {
     onOpen: onAddOpen,
     onClose: onAddClose,
   } = useDisclosure();
+
+  const {
+    isOpen: isDeleteUserOpen,
+    onOpen: onDeleteUserOpen,
+    onClose: onDeleteUserClose,
+  } = useDisclosure();
+
+  const [userToDelete, setUserToDelete] = useState(null);
   const deleteRole = async () => {
     await axios
       .post(
@@ -84,7 +93,13 @@ function DaftarUserAdmin() {
         console.error(err);
       });
   };
+  function inputHandler(event, field) {
+    const tes = setTimeout(() => {
+      const { value } = event.target;
 
+      setNamaPengguna(value);
+    }, 2000);
+  }
   const deleteUser = async (val) => {
     await axios
       .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/delete/${val}`)
@@ -135,7 +150,7 @@ function DaftarUserAdmin() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/user/get/user?page=${page}&limit=${limit}`
+        }/user/get/user?page=${page}&limit=${limit}&namaPengguna=${namaPengguna}`
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -153,7 +168,7 @@ function DaftarUserAdmin() {
   useEffect(() => {
     fetchDataUser();
     fetchRole();
-  }, [page]);
+  }, [page, namaPengguna]);
   return (
     <Layout>
       {isLoading ? (
@@ -161,6 +176,15 @@ function DaftarUserAdmin() {
       ) : (
         <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Container maxW={"1280px"} variant={"primary"} p={"30px"}>
+            <FormControl mb={"30px"}>
+              <FormLabel fontSize={"24px"}>Nama Pengguna</FormLabel>
+              <Input
+                height={"60px"}
+                bgColor={"terang"}
+                onChange={inputHandler}
+                placeholder="Contoh : sifulan"
+              />
+            </FormControl>{" "}
             <Table variant={"primary"}>
               <Thead>
                 <Tr>
@@ -231,7 +255,8 @@ function DaftarUserAdmin() {
                         </Center>{" "}
                         <Center
                           onClick={() => {
-                            deleteUser(user?.id);
+                            setUserToDelete(user);
+                            onDeleteUserOpen();
                           }}
                           borderRadius={"5px"}
                           as="button"
@@ -245,7 +270,7 @@ function DaftarUserAdmin() {
                           }}
                           bg="danger"
                         >
-                          Hapus
+                          <BsTrash />
                         </Center>
                       </Flex>
                     </Td>
@@ -339,6 +364,42 @@ function DaftarUserAdmin() {
               Simpan
             </Button>
             <Button variant="ghost" onClick={onDeleteClose}>
+              Batal
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Konfirmasi Hapus User */}
+      <Modal isOpen={isDeleteUserOpen} onClose={onDeleteUserClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Konfirmasi Hapus User</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>
+              Apakah Anda yakin ingin menghapus user{" "}
+              <strong>{userToDelete?.nama}</strong> (
+              {userToDelete?.namaPengguna})?
+            </Text>
+            <Text mt={2} color="red.500" fontSize="sm">
+              Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data
+              user terkait.
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme="red"
+              mr={3}
+              onClick={() => {
+                deleteUser(userToDelete?.id);
+                onDeleteUserClose();
+                setUserToDelete(null);
+              }}
+            >
+              Hapus
+            </Button>
+            <Button variant="ghost" onClick={onDeleteUserClose}>
               Batal
             </Button>
           </ModalFooter>

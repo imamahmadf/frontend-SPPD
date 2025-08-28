@@ -51,6 +51,18 @@ import {
   Spacer,
   VStack,
   FormErrorMessage,
+  Grid,
+  GridItem,
+  Card,
+  CardBody,
+  CardHeader,
+  Badge,
+  Divider,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  Icon,
 } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
@@ -508,625 +520,954 @@ function Rampung(props) {
     }, {}) || {};
   const grandTotal = Object.values(groupedData)
     .flat()
-    .reduce((sum, item) => sum + item.nilai, 0);
+    .reduce((sum, item) => {
+      // Validasi data sebelum perhitungan
+      const nilai = Number(item.nilai) || 0;
+      const qty = Number(item.qty) || 0;
+
+      // Debug khusus untuk jenis "Rill"
+      if (item.jenisRincianBPD?.jenis === "Rill") {
+        console.log(`=== RILL ITEM DEBUG ===`);
+        console.log(`Item: ${item.item}`);
+        console.log(`Jenis: ${item.jenisRincianBPD?.jenis}`);
+        console.log(`Nilai: ${item.nilai}`);
+        console.log(`Qty: ${item.qty}`);
+        console.log(`Tipe Data Nilai:`, typeof item.nilai);
+        console.log(`Tipe Data Qty:`, typeof item.qty);
+        console.log(`Is Nilai NaN:`, isNaN(item.nilai));
+        console.log(`Is Qty NaN:`, isNaN(item.qty));
+        console.log(`Raw Nilai:`, item.nilai);
+        console.log(`Raw Qty:`, item.qty);
+        console.log(
+          `PERHATIAN: Untuk jenis Rill, TIDAK ada rillTotal tambahan!`
+        );
+        console.log(
+          `Total Rill = nilai × qty = ${nilai} × ${qty} = ${nilai * qty}`
+        );
+        console.log(`========================`);
+      }
+
+      // Hitung total untuk item utama (nilai * qty)
+      const itemTotal = nilai * qty;
+
+      // Hitung total untuk rills jika ada (hanya untuk jenis non-Rill)
+      let rillTotal = 0;
+      if (item.jenisRincianBPD?.jenis !== "Rill") {
+        rillTotal =
+          item.rills?.reduce(
+            (rillSum, rill) => rillSum + (Number(rill.nilai) || 0),
+            0
+          ) || 0;
+      }
+
+      // Debug: log perhitungan untuk setiap item dengan detail lebih lengkap
+      console.log(`=== DETAIL ITEM ===`);
+      console.log(`Item: ${item.item}`);
+      console.log(`Jenis: ${item.jenisRincianBPD?.jenis}`);
+      console.log(`Raw Nilai: ${item.nilai} (${typeof item.nilai})`);
+      console.log(`Raw Qty: ${item.qty} (${typeof item.qty})`);
+      console.log(`Validated Nilai: ${nilai}`);
+      console.log(`Validated Qty: ${qty}`);
+      console.log(`ItemTotal (nilai × qty): ${itemTotal}`);
+      console.log(`Rills:`, item.rills);
+      console.log(`RillTotal: ${rillTotal}`);
+      console.log(`Total Per Item: ${itemTotal + rillTotal}`);
+      console.log(`====================`);
+
+      // Return total item + total rills (untuk non-Rill)
+      return sum + itemTotal + rillTotal;
+    }, 0);
+
+  // Debug: log total keseluruhan dan detail groupedData
+  console.log("=== RAW DATA ===");
+  console.log("Data Rampung Result:", dataRampung?.result);
+  console.log("Rincian BPDs:", dataRampung?.result?.rincianBPDs);
+  console.log("=================");
+
+  console.log("=== GROUPED DATA ===");
+  console.log("Grouped Data:", groupedData);
+  console.log("===================");
+
+  console.log("=== PERHITUNGAN ===");
+  console.log("Grand Total:", grandTotal);
+  console.log("===================");
+
+  const getStatusColor = (statusId) => {
+    switch (statusId) {
+      case 1:
+        return "gray";
+      case 2:
+        return "blue";
+      case 3:
+        return "purple";
+      case 4:
+        return "orange";
+      case 5:
+        return "green";
+      default:
+        return "gray";
+    }
+  };
+
+  const getStatusText = (statusId) => {
+    switch (statusId) {
+      case 1:
+        return "Pending";
+      case 2:
+        return "Menunggu Verifikasi";
+      case 3:
+        return "Diverifikasi";
+      case 4:
+        return "Diproses";
+      case 5:
+        return "Selesai";
+      default:
+        return "Unknown";
+    }
+  };
 
   return (
     <Layout>
       {isPrinting && <Loading />}
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container variant={"primary"} maxW={"1280px"} pt={"30px"} ps={"0px"}>
-          <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Data Rampung</Heading>
-            <Spacer />
+      <Box bg="gray.50" minH="100vh" py={8}>
+        <Container maxW="1400px" px={4}>
+          {/* Header Section */}
+          <Box mb={8}>
+            <Flex justify="space-between" align="center" mb={4}>
+              <HStack>
+                <Box
+                  bgColor="primary"
+                  width="30px"
+                  height="30px"
+                  borderRadius="md"
+                ></Box>
+                <Heading color="primary" size="lg">
+                  Data Rampung
+                </Heading>
+              </HStack>
+              <Badge
+                colorScheme={getStatusColor(dataRampung?.result?.status?.id)}
+                size="lg"
+                px={4}
+                py={2}
+                borderRadius="full"
+                fontSize="md"
+              >
+                {dataRampung?.result?.status?.statusKuitansi ||
+                  "Unknown Status"}
+              </Badge>
+            </Flex>
+          </Box>
 
-            <Center
-              height={"50px"}
-              borderRadius={"3px"}
-              p={"5px"}
-              w={"160px"}
-              bgColor={
-                dataRampung?.result?.status?.id === 1
-                  ? "grey"
-                  : dataRampung?.result?.status?.id === 2
-                  ? "primary"
-                  : dataRampung?.result?.status?.id === 3
-                  ? "ungu"
-                  : dataRampung?.result?.status?.id === 4
-                  ? "oren"
-                  : dataRampung?.result?.status?.id === 5
-              }
-            >
-              <Text> {dataRampung?.result?.status?.statusKuitansi}</Text>
-            </Center>
-          </HStack>
+          {/* Main Content Grid */}
+          <Grid
+            templateColumns={{ base: "1fr", lg: "1fr 400px" }}
+            gap={8}
+            mb={8}
+          >
+            {/* Left Column - Bukti Kegiatan & Undangan */}
+            <GridItem>
+              <VStack spacing={6} align="stretch">
+                {/* Bukti Kegiatan Card */}
+                <Card shadow="lg" borderRadius="xl" overflow="hidden">
+                  <CardHeader bg="ungu" color="white" py={6}>
+                    <Heading size="md">Bukti Kegiatan</Heading>
+                  </CardHeader>
+                  <CardBody p={0}>
+                    <TambahBuktiKegiatan
+                      pic={dataRampung?.result?.perjalanan?.pic}
+                      id={dataRampung?.result?.perjalanan?.id}
+                      status={dataRampung?.result?.status?.id}
+                      randomNumber={setRandomNumber}
+                    />
+                  </CardBody>
+                </Card>
 
-          <Box p={"30px"}>
-            <Flex gap={"30px"}>
-              <Box minW={"40%"}>
-                <TambahBuktiKegiatan
-                  pic={dataRampung?.result?.perjalanan?.pic}
-                  id={dataRampung?.result?.perjalanan?.id}
-                  status={dataRampung?.result?.status?.id}
-                  randomNumber={setRandomNumber}
-                />
+                {/* Undangan Card */}
                 {dataRampung?.result?.perjalanan?.undangan ? (
-                  <Button
-                    gap={"10px"}
-                    mt={"30px"}
-                    px={"15px"}
-                    variant={"primary"}
-                    onClick={() =>
-                      handleDownload(dataRampung?.result?.perjalanan?.undangan)
-                    }
-                  >
-                    <BsFileEarmark /> Undangan
-                  </Button>
+                  <Card shadow="md" borderRadius="lg">
+                    <CardHeader bg="green.50" py={4}>
+                      <Heading size="sm" color="green.700">
+                        File Undangan
+                      </Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <Button
+                        gap="10px"
+                        w="100%"
+                        variant="primary"
+                        onClick={() =>
+                          handleDownload(
+                            dataRampung?.result?.perjalanan?.undangan
+                          )
+                        }
+                        leftIcon={<Icon as={BsFileEarmark} />}
+                      >
+                        Download Undangan
+                      </Button>
+                    </CardBody>
+                  </Card>
                 ) : (
-                  <Box
-                    mx="auto"
-                    p={5}
-                    borderWidth="1px"
-                    borderRadius="lg"
-                    boxShadow="lg"
-                    mt={"20px"}
-                  >
-                    <Formik
-                      initialValues={{ file: null, jenis: null }}
-                      validationSchema={validationSchema}
-                      onSubmit={async (
-                        values,
-                        { setSubmitting, resetForm }
-                      ) => {
-                        console.log("Nilai yang dikirim:", values.jenis);
-                        const formData = new FormData();
-                        formData.append("file", values.file);
-                        formData.append("id", dataRampung.result.perjalanan.id);
-
-                        try {
-                          const response = await axios.post(
-                            `${
-                              import.meta.env.VITE_REACT_APP_API_BASE_URL
-                            }/template/upload-undangan`,
-                            formData,
-                            {
-                              headers: {
-                                "Content-Type": "multipart/form-data",
-                              },
-                            }
+                  <Card shadow="md" borderRadius="lg">
+                    <CardHeader bg="orange.50" py={4}>
+                      <Heading size="sm" color="orange.700">
+                        Upload Undangan
+                      </Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <Formik
+                        initialValues={{ file: null, jenis: null }}
+                        validationSchema={validationSchema}
+                        onSubmit={async (
+                          values,
+                          { setSubmitting, resetForm }
+                        ) => {
+                          console.log("Nilai yang dikirim:", values.jenis);
+                          const formData = new FormData();
+                          formData.append("file", values.file);
+                          formData.append(
+                            "id",
+                            dataRampung.result.perjalanan.id
                           );
 
-                          toast({
-                            title: "Sukses!",
-                            description: response.data.message,
-                            status: "success",
-                            duration: 3000,
-                            isClosable: true,
-                          });
+                          try {
+                            const response = await axios.post(
+                              `${
+                                import.meta.env.VITE_REACT_APP_API_BASE_URL
+                              }/template/upload-undangan`,
+                              formData,
+                              {
+                                headers: {
+                                  "Content-Type": "multipart/form-data",
+                                },
+                              }
+                            );
 
-                          resetForm();
-                          setSelectedFile(null);
-                          fetchTemplate();
-                        } catch (error) {
-                          toast({
-                            title: "Gagal Mengunggah",
-                            description:
-                              "Terjadi kesalahan saat mengunggah file",
-                            status: "error",
-                            duration: 3000,
-                            isClosable: true,
-                          });
-                        }
+                            toast({
+                              title: "Sukses!",
+                              description: response.data.message,
+                              status: "success",
+                              duration: 3000,
+                              isClosable: true,
+                            });
 
-                        setSubmitting(false);
-                      }}
-                    >
-                      {({ setFieldValue, isSubmitting, errors, touched }) => (
-                        <Form>
-                          <VStack spacing={4} align="stretch">
-                            <FormControl
-                              isInvalid={errors.file && touched.file}
-                            >
-                              <Input
-                                type="file"
-                                accept=".pdf"
-                                onChange={(event) => {
-                                  setFieldValue(
-                                    "file",
-                                    event.currentTarget.files[0]
-                                  );
-                                  setSelectedFile(event.currentTarget.files[0]);
-                                }}
-                                p={1}
-                              />
-                              <FormErrorMessage>{errors.file}</FormErrorMessage>
-                            </FormControl>
+                            resetForm();
+                            setSelectedFile(null);
+                            fetchTemplate();
+                          } catch (error) {
+                            toast({
+                              title: "Gagal Mengunggah",
+                              description:
+                                "Terjadi kesalahan saat mengunggah file",
+                              status: "error",
+                              duration: 3000,
+                              isClosable: true,
+                            });
+                          }
 
-                            {selectedFile && (
-                              <Text fontSize="sm" color="gray.600">
-                                File: {selectedFile.name}
-                              </Text>
-                            )}
-
-                            <Button
-                              type="submit"
-                              variant={"primary"}
-                              isLoading={isSubmitting}
-                              isDisabled={!selectedFile}
-                            >
-                              Upload
-                            </Button>
-                          </VStack>
-                        </Form>
-                      )}
-                    </Formik>
-                  </Box>
-                )}
-              </Box>
-              <Box>
-                <Text fontWeight={"600"} fontSize={"18px"}>
-                  Nama: {dataRampung?.result?.pegawai?.nama}
-                </Text>
-                <Text fontWeight={"600"} fontSize={"18px"}>
-                  Asal: {dataRampung?.result?.perjalanan?.asal}
-                </Text>
-                <Text fontWeight={"600"} fontSize={"18px"}>
-                  Tujuan: {daftarTempat}
-                </Text>
-                <Text>
-                  Nomor ST:{" "}
-                  {dataRampung?.result?.perjalanan.noSuratTugas || "-"}
-                </Text>
-                <Text>Nomor SPD: {dataRampung?.result?.nomorSPD || "-"}</Text>
-                <Text>
-                  PPTK: {dataRampung?.result?.perjalanan.PPTK.pegawai_PPTK.nama}
-                </Text>
-                <Text>
-                  PA: {dataRampung?.result?.perjalanan.KPA.pegawai_KPA.nama}
-                </Text>
-                <Text>
-                  Bendahara:
-                  {
-                    dataRampung?.result?.perjalanan.bendahara.pegawai_bendahara
-                      .nama
-                  }
-                </Text>
-                <Text>
-                  {`Untuk Pembayaran: Belanja ${dataRampung?.result?.perjalanan.jenisPerjalanan?.jenis} dalam rangka untuk ${dataRampung?.result?.perjalanan.untuk} ke ${daftarTempat}, sub kegiatan ${dataRampung?.result?.perjalanan.daftarSubKegiatan?.subKegiatan} ${dataRampung?.result?.perjalanan.bendahara?.sumberDana?.kalimat1}, tahun anggaran`}
-                </Text>
-                <Text>
-                  Catatan: {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
-                </Text>
-                {dataRampung?.result?.statusId === 3 ? (
-                  <FormControl>
-                    <FormLabel fontSize={"24px"}>Template</FormLabel>
-                    <Select
-                      height={"60px"}
-                      bgColor={"terang"}
-                      borderRadius={"8px"}
-                      borderColor={"rgba(229, 231, 235, 1)"}
-                      defaultValue={dataRampung?.template?.[0]?.id}
-                      onChange={(e) => {
-                        setTemplateId(e.target.value);
-                      }}
-                    >
-                      {renderTemplate()}
-                    </Select>
-                  </FormControl>
-                ) : null}
-              </Box>
-            </Flex>
-            {dataRampung?.result?.statusId === 3 ? null : (
-              <>
-                {/* <FormControl>
-                  <FormLabel>Bendahara</FormLabel>
-                  <Select
-                    mt="10px"
-                    border="1px"
-                    borderRadius={"8px"}
-                    borderColor={"rgba(229, 231, 235, 1)"}
-                    value={bendaharaSelected}
-                    onChange={(e) => {
-                      setBendaharaSelected(parseInt(e.target.value));
-                    }}
-                  >
-                    {renderBendahara()}
-                  </Select>
-                  {formik.errors.jenis ? (
-                    <Alert status="error" color="red" text="center">
-                      <i className="fa-solid fa-circle-exclamation"></i>
-                      <Text ms="10px">{formik.errors.jenis}</Text>
-                    </Alert>
-                  ) : null}
-                </FormControl> */}
-              </>
-            )}
-            {dataRampung?.result?.statusId === 3 ||
-            dataRampung?.result?.statusId === 2 ? null : (
-              <Box></Box>
-            )}{" "}
-          </Box>
-        </Container>
-        {/* <Container
-          border={"1px"}
-          borderRadius={"6px"}
-          borderColor={"rgba(229, 231, 235, 1)"}
-          maxW={"1280px"}
-          bgColor={"white"}
-          pt={"30px"}
-          ps={"0px"}
-        >
-          <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Input Rincian Biaya Perjalanan</Heading>
-          </HStack>
-        </Container> */}
-        <Container
-          maxW={"1280px"}
-          variant={"primary"}
-          pt={"30px"}
-          ps={"0px"}
-          mt={"30px"}
-        >
-          <HStack>
-            <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"primary"}>Detail Rampung</Heading>
-            <Spacer />
-            <Flex mt={"30px"} gap={5}>
-              <Rill
-                data={dataRampung?.daftarRill}
-                personilId={dataRampung?.result?.id}
-                randomNumber={setRandomNumber}
-                status={dataRampung?.result?.statusId}
-              />
-              {dataRampung?.result?.statusId === 3 ? (
-                <Button variant={"primary"} onClick={cetak}>
-                  CETAK
-                </Button>
-              ) : null}
-              {dataRampung?.result?.statusId === 3 ||
-              dataRampung?.result?.statusId === 2 ? null : (
-                <Button onClick={onInputOpen} variant={"primary"}>
-                  Tambah +
-                </Button>
-              )}{" "}
-              {dataRampung?.result?.perjalanan?.jenisPerjalanan
-                .tipePerjalananId === 1 &&
-              dataRampung?.result?.rincianBPDs.length == 0 ? (
-                <Button variant={"primary"} onClick={buatOtomatis}>
-                  buat otomatis
-                </Button>
-              ) : null}
-            </Flex>
-          </HStack>
-          <Box py={"30px"} ps={"30px"} style={{ overflowX: "auto" }}>
-            {Object.keys(groupedData).length > 0 ? (
-              Object.keys(groupedData).map((jenis) => (
-                <Box key={jenis} mt={4}>
-                  <Text fontWeight="bold" fontSize="lg">
-                    {jenis}
-                  </Text>
-                  <Table variant="primary" mt={2}>
-                    <Thead>
-                      <Tr>
-                        <Th>item</Th>
-                        <Th>Nilai</Th>
-                        <Th>Qty</Th>
-                        <Th>Satuan</Th> <Th>Bukti</Th>
-                        {dataRampung?.result?.statusId === 3 ||
-                        dataRampung?.result?.statusId === 2 ? null : (
-                          <Th>Aksi</Th>
-                        )}
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {groupedData[jenis].map((item) => (
-                        <Tr key={item.id}>
-                          <Td>
-                            {editMode === item.id ? (
-                              <Input
-                                value={editedData.item}
-                                onChange={(e) => handleChange(e, "item")}
-                              />
-                            ) : (
-                              item.item
-                            )}
-                          </Td>
-                          <Td>
-                            {editMode === item.id ? (
-                              <Input
-                                type="number"
-                                value={editedData.nilai}
-                                onChange={(e) => handleChange(e, "nilai")}
-                              />
-                            ) : (
-                              new Intl.NumberFormat("id-ID", {
-                                style: "currency",
-                                currency: "IDR",
-                              }).format(item.nilai)
-                            )}
-                          </Td>
-                          <Td>
-                            {editMode === item.id ? (
-                              <Input
-                                type="number"
-                                value={editedData.qty}
-                                onChange={(e) => handleChange(e, "qty")}
-                              />
-                            ) : (
-                              item.qty
-                            )}
-                          </Td>
-                          <Td>
-                            {editMode === item.id ? (
-                              <Input
-                                value={editedData.satuan}
-                                onChange={(e) => handleChange(e, "satuan")}
-                              />
-                            ) : (
-                              item.satuan
-                            )}
-                          </Td>{" "}
-                          <Td>
-                            {editMode === item.id ? (
-                              <Box>
-                                <Image
-                                  borderRadius={"5px"}
-                                  alt="foto obat"
-                                  width="120px"
-                                  height="80px"
-                                  overflow="hiden"
-                                  objectFit="cover"
-                                  src={
-                                    item.bukti
-                                      ? import.meta.env
-                                          .VITE_REACT_APP_API_BASE_URL +
-                                        item.bukti
-                                      : Foto
-                                  }
+                          setSubmitting(false);
+                        }}
+                      >
+                        {({ setFieldValue, isSubmitting, errors, touched }) => (
+                          <Form>
+                            <VStack spacing={4} align="stretch">
+                              <FormControl
+                                isInvalid={errors.file && touched.file}
+                              >
+                                <Input
+                                  type="file"
+                                  accept=".pdf"
+                                  onChange={(event) => {
+                                    setFieldValue(
+                                      "file",
+                                      event.currentTarget.files[0]
+                                    );
+                                    setSelectedFile(
+                                      event.currentTarget.files[0]
+                                    );
+                                  }}
+                                  p={1}
                                 />
-                              </Box>
-                            ) : (
-                              <Box>
-                                <Image
-                                  borderRadius={"5px"}
-                                  alt="foto obat"
-                                  width="120px"
-                                  height="80px"
-                                  overflow="hiden"
-                                  objectFit="cover"
-                                  src={
-                                    item.bukti
-                                      ? import.meta.env
-                                          .VITE_REACT_APP_API_BASE_URL +
-                                        item.bukti
-                                      : Foto
-                                  }
-                                />
-                              </Box>
-                            )}
-                          </Td>
-                          {dataRampung?.result?.statusId === 3 ||
-                          dataRampung?.result?.statusId === 2 ? null : (
-                            <Td>
-                              {editMode === item.id ? (
-                                <HStack>
-                                  <Button
-                                    variant="primary"
-                                    onClick={() => handleSave(item.id)}
-                                  >
-                                    Save
-                                  </Button>
-                                  <Button
-                                    colorScheme="gray"
-                                    onClick={() => setEditMode(null)}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </HStack>
-                              ) : (
-                                <HStack>
-                                  {jenis === "Rill" ? null : (
-                                    <>
-                                      {" "}
-                                      <Button
-                                        colorScheme="blue"
-                                        onClick={() => handleEdit(item)}
-                                      >
-                                        Edit
-                                      </Button>
-                                      <Button
-                                        colorScheme="red"
-                                        onClick={() => {
-                                          setItemToDelete(item);
-                                          onDeleteOpen();
-                                        }}
-                                      >
-                                        Delete
-                                      </Button>
-                                    </>
-                                  )}
-                                </HStack>
+                                <FormErrorMessage>
+                                  {errors.file}
+                                </FormErrorMessage>
+                              </FormControl>
+
+                              {selectedFile && (
+                                <Text fontSize="sm" color="gray.600">
+                                  File: {selectedFile.name}
+                                </Text>
                               )}
-                            </Td>
-                          )}
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </Box>
-              ))
-            ) : (
-              <Text>Tidak ada data untuk ditampilkan.</Text>
-            )}
-          </Box>
 
-          <Flex>
-            <Box>
-              {dataRampung?.result?.statusId === 1 ||
-              dataRampung?.result?.statusId == 4 ? (
-                <Button
-                  ms={"30px"}
-                  mb={"30px"}
-                  variant={"primary"}
-                  onClick={() => {
-                    pengajuan();
-                  }}
-                >
-                  Ajukan
-                </Button>
-              ) : null}
-            </Box>
-            <Spacer />
-            <Box mt={"15px"}>
-              <Text fontSize="lg" fontWeight={800} color="primary">
-                TOTAL:{" "}
-                {new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                }).format(grandTotal)}
-              </Text>
-            </Box>
-          </Flex>
+                              <Button
+                                type="submit"
+                                variant="primary"
+                                isLoading={isSubmitting}
+                                isDisabled={!selectedFile}
+                                w="100%"
+                              >
+                                Upload
+                              </Button>
+                            </VStack>
+                          </Form>
+                        )}
+                      </Formik>
+                    </CardBody>
+                  </Card>
+                )}
+              </VStack>
+            </GridItem>
+
+            {/* Right Column - Information */}
+            <GridItem>
+              <VStack spacing={6} align="stretch">
+                {/* Basic Info Card */}
+                <Card shadow="md" borderRadius="lg">
+                  <CardHeader bg="gray.50" py={4}>
+                    <Heading size="sm" color="gray.700">
+                      Informasi Dasar
+                    </Heading>
+                  </CardHeader>
+                  <CardBody>
+                    <VStack spacing={4} align="stretch">
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          Nama Pegawai
+                        </Text>
+                        <Text fontSize="md" fontWeight="medium">
+                          {dataRampung?.result?.pegawai?.nama || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          Asal
+                        </Text>
+                        <Text fontSize="md">
+                          {dataRampung?.result?.perjalanan?.asal || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          Tujuan
+                        </Text>
+                        <Text fontSize="md">{daftarTempat || "-"}</Text>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          Nomor ST
+                        </Text>
+                        <Text fontSize="md" fontFamily="mono">
+                          {dataRampung?.result?.perjalanan.noSuratTugas || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          Nomor SPD
+                        </Text>
+                        <Text fontSize="md" fontFamily="mono">
+                          {dataRampung?.result?.nomorSPD || "-"}
+                        </Text>
+                      </Box>
+                    </VStack>
+                  </CardBody>
+                </Card>
+
+                {/* Personnel Info Card */}
+                <Card shadow="md" borderRadius="lg">
+                  <CardHeader bg="purple.50" py={4}>
+                    <Heading size="sm" color="purple.700">
+                      Personil Terkait
+                    </Heading>
+                  </CardHeader>
+                  <CardBody>
+                    <VStack spacing={4} align="stretch">
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          PPTK
+                        </Text>
+                        <Text fontSize="md">
+                          {dataRampung?.result?.perjalanan.PPTK?.pegawai_PPTK
+                            ?.nama || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          PA/KPA
+                        </Text>
+                        <Text fontSize="md">
+                          {dataRampung?.result?.perjalanan.KPA?.pegawai_KPA
+                            ?.nama || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text
+                          fontWeight="semibold"
+                          color="gray.600"
+                          fontSize="sm"
+                        >
+                          Bendahara
+                        </Text>
+                        <Text fontSize="md">
+                          {dataRampung?.result?.perjalanan.bendahara
+                            ?.pegawai_bendahara?.nama || "-"}
+                        </Text>
+                      </Box>
+                    </VStack>
+                  </CardBody>
+                </Card>
+
+                {/* Template Selection */}
+                {dataRampung?.result?.statusId === 3 && (
+                  <Card shadow="md" borderRadius="lg">
+                    <CardHeader bg="orange.50" py={4}>
+                      <Heading size="sm" color="orange.700">
+                        Pilih Template
+                      </Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <FormControl>
+                        <Select
+                          size="lg"
+                          bg="white"
+                          borderRadius="md"
+                          borderColor="gray.300"
+                          defaultValue={dataRampung?.template?.[0]?.id}
+                          onChange={(e) => {
+                            setTemplateId(e.target.value);
+                          }}
+                          _focus={{
+                            borderColor: "blue.500",
+                            boxShadow: "outline",
+                          }}
+                        >
+                          {renderTemplate()}
+                        </Select>
+                      </FormControl>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {/* Catatan */}
+                <Card shadow="md" borderRadius="lg">
+                  <CardHeader bg="teal.50" py={4}>
+                    <Heading size="sm" color="teal.700">
+                      Catatan
+                    </Heading>
+                  </CardHeader>
+                  <CardBody>
+                    <Text fontSize="md">
+                      {dataRampung?.result?.catatan || "Tidak Ada Catatan"}
+                    </Text>
+                  </CardBody>
+                </Card>
+              </VStack>
+            </GridItem>
+          </Grid>
+
+          {/* Detail Rampung Section */}
+          <Card shadow="xl" borderRadius="xl" mb={8}>
+            <CardHeader bg="primary" color="white" py={6}>
+              <Flex justify="space-between" align="center">
+                <HStack>
+                  <Box
+                    bgColor="white"
+                    width="30px"
+                    height="30px"
+                    borderRadius="md"
+                  ></Box>
+                  <Heading size="md" color="white">
+                    Detail Rampung
+                  </Heading>
+                </HStack>
+                <Flex gap={3}>
+                  <Rill
+                    data={dataRampung?.daftarRill}
+                    personilId={dataRampung?.result?.id}
+                    randomNumber={setRandomNumber}
+                    status={dataRampung?.result?.statusId}
+                  />
+                  {dataRampung?.result?.statusId === 3 && (
+                    <Button variant="primary" onClick={cetak} size="lg">
+                      CETAK
+                    </Button>
+                  )}
+                  {dataRampung?.result?.statusId !== 3 &&
+                    dataRampung?.result?.statusId !== 2 && (
+                      <Button onClick={onInputOpen} variant="primary" size="lg">
+                        Tambah +
+                      </Button>
+                    )}
+                  {dataRampung?.result?.perjalanan?.jenisPerjalanan
+                    ?.tipePerjalananId === 1 &&
+                    dataRampung?.result?.rincianBPDs.length === 0 && (
+                      <Button
+                        variant="primary"
+                        onClick={buatOtomatis}
+                        size="lg"
+                      >
+                        Buat Otomatis
+                      </Button>
+                    )}
+                </Flex>
+              </Flex>
+            </CardHeader>
+            <CardBody p={8}>
+              {Object.keys(groupedData).length > 0 ? (
+                <VStack spacing={6} align="stretch">
+                  {Object.keys(groupedData).map((jenis) => (
+                    <Box key={jenis}>
+                      <Heading
+                        size="md"
+                        color="gray.700"
+                        mb={4}
+                        pb={2}
+                        borderBottom="2px solid"
+                        borderColor="gray.200"
+                      >
+                        {jenis}
+                      </Heading>
+                      <Box overflowX="auto">
+                        <Table variant="simple" size="md">
+                          <Thead bg="gray.50">
+                            <Tr>
+                              <Th>Item</Th>
+                              <Th isNumeric>Nilai</Th>
+                              <Th isNumeric>Qty</Th>
+                              <Th>Satuan</Th>
+                              <Th>Bukti</Th>
+                              {dataRampung?.result?.statusId !== 3 &&
+                                dataRampung?.result?.statusId !== 2 && (
+                                  <Th>Aksi</Th>
+                                )}
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            {groupedData[jenis].map((item) => (
+                              <Tr key={item.id} _hover={{ bg: "gray.50" }}>
+                                <Td>
+                                  {editMode === item.id ? (
+                                    <Input
+                                      value={editedData.item}
+                                      onChange={(e) => handleChange(e, "item")}
+                                      size="sm"
+                                    />
+                                  ) : (
+                                    <Text fontWeight="medium">{item.item}</Text>
+                                  )}
+                                </Td>
+                                <Td isNumeric>
+                                  {editMode === item.id ? (
+                                    <Input
+                                      type="number"
+                                      value={editedData.nilai}
+                                      onChange={(e) => handleChange(e, "nilai")}
+                                      size="sm"
+                                    />
+                                  ) : (
+                                    <Text
+                                      fontFamily="mono"
+                                      fontWeight="semibold"
+                                    >
+                                      {new Intl.NumberFormat("id-ID", {
+                                        style: "currency",
+                                        currency: "IDR",
+                                      }).format(item.nilai)}
+                                    </Text>
+                                  )}
+                                </Td>
+                                <Td isNumeric>
+                                  {editMode === item.id ? (
+                                    <Input
+                                      type="number"
+                                      value={editedData.qty}
+                                      onChange={(e) => handleChange(e, "qty")}
+                                      size="sm"
+                                    />
+                                  ) : (
+                                    <Text fontWeight="medium">{item.qty}</Text>
+                                  )}
+                                </Td>
+                                <Td>
+                                  {editMode === item.id ? (
+                                    <Input
+                                      value={editedData.satuan}
+                                      onChange={(e) =>
+                                        handleChange(e, "satuan")
+                                      }
+                                      size="sm"
+                                    />
+                                  ) : (
+                                    <Text>{item.satuan}</Text>
+                                  )}
+                                </Td>
+                                <Td>
+                                  <Image
+                                    borderRadius="md"
+                                    alt="Bukti"
+                                    width="80px"
+                                    height="60px"
+                                    objectFit="cover"
+                                    src={
+                                      item.bukti
+                                        ? import.meta.env
+                                            .VITE_REACT_APP_API_BASE_URL +
+                                          item.bukti
+                                        : Foto
+                                    }
+                                    cursor="pointer"
+                                    _hover={{ opacity: 0.8 }}
+                                    transition="opacity 0.2s"
+                                  />
+                                </Td>
+                                {dataRampung?.result?.statusId !== 3 &&
+                                  dataRampung?.result?.statusId !== 2 && (
+                                    <Td>
+                                      {editMode === item.id ? (
+                                        <HStack spacing={2}>
+                                          <Button
+                                            colorScheme="green"
+                                            size="sm"
+                                            onClick={() => handleSave(item.id)}
+                                          >
+                                            Simpan
+                                          </Button>
+                                          <Button
+                                            colorScheme="gray"
+                                            size="sm"
+                                            onClick={() => setEditMode(null)}
+                                          >
+                                            Batal
+                                          </Button>
+                                        </HStack>
+                                      ) : (
+                                        <HStack spacing={2}>
+                                          {jenis !== "Rill" && (
+                                            <>
+                                              <Button
+                                                colorScheme="blue"
+                                                size="sm"
+                                                onClick={() => handleEdit(item)}
+                                              >
+                                                Edit
+                                              </Button>
+                                              <Button
+                                                colorScheme="red"
+                                                size="sm"
+                                                onClick={() => {
+                                                  setItemToDelete(item);
+                                                  onDeleteOpen();
+                                                }}
+                                              >
+                                                Hapus
+                                              </Button>
+                                            </>
+                                          )}
+                                        </HStack>
+                                      )}
+                                    </Td>
+                                  )}
+                              </Tr>
+                            ))}
+                          </Tbody>
+                        </Table>
+                      </Box>
+                    </Box>
+                  ))}
+                </VStack>
+              ) : (
+                <Box textAlign="center" py={12}>
+                  <Text fontSize="lg" color="gray.500">
+                    Tidak ada data untuk ditampilkan.
+                  </Text>
+                </Box>
+              )}
+            </CardBody>
+          </Card>
+
+          {/* Action & Total Section */}
+          <Card shadow="lg" borderRadius="xl">
+            <CardBody p={6}>
+              <Flex justify="space-between" align="center">
+                <Box>
+                  {dataRampung?.result?.statusId === 1 ||
+                  dataRampung?.result?.statusId === 4 ? (
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={() => {
+                        pengajuan();
+                      }}
+                    >
+                      Ajukan
+                    </Button>
+                  ) : null}
+                </Box>
+                <Box textAlign="right">
+                  <Stat>
+                    <StatLabel fontSize="lg" color="gray.600">
+                      TOTAL KESELURUHAN
+                    </StatLabel>
+                    <StatNumber
+                      fontSize="3xl"
+                      color="primary"
+                      fontWeight="bold"
+                    >
+                      {new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      }).format(grandTotal)}
+                    </StatNumber>
+                    <StatHelpText color="gray.500">
+                      Total biaya perjalanan dinas
+                    </StatHelpText>
+                  </Stat>
+                </Box>
+              </Flex>
+            </CardBody>
+          </Card>
+
+          {/* Breakdown Perhitungan - Development Only */}
+          {process.env.NODE_ENV === "development" && (
+            <Card shadow="md" borderRadius="lg" mt={4}>
+              <CardHeader bg="yellow.50" py={4}>
+                <Heading size="sm" color="yellow.700">
+                  Debug: Breakdown Perhitungan
+                </Heading>
+              </CardHeader>
+              <CardBody>
+                <VStack spacing={3} align="stretch">
+                  {Object.entries(groupedData).map(([jenis, items]) => (
+                    <Box key={jenis}>
+                      <Text fontWeight="semibold" color="gray.700" mb={2}>
+                        {jenis}:
+                      </Text>
+                      {items.map((item, index) => {
+                        const itemTotal = item.nilai * item.qty;
+                        // Untuk jenis Rill, tidak ada rillTotal tambahan
+                        const rillTotal =
+                          item.jenisRincianBPD?.jenis === "Rill"
+                            ? 0
+                            : item.rills?.reduce(
+                                (rillSum, rill) => rillSum + rill.nilai,
+                                0
+                              ) || 0;
+                        const totalPerItem = itemTotal + rillTotal;
+
+                        return (
+                          <Box
+                            key={index}
+                            ml={4}
+                            mb={2}
+                            p={2}
+                            bg="gray.50"
+                            borderRadius="md"
+                          >
+                            <Text fontSize="sm">
+                              {item.item}: {item.nilai.toLocaleString("id-ID")}{" "}
+                              × {item.qty} = {itemTotal.toLocaleString("id-ID")}
+                              {item.jenisRincianBPD?.jenis === "Rill"
+                                ? ` (Jenis Rill - tidak ada rill tambahan)`
+                                : rillTotal > 0
+                                ? ` + Rill: ${rillTotal.toLocaleString(
+                                    "id-ID"
+                                  )}`
+                                : ""}
+                              {` = Total: ${totalPerItem.toLocaleString(
+                                "id-ID"
+                              )}`}
+                            </Text>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  ))}
+                  <Divider />
+                  <Box textAlign="center">
+                    <Text fontWeight="bold" color="primary">
+                      Grand Total: {grandTotal.toLocaleString("id-ID")}
+                    </Text>
+                  </Box>
+                </VStack>
+              </CardBody>
+            </Card>
+          )}
         </Container>
       </Box>
 
+      {/* Delete Modal */}
       <Modal
         closeOnOverlayClick={false}
         isOpen={isDeleteOpen}
         onClose={onDeleteClose}
       >
         <ModalOverlay />
-        <ModalContent borderRadius={0} maxWidth="900px">
-          <ModalHeader>Rill </ModalHeader>
+        <ModalContent borderRadius="lg" maxWidth="500px">
+          <ModalHeader>Konfirmasi Hapus</ModalHeader>
           <ModalCloseButton />
-
           <ModalBody pb={6}>
+            <Text mb={4}>
+              Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak
+              dapat dibatalkan.
+            </Text>
             <Button
               onClick={() => {
                 hapusBPD(itemToDelete);
               }}
               colorScheme="red"
+              w="100%"
             >
               Hapus
             </Button>
           </ModalBody>
-
-          <ModalFooter></ModalFooter>
         </ModalContent>
       </Modal>
 
+      {/* Input Modal */}
       <Modal
         closeOnOverlayClick={false}
         isOpen={isInputOpen}
         onClose={onInputClose}
       >
         <ModalOverlay />
-        <ModalContent borderRadius={0} maxWidth="1200px">
-          <ModalHeader>Rill </ModalHeader>
+        <ModalContent borderRadius="lg" maxWidth="800px">
+          <ModalHeader>Tambah Rincian Biaya</ModalHeader>
           <ModalCloseButton />
-
           <ModalBody pb={6}>
-            <Box>
-              <FormControl mb={"30px"}>
-                <FormLabel fontSize={"24px"}>Item</FormLabel>
+            <VStack spacing={6} align="stretch">
+              <FormControl>
+                <FormLabel fontSize="lg" fontWeight="semibold">
+                  Item
+                </FormLabel>
                 <Input
                   placeholder="Contoh: Hotel"
-                  height={"60px"}
-                  bgColor={"terang"}
+                  height="50px"
+                  bgColor="gray.50"
                   type="text"
-                  border={"none"}
+                  border="1px solid"
+                  borderColor="gray.300"
                   onChange={(e) => {
                     formik.setFieldValue("item", e.target.value);
                   }}
+                  _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                 />
-                {formik.errors.item ? (
-                  <Alert status="error" color="red" text="center">
-                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                    <Text ms="10px">{formik.errors.item}</Text>
-                  </Alert>
-                ) : null}
+                {formik.errors.item && (
+                  <FormErrorMessage>{formik.errors.item}</FormErrorMessage>
+                )}
               </FormControl>
-              <FormControl my={"30px"}>
-                <FormLabel fontSize={"24px"}>Satuan</FormLabel>
+
+              <FormControl>
+                <FormLabel fontSize="lg" fontWeight="semibold">
+                  Satuan
+                </FormLabel>
                 <Input
-                  placeholder="contoh: malam"
-                  height={"60px"}
-                  bgColor={"terang"}
+                  placeholder="Contoh: malam"
+                  height="50px"
+                  bgColor="gray.50"
                   type="text"
-                  border={"none"}
+                  border="1px solid"
+                  borderColor="gray.300"
                   onChange={(e) => {
                     formik.setFieldValue("satuan", e.target.value);
                   }}
+                  _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                 />
-                {formik.errors.satuan ? (
-                  <Alert status="error" color="red" text="center">
-                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                    <Text ms="10px">{formik.errors.satuan}</Text>
-                  </Alert>
-                ) : null}
+                {formik.errors.satuan && (
+                  <FormErrorMessage>{formik.errors.satuan}</FormErrorMessage>
+                )}
               </FormControl>
-              <FormControl my={"30px"}>
-                {" "}
-                <FormLabel fontSize={"24px"}>Quantity</FormLabel>
+
+              <FormControl>
+                <FormLabel fontSize="lg" fontWeight="semibold">
+                  Quantity
+                </FormLabel>
                 <Input
-                  placeholder="contoh; 1"
-                  height={"60px"}
-                  bgColor={"terang"}
+                  placeholder="Contoh: 1"
+                  height="50px"
+                  bgColor="gray.50"
                   type="number"
-                  border={"none"}
+                  border="1px solid"
+                  borderColor="gray.300"
                   onChange={(e) => {
                     formik.setFieldValue("qty", e.target.value);
                   }}
+                  _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                 />
-                {formik.errors.qty ? (
-                  <Alert status="error" color="red" text="center">
-                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                    <Text ms="10px">{formik.errors.qty}</Text>
-                  </Alert>
-                ) : null}
-              </FormControl>{" "}
-              <FormControl my={"30px"}>
-                {" "}
-                <FormLabel fontSize={"24px"}>Nilai</FormLabel>
+                {formik.errors.qty && (
+                  <FormErrorMessage>{formik.errors.qty}</FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel fontSize="lg" fontWeight="semibold">
+                  Nilai
+                </FormLabel>
                 <Input
                   placeholder="Contoh: 5000000"
-                  height={"60px"}
-                  bgColor={"terang"}
+                  height="50px"
+                  bgColor="gray.50"
                   type="number"
-                  border={"none"}
+                  border="1px solid"
+                  borderColor="gray.300"
                   onChange={(e) => {
                     formik.setFieldValue("nilai", e.target.value);
                   }}
+                  _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                 />
-                {formik.errors.nilai ? (
-                  <Alert status="error" color="red" text="center">
-                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                    <Text ms="10px">{formik.errors.nilai}</Text>
-                  </Alert>
-                ) : null}
+                {formik.errors.nilai && (
+                  <FormErrorMessage>{formik.errors.nilai}</FormErrorMessage>
+                )}
               </FormControl>
+
               <FormControl>
-                <FormLabel fontSize={"24px"}>Jenis</FormLabel>
+                <FormLabel fontSize="lg" fontWeight="semibold">
+                  Jenis
+                </FormLabel>
                 <Select
-                  placeholder="Jenis"
-                  height={"60px"}
-                  bgColor={"terang"}
-                  borderRadius={"8px"}
-                  borderColor={"rgba(229, 231, 235, 1)"}
+                  placeholder="Pilih Jenis"
+                  height="50px"
+                  bgColor="gray.50"
+                  borderRadius="md"
+                  borderColor="gray.300"
                   onChange={(e) => {
                     formik.setFieldValue("jenis", parseInt(e.target.value));
                   }}
+                  _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                 >
                   {renderJenis()}
                 </Select>
-                {formik.errors.jenis ? (
-                  <Alert status="error" color="red" text="center">
-                    <i className="fa-solid fa-circle-exclamation"></i>
-                    <Text ms="10px">{formik.errors.jenis}</Text>
-                  </Alert>
-                ) : null}
+                {formik.errors.jenis && (
+                  <FormErrorMessage>{formik.errors.jenis}</FormErrorMessage>
+                )}
               </FormControl>
+
               <FormControl>
                 <Input
                   onChange={handleFile}
@@ -1134,44 +1475,52 @@ function Rampung(props) {
                   accept="image/png, image/jpeg"
                   display="none"
                   type="file"
-
-                  // hidden="hidden"
                 />
-              </FormControl>{" "}
+              </FormControl>
+
               <FormControl>
                 <Image
                   src={Foto}
                   id="imgpreview"
-                  alt="Room image"
+                  alt="Preview"
                   width="100%"
-                  height={{ ss: "210px", sm: "210px", sl: "650px" }}
-                  me="10px"
-                  mt="20px"
-                  overflow="hiden"
+                  height="200px"
                   objectFit="cover"
+                  borderRadius="md"
+                  border="2px dashed"
+                  borderColor="gray.300"
                 />
-              </FormControl>{" "}
-              <FormControl mt="20px">
-                <FormHelperText>Max size: 1MB</FormHelperText>
+              </FormControl>
+
+              <FormControl>
+                <FormHelperText color="gray.500">
+                  Maksimal ukuran: 1MB
+                </FormHelperText>
                 <Button
-                  variant={"secondary"}
+                  variant="outline"
                   w="100%"
                   onClick={() => inputFileRef.current.click()}
+                  size="lg"
                 >
-                  Add Photo
+                  Pilih Foto
                 </Button>
-                {fileSizeMsg ? (
-                  <Alert status="error" color="red" text="center">
-                    {/* <i className="fa-solid fa-circle-exclamation"></i> */}
-                    <Text ms="10px">{fileSizeMsg}</Text>
+                {fileSizeMsg && (
+                  <Alert status="error" borderRadius="md">
+                    <Text>{fileSizeMsg}</Text>
                   </Alert>
-                ) : null}
-              </FormControl>{" "}
-              <Button onClick={formik.handleSubmit}>submit</Button>
-            </Box>
-          </ModalBody>
+                )}
+              </FormControl>
 
-          <ModalFooter></ModalFooter>
+              <Button
+                onClick={formik.handleSubmit}
+                variant={"primary"}
+                size="lg"
+                w="100%"
+              >
+                Simpan
+              </Button>
+            </VStack>
+          </ModalBody>
         </ModalContent>
       </Modal>
     </Layout>

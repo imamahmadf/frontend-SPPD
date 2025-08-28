@@ -107,8 +107,8 @@ function TambahBuktiKegiatan(props) {
       <Image
         borderRadius={"5px"}
         alt="foto obat"
-        width="520px"
-        height="320px"
+        width="100%"
+        height="520px"
         overflow="hiden"
         objectFit="cover"
         src={
