@@ -751,6 +751,7 @@ function RampungAdmin(props) {
                             <Th isNumeric>Nilai</Th>
                             <Th isNumeric>Qty</Th>
                             <Th>Satuan</Th>
+                            <Th isNumeric>Total</Th>
                             <Th>Bukti</Th>
                           </Tr>
                         </Thead>
@@ -770,6 +771,12 @@ function RampungAdmin(props) {
                                 </Td>
                                 <Td isNumeric>{val.qty}</Td>
                                 <Td>{val.satuan}</Td>
+                                <Td fontFamily="mono" isNumeric>
+                                  {new Intl.NumberFormat("id-ID", {
+                                    style: "currency",
+                                    currency: "IDR",
+                                  }).format(val.nilai * val.qty)}
+                                </Td>
                                 <Td>
                                   <Image
                                     src={
@@ -817,7 +824,7 @@ function RampungAdmin(props) {
                               </Tr>
                               {val.rills?.length > 0 && (
                                 <Tr>
-                                  <Td colSpan={6}>
+                                  <Td colSpan={7}>
                                     <Box bg="gray.50" p={3} borderRadius="md">
                                       <Text
                                         fontWeight="semibold"
@@ -886,7 +893,7 @@ function RampungAdmin(props) {
                                 (rillSum, rill) => rillSum + rill.nilai,
                                 0
                               ) || 0;
-                            return total + rincianTotal + rillTotal;
+                            return total + rincianTotal;
                           }, 0) || 0
                         )}
                       </StatNumber>
@@ -959,12 +966,8 @@ function RampungAdmin(props) {
                         const personilTotal =
                           item.rincianBPDs?.reduce((total, val) => {
                             const rincianTotal = val.nilai * val.qty;
-                            const rillTotal =
-                              val.rills?.reduce(
-                                (rillSum, rill) => rillSum + rill.nilai,
-                                0
-                              ) || 0;
-                            return total + rincianTotal + rillTotal;
+
+                            return total + rincianTotal;
                           }, 0) || 0;
                         return totalPersonil + personilTotal;
                       },

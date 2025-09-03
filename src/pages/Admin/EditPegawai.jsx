@@ -31,11 +31,13 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import Layout from "../../Componets/Layout";
+import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 function EditPegawai(props) {
   const [isEditing, setIsEditing] = useState(false);
   const [dataSeed, setDataSeed] = useState([]);
+  const [dataRiwayat, setDataRiwayat] = useState(null);
   const [dataPegawai, setDataPegawai] = useState({
     id: "",
     nama: "",
@@ -121,6 +123,7 @@ function EditPegawai(props) {
             unitKerja: res.data.result.daftarUnitKerja.unitKerja,
           },
         });
+        setDataRiwayat(res.data.result.riwayatPegawais);
 
         console.log(res.data, "CEK 1234567890");
       })
@@ -134,9 +137,9 @@ function EditPegawai(props) {
     fetchSeed();
   }, []);
   return (
-    <Layout>
+    <LayoutPegawai>
       {/* {JSON.stringify(dataPegawai)} */}
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box bgColor={"secondary"} py={"60px"} px={"30px"}>
         <Container maxW={"1280px"} variant={"primary"} pt={"30px"} ps={"0px"}>
           <Box p={"30px"}>
             <Table>
@@ -409,8 +412,42 @@ function EditPegawai(props) {
             </Box>
           </Box>
         </Container>
+        <Container
+          mt={"30px"}
+          maxW={"1280px"}
+          variant={"primary"}
+          pt={"30px"}
+          ps={"0px"}
+        >
+          {JSON.stringify(dataRiwayat)}
+          <Table variant={"pegawai"}>
+            <Thead>
+              <Tr>
+                <Th>No</Th>
+                <Th>Nama</Th>
+                <Th>Unit Kerja</Th>
+                <Th>Status</Th>
+                <Th>Aksi</Th> <Th>Aksi</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {dataRiwayat?.map((item, index) => (
+                <Tr key={index}>
+                  <Td>{index + 1}</Td>
+                  <Td>{dataPegawai.nama}</Td>
+                  <Td>{item?.unitKerjaLama?.unitKerja}</Td>
+                  <Td>{item?.profesiLama?.nama}</Td>{" "}
+                  <Td>
+                    {item?.pangkat?.pangkat}/{item?.golongan?.golongan}
+                  </Td>
+                  <Td>{JSON.stringify(item?.golongan?.golongan)}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Container>
       </Box>
-    </Layout>
+    </LayoutPegawai>
   );
 }
 

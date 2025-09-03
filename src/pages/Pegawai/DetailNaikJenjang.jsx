@@ -88,9 +88,12 @@ import {
   FaFileInvoiceDollar,
   FaUserGraduate,
   FaFileSignature,
+  FaMap,
+  FaStethoscope,
+  FaUserTie,
 } from "react-icons/fa";
 
-function DetailUsulan(props) {
+function DetailNaikJenjang(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = useState(true);
   const [dataUsulan, setDataUsulan] = useState(null);
@@ -99,20 +102,21 @@ function DetailUsulan(props) {
   const [tanggalTMT, setTanggalTMT] = useState("");
   const [link, setLink] = useState("");
   const user = useSelector(userRedux);
+
   function inputHandler(event, field) {
     const tes = setTimeout(() => {
       const { value } = event.target;
-
       setLink(value);
     }, 2000);
   }
+
   async function fetchDataUsulan() {
     setIsLoading(true); // Set loading true sebelum fetch
     await axios
       .get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/usulan/get/detail/${
-          props.match.params.id
-        }`
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/naik-jenjang/get/detail/${props.match.params.id}`
       )
       .then((res) => {
         setDataUsulan(res.data.result);
@@ -130,7 +134,7 @@ function DetailUsulan(props) {
       .post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/usulan/update/link-sertifikat`,
+        }/naik-jenjang/update/link-sertifikat`,
         {
           linkSertifikat: link,
           id: dataUsulan.id,
@@ -157,7 +161,7 @@ function DetailUsulan(props) {
       .post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/usulan/update/usulan-pangkat`,
+        }/naik-jenjang/update/status`,
         { id: dataUsulan.id, catatan, status: stat }
       )
       .then((res) => {
@@ -198,11 +202,11 @@ function DetailUsulan(props) {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 0:
+      case "diusulkan":
         return "orange";
-      case 1:
+      case "diterima":
         return "green";
-      case 2:
+      case "ditolak":
         return "red";
       default:
         return "gray";
@@ -211,11 +215,11 @@ function DetailUsulan(props) {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 0:
+      case "diusulkan":
         return "Menunggu Verifikasi";
-      case 1:
+      case "diterima":
         return "Diterima";
-      case 2:
+      case "ditolak":
         return "Ditolak";
       default:
         return "Tidak Diketahui";
@@ -224,11 +228,11 @@ function DetailUsulan(props) {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 0:
+      case "diusulkan":
         return FaClock;
-      case 1:
+      case "diterima":
         return FaCheckCircle;
-      case 2:
+      case "ditolak":
         return FaTimesCircle;
       default:
         return FaClock;
@@ -349,6 +353,7 @@ function DetailUsulan(props) {
               </Flex>
             </CardBody>
           </Card>
+
           {/* Documents Section */}
           <Card
             shadow="xl"
@@ -372,81 +377,82 @@ function DetailUsulan(props) {
                   <DocumentItem
                     title="Formulir Pengusulan"
                     icon={FaFileAlt}
-                    onPreview={() => handlePreview(dataUsulan.formulirUsulan)}
+                    onPreview={() => handlePreview(dataUsulan.formulir)}
                     color="blue"
-                    isAvailable={isFileAvailable(dataUsulan.formulirUsulan)}
+                    isAvailable={isFileAvailable(dataUsulan.formulir)}
                   />
                   <DocumentItem
-                    title="SK CPNS"
+                    title="UKOM"
                     icon={FaCertificate}
-                    onPreview={() => handlePreview(dataUsulan.skCpns)}
+                    onPreview={() => handlePreview(dataUsulan.ukom)}
                     color="green"
-                    isAvailable={isFileAvailable(dataUsulan.skCpns)}
+                    isAvailable={isFileAvailable(dataUsulan.ukom)}
                   />
                   <DocumentItem
-                    title="SK PNS"
+                    title="SK Pangkat"
                     icon={FaFileContract}
-                    onPreview={() => handlePreview(dataUsulan.skPns)}
+                    onPreview={() => handlePreview(dataUsulan.SKPangkat)}
                     color="purple"
-                    isAvailable={isFileAvailable(dataUsulan.skPns)}
-                  />
-                  <DocumentItem
-                    title="PAK"
-                    icon={FaFileInvoiceDollar}
-                    onPreview={() => handlePreview(dataUsulan.PAK)}
-                    color="orange"
-                    isAvailable={isFileAvailable(dataUsulan.PAK)}
+                    isAvailable={isFileAvailable(dataUsulan.SKPangkat)}
                   />
                   <DocumentItem
                     title="SK Mutasi"
                     icon={FaFileSignature}
-                    onPreview={() => handlePreview(dataUsulan.skMutasi)}
+                    onPreview={() => handlePreview(dataUsulan.SKMutasi)}
                     color="teal"
-                    isAvailable={isFileAvailable(dataUsulan.skMutasi)}
+                    isAvailable={isFileAvailable(dataUsulan.SKMutasi)}
+                  />
+                  <DocumentItem
+                    title="SK Jafung"
+                    icon={FaGraduationCap}
+                    onPreview={() => handlePreview(dataUsulan.SKJafung)}
+                    color="cyan"
+                    isAvailable={isFileAvailable(dataUsulan.SKJafung)}
+                  />
+                  <DocumentItem
+                    title="SKP"
+                    icon={FaFileAlt}
+                    onPreview={() => handlePreview(dataUsulan.SKP)}
+                    color="pink"
+                    isAvailable={isFileAvailable(dataUsulan.SKP)}
                   />
                 </VStack>
 
                 {/* Right Column */}
                 <VStack spacing={4} align="stretch">
                   <DocumentItem
-                    title="SK Jafung"
-                    icon={FaGraduationCap}
-                    onPreview={() => handlePreview(dataUsulan.skJafung)}
-                    color="cyan"
-                    isAvailable={isFileAvailable(dataUsulan.skJafung)}
-                  />
-                  <DocumentItem
-                    title="SKP"
-                    icon={FaFileAlt}
-                    onPreview={() => handlePreview(dataUsulan.skp)}
-                    color="pink"
-                    isAvailable={isFileAvailable(dataUsulan.skp)}
-                  />
-                  <DocumentItem
                     title="STR"
                     icon={FaCertificate}
-                    onPreview={() => handlePreview(dataUsulan.str)}
+                    onPreview={() => handlePreview(dataUsulan.STR)}
                     color="indigo"
-                    isAvailable={isFileAvailable(dataUsulan.str)}
+                    isAvailable={isFileAvailable(dataUsulan.STR)}
                   />
                   <DocumentItem
-                    title="Surat Cuti"
-                    icon={FaFileContract}
-                    onPreview={() => handlePreview(dataUsulan.suratCuti)}
+                    title="SIP"
+                    icon={FaStethoscope}
+                    onPreview={() => handlePreview(dataUsulan.SIP)}
                     color="red"
-                    isAvailable={isFileAvailable(dataUsulan.suratCuti)}
+                    isAvailable={isFileAvailable(dataUsulan.SIP)}
                   />
                   <DocumentItem
-                    title="SK Pencantuman Gelar"
-                    icon={FaUserGraduate}
-                    onPreview={() => handlePreview(dataUsulan.gelar)}
+                    title="Rekomendasi"
+                    icon={FaUserTie}
+                    onPreview={() => handlePreview(dataUsulan.rekom)}
                     color="yellow"
-                    isAvailable={isFileAvailable(dataUsulan.gelar)}
+                    isAvailable={isFileAvailable(dataUsulan.rekom)}
+                  />
+                  <DocumentItem
+                    title="Peta Jabatan"
+                    icon={FaMap}
+                    onPreview={() => handlePreview(dataUsulan.petaJabatan)}
+                    color="orange"
+                    isAvailable={isFileAvailable(dataUsulan.petaJabatan)}
                   />
                 </VStack>
               </SimpleGrid>
+
               {/* Action Buttons */}
-              {dataUsulan?.status == 0 && (
+              {dataUsulan?.status === "diusulkan" && (
                 <Box mt={8} pt={6} borderTop="1px" borderColor="gray.200">
                   <Flex
                     direction={{ base: "column", sm: "row" }}
@@ -458,7 +464,7 @@ function DetailUsulan(props) {
                       colorScheme="green"
                       size="lg"
                       px={8}
-                      onClick={() => ubahStatus(dataUsulan.id, 1)}
+                      onClick={() => ubahStatus(dataUsulan.id, "diterima")}
                       _hover={{ transform: "translateY(-2px)", shadow: "lg" }}
                       transition="all 0.2s"
                     >
@@ -478,8 +484,9 @@ function DetailUsulan(props) {
                     </Button>
                   </Flex>
                 </Box>
-              )}{" "}
-              {dataUsulan.status === 1 &&
+              )}
+
+              {dataUsulan.status === "diterima" &&
                 (dataUsulan.linkSertifikat ? (
                   <Box mt={4}>
                     <Text fontSize="16px" fontWeight="semibold" mb={2}>
@@ -536,7 +543,7 @@ function DetailUsulan(props) {
                   </Flex>
                 ))}
             </CardBody>
-          </Card>{" "}
+          </Card>
         </Container>
       </Box>
 
@@ -585,7 +592,7 @@ function DetailUsulan(props) {
             <Button
               colorScheme="red"
               leftIcon={<FaTimesCircle />}
-              onClick={() => ubahStatus(dataUsulan.id, 2)}
+              onClick={() => ubahStatus(dataUsulan.id, "ditolak")}
               isDisabled={!catatan || catatan.trim() === ""}
             >
               Tolak Usulan
@@ -665,4 +672,4 @@ const DocumentItem = ({ title, icon, onPreview, color, isAvailable }) => (
   </Card>
 );
 
-export default DetailUsulan;
+export default DetailNaikJenjang;

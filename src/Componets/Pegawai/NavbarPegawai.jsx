@@ -53,6 +53,11 @@ const menuData = [
       { label: "Statistik Pegawai", path: "/kepegawaian/statistik-pegawai" },
       { label: "Data Saya", path: "/kepegawaian/profile" },
       { label: "Usulan Pegawai", path: "/kepegawaian/usulan" },
+      {
+        label: "Daftar Naik Jenjang",
+        path: "/kepegawaian/daftar-naik-jenjang",
+      },
+      { label: "Pengaturan", path: "/kepegawaian/laporan-usulan-pegawai" },
     ],
   },
 ];

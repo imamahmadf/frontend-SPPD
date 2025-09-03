@@ -110,7 +110,6 @@ function DaftarPegawai() {
   }
 
   const tambahPegawai = () => {
-    axios;
     axios
       .post(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/post`,

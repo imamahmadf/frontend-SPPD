@@ -99,7 +99,7 @@ import {
   FaSync,
 } from "react-icons/fa";
 
-function NaikGolongan() {
+function NaikJenjang() {
   const [selectedFiles, setSelectedFiles] = useState({});
   const user = useSelector(userRedux);
   const toast = useToast();
@@ -118,7 +118,7 @@ function NaikGolongan() {
   async function fetchProfile() {
     axios
       .get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/profile/${
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/naik-jenjang/get/${
           user[0].id
         }`
       )
@@ -137,8 +137,11 @@ function NaikGolongan() {
       .post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/usulan/update/usulan-pangkat`,
-        { id: dataProfile.pegawai.usulanPegawais[0].id, status: 0 }
+        }/naik-jenjang/update/status`,
+        {
+          id: dataProfile.pegawai.usulanNaikJenjangs[0].id,
+          status: "diusulkan",
+        }
       )
       .then((res) => {
         console.log(res.data);
@@ -165,8 +168,8 @@ function NaikGolongan() {
 
   // Validasi Yup
   const validationSchema = Yup.object().shape({
-    formulirUsulan: Yup.mixed()
-      .required("Formulir Usulan Naik Pangkat wajib diunggah")
+    formulir: Yup.mixed()
+      .required("Formulir Usulan Naik Jenjang wajib diunggah")
       .test(
         "fileType",
         "Format file harus PDF",
@@ -177,8 +180,8 @@ function NaikGolongan() {
         "Ukuran file maksimal 700KB",
         (value) => value && value.size <= 700 * 1024
       ),
-    skCpns: Yup.mixed()
-      .required("Fotocopy SK CPNS Legalisir wajib diunggah")
+    ukom: Yup.mixed()
+      .required("Sertifikat UKOM wajib diunggah")
       .test(
         "fileType",
         "Format file harus PDF",
@@ -189,8 +192,8 @@ function NaikGolongan() {
         "Ukuran file maksimal 700KB",
         (value) => value && value.size <= 700 * 1024
       ),
-    skPns: Yup.mixed()
-      .required("Fotocopy SK PNS Legalisir wajib diunggah")
+    SKPangkat: Yup.mixed()
+      .required("SK Pangkat wajib diunggah")
       .test(
         "fileType",
         "Format file harus PDF",
@@ -201,8 +204,8 @@ function NaikGolongan() {
         "Ukuran file maksimal 700KB",
         (value) => value && value.size <= 700 * 1024
       ),
-    PAK: Yup.mixed()
-      .required("PAK wajib diunggah")
+    SKJafung: Yup.mixed()
+      .required("SK Jafung wajib diunggah")
       .test(
         "fileType",
         "Format file harus PDF",
@@ -213,10 +216,8 @@ function NaikGolongan() {
         "Ukuran file maksimal 700KB",
         (value) => value && value.size <= 700 * 1024
       ),
-    skJafung: Yup.mixed()
-      .required(
-        "Fotocopy SK Jafung Pengangkatan Pertama Kali Legalisir wajib diunggah"
-      )
+    SKP: Yup.mixed()
+      .required("SKP wajib diunggah")
       .test(
         "fileType",
         "Format file harus PDF",
@@ -226,44 +227,56 @@ function NaikGolongan() {
         "fileSize",
         "Ukuran file maksimal 700KB",
         (value) => value && value.size <= 700 * 1024
-      ),
-    skp: Yup.mixed()
-      .required("Fotocopy SKP 2 Tahun Terakhir Legalisir wajib diunggah")
-      .test(
-        "fileType",
-        "Format file harus PDF",
-        (value) => value && value.type === "application/pdf"
-      )
-      .test(
-        "fileSize",
-        "Ukuran file maksimal 700KB",
-        (value) => value && value.size <= 700 * 1024
-      ),
-    skMutasi: Yup.mixed()
-      .nullable()
-      .test(
-        "fileType",
-        "Format file harus PDF",
-        (value) => !value || value.type === "application/pdf"
-      )
-      .test(
-        "fileSize",
-        "Ukuran file maksimal 700KB",
-        (value) => !value || value.size <= 700 * 1024
       ),
     STR: Yup.mixed()
-      .nullable()
+      .required("STR wajib diunggah")
       .test(
         "fileType",
         "Format file harus PDF",
-        (value) => !value || value.type === "application/pdf"
+        (value) => value && value.type === "application/pdf"
       )
       .test(
         "fileSize",
         "Ukuran file maksimal 700KB",
-        (value) => !value || value.size <= 700 * 1024
+        (value) => value && value.size <= 700 * 1024
       ),
-    suratCuti: Yup.mixed()
+    SIP: Yup.mixed()
+      .required("SIP wajib diunggah")
+      .test(
+        "fileType",
+        "Format file harus PDF",
+        (value) => value && value.type === "application/pdf"
+      )
+      .test(
+        "fileSize",
+        "Ukuran file maksimal 700KB",
+        (value) => value && value.size <= 700 * 1024
+      ),
+    rekom: Yup.mixed()
+      .required("Surat Rekomendasi wajib diunggah")
+      .test(
+        "fileType",
+        "Format file harus PDF",
+        (value) => value && value.type === "application/pdf"
+      )
+      .test(
+        "fileSize",
+        "Ukuran file maksimal 700KB",
+        (value) => value && value.size <= 700 * 1024
+      ),
+    petaJabatan: Yup.mixed()
+      .required("Peta Jabatan wajib diunggah")
+      .test(
+        "fileType",
+        "Format file harus PDF",
+        (value) => value && value.type === "application/pdf"
+      )
+      .test(
+        "fileSize",
+        "Ukuran file maksimal 700KB",
+        (value) => value && value.size <= 700 * 1024
+      ),
+    SKMutasi: Yup.mixed()
       .nullable()
       .test(
         "fileType",
@@ -279,66 +292,73 @@ function NaikGolongan() {
 
   const fileFields = [
     {
-      name: "formulirUsulan",
-      label: "Formulir Usulan Naik Pangkat",
+      name: "formulir",
+      label: "Formulir Usulan Naik Jenjang",
       wajib: true,
       icon: FaFileAlt,
       color: "blue",
     },
     {
-      name: "skCpns",
-      label: "Fotocopy SK CPNS Legalisir",
+      name: "ukom",
+      label: "Sertifikat UKOM",
       wajib: true,
       icon: FaCertificate,
       color: "green",
     },
     {
-      name: "skPns",
-      label: "Fotocopy SK PNS Legalisir",
+      name: "SKPangkat",
+      label: "SK Pangkat",
       wajib: true,
       icon: FaFileContract,
       color: "purple",
     },
     {
-      name: "PAK",
-      label: "PAK",
-      wajib: true,
-      icon: FaFileInvoiceDollar,
-      color: "orange",
-    },
-    {
-      name: "skJafung",
-      label: "Fotocopy SK Jafung Pengangkatan Pertama Kali Legalisir",
+      name: "SKJafung",
+      label: "SK Jafung",
       wajib: true,
       icon: FaGraduationCap,
       color: "cyan",
     },
     {
-      name: "skp",
-      label: "Fotocopy SKP 2 Tahun Terakhir Legalisir",
+      name: "SKP",
+      label: "SKP",
       wajib: true,
       icon: FaFileAlt,
       color: "pink",
     },
     {
-      name: "skMutasi",
-      label: "Fotocopy SK Mutasi",
-      wajib: false,
-      icon: FaFileSignature,
-      color: "teal",
-    },
-    {
       name: "STR",
-      label: "Fotocopy STR dan SIP aktif Legalisir",
-      wajib: false,
+      label: "STR",
+      wajib: true,
       icon: FaCertificate,
       color: "indigo",
     },
     {
-      name: "suratCuti",
-      label: "Fotocopy surat Cuti jika cuti > 29 hari",
-      wajib: false,
+      name: "SIP",
+      label: "SIP",
+      wajib: true,
       icon: FaFileContract,
+      color: "teal",
+    },
+    {
+      name: "rekom",
+      label: "Surat Rekomendasi",
+      wajib: true,
+      icon: FaFileSignature,
+      color: "orange",
+    },
+    {
+      name: "petaJabatan",
+      label: "Peta Jabatan",
+      wajib: true,
+      icon: FaFileInvoiceDollar,
+      color: "yellow",
+    },
+    {
+      name: "SKMutasi",
+      label: "SK Mutasi",
+      wajib: false,
+      icon: FaFileSignature,
       color: "red",
     },
   ];
@@ -355,16 +375,16 @@ function NaikGolongan() {
 
     // Mapping field name ke property yang sesuai di data API
     const fieldMapping = {
-      formulirUsulan: "formulirUsulan",
-      skCpns: "skCpns",
-      skPns: "skPns",
-      PAK: "PAK",
-      skMutasi: "skMutasi",
-      skJafung: "skJafung",
-      skp: "skp",
-      STR: "str",
-      suratCuti: "suratCuti",
-      gelar: "gelar",
+      formulir: "formulir",
+      ukom: "ukom",
+      SKPangkat: "SKPangkat",
+      SKMutasi: "SKMutasi",
+      SKJafung: "SKJafung",
+      SKP: "SKP",
+      STR: "STR",
+      SIP: "SIP",
+      rekom: "rekom",
+      petaJabatan: "petaJabatan",
     };
 
     // Menggunakan mapping untuk mendapatkan nama file lama
@@ -385,7 +405,7 @@ function NaikGolongan() {
     }
 
     setUploadLoading(true);
-    const usulanId = dataProfile?.pegawai?.usulanPegawais[0]?.id;
+    const usulanId = dataProfile?.pegawai?.usulanNaikJenjangs[0]?.id;
     const formData = new FormData();
 
     // Data file yang akan diupload
@@ -400,7 +420,7 @@ function NaikGolongan() {
     formData.append("field_name", fieldName); // Nama field di database
 
     // Mendapatkan nama file dokumen yang lama (jika ada)
-    const usulanPegawai = dataProfile?.pegawai?.usulanPegawais[0];
+    const usulanPegawai = dataProfile?.pegawai?.usulanNaikJenjangs[0];
     const namaFileLama = getNamaFileLama(fieldName, usulanPegawai);
 
     // Menambahkan nama file dokumen yang lama
@@ -410,7 +430,7 @@ function NaikGolongan() {
       const response = await axios.post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/usulan/update/usulan-pegawai`,
+        }/naik-jenjang/post/naik-jenjang`,
         formData,
         {
           headers: {
@@ -462,94 +482,94 @@ function NaikGolongan() {
 
   // Mapping dokumen ke endpoint dan field
   const uploadConfig = {
-    formulirUsulan: {
+    formulir: {
       label: "Formulir Pengusulan",
-      endpoint: "/usulan/upload/formulirusulan",
-      field: "formulirUsulan",
+      endpoint: "/usulan/upload/formulir",
+      field: "formulir",
     },
-    skCpns: {
-      label: "SK Cpns",
-      endpoint: "/usulan/upload/skcpns",
-      field: "skCpns",
+    ukom: {
+      label: "Sertifikat UKOM",
+      endpoint: "/usulan/upload/ukom",
+      field: "ukom",
     },
-    skPns: {
-      label: "SK PNS",
-      endpoint: "/usulan/upload/skpns",
-      field: "skPns",
+    SKPangkat: {
+      label: "SK Pangkat",
+      endpoint: "/usulan/upload/skpangkat",
+      field: "SKPangkat",
     },
-    PAK: {
-      label: "PAK",
-      endpoint: "/usulan/upload/PAK",
-      field: "PAK",
-    },
-    skMutasi: {
+    SKMutasi: {
       label: "SK Mutasi",
       endpoint: "/usulan/upload/skmutasi",
-      field: "skMutasi",
+      field: "SKMutasi",
     },
-    skJafung: {
+    SKJafung: {
       label: "SK Jafung",
       endpoint: "/usulan/upload/skjafung",
-      field: "skJafung",
+      field: "SKJafung",
     },
-    skp: {
+    SKP: {
       label: "SKP",
       endpoint: "/usulan/upload/skp",
-      field: "skp",
+      field: "SKP",
     },
-    str: {
+    STR: {
       label: "STR",
       endpoint: "/usulan/upload/str",
       field: "STR",
     },
-    suratCuti: {
-      label: "Surat Cuti",
-      endpoint: "/usulan/upload/suratcuti",
-      field: "suratCuti",
+    SIP: {
+      label: "SIP",
+      endpoint: "/usulan/upload/sip",
+      field: "SIP",
     },
-    gelar: {
-      label: "SK Pencantuman Gelar",
-      endpoint: "/usulan/upload/gelar",
-      field: "gelar",
+    rekom: {
+      label: "Surat Rekomendasi",
+      endpoint: "/usulan/upload/rekom",
+      field: "rekom",
+    },
+    petaJabatan: {
+      label: "Peta Jabatan",
+      endpoint: "/usulan/upload/petajabatan",
+      field: "petaJabatan",
     },
   };
 
   const getStatusInfo = (status) => {
     switch (status) {
-      case 0:
+      case "diusulkan":
         return {
           text: "Menunggu Verifikasi",
           color: "orange",
           icon: FaClock,
           description: "Usulan Anda sedang dalam proses verifikasi oleh admin",
         };
-      case 1:
+      case "diterima":
         return {
           text: "Diterima",
           color: "green",
           icon: FaCheckCircle,
           description: "Selamat! Usulan Anda telah diterima dan disetujui",
         };
-      case 2:
+      case "ditolak":
         return {
           text: "Ditolak",
           color: "red",
           icon: FaTimesCircle,
           description:
-            "Usulan Anda ditolak. Silakan upload ulang dokumen yang diperlukan",
+            "Usulan naik jenjang Anda ditolak. Silakan upload ulang dokumen yang diperlukan",
         };
       default:
         return {
           text: "Belum Ada Usulan",
           color: "gray",
           icon: FaInfoCircle,
-          description: "Anda belum mengajukan usulan naik golongan",
+          description: "Anda belum mengajukan usulan naik jenjang",
         };
     }
   };
 
   const statusInfo = getStatusInfo(
-    dataProfile?.pegawai?.usulanPegawais[0]?.status
+    dataProfile?.pegawai?.usulanNaikJenjangs[0]?.status
   );
 
   return (
@@ -652,7 +672,7 @@ function NaikGolongan() {
           </Card>
 
           {/* Documents Section */}
-          {dataProfile?.pegawai?.usulanPegawais[0]?.status === 2 ? (
+          {dataProfile?.pegawai?.usulanNaikJenjangs[0]?.status === "ditolak" ? (
             <Card
               shadow="xl"
               border="1px"
@@ -662,11 +682,12 @@ function NaikGolongan() {
             >
               <CardHeader bg="gray.50" borderTopRadius="xl">
                 <Heading size="md" color="gray.800">
-                  📋 Upload Ulang Dokumen
+                  📋 Upload Ulang Dokumen Naik Jenjang
                 </Heading>
                 <Text color="gray.600" fontSize="sm">
-                  Usulan Anda ditolak. Silakan upload ulang dokumen yang
-                  diperlukan
+                  Usulan naik jenjang Anda ditolak. Silakan upload ulang dokumen
+                  yang diperlukan untuk naik jenjang. Pastikan semua dokumen
+                  lengkap dan valid.
                 </Text>
               </CardHeader>
               <CardBody p={8}>
@@ -678,103 +699,109 @@ function NaikGolongan() {
                       icon={FaFileAlt}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].formulirUsulan
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].formulir
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.formulirUsulan.label,
-                          endpoint: uploadConfig.formulirUsulan.endpoint,
-                          field: uploadConfig.formulirUsulan.field,
-                          fileName: "formulirUsulan",
+                          label: uploadConfig.formulir.label,
+                          endpoint: uploadConfig.formulir.endpoint,
+                          field: uploadConfig.formulir.field,
+                          fileName: "formulir",
                         })
                       }
                       color="blue"
                       hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].formulirUsulan
+                        !!dataProfile?.pegawai.usulanNaikJenjangs[0].formulir
                       }
                     />
                     <DocumentUploadItem
-                      title="SK CPNS"
+                      title="Sertifikat UKOM"
                       icon={FaCertificate}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skCpns
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].ukom
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.skCpns.label,
-                          endpoint: uploadConfig.skCpns.endpoint,
-                          field: uploadConfig.skCpns.field,
-                          fileName: "skCpns",
+                          label: uploadConfig.ukom.label,
+                          endpoint: uploadConfig.ukom.endpoint,
+                          field: uploadConfig.ukom.field,
+                          fileName: "ukom",
                         })
                       }
                       color="green"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].skCpns}
+                      hasFile={
+                        !!dataProfile?.pegawai.usulanNaikJenjangs[0].ukom
+                      }
                     />
                     <DocumentUploadItem
-                      title="SK PNS"
+                      title="SK Pangkat"
                       icon={FaFileContract}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skPns
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].SKPangkat
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.skPns.label,
-                          endpoint: uploadConfig.skPns.endpoint,
-                          field: uploadConfig.skPns.field,
-                          fileName: "skPns",
+                          label: uploadConfig.SKPangkat.label,
+                          endpoint: uploadConfig.SKPangkat.endpoint,
+                          field: uploadConfig.SKPangkat.field,
+                          fileName: "SKPangkat",
                         })
                       }
                       color="purple"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].skPns}
+                      hasFile={
+                        !!dataProfile?.pegawai.usulanNaikJenjangs[0].SKPangkat
+                      }
                     />
                     <DocumentUploadItem
-                      title="PAK"
-                      icon={FaFileInvoiceDollar}
+                      title="SK Jafung"
+                      icon={FaGraduationCap}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].PAK
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].SKJafung
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.PAK.label,
-                          endpoint: uploadConfig.PAK.endpoint,
-                          field: uploadConfig.PAK.field,
-                          fileName: "PAK",
+                          label: uploadConfig.SKJafung.label,
+                          endpoint: uploadConfig.SKJafung.endpoint,
+                          field: uploadConfig.SKJafung.field,
+                          fileName: "SKJafung",
                         })
                       }
-                      color="orange"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].PAK}
+                      color="cyan"
+                      hasFile={
+                        !!dataProfile?.pegawai.usulanNaikJenjangs[0].SKJafung
+                      }
                     />
                     <DocumentUploadItem
                       title="SK Mutasi"
                       icon={FaFileSignature}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skMutasi
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].SKMutasi
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.skMutasi.label,
-                          endpoint: uploadConfig.skMutasi.endpoint,
-                          field: uploadConfig.skMutasi.field,
-                          fileName: "skMutasi",
+                          label: uploadConfig.SKMutasi.label,
+                          endpoint: uploadConfig.SKMutasi.endpoint,
+                          field: uploadConfig.SKMutasi.field,
+                          fileName: "SKMutasi",
                         })
                       }
                       color="teal"
                       hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].skMutasi
+                        !!dataProfile?.pegawai.usulanNaikJenjangs[0].SKMutasi
                       }
                     />
                   </VStack>
@@ -782,108 +809,108 @@ function NaikGolongan() {
                   {/* Right Column */}
                   <VStack spacing={4} align="stretch">
                     <DocumentUploadItem
-                      title="SK Jafung"
-                      icon={FaGraduationCap}
-                      onPreview={() =>
-                        handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skJafung
-                        )
-                      }
-                      onUpload={() =>
-                        setUploadModal({
-                          open: true,
-                          label: uploadConfig.skJafung.label,
-                          endpoint: uploadConfig.skJafung.endpoint,
-                          field: uploadConfig.skJafung.field,
-                          fileName: "skJafung",
-                        })
-                      }
-                      color="cyan"
-                      hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].skJafung
-                      }
-                    />
-                    <DocumentUploadItem
                       title="SKP"
                       icon={FaFileAlt}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skp
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].SKP
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.skp.label,
-                          endpoint: uploadConfig.skp.endpoint,
-                          field: uploadConfig.skp.field,
-                          fileName: "skp",
+                          label: uploadConfig.SKP.label,
+                          endpoint: uploadConfig.SKP.endpoint,
+                          field: uploadConfig.SKP.field,
+                          fileName: "SKP",
                         })
                       }
                       color="pink"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].skp}
+                      hasFile={!!dataProfile?.pegawai.usulanNaikJenjangs[0].SKP}
                     />
                     <DocumentUploadItem
                       title="STR"
                       icon={FaCertificate}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].str
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].STR
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.str.label,
-                          endpoint: uploadConfig.str.endpoint,
-                          field: uploadConfig.str.field,
-                          fileName: "str",
+                          label: uploadConfig.STR.label,
+                          endpoint: uploadConfig.STR.endpoint,
+                          field: uploadConfig.STR.field,
+                          fileName: "STR",
                         })
                       }
                       color="indigo"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].str}
+                      hasFile={!!dataProfile?.pegawai.usulanNaikJenjangs[0].STR}
                     />
                     <DocumentUploadItem
-                      title="Surat Cuti"
+                      title="SIP"
                       icon={FaFileContract}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].suratCuti
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].SIP
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.suratCuti.label,
-                          endpoint: uploadConfig.suratCuti.endpoint,
-                          field: uploadConfig.suratCuti.field,
-                          fileName: "suratCuti",
+                          label: uploadConfig.SIP.label,
+                          endpoint: uploadConfig.SIP.endpoint,
+                          field: uploadConfig.SIP.field,
+                          fileName: "SIP",
                         })
                       }
-                      color="red"
+                      color="teal"
+                      hasFile={!!dataProfile?.pegawai.usulanNaikJenjangs[0].SIP}
+                    />
+                    <DocumentUploadItem
+                      title="Surat Rekomendasi"
+                      icon={FaFileSignature}
+                      onPreview={() =>
+                        handlePreview(
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].rekom
+                        )
+                      }
+                      onUpload={() =>
+                        setUploadModal({
+                          open: true,
+                          label: uploadConfig.rekom.label,
+                          endpoint: uploadConfig.rekom.endpoint,
+                          field: uploadConfig.rekom.field,
+                          fileName: "rekom",
+                        })
+                      }
+                      color="orange"
                       hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].suratCuti
+                        !!dataProfile?.pegawai.usulanNaikJenjangs[0].rekom
                       }
                     />
                     <DocumentUploadItem
-                      title="SK Pencantuman Gelar"
-                      icon={FaUserGraduate}
+                      title="Peta Jabatan"
+                      icon={FaFileInvoiceDollar}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].gelar
+                          dataProfile?.pegawai.usulanNaikJenjangs[0].petaJabatan
                         )
                       }
                       onUpload={() =>
                         setUploadModal({
                           open: true,
-                          label: uploadConfig.gelar.label,
-                          endpoint: uploadConfig.gelar.endpoint,
-                          field: uploadConfig.gelar.field,
-                          fileName: "gelar",
+                          label: uploadConfig.petaJabatan.label,
+                          endpoint: uploadConfig.petaJabatan.endpoint,
+                          field: uploadConfig.petaJabatan.field,
+                          fileName: "petaJabatan",
                         })
                       }
                       color="yellow"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].gelar}
+                      hasFile={
+                        !!dataProfile?.pegawai.usulanNaikJenjangs[0].petaJabatan
+                      }
                     />
                   </VStack>
                 </SimpleGrid>
@@ -906,7 +933,8 @@ function NaikGolongan() {
                 </Box>
               </CardBody>
             </Card>
-          ) : dataProfile?.pegawai?.usulanPegawais[0]?.status === 0 ? (
+          ) : dataProfile?.pegawai?.usulanNaikJenjangs[0]?.status ===
+            "diusulkan" ? (
             <Card
               shadow="xl"
               border="1px"
@@ -919,11 +947,11 @@ function NaikGolongan() {
                   <VStack spacing={4}>
                     <Icon as={FaClock} boxSize={16} color="orange.500" />
                     <Heading size="md" color="orange.600">
-                      Usulan Sedang Diproses
+                      Usulan Naik Jenjang Sedang Diproses
                     </Heading>
                     <Text color="gray.600" textAlign="center">
-                      Usulan Anda sedang dalam proses verifikasi oleh admin.
-                      Silakan tunggu notifikasi selanjutnya.
+                      Usulan naik jenjang Anda sedang dalam proses verifikasi
+                      oleh admin. Silakan tunggu notifikasi selanjutnya.
                     </Text>
                     <Button
                       leftIcon={<FaSync />}
@@ -936,7 +964,8 @@ function NaikGolongan() {
                 </Center>
               </CardBody>
             </Card>
-          ) : dataProfile?.pegawai?.usulanPegawais[0]?.status === 1 ? (
+          ) : dataProfile?.pegawai?.usulanNaikJenjangs[0]?.status ===
+            "diterima" ? (
             <Card
               shadow="xl"
               border="1px"
@@ -949,13 +978,13 @@ function NaikGolongan() {
                   <VStack spacing={4}>
                     <Icon as={FaCheckCircle} boxSize={16} color="green.500" />
                     <Heading size="md" color="green.600">
-                      Usulan Diterima!
+                      Usulan Naik Jenjang Diterima!
                     </Heading>{" "}
                     <Badge colorScheme="blue" fontSize={"20px"} px={4} py={2}>
-                      {`NOMOR PERMOHONAN:  ${dataProfile?.pegawai?.usulanPegawais[0]?.nomorUsulan}`}
+                      {`NOMOR PERMOHONAN:  ${dataProfile?.pegawai?.usulanNaikJenjangs[0]?.nomorUsulan}`}
                     </Badge>
                     <Text color="gray.600" textAlign="center">
-                      Selamat! Usulan naik golongan Anda telah disetujui dan
+                      Selamat! Usulan naik jenjang Anda telah disetujui dan
                       diterima.
                     </Text>
                     <Badge colorScheme="green" size="lg" px={4} py={2}>
@@ -968,7 +997,7 @@ function NaikGolongan() {
                       <Button
                         onClick={() =>
                           handleLinkClick(
-                            dataProfile?.pegawai?.usulanPegawais[0]
+                            dataProfile?.pegawai?.usulanNaikJenjangs[0]
                               ?.linkSertifikat
                           )
                         }
@@ -987,7 +1016,7 @@ function NaikGolongan() {
                         whiteSpace="normal"
                       >
                         {
-                          dataProfile?.pegawai?.usulanPegawais[0]
+                          dataProfile?.pegawai?.usulanNaikJenjangs[0]
                             ?.linkSertifikat
                         }
                       </Button>
@@ -1006,48 +1035,50 @@ function NaikGolongan() {
             >
               <CardHeader bg="gray.50" borderTopRadius="xl">
                 <Heading size="md" color="gray.800">
-                  📤 Ajukan Usulan Naik Golongan
+                  📤 Ajukan Usulan Naik Jenjang
                 </Heading>
                 <Text color="gray.600" fontSize="sm">
                   Upload dokumen yang diperlukan untuk mengajukan usulan naik
-                  golongan
+                  jenjang. Pastikan semua dokumen lengkap dan valid sesuai
+                  persyaratan yang berlaku.
                 </Text>
               </CardHeader>
               <CardBody p={8}>
                 <Formik
                   initialValues={{
-                    formulirUsulan: null,
-                    skCpns: null,
-                    skPns: null,
-                    PAK: null,
-                    skJafung: null,
-                    skp: null,
-                    skMutasi: null,
+                    formulir: null,
+                    ukom: null,
+                    SKPangkat: null,
+                    SKJafung: null,
+                    SKP: null,
                     STR: null,
-                    suratCuti: null,
+                    SIP: null,
+                    rekom: null,
+                    petaJabatan: null,
+                    SKMutasi: null,
                   }}
                   validationSchema={validationSchema}
                   onSubmit={async (values, { setSubmitting, resetForm }) => {
                     const formData = new FormData();
                     // Append semua field wajib (sudah divalidasi pasti ada)
-                    formData.append("formulirUsulan", values.formulirUsulan);
-                    formData.append("skCpns", values.skCpns);
-                    formData.append("skPns", values.skPns);
-                    formData.append("PAK", values.PAK);
-                    formData.append("skJafung", values.skJafung);
-                    formData.append("skp", values.skp);
+                    formData.append("formulir", values.formulir);
+                    formData.append("ukom", values.ukom);
+                    formData.append("SKPangkat", values.SKPangkat);
+                    formData.append("SKJafung", values.SKJafung);
+                    formData.append("SKP", values.SKP);
+                    formData.append("STR", values.STR);
+                    formData.append("SIP", values.SIP);
+                    formData.append("rekom", values.rekom);
+                    formData.append("petaJabatan", values.petaJabatan);
                     formData.append("pegawaiId", user[0].pegawaiId);
                     // Append field opsional jika ada
-                    if (values.skMutasi)
-                      formData.append("skMutasi", values.skMutasi);
-                    if (values.STR) formData.append("STR", values.STR);
-                    if (values.suratCuti)
-                      formData.append("suratCuti", values.suratCuti);
+                    if (values.SKMutasi)
+                      formData.append("SKMutasi", values.SKMutasi);
                     try {
                       await axios.post(
                         `${
                           import.meta.env.VITE_REACT_APP_API_BASE_URL
-                        }/usulan/post/golongan`,
+                        }/naik-jenjang/post/naik-jenjang`,
                         formData,
                         { headers: { "Content-Type": "multipart/form-data" } }
                       );
@@ -1162,11 +1193,15 @@ function NaikGolongan() {
                           leftIcon={<FaCloudUploadAlt />}
                           isLoading={isSubmitting}
                           isDisabled={
-                            !values.formulirUsulan ||
-                            !values.skCpns ||
-                            !values.skPns ||
-                            !values.PAK ||
-                            !values.skJafung
+                            !values.formulir ||
+                            !values.ukom ||
+                            !values.SKPangkat ||
+                            !values.SKJafung ||
+                            !values.SKP ||
+                            !values.STR ||
+                            !values.SIP ||
+                            !values.rekom ||
+                            !values.petaJabatan
                           }
                           _hover={{
                             transform: "translateY(-2px)",
@@ -1215,7 +1250,7 @@ function NaikGolongan() {
                     {/* Menampilkan nama file lama jika ada */}
                     {(() => {
                       const usulanPegawai =
-                        dataProfile?.pegawai?.usulanPegawais[0];
+                        dataProfile?.pegawai?.usulanNaikJenjangs[0];
                       const namaFileLama = getNamaFileLama(
                         uploadModal.field,
                         usulanPegawai
@@ -1406,4 +1441,4 @@ const DocumentUploadItem = ({
   </Card>
 );
 
-export default NaikGolongan;
+export default NaikJenjang;

@@ -1055,24 +1055,36 @@ function Rampung(props) {
                         {jenis}
                       </Heading>
                       <Box overflowX="auto">
-                        <Table variant="simple" size="md">
+                        <Table
+                          variant="simple"
+                          size="md"
+                          tableLayout="fixed"
+                          width="100%"
+                        >
                           <Thead bg="gray.50">
                             <Tr>
-                              <Th>Item</Th>
-                              <Th isNumeric>Nilai</Th>
-                              <Th isNumeric>Qty</Th>
-                              <Th>Satuan</Th>
-                              <Th>Bukti</Th>
+                              <Th style={{ width: "25%" }}>Item</Th>
+                              <Th isNumeric style={{ width: "15%" }}>
+                                Nilai
+                              </Th>
+                              <Th isNumeric style={{ width: "10%" }}>
+                                Qty
+                              </Th>
+                              <Th style={{ width: "10%" }}>Satuan</Th>
+                              <Th isNumeric style={{ width: "15%" }}>
+                                Total
+                              </Th>
+                              <Th style={{ width: "15%" }}>Bukti</Th>
                               {dataRampung?.result?.statusId !== 3 &&
                                 dataRampung?.result?.statusId !== 2 && (
-                                  <Th>Aksi</Th>
+                                  <Th style={{ width: "10%" }}>Aksi</Th>
                                 )}
                             </Tr>
                           </Thead>
                           <Tbody>
                             {groupedData[jenis].map((item) => (
                               <Tr key={item.id} _hover={{ bg: "gray.50" }}>
-                                <Td>
+                                <Td width="25%">
                                   {editMode === item.id ? (
                                     <Input
                                       value={editedData.item}
@@ -1083,7 +1095,7 @@ function Rampung(props) {
                                     <Text fontWeight="medium">{item.item}</Text>
                                   )}
                                 </Td>
-                                <Td isNumeric>
+                                <Td width="15%" isNumeric>
                                   {editMode === item.id ? (
                                     <Input
                                       type="number"
@@ -1126,6 +1138,29 @@ function Rampung(props) {
                                     />
                                   ) : (
                                     <Text>{item.satuan}</Text>
+                                  )}
+                                </Td>
+                                <Td isNumeric>
+                                  {editMode === item.id ? (
+                                    <Text
+                                      fontFamily="mono"
+                                      fontWeight="semibold"
+                                    >
+                                      {new Intl.NumberFormat("id-ID", {
+                                        style: "currency",
+                                        currency: "IDR",
+                                      }).format(item.nilai * item.qty)}
+                                    </Text>
+                                  ) : (
+                                    <Text
+                                      fontFamily="mono"
+                                      fontWeight="semibold"
+                                    >
+                                      {new Intl.NumberFormat("id-ID", {
+                                        style: "currency",
+                                        currency: "IDR",
+                                      }).format(item.nilai * item.qty)}
+                                    </Text>
                                   )}
                                 </Td>
                                 <Td>
@@ -1255,70 +1290,6 @@ function Rampung(props) {
           </Card>
 
           {/* Breakdown Perhitungan - Development Only */}
-          {process.env.NODE_ENV === "development" && (
-            <Card shadow="md" borderRadius="lg" mt={4}>
-              <CardHeader bg="yellow.50" py={4}>
-                <Heading size="sm" color="yellow.700">
-                  Debug: Breakdown Perhitungan
-                </Heading>
-              </CardHeader>
-              <CardBody>
-                <VStack spacing={3} align="stretch">
-                  {Object.entries(groupedData).map(([jenis, items]) => (
-                    <Box key={jenis}>
-                      <Text fontWeight="semibold" color="gray.700" mb={2}>
-                        {jenis}:
-                      </Text>
-                      {items.map((item, index) => {
-                        const itemTotal = item.nilai * item.qty;
-                        // Untuk jenis Rill, tidak ada rillTotal tambahan
-                        const rillTotal =
-                          item.jenisRincianBPD?.jenis === "Rill"
-                            ? 0
-                            : item.rills?.reduce(
-                                (rillSum, rill) => rillSum + rill.nilai,
-                                0
-                              ) || 0;
-                        const totalPerItem = itemTotal + rillTotal;
-
-                        return (
-                          <Box
-                            key={index}
-                            ml={4}
-                            mb={2}
-                            p={2}
-                            bg="gray.50"
-                            borderRadius="md"
-                          >
-                            <Text fontSize="sm">
-                              {item.item}: {item.nilai.toLocaleString("id-ID")}{" "}
-                              × {item.qty} = {itemTotal.toLocaleString("id-ID")}
-                              {item.jenisRincianBPD?.jenis === "Rill"
-                                ? ` (Jenis Rill - tidak ada rill tambahan)`
-                                : rillTotal > 0
-                                ? ` + Rill: ${rillTotal.toLocaleString(
-                                    "id-ID"
-                                  )}`
-                                : ""}
-                              {` = Total: ${totalPerItem.toLocaleString(
-                                "id-ID"
-                              )}`}
-                            </Text>
-                          </Box>
-                        );
-                      })}
-                    </Box>
-                  ))}
-                  <Divider />
-                  <Box textAlign="center">
-                    <Text fontWeight="bold" color="primary">
-                      Grand Total: {grandTotal.toLocaleString("id-ID")}
-                    </Text>
-                  </Box>
-                </VStack>
-              </CardBody>
-            </Card>
-          )}
         </Container>
       </Box>
 

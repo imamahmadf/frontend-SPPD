@@ -67,6 +67,10 @@ import DaftarSPPD from "./pages/Surat/DaftarSPPD.jsx";
 import LaporanPersediaanKeluar from "./pages/Aset/LaporanPersediaanKeluar.jsx";
 import RekapAdminAset from "./pages/Aset/RekapAdminAset.jsx";
 import SuratPesanan from "./pages/Aset/SuratPesanan.jsx";
+import LaporanUsulanPegawai from "./pages/Pegawai/LaporanUsulanPegawai.jsx";
+import NaikJenjang from "./pages/Pegawai/NaikJenjang.jsx";
+import DaftarNaikJenjang from "./pages/Pegawai/DaftarNaikJenjang.jsx";
+import DetailNaikJenjang from "./pages/Pegawai/DetailNaikJenjang.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -202,6 +206,20 @@ function App() {
           <ProtectedRoute
             component={UsulanPegawai}
             path="/kepegawaian/usulan"
+            exact
+            roleRoute={[5, 7]}
+          />
+
+          <ProtectedRoute
+            component={DaftarNaikJenjang}
+            path="/kepegawaian/daftar-naik-jenjang"
+            exact
+            roleRoute={[5, 7]}
+          />
+
+          <ProtectedRoute
+            component={LaporanUsulanPegawai}
+            path="/kepegawaian/laporan-usulan-pegawai"
             exact
             roleRoute={[5, 7]}
           />
@@ -399,11 +417,25 @@ function App() {
             roleRoute={[9, 5]}
           />
           <ProtectedRoute
+            component={NaikJenjang}
+            path="/pegawai/naik-jenjang"
+            exact
+            roleRoute={[9, 5]}
+          />
+          <ProtectedRoute
             component={DetailUsulan}
             path="/pegawai/detail-usulan/:id"
             exact
             roleRoute={[9, 5]}
           />
+
+          <ProtectedRoute
+            component={DetailNaikJenjang}
+            path="/pegawai/detail-naik-jenjang/:id"
+            exact
+            roleRoute={[9, 5]}
+          />
+
           <ProtectedRoute
             component={RekapAdminAset}
             path="/admin-aset/rekap-persediaan/:id"
