@@ -121,7 +121,7 @@ function DaftarAdmin() {
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container maxW={"2280px"} variant={"primary"} ps={"0px"} my={"30px"}>
+        <Container maxW={"3280px"} variant={"primary"} ps={"0px"} my={"30px"}>
           <Box style={{ overflowX: "auto" }} p={"30px"}>
             <Flex gap={4} my={"30px"}>
               {" "}

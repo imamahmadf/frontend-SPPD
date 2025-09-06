@@ -71,6 +71,8 @@ import LaporanUsulanPegawai from "./pages/Pegawai/LaporanUsulanPegawai.jsx";
 import NaikJenjang from "./pages/Pegawai/NaikJenjang.jsx";
 import DaftarNaikJenjang from "./pages/Pegawai/DaftarNaikJenjang.jsx";
 import DetailNaikJenjang from "./pages/Pegawai/DetailNaikJenjang.jsx";
+import DaftarKwitansiGlobal from "./pages/DaftarKwitansiGlobal.jsx";
+import DetailKwitansiGlobal from "./pages/DetailKwitansiGlobal.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -492,6 +494,19 @@ function App() {
             path="/aset/detail-laporan-keluar/:id"
             exact
             roleRoute={[5, 10, 8]}
+          />
+
+          <ProtectedRoute
+            component={DaftarKwitansiGlobal}
+            path="/perjalanan/kwitansi-global"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={DetailKwitansiGlobal}
+            path="/perjalanan/detail-kwitansi-global/:id"
+            exact
+            roleRoute={[5, 1]}
           />
 
           <Route component={Home} path="/" />

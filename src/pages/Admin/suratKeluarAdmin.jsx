@@ -195,6 +195,7 @@ function suratKeluarAdmin() {
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container maxW={"2880px"} variant={"primary"} pt={"30px"} ps={"0px"}>
+          {JSON.stringify(user)}
           <Flex gap={4} p={"30px"}>
             <FormControl>
               <FormLabel>Tanggal Awal</FormLabel>

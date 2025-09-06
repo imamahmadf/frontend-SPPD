@@ -53,6 +53,7 @@ const menuData = [
     items: [
       { label: "Perjalanan", path: "/perjalanan" },
       { label: "Daftar Perjalanan", path: "/perjalanan/daftar" },
+      { label: "Kwitansi Global", path: "/perjalanan/kwitansi-global" },
       { label: "Rekap Perjalanan", path: "/perjalanan/rekap" },
       { label: "Perjalanan Kepala Dinas", path: "/perjalanan/kalender-kadis" },
     ],

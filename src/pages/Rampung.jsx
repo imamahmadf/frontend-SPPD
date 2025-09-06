@@ -347,6 +347,82 @@ function Rampung(props) {
       });
   };
 
+  // const cetak = () => {
+  //   setIsPrinting(true);
+  //   axios
+  //     .post(
+  //       `${
+  //         import.meta.env.VITE_REACT_APP_API_BASE_URL
+  //       }/kwitansi/post/cetak-kwitansi-pdf`,
+  //       {
+  //         id: dataRampung.result.id,
+  //         indukUnitKerja:
+  //           user[0]?.unitKerja_profile.indukUnitKerja.indukUnitKerja,
+  //         nomorSPD: dataRampung.result.nomorSPD,
+  //         nomorST: dataRampung?.result?.perjalanan.noSuratTugas,
+  //         pegawaiNama: dataRampung.result.pegawai.nama,
+  //         pegawaiNip: dataRampung.result.pegawai.nip,
+  //         pegawaiJabatan: dataRampung.result.pegawai.jabatan,
+  //         untuk: dataRampung.result.perjalanan.untuk,
+  //         PPTKNama: dataRampung.result.perjalanan.PPTK.pegawai_PPTK.nama,
+  //         PPTKNip: dataRampung.result.perjalanan.PPTK.pegawai_PPTK.nip,
+  //         KPANama: dataRampung.result.perjalanan.KPA.pegawai_KPA.nama,
+  //         KPANip: dataRampung.result.perjalanan.KPA.pegawai_KPA.nip,
+  //         KPAJabatan: dataRampung.result.perjalanan.KPA.jabatan,
+  //         templateId,
+  //         subKegiatan:
+  //           dataRampung.result.perjalanan.daftarSubKegiatan.subKegiatan,
+  //         kodeRekening: `${dataRampung.result.perjalanan.daftarSubKegiatan.kodeRekening}${dataRampung.result.perjalanan.jenisPerjalanan.kodeRekening}`,
+  //         rincianBPD: dataRampung.result.rincianBPDs,
+  //         tanggalPengajuan: dataRampung.result.perjalanan.tanggalPengajuan,
+  //         totalDurasi,
+  //         jenis: dataRampung.result.perjalanan.jenisPerjalanan.id,
+  //         tempat: dataRampung.result.perjalanan.tempats,
+  //         jenisPerjalanan: dataRampung.result.perjalanan.jenisPerjalanan.jenis,
+  //         dataBendahara: dataRampung.result.perjalanan.bendahara,
+  //         tahun: new Date(
+  //           dataRampung?.result?.perjalanan.tanggalPengajuan
+  //         ).getFullYear(),
+  //       },
+  //       {
+  //         responseType: "blob", // penting untuk file binary
+  //       }
+  //     )
+  //     .then((res) => {
+  //       const url = window.URL.createObjectURL(new Blob([res.data]));
+  //       const link = document.createElement("a");
+  //       link.href = url;
+  //       link.setAttribute(
+  //         "download",
+  //         `kwitansi_${dataRampung?.result?.pegawai?.nama}_${dataRampung?.result?.id}.pdf` // ubah ke .pdf
+  //       );
+  //       document.body.appendChild(link);
+  //       link.click();
+  //       link.remove();
+
+  //       toast({
+  //         title: "Berhasil!",
+  //         description: "File PDF berhasil diunduh.",
+  //         status: "success",
+  //         duration: 5000,
+  //         isClosable: true,
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       console.error(err);
+  //       toast({
+  //         title: "Error!",
+  //         description: "Gagal mengunduh file PDF.",
+  //         status: "error",
+  //         duration: 5000,
+  //         isClosable: true,
+  //       });
+  //     })
+  //     .finally(() => {
+  //       setIsPrinting(false);
+  //     });
+  // };
+
   YupPassword(Yup);
 
   // /////////////
