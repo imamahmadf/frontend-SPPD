@@ -382,6 +382,104 @@ function DetailKwitansiGlobal(props) {
               </Text>
             </Box>
 
+            {/* Informasi Penting Kwitansi Global */}
+            {dataKwitGlobal[0] && (
+              <Box 
+                mb={"30px"} 
+                p={6} 
+                bg="gray.50" 
+                borderRadius="lg" 
+                border="1px" 
+                borderColor="gray.200"
+              >
+                <Heading size="md" color="gray.700" mb={4}>
+                  Informasi Kwitansi Global
+                </Heading>
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                      Pegawai Penerima
+                    </Text>
+                    <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                      {dataKwitGlobal[0]?.pegawai?.nama || "-"}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      NIP: {dataKwitGlobal[0]?.pegawai?.nip || "-"}
+                    </Text>
+                  </Box>
+
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                      Jenis Perjalanan
+                    </Text>
+                    <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                      {dataKwitGlobal[0]?.jenisPerjalanan?.jenis || "-"}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Kode: {dataKwitGlobal[0]?.jenisPerjalanan?.kodeRekening || "-"}
+                    </Text>
+                  </Box>
+
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                      Sub Kegiatan
+                    </Text>
+                    <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                      {dataKwitGlobal[0]?.subKegiatan?.subKegiatan || "-"}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Kode: {dataKwitGlobal[0]?.subKegiatan?.kodeRekening || "-"}
+                    </Text>
+                  </Box>
+
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                      KPA (Kuasa Pengguna Anggaran)
+                    </Text>
+                    <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                      {dataKwitGlobal[0]?.KPA?.pegawai_KPA?.nama || "-"}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Jabatan: {dataKwitGlobal[0]?.KPA?.jabatan || "-"}
+                    </Text>
+                  </Box>
+
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                      Bendahara
+                    </Text>
+                    <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                      {dataKwitGlobal[0]?.bendahara?.pegawai_bendahara?.nama || "-"}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Jabatan: {dataKwitGlobal[0]?.bendahara?.jabatan || "-"}
+                    </Text>
+                  </Box>
+
+                  <Box>
+                    <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                      Tanggal Dibuat
+                    </Text>
+                    <Text fontSize="md" fontWeight="semibold" color="gray.800">
+                      {dataKwitGlobal[0]?.createdAt 
+                        ? new Date(dataKwitGlobal[0].createdAt).toLocaleDateString("id-ID", {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })
+                        : "-"}
+                    </Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Terakhir diperbarui: {dataKwitGlobal[0]?.updatedAt 
+                        ? new Date(dataKwitGlobal[0].updatedAt).toLocaleDateString("id-ID")
+                        : "-"}
+                    </Text>
+                  </Box>
+                </SimpleGrid>
+              </Box>
+            )}
+
             {/* Action Buttons */}
             <Flex gap={4} mb={"30px"} wrap="wrap" align="center">
               {dataKwitGlobal[0]?.status === "diterima" ? (
@@ -418,8 +516,8 @@ function DetailKwitansiGlobal(props) {
               {/* Status Badge */}
               {dataKwitGlobal[0]?.status && (
                 <Box
-                  px={3}
-                  py={1}
+                  px={4}
+                  py={2}
                   borderRadius="full"
                   bg={
                     dataKwitGlobal[0]?.status === "diterima"
@@ -436,8 +534,16 @@ function DetailKwitansiGlobal(props) {
                       : "gray.700"
                   }
                   fontSize="sm"
-                  fontWeight="medium"
-                  textTransform="capitalize"
+                  fontWeight="semibold"
+                  textTransform="uppercase"
+                  border="2px"
+                  borderColor={
+                    dataKwitGlobal[0]?.status === "diterima"
+                      ? "green.200"
+                      : dataKwitGlobal[0]?.status === "dibuat"
+                      ? "blue.200"
+                      : "gray.200"
+                  }
                 >
                   Status: {dataKwitGlobal[0]?.status}
                 </Box>
