@@ -73,6 +73,8 @@ import DaftarNaikJenjang from "./pages/Pegawai/DaftarNaikJenjang.jsx";
 import DetailNaikJenjang from "./pages/Pegawai/DetailNaikJenjang.jsx";
 import DaftarKwitansiGlobal from "./pages/DaftarKwitansiGlobal.jsx";
 import DetailKwitansiGlobal from "./pages/DetailKwitansiGlobal.jsx";
+import DaftarKwitansiGlobalKeuangan from "./pages/Admin/DaftarKwitansiGlobalKeuangan.jsx";
+import DetailKwitansiGlobalKeuangan from "./pages/Admin/DetailKwitansiGlobalKeuangan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -243,6 +245,18 @@ function App() {
             path="/keuangan/dalam-kota"
             roleRoute={[3, 5]}
           />
+
+          <ProtectedRoute
+            component={DaftarKwitansiGlobalKeuangan}
+            path="/keuangan/daftar-kwitansi-global"
+            roleRoute={[3, 5]}
+          />
+          <ProtectedRoute
+            component={DetailKwitansiGlobalKeuangan}
+            path="/keuangan/detail-kwitansi-global/:id"
+            roleRoute={[3, 5]}
+          />
+
           <ProtectedRoute
             component={DaftarAdmin}
             path="/keuangan/daftar-perjalanan"

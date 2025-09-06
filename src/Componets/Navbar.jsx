@@ -63,6 +63,10 @@ const menuData = [
     icon: BiWallet,
     pathPrefix: "/keuangan",
     items: [
+      {
+        label: "Daftar Kwitansi Global",
+        path: "/keuangan/daftar-kwitansi-global",
+      },
       { label: "Daftar Perjalanan", path: "/keuangan/daftar-perjalanan" },
       { label: "Perjalanan Pegawai", path: "/keuangan/perjalanan-pegawai" },
       { label: "Template Keuangan", path: "/keuangan/template" },

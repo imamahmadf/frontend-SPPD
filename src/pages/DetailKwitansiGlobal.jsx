@@ -360,40 +360,89 @@ function DetailKwitansiGlobal(props) {
   return (
     <>
       <Layout>
-        <Box minH={"70vh"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Box minH={"70vh"} pb={"40px"} px={{ base: "20px", md: "30px" }}>
           <Container
             style={{ overflowX: "auto" }}
             bgColor={"white"}
             maxW={"1280px"}
-            p={"30px"}
-            borderRadius={"5px"}
+            p={{ base: "20px", md: "30px" }}
+            borderRadius={"12px"}
+            boxShadow={
+              "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+            }
             bg={colorMode === "dark" ? "gray.800" : "white"}
           >
-            {/* {JSON.stringify(dataKwitGlobal[0]?.perjalanans[0])} */}
+            {/* Header Section */}
+            <Box mb={"30px"}>
+              <Heading size="lg" color="gray.700" mb={4}>
+                Detail Kwitansi Global
+              </Heading>
+              <Text color="gray.600" fontSize="sm">
+                Kelola dan lihat detail kwitansi global perjalanan dinas
+              </Text>
+            </Box>
 
-            <HStack gap={5} mb={"30px"}>
+            {/* Action Buttons */}
+            <Flex gap={4} mb={"30px"} wrap="wrap" align="center">
               {dataKwitGlobal[0]?.status === "diterima" ? (
                 <Button
                   onClick={kirimDataTabel}
-                  variant={"outline"}
+                  variant={"solid"}
                   px={"30px"}
                   colorScheme="blue"
                   isLoading={isPrinting}
                   loadingText="Mengunduh..."
                   disabled={isPrinting}
+                  leftIcon={<BsFileEarmarkArrowDown />}
+                  size="md"
                 >
                   {isPrinting ? "Mengunduh..." : "Download Word"}
                 </Button>
               ) : null}
 
               {dataKwitGlobal[0]?.status === "dibuat" ? (
-                <Button onClick={onDetailOpen} variant={"outline"} px={"30px"}>
+                <Button
+                  onClick={onDetailOpen}
+                  variant={"outline"}
+                  px={"30px"}
+                  colorScheme="green"
+                  leftIcon={<BsEyeFill />}
+                  size="md"
+                >
                   Detail Kwitansi
                 </Button>
               ) : null}
 
               <Spacer />
-            </HStack>
+
+              {/* Status Badge */}
+              {dataKwitGlobal[0]?.status && (
+                <Box
+                  px={3}
+                  py={1}
+                  borderRadius="full"
+                  bg={
+                    dataKwitGlobal[0]?.status === "diterima"
+                      ? "green.100"
+                      : dataKwitGlobal[0]?.status === "dibuat"
+                      ? "blue.100"
+                      : "gray.100"
+                  }
+                  color={
+                    dataKwitGlobal[0]?.status === "diterima"
+                      ? "green.700"
+                      : dataKwitGlobal[0]?.status === "dibuat"
+                      ? "blue.700"
+                      : "gray.700"
+                  }
+                  fontSize="sm"
+                  fontWeight="medium"
+                  textTransform="capitalize"
+                >
+                  Status: {dataKwitGlobal[0]?.status}
+                </Box>
+              )}
+            </Flex>
             {(() => {
               const kg = Array.isArray(dataKwitGlobal)
                 ? dataKwitGlobal[0]
@@ -455,44 +504,98 @@ function DetailKwitansiGlobal(props) {
                 });
               });
               if (rows.length === 0) {
-                return <Text color="gray.500">Tidak ada data perjalanan</Text>;
+                return (
+                  <Box textAlign="center" py={10}>
+                    <BsClipboard2Data size={48} color="#CBD5E0" />
+                    <Text color="gray.500" mt={4} fontSize="lg">
+                      Tidak ada data perjalanan
+                    </Text>
+                    <Text color="gray.400" fontSize="sm">
+                      Data perjalanan akan muncul setelah ditambahkan
+                    </Text>
+                  </Box>
+                );
               }
               const totalAll = rows.reduce((a, r) => a + (r.total || 0), 0);
               return (
-                <Table variant="primary" size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>No Surat Tugas</Th> <Th>Nama Pegawai</Th>
-                      <Th>Tanggal Berangkat</Th>
-                      <Th>Tempat</Th>
-                      <Th isNumeric>BPD</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {rows.map((r, idx) => (
-                      <Tr key={idx}>
-                        <Td>{r.noSuratTugas}</Td> <Td>{r.nama}</Td>
-                        <Td>{r.tanggalBerangkat}</Td>
-                        <Td>{r.tempat}</Td>
-                        <Td isNumeric>Rp {r.total.toLocaleString("id-ID")}</Td>
-                      </Tr>
-                    ))}
-                    <Tr>
-                      <Td colSpan={4} fontWeight="bold">
-                        TOTAL
-                      </Td>
-                      <Td isNumeric fontWeight="bold">
-                        Rp {totalAll.toLocaleString("id-ID")}
-                      </Td>
-                    </Tr>
-                  </Tbody>
-                </Table>
+                <Box>
+                  <Heading size="md" color="gray.700" mb={4}>
+                    Data Perjalanan Dinas
+                  </Heading>
+                  <Box
+                    overflowX="auto"
+                    borderRadius="lg"
+                    border="1px"
+                    borderColor="gray.200"
+                  >
+                    <Table variant="simple" size="md">
+                      <Thead bg="gray.50">
+                        <Tr>
+                          <Th color="gray.600" fontWeight="semibold">
+                            No Surat Tugas
+                          </Th>
+                          <Th color="gray.600" fontWeight="semibold">
+                            Nama Pegawai
+                          </Th>
+                          <Th color="gray.600" fontWeight="semibold">
+                            Tanggal Berangkat
+                          </Th>
+                          <Th color="gray.600" fontWeight="semibold">
+                            Tempat
+                          </Th>
+                          <Th color="gray.600" fontWeight="semibold" isNumeric>
+                            BPD
+                          </Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {rows.map((r, idx) => (
+                          <Tr key={idx} _hover={{ bg: "gray.50" }}>
+                            <Td fontWeight="medium">{r.noSuratTugas}</Td>
+                            <Td>{r.nama}</Td>
+                            <Td color="gray.600">{r.tanggalBerangkat}</Td>
+                            <Td color="gray.600">{r.tempat}</Td>
+                            <Td
+                              isNumeric
+                              fontWeight="semibold"
+                              color="green.600"
+                            >
+                              Rp {r.total.toLocaleString("id-ID")}
+                            </Td>
+                          </Tr>
+                        ))}
+                        <Tr bg="blue.50" borderTop="2px" borderColor="blue.200">
+                          <Td colSpan={4} fontWeight="bold" color="blue.700">
+                            TOTAL
+                          </Td>
+                          <Td
+                            isNumeric
+                            fontWeight="bold"
+                            color="blue.700"
+                            fontSize="lg"
+                          >
+                            Rp {totalAll.toLocaleString("id-ID")}
+                          </Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+                  </Box>
+                </Box>
               );
             })()}
             {dataKwitGlobal[0]?.status === "dibuat" ? (
-              <Button mt={"30px"} variant={"primary"} onClick={ajukan}>
-                Ajukan
-              </Button>
+              <Flex justify="center" mt={"30px"}>
+                <Button
+                  variant={"solid"}
+                  colorScheme="green"
+                  onClick={ajukan}
+                  size="lg"
+                  px={8}
+                  leftIcon={<BsCartPlus />}
+                >
+                  Ajukan Kwitansi Global
+                </Button>
+              </Flex>
             ) : null}
           </Container>
         </Box>
@@ -504,11 +607,23 @@ function DetailKwitansiGlobal(props) {
           size="6xl"
           scrollBehavior="inside"
         >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Detail Kwitansi Global</ModalHeader>
+          <ModalOverlay bg="blackAlpha.600" />
+          <ModalContent maxH="90vh" borderRadius="xl">
+            <ModalHeader
+              bg="blue.50"
+              borderTopRadius="xl"
+              borderBottom="1px"
+              borderColor="gray.200"
+            >
+              <Flex align="center" gap={3}>
+                <BsEyeFill color="#3182CE" />
+                <Text color="blue.700" fontWeight="semibold">
+                  Detail Kwitansi Global
+                </Text>
+              </Flex>
+            </ModalHeader>
             <ModalCloseButton />
-            <ModalBody>
+            <ModalBody p={6}>
               {dataPerjalanan ? (
                 <>
                   {Array.isArray(dataPerjalanan) &&
@@ -548,24 +663,38 @@ function DetailKwitansiGlobal(props) {
                         selectedCount > 0 && !areAllSelectableSelected;
 
                       return (
-                        <Checkbox
-                          isChecked={areAllSelectableSelected}
-                          isIndeterminate={isIndeterminate}
-                          onChange={(e) => {
-                            const checked = e.target.checked;
-                            if (checked) {
-                              const next = {};
-                              selectableIds.forEach((id) => (next[id] = true));
-                              setSelectedPerjalanan(next);
-                            } else {
-                              setSelectedPerjalanan({});
-                            }
-                          }}
-                          colorScheme="green"
+                        <Box
+                          p={4}
+                          bg="green.50"
+                          borderRadius="lg"
+                          border="1px"
+                          borderColor="green.200"
+                          mb={6}
                         >
-                          Pilih Semua ({selectableIds.length} dari{" "}
-                          {dataPerjalanan.length} perjalanan dapat dipilih)
-                        </Checkbox>
+                          <Checkbox
+                            isChecked={areAllSelectableSelected}
+                            isIndeterminate={isIndeterminate}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              if (checked) {
+                                const next = {};
+                                selectableIds.forEach(
+                                  (id) => (next[id] = true)
+                                );
+                                setSelectedPerjalanan(next);
+                              } else {
+                                setSelectedPerjalanan({});
+                              }
+                            }}
+                            colorScheme="green"
+                            size="lg"
+                          >
+                            <Text fontWeight="semibold" color="green.700">
+                              Pilih Semua ({selectableIds.length} dari{" "}
+                              {dataPerjalanan.length} perjalanan dapat dipilih)
+                            </Text>
+                          </Checkbox>
+                        </Box>
                       );
                     })()}{" "}
                   {dataPerjalanan && dataPerjalanan.length > 0 && (
@@ -601,13 +730,19 @@ function DetailKwitansiGlobal(props) {
                         return (
                           <Box
                             key={perjalanan.id}
-                            border="1px"
-                            borderColor={isRestricted ? "red.200" : "gray.200"}
-                            borderRadius="lg"
+                            border="2px"
+                            borderColor={isRestricted ? "red.200" : "blue.200"}
+                            borderRadius="xl"
                             p={6}
                             mb={6}
-                            bg={isRestricted ? "red.50" : "gray.50"}
+                            bg={isRestricted ? "red.50" : "blue.50"}
                             opacity={isRestricted ? 0.7 : 1}
+                            boxShadow="sm"
+                            _hover={{
+                              boxShadow: "md",
+                              transform: "translateY(-2px)",
+                              transition: "all 0.2s",
+                            }}
                           >
                             <Flex mb={3} align="center" justify="space-between">
                               <Text
@@ -651,113 +786,168 @@ function DetailKwitansiGlobal(props) {
                             {perjalanan.personils &&
                               perjalanan.personils.length > 0 && (
                                 <Box mt={4}>
-                                  <Table variant="simple" size="sm">
-                                    <Thead>
-                                      <Tr>
-                                        <Th>Asal</Th>
-                                        <Th>Tempat</Th>
-                                        <Th>Tanggal Berangkat</Th>
-                                        <Th>Nama Pegawai</Th>
-                                        <Th>Total Rincian BPD</Th>
-                                        <Th>Status</Th>
-                                      </Tr>
-                                    </Thead>
-                                    <Tbody>
-                                      {perjalanan.personils.map((personil) => {
-                                        const daftarTempat = (
-                                          perjalanan.tempats || []
-                                        )
-                                          .map((t) => {
-                                            const tempatStr = t?.tempat || "";
-                                            if (
-                                              tempatStr.toLowerCase() ===
-                                              "dalam kota"
-                                            ) {
-                                              return (
-                                                t?.dalamKota?.nama ||
-                                                "Dalam Kota"
-                                              );
-                                            }
-                                            return tempatStr;
-                                          })
-                                          .filter(Boolean)
-                                          .join(", ");
-                                        const daftarTanggal = (
-                                          perjalanan.tempats || []
-                                        )
-                                          .map(
-                                            (t) =>
-                                              t.tanggalBerangkat || t.tanggal
-                                          )
-                                          .filter(Boolean)
-                                          .map((d) => new Date(d))
-                                          .map((d) => (isNaN(d) ? null : d))
-                                          .filter(Boolean)
-                                          .map((d) =>
-                                            d.toLocaleDateString("id-ID")
-                                          )
-                                          .join(", ");
-                                        const parseNumber = (val) => {
-                                          if (typeof val === "number")
-                                            return val;
-                                          if (typeof val === "string") {
-                                            const cleaned = val.replace(
-                                              /[^0-9.-]/g,
-                                              ""
-                                            );
-                                            const num = Number(cleaned);
-                                            return isNaN(num) ? 0 : num;
-                                          }
-                                          return 0;
-                                        };
-                                        const totalRincian =
-                                          typeof personil.total === "number" &&
-                                          !isNaN(personil.total)
-                                            ? personil.total
-                                            : (
-                                                personil.rincianBPDs || []
-                                              ).reduce((acc, r) => {
-                                                const nilai = parseNumber(
-                                                  r?.nilai
-                                                );
-                                                const qty =
-                                                  r?.qty == null
-                                                    ? 1
-                                                    : parseNumber(r?.qty);
-                                                return acc + nilai * qty;
-                                              }, 0);
-
-                                        return (
-                                          <Tr key={personil.id}>
-                                            <Td>{perjalanan.asal}</Td>
-                                            <Td>{daftarTempat || "-"}</Td>
-                                            <Td>{daftarTanggal || "-"}</Td>
-                                            <Td>
-                                              {personil.pegawai?.nama || "-"}
-                                            </Td>
-                                            <Td>
-                                              Rp{" "}
-                                              {totalRincian.toLocaleString(
-                                                "id-ID"
-                                              )}
-                                            </Td>
-                                            <Td>
-                                              {personil?.status?.statusKuitansi}
-                                            </Td>
-                                          </Tr>
-                                        );
-                                      })}
-                                    </Tbody>
-                                  </Table>
-                                  <Button
-                                    onClick={() =>
-                                      history.push(
-                                        `/detail-perjalanan/${perjalanan.id}`
-                                      )
-                                    }
+                                  <Heading size="sm" color="gray.600" mb={3}>
+                                    Detail Personil
+                                  </Heading>
+                                  <Box
+                                    overflowX="auto"
+                                    borderRadius="lg"
+                                    border="1px"
+                                    borderColor="gray.200"
                                   >
-                                    detail
-                                  </Button>
+                                    <Table variant="simple" size="sm">
+                                      <Thead bg="gray.100">
+                                        <Tr>
+                                          <Th
+                                            color="gray.600"
+                                            fontWeight="semibold"
+                                          >
+                                            Asal
+                                          </Th>
+                                          <Th
+                                            color="gray.600"
+                                            fontWeight="semibold"
+                                          >
+                                            Tempat
+                                          </Th>
+                                          <Th
+                                            color="gray.600"
+                                            fontWeight="semibold"
+                                          >
+                                            Tanggal Berangkat
+                                          </Th>
+                                          <Th
+                                            color="gray.600"
+                                            fontWeight="semibold"
+                                          >
+                                            Nama Pegawai
+                                          </Th>
+                                          <Th
+                                            color="gray.600"
+                                            fontWeight="semibold"
+                                          >
+                                            Total Rincian BPD
+                                          </Th>
+                                          <Th
+                                            color="gray.600"
+                                            fontWeight="semibold"
+                                          >
+                                            Status
+                                          </Th>
+                                        </Tr>
+                                      </Thead>
+                                      <Tbody>
+                                        {perjalanan.personils.map(
+                                          (personil) => {
+                                            const daftarTempat = (
+                                              perjalanan.tempats || []
+                                            )
+                                              .map((t) => {
+                                                const tempatStr =
+                                                  t?.tempat || "";
+                                                if (
+                                                  tempatStr.toLowerCase() ===
+                                                  "dalam kota"
+                                                ) {
+                                                  return (
+                                                    t?.dalamKota?.nama ||
+                                                    "Dalam Kota"
+                                                  );
+                                                }
+                                                return tempatStr;
+                                              })
+                                              .filter(Boolean)
+                                              .join(", ");
+                                            const daftarTanggal = (
+                                              perjalanan.tempats || []
+                                            )
+                                              .map(
+                                                (t) =>
+                                                  t.tanggalBerangkat ||
+                                                  t.tanggal
+                                              )
+                                              .filter(Boolean)
+                                              .map((d) => new Date(d))
+                                              .map((d) => (isNaN(d) ? null : d))
+                                              .filter(Boolean)
+                                              .map((d) =>
+                                                d.toLocaleDateString("id-ID")
+                                              )
+                                              .join(", ");
+                                            const parseNumber = (val) => {
+                                              if (typeof val === "number")
+                                                return val;
+                                              if (typeof val === "string") {
+                                                const cleaned = val.replace(
+                                                  /[^0-9.-]/g,
+                                                  ""
+                                                );
+                                                const num = Number(cleaned);
+                                                return isNaN(num) ? 0 : num;
+                                              }
+                                              return 0;
+                                            };
+                                            const totalRincian =
+                                              typeof personil.total ===
+                                                "number" &&
+                                              !isNaN(personil.total)
+                                                ? personil.total
+                                                : (
+                                                    personil.rincianBPDs || []
+                                                  ).reduce((acc, r) => {
+                                                    const nilai = parseNumber(
+                                                      r?.nilai
+                                                    );
+                                                    const qty =
+                                                      r?.qty == null
+                                                        ? 1
+                                                        : parseNumber(r?.qty);
+                                                    return acc + nilai * qty;
+                                                  }, 0);
+
+                                            return (
+                                              <Tr key={personil.id}>
+                                                <Td>{perjalanan.asal}</Td>
+                                                <Td>{daftarTempat || "-"}</Td>
+                                                <Td>{daftarTanggal || "-"}</Td>
+                                                <Td>
+                                                  {personil.pegawai?.nama ||
+                                                    "-"}
+                                                </Td>
+                                                <Td>
+                                                  Rp{" "}
+                                                  {totalRincian.toLocaleString(
+                                                    "id-ID"
+                                                  )}
+                                                </Td>
+                                                <Td>
+                                                  {
+                                                    personil?.status
+                                                      ?.statusKuitansi
+                                                  }
+                                                </Td>
+                                              </Tr>
+                                            );
+                                          }
+                                        )}
+                                      </Tbody>
+                                    </Table>
+                                  </Box>
+                                  <Flex justify="end" mt={3}>
+                                    <Button
+                                      onClick={() =>
+                                        history.push(
+                                          `/detail-perjalanan/${perjalanan.id}`
+                                        )
+                                      }
+                                      colorScheme="blue"
+                                      variant="outline"
+                                      size="sm"
+                                      leftIcon={<BsEyeFill />}
+                                    >
+                                      Lihat Detail
+                                    </Button>
+                                  </Flex>
                                 </Box>
                               )}
 
@@ -774,24 +964,54 @@ function DetailKwitansiGlobal(props) {
                   )}
                   {(!dataPerjalanan || dataPerjalanan.length === 0) && (
                     <Box textAlign="center" py={10}>
-                      <Text color="gray.500">Belum ada data perjalanan</Text>
+                      <BsClipboard2Data size={48} color="#CBD5E0" />
+                      <Text color="gray.500" mt={4} fontSize="lg">
+                        Belum ada data perjalanan
+                      </Text>
+                      <Text color="gray.400" fontSize="sm">
+                        Data perjalanan akan muncul setelah ditambahkan
+                      </Text>
                     </Box>
                   )}
                 </>
               ) : (
-                <Button onClick={fetchAllPerjalanan}>tes</Button>
+                <Box textAlign="center" py={10}>
+                  <Button
+                    onClick={fetchAllPerjalanan}
+                    colorScheme="blue"
+                    size="lg"
+                    leftIcon={<BsClipboard2Data />}
+                  >
+                    Muat Data Perjalanan
+                  </Button>
+                </Box>
               )}
             </ModalBody>
-            <ModalFooter>
-              {" "}
-              <Button
-                onClick={tambahPerjalanan}
-                variant={"primary"}
-                px={"50px"}
-              >
-                Tambah +
-              </Button>
-              <Button onClick={onDetailClose}>Tutup</Button>
+            <ModalFooter
+              bg="gray.50"
+              borderTop="1px"
+              borderColor="gray.200"
+              borderBottomRadius="xl"
+            >
+              <Flex gap={3} w="full" justify="space-between">
+                <Button
+                  onClick={onDetailClose}
+                  variant="outline"
+                  colorScheme="gray"
+                >
+                  Tutup
+                </Button>
+                {dataPerjalanan ? (
+                  <Button
+                    onClick={tambahPerjalanan}
+                    colorScheme="green"
+                    px={"50px"}
+                    leftIcon={<BsCartPlus />}
+                  >
+                    Tambah Perjalanan
+                  </Button>
+                ) : null}
+              </Flex>
             </ModalFooter>
           </ModalContent>
         </Modal>
