@@ -75,6 +75,7 @@ import DaftarKwitansiGlobal from "./pages/DaftarKwitansiGlobal.jsx";
 import DetailKwitansiGlobal from "./pages/DetailKwitansiGlobal.jsx";
 import DaftarKwitansiGlobalKeuangan from "./pages/Admin/DaftarKwitansiGlobalKeuangan.jsx";
 import DetailKwitansiGlobalKeuangan from "./pages/Admin/DetailKwitansiGlobalKeuangan.jsx";
+import verifikasi from "./pages/Verifikasi.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -522,7 +523,7 @@ function App() {
             exact
             roleRoute={[5, 1]}
           />
-
+          <Route component={verifikasi} path="/verifikasi/:id" />
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>

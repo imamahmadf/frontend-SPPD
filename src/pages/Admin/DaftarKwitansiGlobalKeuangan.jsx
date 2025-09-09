@@ -128,7 +128,6 @@ function DaftarKwitansiGlobalKeuangan() {
             <HStack gap={5} mb={"30px"}>
               <Spacer />
             </HStack>
-            {JSON.stringify(dataKwitGlobal)}
 
             <Table variant={"primary"}>
               <Thead>

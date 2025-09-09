@@ -291,6 +291,7 @@ function Rampung(props) {
           KPANama: dataRampung.result.perjalanan.KPA.pegawai_KPA.nama,
           KPANip: dataRampung.result.perjalanan.KPA.pegawai_KPA.nip,
           KPAJabatan: dataRampung.result.perjalanan.KPA.jabatan,
+          foto: dataRampung?.result?.perjalanan?.pic,
           templateId,
           subKegiatan:
             dataRampung.result.perjalanan.daftarSubKegiatan.subKegiatan,

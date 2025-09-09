@@ -191,8 +191,7 @@ function DaftarKwitansiGlobal() {
 
               <Spacer />
             </HStack>
-            {JSON.stringify(dataKwitGlobal)}
-
+            {/* {JSON.stringify(dataKwitGlobal)} */}
             <Table variant={"primary"}>
               <Thead>
                 <Tr>

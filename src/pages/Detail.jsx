@@ -196,7 +196,7 @@ function Detail(props) {
   return (
     <>
       <Layout>
-        <Box minH="70vh" bg={useColorModeValue("gray.50", "gray.900")}>
+        <Box minH="100vh">
           {/* Header Section */}
           <Box
             // bgGradient="linear(to-r, primary, purple.600)"
@@ -241,7 +241,7 @@ function Detail(props) {
             </Container>
           </Box>
 
-          <Container maxW="1280px" px={6}>
+          <Container maxW="1380px" px={6}>
             {/* Informasi Perjalanan Card */}
             <Card
               bg={cardBg}
@@ -548,19 +548,6 @@ function Detail(props) {
                       }
                     };
 
-                    const getStatusText = (statusId) => {
-                      switch (statusId) {
-                        case 1:
-                          return "Pending";
-                        case 2:
-                          return "Approved";
-                        case 3:
-                          return "Completed";
-                        default:
-                          return "Unknown";
-                      }
-                    };
-
                     return (
                       <Card
                         key={index}
@@ -598,7 +585,7 @@ function Detail(props) {
                                     variant="subtle"
                                     borderRadius="full"
                                   >
-                                    {getStatusText(item.statusId)}
+                                    {item?.status?.statusKuitansi}
                                   </Badge>
                                 </HStack>
                               </VStack>

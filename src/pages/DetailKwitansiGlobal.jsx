@@ -296,6 +296,7 @@ function DetailKwitansiGlobal(props) {
           penerima: dataKwitGlobal[0]?.pegawai,
           jenisPerjalananFE: dataKwitGlobal[0]?.jenisPerjalanan,
           totalFE,
+          verifikasi: dataKwitGlobal[0]?.verifikasi,
           indukUnitKerjaFE:
             user[0]?.unitKerja_profile.indukUnitKerja.indukUnitKerja,
         },
@@ -381,7 +382,7 @@ function DetailKwitansiGlobal(props) {
                 Kelola dan lihat detail kwitansi global perjalanan dinas
               </Text>
             </Box>
-
+            {/* {JSON.stringify(dataKwitGlobal[0]?.verifikasi)} */}
             {/* Action Buttons */}
             <Flex gap={4} mb={"30px"} wrap="wrap" align="center">
               {dataKwitGlobal[0]?.status === "diterima" ? (
@@ -409,7 +410,7 @@ function DetailKwitansiGlobal(props) {
                   leftIcon={<BsEyeFill />}
                   size="md"
                 >
-                  Detail Kwitansi
+                  Tambah Perjalanan
                 </Button>
               ) : null}
 
@@ -564,14 +565,18 @@ function DetailKwitansiGlobal(props) {
                             </Td>
                           </Tr>
                         ))}
-                        <Tr bg="blue.50" borderTop="2px" borderColor="blue.200">
-                          <Td colSpan={4} fontWeight="bold" color="blue.700">
+                        <Tr
+                          bg="green.50"
+                          borderTop="2px"
+                          borderColor="green.200"
+                        >
+                          <Td colSpan={4} fontWeight="bold" color="green.700">
                             TOTAL
                           </Td>
                           <Td
                             isNumeric
                             fontWeight="bold"
-                            color="blue.700"
+                            color="green.700"
                             fontSize="lg"
                           >
                             Rp {totalAll.toLocaleString("id-ID")}
@@ -610,14 +615,14 @@ function DetailKwitansiGlobal(props) {
           <ModalOverlay bg="blackAlpha.600" />
           <ModalContent maxH="90vh" borderRadius="xl">
             <ModalHeader
-              bg="blue.50"
+              bg="primary"
               borderTopRadius="xl"
               borderBottom="1px"
               borderColor="gray.200"
             >
               <Flex align="center" gap={3}>
-                <BsEyeFill color="#3182CE" />
-                <Text color="blue.700" fontWeight="semibold">
+                <BsEyeFill color="white" />
+                <Text color="white" fontWeight="semibold">
                   Detail Kwitansi Global
                 </Text>
               </Flex>
@@ -731,11 +736,11 @@ function DetailKwitansiGlobal(props) {
                           <Box
                             key={perjalanan.id}
                             border="2px"
-                            borderColor={isRestricted ? "red.200" : "blue.200"}
+                            borderColor={isRestricted ? "red.200" : "primary"}
                             borderRadius="xl"
                             p={6}
                             mb={6}
-                            bg={isRestricted ? "red.50" : "blue.50"}
+                            bg={isRestricted ? "red.50" : "green.50"}
                             opacity={isRestricted ? 0.7 : 1}
                             boxShadow="sm"
                             _hover={{
@@ -940,7 +945,7 @@ function DetailKwitansiGlobal(props) {
                                           `/detail-perjalanan/${perjalanan.id}`
                                         )
                                       }
-                                      colorScheme="blue"
+                                      colorScheme="green"
                                       variant="outline"
                                       size="sm"
                                       leftIcon={<BsEyeFill />}
@@ -978,8 +983,7 @@ function DetailKwitansiGlobal(props) {
                 <Box textAlign="center" py={10}>
                   <Button
                     onClick={fetchAllPerjalanan}
-                    colorScheme="blue"
-                    size="lg"
+                    variant={"primary"}
                     leftIcon={<BsClipboard2Data />}
                   >
                     Muat Data Perjalanan
@@ -1002,12 +1006,7 @@ function DetailKwitansiGlobal(props) {
                   Tutup
                 </Button>
                 {dataPerjalanan ? (
-                  <Button
-                    onClick={tambahPerjalanan}
-                    colorScheme="green"
-                    px={"50px"}
-                    leftIcon={<BsCartPlus />}
-                  >
+                  <Button onClick={tambahPerjalanan} variant={"primary"}>
                     Tambah Perjalanan
                   </Button>
                 ) : null}

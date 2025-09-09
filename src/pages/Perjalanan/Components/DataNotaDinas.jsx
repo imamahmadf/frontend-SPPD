@@ -150,7 +150,7 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             height={"60px"}
             borderRadius={"8px"}
             borderColor={"rgba(229, 231, 235, 1)"}
-            onChange={(e) => actions.setIsNotaDinas(e.target.checked ? 1 : 0)}
+            onChange={(e) => actions.setIsNotaDinas(parseInt(e.target.value))}
           >
             <option value="1">Nota Dinas</option>
             <option value="0">Telaahan Staf</option>{" "}

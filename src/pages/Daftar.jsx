@@ -248,7 +248,7 @@ function Daftar() {
           KPAPangkat: val.KPA.pegawai_KPA.daftarPangkat.pangkat,
           KPAGolongan: val.KPA.pegawai_KPA.daftarGolongan.golongan,
           KPAJabatan: val.KPA.jabatan,
-          noNotaDinas: val.suratKeluar.nomor,
+          noNotaDinas: val.suratKeluar?.nomor || "",
           noSuratTugas: val.noSuratTugas,
           unitKerja: user[0]?.unitKerja_profile,
           indukUnitKerjaFE: user[0]?.unitKerja_profile,
@@ -425,18 +425,18 @@ function Daftar() {
                             .kodeInduk
                         }
                       </Td>
-                      <Td>{item.noSuratTugas ? item.noSuratTugas : "-"}</Td>
+                      <Td>{item.noSuratTugas ? item?.noSuratTugas : "-"}</Td>
                       <Td>
                         {/* Kolom 1: jika nomor ada dan isNotaDinas 1 atau null */}
-                        {item.suratKeluar.nomor &&
-                        (item.isNotaDinas === 1 || item.isNotaDinas == null)
+                        {item?.suratKeluar?.nomor &&
+                        (item?.isNotaDinas === 1 || item.isNotaDinas == null)
                           ? item.suratKeluar.nomor
                           : "-"}
                       </Td>
                       <Td>
                         {/* Kolom 2: jika nomor ada dan isNotaDinas === 0 */}
-                        {item.suratKeluar.nomor && item.isNotaDinas === 0
-                          ? item.suratKeluar.nomor
+                        {item?.suratKeluar?.nomor && item?.isNotaDinas === 0
+                          ? item?.suratKeluar?.nomor
                           : "-"}
                       </Td>
                       <Td>

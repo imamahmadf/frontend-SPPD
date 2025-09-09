@@ -127,25 +127,39 @@ const usePerjalananData = (user) => {
         { responseType: "blob" }
       )
       .then((res) => {
-        const blob = new Blob([res.data]);
-        const url = window.URL.createObjectURL(blob);
-        const fileLink = document.createElement("a");
-        fileLink.href = url;
-        fileLink.download = "nota_dinas.docx";
-        document.body.appendChild(fileLink);
-        fileLink.click();
-        fileLink.remove();
-        URL.revokeObjectURL(url);
+        // Jika isNotaDinas === 2, langsung redirect tanpa generate file word
+        if (isNotaDinas === 2) {
+          toast({
+            title: "Berhasil",
+            description: "Data perjalanan berhasil disimpan",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+            position: "top",
+          });
+          history.push("/perjalanan/daftar");
+        } else {
+          // Generate dan download file word
+          const blob = new Blob([res.data]);
+          const url = window.URL.createObjectURL(blob);
+          const fileLink = document.createElement("a");
+          fileLink.href = url;
+          fileLink.download = "nota_dinas.docx";
+          document.body.appendChild(fileLink);
+          fileLink.click();
+          fileLink.remove();
+          URL.revokeObjectURL(url);
 
-        toast({
-          title: "Berhasil",
-          description: "File nota dinas berhasil diunduh",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-          position: "top",
-        });
-        setTimeout(() => history.push("/daftar"), 1000);
+          toast({
+            title: "Berhasil",
+            description: "File nota dinas berhasil diunduh",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+            position: "top",
+          });
+          setTimeout(() => history.push("/daftar"), 1000);
+        }
       })
       .catch((err) => {
         console.error(err);
