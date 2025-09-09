@@ -121,7 +121,7 @@ const usePerjalananData = (user) => {
           kodeKlasifikasi: dataKodeKlasifikasi,
           dataBendaharaId: values.bendahara.value.id,
           pelayananKesehatanId: jenisPelayananKesehatan,
-          isSrikandi,
+          isSrikandi: 0,
           isNotaDinas,
         },
         { responseType: "blob" }

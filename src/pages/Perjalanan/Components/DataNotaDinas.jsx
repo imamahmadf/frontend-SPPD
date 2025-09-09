@@ -165,6 +165,7 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             Srikandi
           </Checkbox>
         </Flex>
+        {JSON.stringify(state.isNotaDinas)}
       </Box>
     </Container>
   );
