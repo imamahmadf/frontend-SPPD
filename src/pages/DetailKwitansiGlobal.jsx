@@ -292,6 +292,7 @@ function DetailKwitansiGlobal(props) {
           templateId: dataKwitGlobal[0]?.templateKwitGlobalId,
           subKegiatan: dataKwitGlobal[0]?.subKegiatan,
           KPAFE: dataKwitGlobal[0]?.KPA,
+          PPTKFE: dataKwitGlobal[0]?.PPTK,
           bendaharaFE: dataKwitGlobal[0]?.bendahara,
           penerima: dataKwitGlobal[0]?.pegawai,
           jenisPerjalananFE: dataKwitGlobal[0]?.jenisPerjalanan,

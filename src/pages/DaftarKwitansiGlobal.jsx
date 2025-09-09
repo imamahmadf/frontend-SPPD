@@ -67,6 +67,7 @@ function DaftarKwitansiGlobal() {
   const { colorMode, toggleColorMode } = useColorMode();
 
   const [pegawaiId, setPegawaiId] = useState(0);
+  const [PPTKId, setPPTKId] = useState(0);
   const [bendaharaId, setBendaharaId] = useState(null);
   const [KPAId, setKPAId] = useState(null);
   const [jenisPerjalananId, setJenisPerjalananId] = useState(null);
@@ -74,6 +75,7 @@ function DaftarKwitansiGlobal() {
   const [subKegiatanId, setSubKegiatanId] = useState(null);
   const [dataBendahara, setDataBendahara] = useState(null);
   const [dataKPA, setDataKPA] = useState(null);
+  const [dataPPTK, setDataPPTK] = useState(null);
   const [dataJenisPerjalanan, setDataJenisPerjalanan] = useState(null);
   const [dataTemplate, setDataTemplate] = useState(null);
   const [dataSubKegiatan, setDataSubKegiatan] = useState(null);
@@ -123,6 +125,7 @@ function DaftarKwitansiGlobal() {
         setDataJenisPerjalanan(res.data.resultJenisPerjalanan);
         setDataTemplate(res.data.resultTemplate);
         setDataSubKegiatan(res.data.resultDaftarSubKegiatan);
+        setDataPPTK(res.data.resultPPTK);
 
         console.log(res.data);
       })
@@ -142,6 +145,7 @@ function DaftarKwitansiGlobal() {
           jenisPerjalananId,
           unitKerjaId: user[0]?.unitKerja_profile?.id,
           subKegiatanId,
+          PPTKId,
         }
       )
       .then((res) => {
@@ -474,6 +478,51 @@ function DaftarKwitansiGlobal() {
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         setJenisPerjalananId(selectedOption.value);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null, // Hilangkan tombol panah
+                        IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "60px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>
+
+                  <FormControl
+                    my={"30px"}
+                    border={0}
+                    bgColor={"white"}
+                    flex="1"
+                  >
+                    <FormLabel fontSize={"24px"}>PPTK</FormLabel>
+                    <Select2
+                      options={dataPPTK?.map((val) => ({
+                        value: val.id,
+                        label: `${val.pegawai_PPTK.nama}`,
+                      }))}
+                      placeholder="Contoh: Roda Dua"
+                      focusBorderColor="red"
+                      onChange={(selectedOption) => {
+                        setPPTKId(selectedOption.value);
                       }}
                       components={{
                         DropdownIndicator: () => null, // Hilangkan tombol panah
