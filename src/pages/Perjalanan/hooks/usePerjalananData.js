@@ -158,7 +158,7 @@ const usePerjalananData = (user) => {
             isClosable: true,
             position: "top",
           });
-          setTimeout(() => history.push("/daftar"), 1000);
+          setTimeout(() => history.push("/perjalanan/daftar"), 1000);
         }
       })
       .catch((err) => {
