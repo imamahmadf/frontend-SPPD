@@ -144,6 +144,8 @@ function DetailKwitansiGlobal(props) {
           duration: 5000,
           isClosable: true,
         });
+        onDetailClose();
+        fetchKwitansiGlobal();
       })
       .catch((err) => {
         console.error(err.message);
@@ -154,6 +156,7 @@ function DetailKwitansiGlobal(props) {
           duration: 5000,
           isClosable: true,
         });
+        onDetailClose();
       });
   };
 
