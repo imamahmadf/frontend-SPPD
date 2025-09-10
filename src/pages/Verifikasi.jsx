@@ -16,10 +16,16 @@ import {
   IconButton,
   useColorMode,
   Center,
+  Image,
+  Flex,
+  Spacer,
+  Divider,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux } from "../Redux/Reducers/auth";
+import LogoDinkes from "../assets/logo.png";
+import LogoPena from "../assets/Logo Pena.png";
 import {
   BsFileEarmarkArrowDown,
   BsChevronDown,
@@ -101,7 +107,13 @@ function TablePerjalanan({ dataKwitGlobal }) {
       <Box display={{ base: "block", md: "none" }}>
         {perjalananList.map((perj, index) => {
           const tempat = perj.tempats
-            ?.map((t) => t.tempat)
+            ?.map((t) => {
+              if (t.tempat === "dalam kota") {
+                return t?.dalamKota?.nama || "Tidak diketahui";
+              }
+              // fallback kalau bukan "dalam kota"
+              return t.tempat;
+            })
             .filter(Boolean)
             .join(", ");
           const tanggal = perj.tempats
@@ -167,40 +179,44 @@ function TablePerjalanan({ dataKwitGlobal }) {
 
               {/* Card Content */}
               <Box mb={3}>
-                <Box mb={2}>
-                  <Text
-                    fontSize="xs"
-                    color={colorMode === "dark" ? "gray.400" : "gray.500"}
-                    fontWeight="semibold"
-                    textTransform="uppercase"
-                    letterSpacing="wide"
-                  >
-                    Tempat
-                  </Text>
-                  <Text
-                    color={colorMode === "dark" ? "gray.300" : "gray.600"}
-                    fontSize="sm"
-                  >
-                    {tempat}
-                  </Text>
-                </Box>
-                <Box mb={2}>
-                  <Text
-                    fontSize="xs"
-                    color={colorMode === "dark" ? "gray.400" : "gray.500"}
-                    fontWeight="semibold"
-                    textTransform="uppercase"
-                    letterSpacing="wide"
-                  >
-                    Tanggal
-                  </Text>
-                  <Text
-                    color={colorMode === "dark" ? "gray.300" : "gray.600"}
-                    fontSize="sm"
-                  >
-                    {tanggal}
-                  </Text>
-                </Box>
+                <Flex>
+                  <Box mb={2}>
+                    <Text
+                      fontSize="xs"
+                      color={colorMode === "dark" ? "gray.400" : "gray.500"}
+                      fontWeight="semibold"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                    >
+                      Tempat
+                    </Text>
+                    <Text
+                      color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                      fontSize="sm"
+                    >
+                      {tempat}
+                    </Text>
+                  </Box>
+                  <Spacer />
+                  <Box mb={2}>
+                    <Text
+                      fontSize="xs"
+                      color={colorMode === "dark" ? "gray.400" : "gray.500"}
+                      fontWeight="semibold"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                    >
+                      Tanggal
+                    </Text>
+                    <Text
+                      color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                      fontSize="sm"
+                    >
+                      {tanggal}
+                    </Text>
+                  </Box>
+                </Flex>{" "}
+                <Divider mb={"15px"} orientation="horizontal" />
                 <Box>
                   <Text
                     fontSize="xs"
@@ -409,7 +425,7 @@ function TablePerjalanan({ dataKwitGlobal }) {
                                       "id-ID"
                                     )}
                                   </Text>
-                                  <Text>Qty: {r.qty}</Text>
+                                  <Text>Jumlah: {r.qty}</Text>
                                 </Box>
                               </Box>
                             );
@@ -499,7 +515,13 @@ function TablePerjalanan({ dataKwitGlobal }) {
             <Tbody>
               {perjalananList.map((perj, index) => {
                 const tempat = perj.tempats
-                  ?.map((t) => t.tempat)
+                  ?.map((t) => {
+                    if (t.tempat === "dalam kota") {
+                      return t?.dalamKota?.nama || "Tidak diketahui";
+                    }
+                    // fallback kalau bukan "dalam kota"
+                    return t.tempat;
+                  })
                   .filter(Boolean)
                   .join(", ");
                 const tanggal = perj.tempats
@@ -821,7 +843,7 @@ function TablePerjalanan({ dataKwitGlobal }) {
                                                         letterSpacing="wide"
                                                         py={2}
                                                       >
-                                                        Qty
+                                                        Jumlah
                                                       </Th>
                                                       <Th
                                                         isNumeric
@@ -1051,11 +1073,7 @@ function Verifikasi(props) {
   }, []);
 
   return (
-    <Box
-      minH={"70vh"}
-      pb={{ base: "20px", md: "40px" }}
-      px={{ base: "16px", sm: "20px", md: "30px" }}
-    >
+    <Center py={"100px"}>
       <Container
         maxW={{
           base: "100%",
@@ -1074,6 +1092,38 @@ function Verifikasi(props) {
         mx="auto"
       >
         {/* Header Section */}
+
+        <Flex mb={"30px"}>
+          <Image
+            height={{ base: "40px", sm: "60px" }}
+            objectFit="cover"
+            src={LogoDinkes}
+            transition="transform 0.3s ease"
+            _hover={{ transform: "scale(1.05)" }}
+            me={"20px"}
+          />
+          <Box>
+            <Text
+              color={"rgba(35, 178, 196, 1)"}
+              fontSize={{ base: "12px", sm: "18px" }}
+              fontWeight={900}
+            >
+              DINAS KESEHATAN
+            </Text>
+            <Text fontSize={{ base: "10px", sm: "15px" }} fontWeight={700}>
+              KABUPATEN PASER
+            </Text>
+          </Box>
+          <Spacer />
+          <Image
+            height={{ base: "40px", sm: "60px" }}
+            objectFit="cover"
+            src={LogoPena}
+            transition="transform 0.3s ease"
+            _hover={{ transform: "scale(1.05)" }}
+            mb={"30px"}
+          />
+        </Flex>
         <Box mb={{ base: "20px", md: "30px" }}>
           <Heading
             size={{ base: "md", sm: "lg" }}
@@ -1083,12 +1133,47 @@ function Verifikasi(props) {
           >
             Detail Kwitansi Global
           </Heading>
-          <Text
+          {/* <Text
             color={colorMode === "dark" ? "gray.300" : "gray.600"}
             fontSize={{ base: "xs", sm: "sm" }}
             textAlign={{ base: "center", sm: "left" }}
           >
             Kelola dan lihat detail kwitansi global perjalanan dinas
+          </Text> */}
+          {/* {JSON.stringify(dataKwitGlobal?.jenisPerjalanan?.kodeRekening)} */}
+          <Text
+            color={colorMode === "dark" ? "gray.300" : "gray.600"}
+            fontSize={{ base: "xs", sm: "sm" }}
+            fontWeight={600}
+          >
+            Unit Kerja: {dataKwitGlobal?.unitKerja?.unitKerja}
+          </Text>
+          <Text
+            color={colorMode === "dark" ? "gray.300" : "gray.600"}
+            fontSize={{ base: "xs", sm: "sm" }}
+            fontWeight={600}
+          >
+            Sub Kegiatan: {dataKwitGlobal?.subKegiatan?.subKegiatan}
+          </Text>
+          <Text
+            color={colorMode === "dark" ? "gray.300" : "gray.600"}
+            fontSize={{ base: "xs", sm: "sm" }}
+            fontWeight={600}
+          >
+            Kode Rekening: {dataKwitGlobal?.subKegiatan?.kodeRekening}
+            {dataKwitGlobal?.jenisPerjalanan?.kodeRekening}
+          </Text>
+          <Text
+            color={colorMode === "dark" ? "gray.300" : "gray.600"}
+            fontSize={{ base: "xs", sm: "sm" }}
+          >
+            Tanggal Verifikasi:{" "}
+            {new Date(dataKwitGlobal?.updatedAt).toLocaleDateString("id-ID", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
           </Text>
         </Box>
 
@@ -1099,7 +1184,7 @@ function Verifikasi(props) {
           }
         />
       </Container>
-    </Box>
+    </Center>
   );
 }
 
