@@ -260,12 +260,12 @@ function DaftarKwitansiGlobal() {
                       >
                         Detail
                       </Button>
-                      {item?.perjalanans[0]?.id ? null : (
+                      {/* {item?.perjalanans[0]?.id ? null : (
                         <Button onClick={hapusKwitansi(item?.id)}>
                           {" "}
                           hapus
                         </Button>
-                      )}
+                      )} */}
                     </Td>
                   </Tr>
                 ))}
