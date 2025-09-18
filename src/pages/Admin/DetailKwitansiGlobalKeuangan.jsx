@@ -87,12 +87,12 @@ function DetailKwitansiGlobalKeuangan(props) {
       });
   }
 
-  const ajukan = () => {
+  const tolak = () => {
     axios
       .post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/kwitansi-global/post/ajukan/${props.match.params.id}`
+        }/kwitansi-global/post/tolak/${props.match.params.id}`
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -321,11 +321,11 @@ function DetailKwitansiGlobalKeuangan(props) {
       case 2:
         return "blue";
       case 3:
-        return "purple";
-      case 4:
-        return "orange";
-      case 5:
         return "green";
+      case 4:
+        return "red";
+      case 5:
+        return "purple";
       default:
         return "gray";
     }
@@ -334,13 +334,13 @@ function DetailKwitansiGlobalKeuangan(props) {
   const getStatusText = (statusId) => {
     switch (statusId) {
       case 1:
-        return "Pending";
+        return "SPD dan Surat Tugas Sudah dibuat";
       case 2:
-        return "Menunggu Verifikasi";
+        return "Pengajuan kuitansi";
       case 3:
-        return "Diverifikasi";
+        return "Kwitansi tervierifikasi";
       case 4:
-        return "Diproses";
+        return "Kwitansi ditolak";
       case 5:
         return "Selesai";
       default:
@@ -759,13 +759,13 @@ function DetailKwitansiGlobalKeuangan(props) {
               });
 
               // Jika status kwitansi global adalah "dibuat", tampilkan tombol Ajukan
-              if (kg.status === "dibuat") {
-                return (
-                  <Button mt={"30px"} variant={"primary"} onClick={ajukan}>
-                    Ajukan
-                  </Button>
-                );
-              }
+              // if (kg.status === "dibuat") {
+              //   return (
+              //     <Button mt={"30px"} variant={"primary"} onClick={ajukan}>
+              //       Ajukan
+              //     </Button>
+              //   );
+              // }
 
               // Jika semua status sudah diverifikasi (statusId === 3), tampilkan tombol Verifikasi
               if (allStatusVerified && kg.status === "diajukan") {
@@ -778,6 +778,9 @@ function DetailKwitansiGlobalKeuangan(props) {
 
               return null;
             })()}
+            <Button mt={"30px"} variant={"primary"} onClick={tolak}>
+              Tolak
+            </Button>
           </Container>
         </Box>
 

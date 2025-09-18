@@ -444,6 +444,7 @@ function DetailKwitansiGlobal(props) {
           isClosable: true,
         });
         fetchKwitansiGlobal();
+        setDataPerjalanan(null);
         onModalBaruClose();
       })
       .catch((err) => {
@@ -468,7 +469,7 @@ function DetailKwitansiGlobal(props) {
           <Container
             style={{ overflowX: "auto" }}
             bgColor={"white"}
-            maxW={"1280px"}
+            maxW={"2880px"}
             p={{ base: "20px", md: "30px" }}
             borderRadius={"12px"}
             boxShadow={
@@ -486,7 +487,67 @@ function DetailKwitansiGlobal(props) {
               </Text>
               {/* Hapus form edit sub kegiatan di sini */}
             </Box>
-            {/* {JSON.stringify(dataKwitGlobal[0]?.verifikasi)} */}
+            <Box mb={6} mt={2}>
+              <Table size="sm" variant="simple">
+                <Tbody>
+                  <Tr>
+                    <Td fontWeight="bold">Penerima</Td>
+                    <Td>{dataKwitGlobal[0]?.pegawai?.nama}</Td>
+                  </Tr>
+
+                  <Tr>
+                    <Td fontWeight="bold">Sub Kegiatan</Td>
+                    <Td>{dataKwitGlobal[0]?.subKegiatan?.subKegiatan}</Td>
+                  </Tr>
+                  <Tr>
+                    <Td fontWeight="bold">Jenis Perjalanan</Td>
+                    <Td>{dataKwitGlobal[0]?.jenisPerjalanan?.jenis}</Td>
+                  </Tr>
+                  <Tr>
+                    <Td fontWeight="bold">Kode Rekening</Td>
+                    <Td>
+                      {" "}
+                      {dataKwitGlobal[0]?.subKegiatan?.kodeRekening}
+                      {dataKwitGlobal[0]?.jenisPerjalanan?.kodeRekening}
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td fontWeight="bold">{dataKwitGlobal[0]?.KPA?.jabatan}</Td>
+                    <Td>{dataKwitGlobal[0]?.KPA?.pegawai_KPA?.nama} </Td>
+                  </Tr>
+                  <Tr>
+                    <Td fontWeight="bold">
+                      {" "}
+                      {dataKwitGlobal[0]?.PPTK?.jabatan}
+                    </Td>
+                    <Td>{dataKwitGlobal[0]?.PPTK?.pegawai_PPTK?.nama} </Td>
+                  </Tr>
+                  <Tr>
+                    <Td fontWeight="bold">
+                      {" "}
+                      {dataKwitGlobal[0]?.bendahara?.jabatan}
+                    </Td>
+                    <Td>
+                      {dataKwitGlobal[0]?.bendahara?.pegawai_bendahara?.nama}
+                    </Td>
+                  </Tr>
+                  <Tr>
+                    <Td fontWeight="bold">Jenis Kwitansi</Td>
+                    <Td>{dataKwitGlobal[0]?.templateKwitGlobal?.nama}</Td>
+                  </Tr>
+                  <Tr>
+                    <Td fontWeight="bold">Tanggal Dibuat</Td>
+                    <Td>
+                      {dataKwitGlobal[0]?.createdAt &&
+                        new Date(dataKwitGlobal[0].createdAt).toLocaleString(
+                          "id-ID"
+                        )}
+                    </Td>
+                  </Tr>
+                </Tbody>
+              </Table>
+            </Box>
+            {/* {JSON.stringify(dataKwitGlobal[0]?.perjalanans[0]?.personils)} */}
             {/* Action Buttons */}
             <Flex gap={4} mb={"30px"} wrap="wrap" align="center">
               {dataKwitGlobal[0]?.status === "diterima" ? (
@@ -505,7 +566,8 @@ function DetailKwitansiGlobal(props) {
                 </Button>
               ) : null}
 
-              {dataKwitGlobal[0]?.status === "dibuat" ? (
+              {dataKwitGlobal[0]?.status === "dibuat" ||
+              dataKwitGlobal[0]?.status === "ditolak" ? (
                 <Button
                   onClick={onDetailOpen}
                   variant={"outline"}
@@ -518,16 +580,19 @@ function DetailKwitansiGlobal(props) {
                 </Button>
               ) : null}
 
-              <Button
-                onClick={onModalBaruOpen}
-                colorScheme="purple"
-                variant="solid"
-                px={6}
-                leftIcon={<BsEyeFill />}
-                size="md"
-              >
-                edit Sub Kegiatan
-              </Button>
+              {Array.isArray(dataKwitGlobal[0]?.perjalanans) &&
+              dataKwitGlobal[0]?.perjalanans.length === 0 ? (
+                <Button
+                  onClick={onModalBaruOpen}
+                  colorScheme="purple"
+                  variant="solid"
+                  px={6}
+                  leftIcon={<BsEyeFill />}
+                  size="md"
+                >
+                  edit Sub Kegiatan
+                </Button>
+              ) : null}
 
               <Spacer />
 
@@ -542,6 +607,8 @@ function DetailKwitansiGlobal(props) {
                       ? "green.100"
                       : dataKwitGlobal[0]?.status === "dibuat"
                       ? "blue.100"
+                      : dataKwitGlobal[0]?.status === "ditolak"
+                      ? "red.100"
                       : "gray.100"
                   }
                   color={
@@ -549,6 +616,8 @@ function DetailKwitansiGlobal(props) {
                       ? "green.700"
                       : dataKwitGlobal[0]?.status === "dibuat"
                       ? "blue.700"
+                      : dataKwitGlobal[0]?.status === "ditolak"
+                      ? "red.700"
                       : "gray.700"
                   }
                   fontSize="sm"
@@ -616,6 +685,8 @@ function DetailKwitansiGlobal(props) {
                     tempat: tempatStr || "-",
                     total: subtotal,
                     nama: p.pegawai?.nama || "-",
+                    status: p.status,
+                    id: p.id,
                   };
                 });
               });
@@ -648,6 +719,9 @@ function DetailKwitansiGlobal(props) {
                       <Thead bg="gray.50">
                         <Tr>
                           <Th color="gray.600" fontWeight="semibold">
+                            Detail
+                          </Th>
+                          <Th color="gray.600" fontWeight="semibold">
                             No Surat Tugas
                           </Th>
                           <Th color="gray.600" fontWeight="semibold">
@@ -659,6 +733,9 @@ function DetailKwitansiGlobal(props) {
                           <Th color="gray.600" fontWeight="semibold">
                             Tempat
                           </Th>
+                          <Th color="gray.600" fontWeight="semibold">
+                            Status
+                          </Th>
                           <Th color="gray.600" fontWeight="semibold" isNumeric>
                             BPD
                           </Th>
@@ -667,10 +744,20 @@ function DetailKwitansiGlobal(props) {
                       <Tbody>
                         {rows.map((r, idx) => (
                           <Tr key={idx} _hover={{ bg: "gray.50" }}>
+                            <Td fontWeight="medium">
+                              <Button
+                                onClick={() => {
+                                  history.push(`/rampung/${r.id}`);
+                                }}
+                              >
+                                detail
+                              </Button>
+                            </Td>
                             <Td fontWeight="medium">{r.noSuratTugas}</Td>
                             <Td>{r.nama}</Td>
                             <Td color="gray.600">{r.tanggalBerangkat}</Td>
                             <Td color="gray.600">{r.tempat}</Td>
+                            <Td color="gray.600">{r.status.statusKuitansi}</Td>
                             <Td
                               isNumeric
                               fontWeight="semibold"
@@ -685,7 +772,7 @@ function DetailKwitansiGlobal(props) {
                           borderTop="2px"
                           borderColor="green.200"
                         >
-                          <Td colSpan={4} fontWeight="bold" color="green.700">
+                          <Td colSpan={6} fontWeight="bold" color="green.700">
                             TOTAL
                           </Td>
                           <Td
@@ -703,7 +790,10 @@ function DetailKwitansiGlobal(props) {
                 </Box>
               );
             })()}
-            {dataKwitGlobal[0]?.status === "dibuat" ? (
+            {(dataKwitGlobal[0]?.status === "dibuat" ||
+              dataKwitGlobal[0]?.status === "ditolak") &&
+            dataKwitGlobal[0]?.perjalanans &&
+            dataKwitGlobal[0]?.perjalanans[0] ? (
               <Flex justify="center" mt={"30px"} gap={4}>
                 <Button
                   variant={"solid"}
@@ -712,6 +802,16 @@ function DetailKwitansiGlobal(props) {
                   size="lg"
                   px={8}
                   leftIcon={<BsCartPlus />}
+                  isDisabled={
+                    Array.isArray(dataKwitGlobal[0]?.perjalanans) &&
+                    dataKwitGlobal[0]?.perjalanans.some(
+                      (perj) =>
+                        Array.isArray(perj.personils) &&
+                        perj.personils.some(
+                          (p) => p?.statusId === 4 || p?.status?.statusId === 4
+                        )
+                    )
+                  }
                 >
                   Ajukan Kwitansi Global
                 </Button>
@@ -727,6 +827,7 @@ function DetailKwitansiGlobal(props) {
                 </Button>
               </Flex>
             ) : null}
+            {/* {JSON.stringify(dataKwitGlobal[0].perjalanans[0])} */}
           </Container>
         </Box>
 
@@ -1143,13 +1244,13 @@ function DetailKwitansiGlobal(props) {
         </Modal>
 
         {/* Modal Baru */}
-        <Modal isOpen={isModalBaruOpen} onClose={onModalBaruClose} size="md">
+        <Modal isOpen={isModalBaruOpen} onClose={onModalBaruClose} size="xl">
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Buka Modal Baru</ModalHeader>
+            <ModalHeader>Edit Sub Kegiatan</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Box mb={8} maxW="400px">
+              <Box mb={8}>
                 <FormControl>
                   <FormLabel fontWeight="bold">Sub Kegiatan</FormLabel>
                   <Select2
@@ -1175,24 +1276,27 @@ function DetailKwitansiGlobal(props) {
                       !["dibuat", "ditolak"].includes(dataKwitGlobal[0]?.status)
                     }
                   />
-                  <Button
-                    mt={2}
-                    colorScheme="blue"
-                    size="sm"
-                    onClick={handleUpdateSubKegiatan}
-                    isDisabled={
-                      !selectedSubKegiatanId ||
-                      !["dibuat", "ditolak"].includes(dataKwitGlobal[0]?.status)
-                    }
-                  >
-                    Simpan Sub Kegiatan
-                  </Button>
                 </FormControl>
               </Box>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="purple" mr={3} onClick={onModalBaruClose}>
-                Tutup
+              <Button
+                variant={"primary"}
+                me={"10px"}
+                onClick={handleUpdateSubKegiatan}
+                isDisabled={
+                  !selectedSubKegiatanId ||
+                  !["dibuat", "ditolak"].includes(dataKwitGlobal[0]?.status)
+                }
+              >
+                Simpan
+              </Button>
+              <Button
+                variant={"outline"}
+                onClick={onModalBaruClose}
+                colorScheme="gray"
+              >
+                Batal
               </Button>
             </ModalFooter>
           </ModalContent>
