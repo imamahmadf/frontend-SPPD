@@ -128,19 +128,19 @@ function DaftarKwitansiGlobal() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/kwitansi-global/get?page=${page}&limit=${limit}&unitKerjaId=${
           user[0]?.unitKerja_profile?.id
-        }&indukUnitKerjaId=${user[0]?.unitKerja_profile?.indukUnitKerja.id}`
+        }&indukUnitKerjaId=${user[0]?.unitKerja_profile?.indukUnitKerja?.id}`
       )
       .then((res) => {
-        setDataKwitGlobal(res.data.result);
-        setPage(res.data.page);
-        setPages(res.data.totalPage);
-        setRows(res.data.totalRows);
-        setDataKPA(res.data.resultKPA);
-        setDataBendahara(res.data.resultBendahara);
-        setDataJenisPerjalanan(res.data.resultJenisPerjalanan);
-        setDataTemplate(res.data.resultTemplate);
-        setDataSubKegiatan(res.data.resultDaftarSubKegiatan);
-        setDataPPTK(res.data.resultPPTK);
+        setDataKwitGlobal(res?.data?.result);
+        setPage(res?.data?.page);
+        setPages(res?.data?.totalPage);
+        setRows(res.data?.totalRows);
+        setDataKPA(res?.data?.resultKPA);
+        setDataBendahara(res?.data?.resultBendahara);
+        setDataJenisPerjalanan(res?.data?.resultJenisPerjalanan);
+        setDataTemplate(res.data?.resultTemplate);
+        setDataSubKegiatan(res.data?.resultDaftarSubKegiatan);
+        setDataPPTK(res.data?.resultPPTK);
 
         console.log(res.data);
       })
@@ -254,7 +254,7 @@ function DaftarKwitansiGlobal() {
                       <Button
                         onClick={() =>
                           history.push(
-                            `/perjalanan/detail-kwitansi-global/${item.id}`
+                            `/perjalanan/detail-kwitansi-global/${item?.id}`
                           )
                         }
                       >
@@ -331,11 +331,11 @@ function DaftarKwitansiGlobal() {
                             }/pegawai/search?q=${inputValue}`
                           );
 
-                          const filtered = res.data.result;
+                          const filtered = res?.data?.result;
 
                           return filtered.map((val) => ({
-                            value: val.id,
-                            label: val.nama,
+                            value: val?.id,
+                            label: val?.nama,
                           }));
                         } catch (err) {
                           console.error("Failed to load options:", err.message);
@@ -381,8 +381,8 @@ function DaftarKwitansiGlobal() {
                     <FormLabel fontSize={"24px"}>Pengguna Anggaran</FormLabel>
                     <Select2
                       options={dataKPA?.map((val) => ({
-                        value: val.id,
-                        label: `${val.pegawai_KPA.nama}`,
+                        value: val?.id,
+                        label: `${val?.pegawai_KPA?.nama}`,
                       }))}
                       placeholder="Contoh: Roda Dua"
                       focusBorderColor="red"
@@ -426,8 +426,8 @@ function DaftarKwitansiGlobal() {
                     <FormLabel fontSize={"24px"}>Bendahara</FormLabel>
                     <Select2
                       options={dataBendahara?.map((val) => ({
-                        value: val.id,
-                        label: `${val.pegawai_bendahara.nama}`,
+                        value: val?.id,
+                        label: `${val?.pegawai_bendahara?.nama}`,
                       }))}
                       placeholder="Contoh: Roda Dua"
                       focusBorderColor="red"
@@ -470,8 +470,8 @@ function DaftarKwitansiGlobal() {
                     <FormLabel fontSize={"24px"}>Sub Kegiatan</FormLabel>
                     <Select2
                       options={dataSubKegiatan?.map((val) => ({
-                        value: val.id,
-                        label: `${val.subKegiatan}`,
+                        value: val?.id,
+                        label: `${val?.subKegiatan}`,
                       }))}
                       placeholder="Contoh: Roda Dua"
                       focusBorderColor="red"
@@ -514,8 +514,8 @@ function DaftarKwitansiGlobal() {
                     <FormLabel fontSize={"24px"}>Jenis Perjalanan</FormLabel>
                     <Select2
                       options={dataJenisPerjalanan?.map((val) => ({
-                        value: val.id,
-                        label: `${val.jenis}`,
+                        value: val?.id,
+                        label: `${val?.jenis}`,
                       }))}
                       placeholder="Contoh: Roda Dua"
                       focusBorderColor="red"
@@ -559,8 +559,8 @@ function DaftarKwitansiGlobal() {
                     <FormLabel fontSize={"24px"}>PPTK</FormLabel>
                     <Select2
                       options={dataPPTK?.map((val) => ({
-                        value: val.id,
-                        label: `${val.pegawai_PPTK.nama}`,
+                        value: val?.id,
+                        label: `${val?.pegawai_PPTK?.nama}`,
                       }))}
                       placeholder="Contoh: Roda Dua"
                       focusBorderColor="red"
@@ -604,8 +604,8 @@ function DaftarKwitansiGlobal() {
                     <FormLabel fontSize={"24px"}>Jenis Kwitansi</FormLabel>
                     <Select2
                       options={dataTemplate?.map((val) => ({
-                        value: val.id,
-                        label: `${val.nama}`,
+                        value: val?.id,
+                        label: `${val?.nama}`,
                       }))}
                       placeholder="Contoh: Roda Dua"
                       focusBorderColor="red"
