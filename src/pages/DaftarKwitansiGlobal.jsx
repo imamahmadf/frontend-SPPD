@@ -42,6 +42,7 @@ import {
   Spacer,
   useToast,
   useColorMode,
+  Badge,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -103,6 +104,20 @@ function DaftarKwitansiGlobal() {
       setTanggal(val);
     } else if (field == "keterangan") {
       setKeterangan(val);
+    }
+  };
+
+  const hapusKwitansi = async (id) => {
+    try {
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi-global/hapus/${id}`
+      );
+      onHapusClose();
+      fetchKwitansiGlobal();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -203,6 +218,7 @@ function DaftarKwitansiGlobal() {
                   <Th>Sub Kegiatan</Th>
                   <Th>Pengguna Anggaran</Th>
                   <Th>Bendahara</Th>
+                  <Th>Status</Th>
                   <Th>Aksi</Th>
                 </Tr>
               </Thead>
@@ -214,6 +230,27 @@ function DaftarKwitansiGlobal() {
                     <Td>{item?.KPA?.pegawai_KPA?.nama || "-"}</Td>
                     <Td>{item?.bendahara?.pegawai_bendahara?.nama}</Td>
                     <Td>
+                      <Badge
+                        colorScheme={
+                          item?.status === "dibuat"
+                            ? "blue"
+                            : item?.status === "diajukan"
+                            ? "yellow"
+                            : item?.status === "ditolak"
+                            ? "red"
+                            : item?.status === "diterima"
+                            ? "green"
+                            : "gray"
+                        }
+                        px={3}
+                        py={1}
+                        borderRadius="md"
+                        fontSize="sm"
+                      >
+                        {item?.status}
+                      </Badge>
+                    </Td>
+                    <Td>
                       <Button
                         onClick={() =>
                           history.push(
@@ -223,6 +260,12 @@ function DaftarKwitansiGlobal() {
                       >
                         Detail
                       </Button>
+                      {item?.perjalanans[0]?.id ? null : (
+                        <Button onClick={hapusKwitansi(item?.id)}>
+                          {" "}
+                          hapus
+                        </Button>
+                      )}
                     </Td>
                   </Tr>
                 ))}

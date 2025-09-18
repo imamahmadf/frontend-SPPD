@@ -42,6 +42,7 @@ import {
   Spacer,
   useToast,
   useColorMode,
+  Badge,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -116,7 +117,7 @@ function DaftarKwitansiGlobalKeuangan() {
   return (
     <>
       <Layout>
-        <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Box minH={"70vh"} bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Container
             style={{ overflowX: "auto" }}
             bgColor={"white"}
@@ -128,11 +129,11 @@ function DaftarKwitansiGlobalKeuangan() {
             <HStack gap={5} mb={"30px"}>
               <Spacer />
             </HStack>
-
             <Table variant={"primary"}>
               <Thead>
                 <Tr>
                   <Th>jenis Perjalanan</Th>
+                  <Th>Unit Kerja</Th>
                   <Th>Sub Kegiatan</Th>
                   <Th>Pengguna Anggaran</Th>
                   <Th>Bendahara</Th>
@@ -145,11 +146,32 @@ function DaftarKwitansiGlobalKeuangan() {
                 {dataKwitGlobal?.map((item, index) => (
                   <Tr key={index}>
                     <Td>{item?.jenisPerjalanan?.jenis || "-"}</Td>
+                    <Td>{item?.unitKerja?.unitKerja || "-"}</Td>
                     <Td>{item?.subKegiatan?.subKegiatan || "-"}</Td>
                     <Td>{item?.KPA?.pegawai_KPA?.nama || "-"}</Td>
                     <Td>{item?.bendahara?.pegawai_bendahara?.nama}</Td>
                     <Td>{item?.bendahara?.sumberDana?.sumber}</Td>
-                    <Td>{item?.status}</Td>
+                    <Td>
+                      <Badge
+                        colorScheme={
+                          item?.status === "dibuat"
+                            ? "blue"
+                            : item?.status === "diajukan"
+                            ? "yellow"
+                            : item?.status === "ditolak"
+                            ? "red"
+                            : item?.status === "diterima"
+                            ? "green"
+                            : "gray"
+                        }
+                        px={3}
+                        py={1}
+                        borderRadius="md"
+                        fontSize="sm"
+                      >
+                        {item?.status}
+                      </Badge>
+                    </Td>
                     <Td>
                       <Button
                         onClick={() =>
@@ -164,36 +186,36 @@ function DaftarKwitansiGlobalKeuangan() {
                   </Tr>
                 ))}
               </Tbody>
-            </Table>
-          </Container>{" "}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
+            </Table>{" "}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
 
-              boxSizing: "border-box",
-              width: "100%",
-              height: "100%",
-            }}
-          >
-            <ReactPaginate
-              previousLabel={"+"}
-              nextLabel={"-"}
-              pageCount={pages}
-              onPageChange={changePage}
-              activeClassName={"item active "}
-              breakClassName={"item break-me "}
-              breakLabel={"..."}
-              containerClassName={"pagination"}
-              disabledClassName={"disabled-page"}
-              marginPagesDisplayed={1}
-              nextClassName={"item next "}
-              pageClassName={"item pagination-page "}
-              pageRangeDisplayed={2}
-              previousClassName={"item previous"}
-            />
-          </div>
+                boxSizing: "border-box",
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              <ReactPaginate
+                previousLabel={"+"}
+                nextLabel={"-"}
+                pageCount={pages}
+                onPageChange={changePage}
+                activeClassName={"item active "}
+                breakClassName={"item break-me "}
+                breakLabel={"..."}
+                containerClassName={"pagination"}
+                disabledClassName={"disabled-page"}
+                marginPagesDisplayed={1}
+                nextClassName={"item next "}
+                pageClassName={"item pagination-page "}
+                pageRangeDisplayed={2}
+                previousClassName={"item previous"}
+              />
+            </div>
+          </Container>{" "}
         </Box>{" "}
       </Layout>
     </>

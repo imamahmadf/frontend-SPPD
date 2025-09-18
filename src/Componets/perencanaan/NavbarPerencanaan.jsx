@@ -25,10 +25,7 @@ import Logout from "../Logout";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { BiWallet } from "react-icons/bi";
 import { BsHouseDoor, BsStar, BsEnvelope } from "react-icons/bs";
-import { BsCart4 } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { GoShieldLock } from "react-icons/go";
-import { BiCar } from "react-icons/bi";
 import LogoPena from "../../assets/penaLogo.png";
 import LogoAset from "../../assets/asetLogo.png";
 import LogoPegawai from "../../assets/pegawaiLogo.png";
@@ -49,35 +46,17 @@ const socket = io("http://localhost:8000", {
 // Data menu untuk mapping
 const menuData = [
   {
-    title: "Administrator",
-    icon: GoShieldLock,
-    pathPrefix: "/sijaka",
+    title: "Perencanaan",
+    icon: HiOutlineUsers,
+    pathPrefix: "/perencanaan",
     items: [
-      { label: "Daftar Kendaraan", path: "/sijaka/daftar-kendaraan" },
-      { label: "Surat Pengantar", path: "/sijaka/daftar-kendaraan" },
-      { label: "template Surat", path: "/sijaka/template" },
+      { label: "Program", path: "/perencanaan/daftar-program" },
+      { label: "Indikator", path: "/perencanaan/daftar-indikator" },
     ],
-  },
-  {
-    title: "Persediaan",
-    icon: BsCart4,
-    pathPrefix: "/aset",
-    items: [
-      { label: "Daftar Persediaan", path: "/aset/daftar-persediaan" },
-      { label: "Laporan Persediaan", path: "/aset/laporan-persediaan" },
-      { label: "Surat Pesanan", path: "/aset/surat-pesanan" },
-    ],
-  },
-
-  {
-    title: "Kendaraan",
-    icon: BiCar,
-    pathPrefix: "/kendaraan",
-    items: [{ label: "Kendaraan Dinas", path: "/kendaraan/unit-kerja" }],
   },
 ];
 
-function NavbarAset() {
+function NavbarPerencanaan() {
   const isAuthenticated =
     useSelector(selectIsAuthenticated) || localStorage.getItem("token");
   const user = useSelector(userRedux);
@@ -141,7 +120,7 @@ function NavbarAset() {
           _hover={{ bg: "gray.100" }}
           borderRadius="md"
           borderBottom={isActive ? "2px solid" : "none"}
-          borderColor={isActive ? "aset" : "transparent"}
+          borderColor={isActive ? "perencanaan" : "transparent"}
           fontWeight={isActive ? "semibold" : "normal"}
         >
           {item.label}
@@ -172,10 +151,10 @@ function NavbarAset() {
         <PopoverTrigger>
           <Button
             variant="ghost"
-            color={"white"}
             leftIcon={<IconComponent />}
             position="relative"
-            _hover={{ bg: "aset", color: "white" }}
+            color={"white"}
+            _hover={{ bg: "perencanaan", color: "white" }}
             _after={{
               content: '""',
               position: "absolute",
@@ -184,7 +163,7 @@ function NavbarAset() {
               transform: "translateX(-50%)",
               width: isActive ? "80%" : "0%",
               height: "3px",
-              bg: "aset",
+              bg: "perencanaan",
               transition: "width 0.2s ease-in-out",
             }}
             onMouseEnter={() => setIsOpen(true)}
@@ -195,7 +174,6 @@ function NavbarAset() {
         </PopoverTrigger>
         <PopoverContent
           mt={1}
-          color="black"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >
@@ -218,7 +196,7 @@ function NavbarAset() {
       <Box position="fixed" top={0} left={0} right={0} zIndex={999}>
         {/* Header Oranye */}
         <Box
-          bg="aset"
+          bg="perencanaan"
           px={4}
           py={4}
           height="100px"
@@ -257,13 +235,12 @@ function NavbarAset() {
               {isAuthenticated ? (
                 <>
                   <Box>
-                    <HStack color={"white"} spacing={6}>
+                    <HStack spacing={6}>
                       {menuData.map((menu, index) => (
                         <MenuDropdown key={index} menu={menu} />
                       ))}
                     </HStack>
                   </Box>
-
                   <Menu>
                     <MenuButton as={Button} variant="ghost" size="sm">
                       <HStack>
@@ -342,13 +319,12 @@ function NavbarAset() {
               )}
             </HStack>
           </Flex>
-
-          {/* Bawah: Menu Putih */}
         </Box>
       </Box>
       {/* Spacing untuk konten utama */}
+      <Box /> {/* Spacer untuk konten */}
     </>
   );
 }
 
-export default NavbarAset;
+export default NavbarPerencanaan;

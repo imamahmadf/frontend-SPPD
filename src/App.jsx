@@ -76,6 +76,11 @@ import DetailKwitansiGlobal from "./pages/DetailKwitansiGlobal.jsx";
 import DaftarKwitansiGlobalKeuangan from "./pages/Admin/DaftarKwitansiGlobalKeuangan.jsx";
 import DetailKwitansiGlobalKeuangan from "./pages/Admin/DetailKwitansiGlobalKeuangan.jsx";
 import verifikasi from "./pages/Verifikasi.jsx";
+// /////PERENCANAAN////////////
+import DashboardPerencanaan from "./pages/Perencanaan/DashboardPerencanaan.jsx";
+import DaftarProgram from "./pages/Perencanaan/DaftarProgram.jsx";
+import DetailSubKegiatan from "./pages/Perencanaan/DetailSubKegiatan.jsx";
+import DaftarIndikator from "./pages/Perencanaan/DaftarIndikator.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -523,6 +528,33 @@ function App() {
             exact
             roleRoute={[5, 1]}
           />
+          {/* PERENCANAAN */}
+          <ProtectedRoute
+            component={DetailSubKegiatan}
+            path="/perencanaan/detail-sub-kegiatan/:id"
+            exact
+            roleRoute={[5, 11]}
+          />
+          <ProtectedRoute
+            component={DashboardPerencanaan}
+            path="/perencanaan"
+            exact
+            roleRoute={[5, 11]}
+          />
+          <ProtectedRoute
+            component={DaftarProgram}
+            path="/perencanaan/daftar-program"
+            exact
+            roleRoute={[5, 11]}
+          />
+
+          <ProtectedRoute
+            component={DaftarIndikator}
+            path="/perencanaan/daftar-indikator"
+            exact
+            roleRoute={[5, 11]}
+          />
+
           <Route component={verifikasi} path="/verifikasi/:id" />
           <Route component={Home} path="/" />
         </Switch>

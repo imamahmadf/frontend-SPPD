@@ -37,7 +37,7 @@ import {
 import Logo from "../../assets/logo.png";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { io } from "socket.io-client";
-
+import LogoPerencanaan from "../../assets/perencanaanLogo.png";
 const socket = io("http://localhost:8000", {
   transports: ["websocket"],
 });
@@ -302,6 +302,12 @@ function NavbarPegawai() {
                         <MenuItem>
                           <Image me={"10px"} h={"20px"} src={LogoPegawai} />
                           Kepegawaian
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/perencanaan"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoPerencanaan} />
+                          perencanaan
                         </MenuItem>
                       </Link>
                       <MenuItem>

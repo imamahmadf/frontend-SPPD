@@ -621,6 +621,15 @@ function RampungAdmin(props) {
                           Tujuan
                         </Text>
                         <Text fontSize="md">{daftarTempat || "-"}</Text>
+                        {/* {JSON.stringify(
+                          Math.max(
+                            ...(detailPerjalanan?.tempats || []).map(
+                              (t) => t?.dalamKota?.uangTransport ?? 0
+                            )
+                          )
+                        )}
+
+                        {JSON.stringify(detailPerjalanan)} */}
                       </Box>
                       <Box>
                         <Text

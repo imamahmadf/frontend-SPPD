@@ -31,6 +31,7 @@ import { BiCar } from "react-icons/bi";
 import LogoPena from "../assets/penaLogo.png";
 import LogoAset from "../assets/asetLogo.png";
 import LogoPegawai from "../assets/pegawaiLogo.png";
+import LogoPerencanaan from "../assets/perencanaanLogo.png";
 import {
   selectIsAuthenticated,
   userRedux,
@@ -364,6 +365,12 @@ function Navbar() {
                       <MenuItem>
                         <Image me={"10px"} h={"20px"} src={LogoPegawai} />
                         Kepegawaian
+                      </MenuItem>
+                    </Link>
+                    <Link to={"/perencanaan"}>
+                      <MenuItem>
+                        <Image me={"10px"} h={"20px"} src={LogoPerencanaan} />
+                        perencanaan
                       </MenuItem>
                     </Link>
                     <MenuItem>

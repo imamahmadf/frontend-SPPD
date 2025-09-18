@@ -503,6 +503,25 @@ function Detail(props) {
                       <Text fontSize="lg" fontWeight="medium">
                         {detailPerjalanan?.daftarSubKegiatan?.subKegiatan}
                       </Text>
+                      {!adaStatusDuaAtauTiga && (
+                        <Button
+                          size="xs"
+                          leftIcon={<FiEdit3 />}
+                          colorScheme="purple"
+                          variant="outline"
+                          ml={2}
+                          onClick={() => {
+                            setEditSubKegiatanId(
+                              detailPerjalanan?.daftarSubKegiatan?.id || ""
+                            );
+                            setIsEditUntukOpen(true);
+                          }}
+                          _hover={{ transform: "translateY(-1px)" }}
+                          transition="all 0.2s"
+                        >
+                          Edit
+                        </Button>
+                      )}
                     </HStack>
                   </VStack>
                 </SimpleGrid>
@@ -845,14 +864,14 @@ function Detail(props) {
           </ModalContent>
         </Modal>
 
-        {/* Modal Edit Untuk */}
+        {/* Modal Edit Sub Kegiatan */}
         <Modal
           isOpen={isEditUntukOpen}
           onClose={() => setIsEditUntukOpen(false)}
-          size="lg"
+          size="md"
         >
           <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
-          <ModalContent borderRadius="xl" maxWidth="600px" mx={4}>
+          <ModalContent borderRadius="xl" maxWidth="500px" mx={4}>
             <ModalHeader
               bg={headerBg}
               borderTopRadius="xl"
@@ -861,58 +880,36 @@ function Detail(props) {
               gap={2}
             >
               <Icon as={FiEdit3} color="purple.500" />
-              Edit Perjalanan
+              Edit Sub Kegiatan
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody p={8}>
-              <VStack spacing={6} align="stretch">
-                <FormControl>
-                  <FormLabel fontSize="lg" fontWeight="semibold">
-                    Tujuan Perjalanan
-                  </FormLabel>
-                  <Input
-                    as="textarea"
-                    value={editUntukValue}
-                    onChange={(e) => setEditUntukValue(e.target.value)}
-                    minH="120px"
-                    borderRadius="lg"
-                    border="2px solid"
-                    borderColor="gray.200"
-                    _hover={{ borderColor: "purple.300" }}
-                    _focus={{
-                      borderColor: "purple.500",
-                      boxShadow: "0 0 0 1px purple.500",
-                    }}
-                    resize="vertical"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="lg" fontWeight="semibold">
-                    Sub Kegiatan
-                  </FormLabel>
-                  <Select
-                    placeholder="Pilih Sub Kegiatan"
-                    value={editSubKegiatanId || ""}
-                    onChange={(e) => setEditSubKegiatanId(e.target.value)}
-                    borderRadius="lg"
-                    border="2px solid"
-                    borderColor="gray.200"
-                    _hover={{ borderColor: "purple.300" }}
-                    _focus={{
-                      borderColor: "purple.500",
-                      boxShadow: "0 0 0 1px purple.500",
-                    }}
-                    height="50px"
-                  >
-                    {dataSubKegiatan &&
-                      dataSubKegiatan.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.subKegiatan}
-                        </option>
-                      ))}
-                  </Select>
-                </FormControl>
-              </VStack>
+              <FormControl>
+                <FormLabel fontSize="lg" fontWeight="semibold">
+                  Pilih Sub Kegiatan Baru
+                </FormLabel>
+                <Select
+                  placeholder="Pilih Sub Kegiatan"
+                  value={editSubKegiatanId || ""}
+                  onChange={(e) => setEditSubKegiatanId(e.target.value)}
+                  borderRadius="lg"
+                  border="2px solid"
+                  borderColor="gray.200"
+                  _hover={{ borderColor: "purple.300" }}
+                  _focus={{
+                    borderColor: "purple.500",
+                    boxShadow: "0 0 0 1px purple.500",
+                  }}
+                  height="50px"
+                >
+                  {dataSubKegiatan &&
+                    dataSubKegiatan.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.subKegiatan}
+                      </option>
+                    ))}
+                </Select>
+              </FormControl>
             </ModalBody>
             <ModalFooter gap={3} p={8}>
               <Button
@@ -927,24 +924,26 @@ function Detail(props) {
                 colorScheme="purple"
                 leftIcon={<FiCheckCircle />}
                 onClick={async () => {
+                  setIsLoading(true); // Mulai loading
                   try {
                     await axios.post(
                       `${
                         import.meta.env.VITE_REACT_APP_API_BASE_URL
                       }/perjalanan/edit/${props.match.params.id}`,
                       {
-                        untuk: editUntukValue,
                         subKegiatanId: editSubKegiatanId,
                       }
                     );
                     setIsEditUntukOpen(false);
-                    fetchDataPerjalan();
+                    await fetchDataPerjalan(); // Tunggu fetch selesai
                   } catch (err) {
                     console.error(err);
                   }
+                  setIsLoading(false); // Pastikan loading di-set false
                 }}
                 _hover={{ transform: "translateY(-1px)" }}
                 transition="all 0.2s"
+                isDisabled={!editSubKegiatanId}
               >
                 Simpan Perubahan
               </Button>

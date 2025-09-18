@@ -75,6 +75,8 @@ function DetailKwitansiGlobal(props) {
   const [dataPerjalanan, setDataPerjalanan] = useState(null);
   const [selectedPerjalanan, setSelectedPerjalanan] = useState({});
   const [selectedIds, setSelectedIds] = useState([]);
+  const [subKegiatanList, setSubKegiatanList] = useState([]);
+  const [selectedSubKegiatanId, setSelectedSubKegiatanId] = useState(null);
 
   // Sinkronkan selectedIds dengan selectedPerjalanan
   useEffect(() => {
@@ -89,6 +91,16 @@ function DetailKwitansiGlobal(props) {
     onOpen: onDetailOpen,
     onClose: onDetailClose,
   } = useDisclosure();
+  const {
+    isOpen: isEditSubKegiatanOpen,
+    onOpen: onEditSubKegiatanOpen,
+    onClose: onEditSubKegiatanClose,
+  } = useDisclosure();
+  const {
+    isOpen: isModalBaruOpen,
+    onOpen: onModalBaruOpen,
+    onClose: onModalBaruClose,
+  } = useDisclosure();
 
   async function fetchKwitansiGlobal() {
     await axios
@@ -99,7 +111,11 @@ function DetailKwitansiGlobal(props) {
       )
       .then((res) => {
         setDataKwitGlobal(res.data.result);
-
+        setSubKegiatanList(res.data.resultSubKegiatan || []);
+        // Set subKegiatanId yang aktif dari dataKwitGlobal
+        if (res.data.result && res.data.result[0]?.subKegiatanId) {
+          setSelectedSubKegiatanId(res.data.result[0].subKegiatanId);
+        }
         console.log(res.data);
       })
       .catch((err) => {
@@ -359,6 +375,89 @@ function DetailKwitansiGlobal(props) {
       });
   };
 
+  const hapusSemuaPerjalanan = () => {
+    const kg = Array.isArray(dataKwitGlobal)
+      ? dataKwitGlobal[0]
+      : dataKwitGlobal;
+    const perjalanans = Array.isArray(kg?.perjalanans) ? kg.perjalanans : [];
+    const semuaId = perjalanans.map((p) => p.id);
+
+    if (semuaId.length === 0) {
+      toast({
+        title: "Error!",
+        description: "Tidak ada perjalanan untuk dihapus.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    console.log(semuaId);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi-global/post/hapus-perjalanan`,
+        {
+          perjalananIds: semuaId,
+          id: props.match.params.id,
+        }
+      )
+      .then((res) => {
+        toast({
+          title: "Berhasil!",
+          description: "Semua perjalanan berhasil dihapus.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        fetchKwitansiGlobal();
+      })
+      .catch((err) => {
+        toast({
+          title: "Error!",
+          description: "Gagal menghapus perjalanan.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      });
+  };
+
+  const handleUpdateSubKegiatan = () => {
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi-global/post/update-subkegiatan`,
+        {
+          id: props.match.params.id,
+          subKegiatanId: selectedSubKegiatanId,
+        }
+      )
+      .then((res) => {
+        toast({
+          title: "Berhasil!",
+          description: "Sub Kegiatan berhasil diupdate.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        fetchKwitansiGlobal();
+        onModalBaruClose();
+      })
+      .catch((err) => {
+        toast({
+          title: "Error!",
+          description: "Gagal update Sub Kegiatan.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        onModalBaruClose();
+      });
+  };
+
   useEffect(() => {
     fetchKwitansiGlobal();
   }, [page]);
@@ -385,6 +484,7 @@ function DetailKwitansiGlobal(props) {
               <Text color="gray.600" fontSize="sm">
                 Kelola dan lihat detail kwitansi global perjalanan dinas
               </Text>
+              {/* Hapus form edit sub kegiatan di sini */}
             </Box>
             {/* {JSON.stringify(dataKwitGlobal[0]?.verifikasi)} */}
             {/* Action Buttons */}
@@ -417,6 +517,17 @@ function DetailKwitansiGlobal(props) {
                   Tambah Perjalanan
                 </Button>
               ) : null}
+
+              <Button
+                onClick={onModalBaruOpen}
+                colorScheme="purple"
+                variant="solid"
+                px={6}
+                leftIcon={<BsEyeFill />}
+                size="md"
+              >
+                edit Sub Kegiatan
+              </Button>
 
               <Spacer />
 
@@ -593,7 +704,7 @@ function DetailKwitansiGlobal(props) {
               );
             })()}
             {dataKwitGlobal[0]?.status === "dibuat" ? (
-              <Flex justify="center" mt={"30px"}>
+              <Flex justify="center" mt={"30px"} gap={4}>
                 <Button
                   variant={"solid"}
                   colorScheme="green"
@@ -603,6 +714,16 @@ function DetailKwitansiGlobal(props) {
                   leftIcon={<BsCartPlus />}
                 >
                   Ajukan Kwitansi Global
+                </Button>
+                <Button
+                  variant={"outline"}
+                  colorScheme="red"
+                  onClick={hapusSemuaPerjalanan}
+                  size="lg"
+                  px={8}
+                  ml={2}
+                >
+                  Hapus Semua Perjalanan
                 </Button>
               </Flex>
             ) : null}
@@ -633,6 +754,8 @@ function DetailKwitansiGlobal(props) {
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody p={6}>
+              {/* Form Edit Sub Kegiatan di dalam modal */}
+
               {dataPerjalanan ? (
                 <>
                   {Array.isArray(dataPerjalanan) &&
@@ -1015,6 +1138,62 @@ function DetailKwitansiGlobal(props) {
                   </Button>
                 ) : null}
               </Flex>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Modal Baru */}
+        <Modal isOpen={isModalBaruOpen} onClose={onModalBaruClose} size="md">
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Buka Modal Baru</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Box mb={8} maxW="400px">
+                <FormControl>
+                  <FormLabel fontWeight="bold">Sub Kegiatan</FormLabel>
+                  <Select2
+                    options={subKegiatanList.map((sk) => ({
+                      value: sk.id,
+                      label: `${sk.subKegiatan} (${sk.kodeRekening})`,
+                    }))}
+                    value={
+                      subKegiatanList
+                        .map((sk) => ({
+                          value: sk.id,
+                          label: `${sk.subKegiatan} (${sk.kodeRekening})`,
+                        }))
+                        .find((opt) => opt.value === selectedSubKegiatanId) ||
+                      null
+                    }
+                    onChange={(opt) =>
+                      setSelectedSubKegiatanId(opt?.value || null)
+                    }
+                    placeholder="Pilih Sub Kegiatan"
+                    isClearable
+                    isDisabled={
+                      !["dibuat", "ditolak"].includes(dataKwitGlobal[0]?.status)
+                    }
+                  />
+                  <Button
+                    mt={2}
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={handleUpdateSubKegiatan}
+                    isDisabled={
+                      !selectedSubKegiatanId ||
+                      !["dibuat", "ditolak"].includes(dataKwitGlobal[0]?.status)
+                    }
+                  >
+                    Simpan Sub Kegiatan
+                  </Button>
+                </FormControl>
+              </Box>
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme="purple" mr={3} onClick={onModalBaruClose}>
+                Tutup
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>

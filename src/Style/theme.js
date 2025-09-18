@@ -32,6 +32,7 @@ export const myNewTheme = extendTheme({
     background: "rgba(243, 243, 243, 1)",
     aset: "rgba(0, 125, 226, 1)",
     pegawai: "rgba(212, 39, 39, 1)",
+    perencanaan: "rgba(235, 106, 63,1)",
   },
 
   config: {
