@@ -3,7 +3,7 @@ import axios from "axios";
 
 import LayoutAset from "../../Componets/Aset/LayoutAset";
 import ReactPaginate from "react-paginate";
-import { BsFileEarmarkArrowDown } from "react-icons/bs";
+
 import "../../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
 import Foto from "../../assets/add_photo.png";
@@ -40,6 +40,11 @@ import {
   Spacer,
   useToast,
   useColorMode,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  IconButton,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -47,7 +52,12 @@ import {
   AsyncSelect,
 } from "chakra-react-select";
 import { useDisclosure } from "@chakra-ui/react";
-import { BsEyeFill } from "react-icons/bs";
+
+import {
+  BsThreeDotsVertical,
+  BsEyeFill,
+  BsFileEarmarkArrowDown,
+} from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
@@ -73,6 +83,7 @@ function DaftarKendaraan() {
   const [time, setTime] = useState("");
   const [loadingItems, setLoadingItems] = useState({});
   const [loadingSurat, setLoadingSurat] = useState({});
+  const [openMenuId, setOpenMenuId] = useState(null);
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
   const [dataPegawai, setDataPegawai] = useState(null);
@@ -153,6 +164,7 @@ function DaftarKendaraan() {
       })
       .finally(() => {
         setLoadingItems((prev) => ({ ...prev, [val.id]: false }));
+        setOpenMenuId(null);
       });
   };
   const cektakSurat = (val) => {
@@ -491,6 +503,8 @@ function DaftarKendaraan() {
                   <Th>nominal Pajak</Th>
                   <Th>status</Th>
                   <Th>kondisi</Th>
+                  <Th>Nilai Perolehan</Th>
+                  <Th>tanggal Perolehan</Th>
                   <Th>kontak</Th>
                   <Th>Aksi</Th>
                 </Tr>
@@ -538,7 +552,7 @@ function DaftarKendaraan() {
                           })
                         : "-"}
                     </Td>{" "}
-                    <Td>{item?.kendaraanUK.unitKerja}</Td>
+                    <Td>{item?.kendaraanUK?.unitKerja}</Td>
                     <Td>{item?.pegawai?.nama}</Td>
                     <Td>
                       {" "}
@@ -547,53 +561,78 @@ function DaftarKendaraan() {
                     </Td>
                     <Td>{item?.statusKendaraan?.status}</Td>
                     <Td>{item?.kondisi?.nama}</Td>
+                    <Td>
+                      {" "}
+                      Rp
+                      {Number(item?.nilaiPerolehan).toLocaleString("id-ID")}
+                    </Td>{" "}
+                    <Td>
+                      {" "}
+                      {item?.tanggalPerolehan
+                        ? new Date(item?.tanggalPerolehan).toLocaleDateString(
+                            "id-ID",
+                            {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
+                        : "-"}
+                    </Td>
                     <Td>{item?.noKontak}</Td>
                     <Td>
-                      <Flex gap={"10px"}>
-                        {item.id ? (
-                          <Button
-                            variant={"primary"}
-                            p={"0px"}
-                            fontSize={"14px"}
-                            onClick={() =>
-                              history.push(
-                                `/sijaka/detail-kendaraan/${item.id}`
-                              )
-                            }
+                      <Menu
+                        closeOnSelect={false}
+                        isOpen={openMenuId === item.id}
+                        onClose={() => setOpenMenuId(null)}
+                      >
+                        <MenuButton
+                          as={IconButton}
+                          aria-label="Options"
+                          icon={<BsThreeDotsVertical />}
+                          variant="primary"
+                          size="sm"
+                          onClick={() =>
+                            setOpenMenuId((prev) =>
+                              prev === item.id ? null : item.id
+                            )
+                          }
+                        />
+                        <MenuList>
+                          <MenuItem
+                            onClick={() => cekPajak(item)}
+                            isDisabled={loadingItems[item.id]}
                           >
-                            <BsEyeFill />
-                          </Button>
-                        ) : null}
+                            {loadingItems[item.id]
+                              ? "Mengecek..."
+                              : "Cek Pajak"}
+                          </MenuItem>
 
-                        <Button
-                          variant={"primary"}
-                          px={"15px"}
-                          fontSize={"14px"}
-                          h={"40px"}
-                          isLoading={loadingItems[item.id]}
-                          loadingText="Mengecek..."
-                          onClick={() => {
-                            cekPajak(item);
-                          }}
-                          disabled={loadingItems[item.id]}
-                        >
-                          Cek Pajak
-                        </Button>
-                        <Button
-                          variant={"secondary"}
-                          p={"0px"}
-                          fontSize={"14px"}
-                          h={"40px"}
-                          isLoading={loadingSurat[item.id]}
-                          loadingText="Mencetak..."
-                          onClick={() => {
-                            cektakSurat(item);
-                          }}
-                          disabled={loadingSurat[item.id]}
-                        >
-                          <BsFileEarmarkArrowDown />
-                        </Button>
-                      </Flex>
+                          {item.id && (
+                            <MenuItem
+                              onClick={() =>
+                                history.push(
+                                  `/sijaka/detail-kendaraan/${item.id}`
+                                )
+                              }
+                              icon={<BsEyeFill />}
+                            >
+                              Lihat Detail
+                            </MenuItem>
+                          )}
+
+                          <MenuItem
+                            onClick={() => cektakSurat(item)}
+                            isDisabled={loadingSurat[item.id]}
+                            icon={<BsFileEarmarkArrowDown />}
+                          >
+                            {loadingSurat[item.id]
+                              ? "Mencetak..."
+                              : "Cetak Surat"}
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
                     </Td>
                   </Tr>
                 ))}

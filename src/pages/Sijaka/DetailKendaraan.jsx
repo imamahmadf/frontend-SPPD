@@ -67,7 +67,15 @@ function DetailKendaraan(props) {
     onOpen: onMutasiOpen,
     onClose: onMutasiClose,
   } = useDisclosure();
-
+  const handleLinkClick = (link) => {
+    if (!link) return;
+    // Pastikan link dimulai dengan http atau https
+    const validLink =
+      link.startsWith("http://") || link.startsWith("https://")
+        ? link
+        : `https://${link}`;
+    window.open(validLink, "_blank");
+  };
   const fetchDataKendaraan = async () => {
     try {
       const res = await axios.get(
@@ -152,6 +160,10 @@ function DetailKendaraan(props) {
     jenisKendaraanId: Yup.string().required("Jenis kendaraan wajib dipilih"),
     statusKendaraanId: Yup.string().required(""),
     kondisiId: Yup.string().required(""),
+    nilaiPerolehan: Yup.number().required("Nilai perolehan Wajib diisi"),
+    tanggalPerolehan: Yup.date().required("Tanggal Perolehan Wajib disi"),
+    nibar: Yup.string().required("nibar wajib diisi"),
+    link: Yup.string().required("Link BPKB wajib diisi"),
   });
 
   const handleSubmitEdit = async (values, actions) => {
@@ -276,6 +288,35 @@ function DetailKendaraan(props) {
                 </HStack>
                 <HStack width="100%">
                   <Text fontWeight="semibold" minW="140px">
+                    Nilai Perolehan:
+                  </Text>
+                  <Text>{detailKendaraan?.nilaiPerolehan}</Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Tangal Perolehan:
+                  </Text>
+                  <Text>
+                    {" "}
+                    {detailKendaraan?.tgl_pkb &&
+                      new Date(
+                        detailKendaraan?.tanggalPerolehan
+                      ).toLocaleDateString("id-ID", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                  </Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
+                    Nibar:
+                  </Text>
+                  <Text>{detailKendaraan?.nibar}</Text>
+                </HStack>
+                <HStack width="100%">
+                  <Text fontWeight="semibold" minW="140px">
                     Status:
                   </Text>
                   <Text>{detailKendaraan?.statusKendaraan?.status}</Text>
@@ -287,6 +328,12 @@ function DetailKendaraan(props) {
                 </Button>
                 <Button variant={"primary"} onClick={onMutasiOpen}>
                   Mutasi
+                </Button>
+                <Button
+                  variant={"primary"}
+                  onClick={() => handleLinkClick(detailKendaraan?.link)}
+                >
+                  BPKB
                 </Button>
               </Flex>
             </Box>
@@ -501,6 +548,11 @@ function DetailKendaraan(props) {
                 statusKendaraanId:
                   detailKendaraan?.statusKendaraan?.id?.toString() || "", // Penting: harus string
                 kondisiId: detailKendaraan?.kondisi?.id?.toString() || "", // Penting: harus string
+
+                nilaiPerolehan: detailKendaraan?.nilaiPerolehan,
+                tanggalPerolehan: detailKendaraan?.tanggalPerolehan,
+                nibar: detailKendaraan?.nibar,
+                link: detailKendaraan?.link,
               }}
               validationSchema={editSchema}
               onSubmit={handleSubmitEdit}
@@ -638,6 +690,51 @@ function DetailKendaraan(props) {
                           </FormControl>
                         )}
                       </Field>
+                      <Field name="nilaiPerolehan">
+                        {({ field, form }) => (
+                          <FormControl
+                            isInvalid={
+                              form.errors.nilaiPerolehan &&
+                              form.touched.nilaiPerolehan
+                            }
+                          >
+                            <FormLabel>Nilai Perolehan</FormLabel>
+                            <Input type="number" {...field} />
+                            <FormErrorMessage>
+                              {form.errors.nilaiPerolehan}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="tanggalPerolehan">
+                        {({ field, form }) => (
+                          <FormControl
+                            isInvalid={
+                              form.errors.tanggalPerolehan &&
+                              form.touched.tanggalPerolehan
+                            }
+                          >
+                            <FormLabel>Tanggal Perolehan</FormLabel>
+                            <Input type="date" {...field} />
+                            <FormErrorMessage>
+                              {form.errors.tanggalPerolehan}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="nibar">
+                        {({ field, form }) => (
+                          <FormControl
+                            isInvalid={form.errors.nibar && form.touched.nibar}
+                          >
+                            <FormLabel>nibar</FormLabel>
+                            <Input {...field} />
+                            <FormErrorMessage>
+                              {form.errors.nibar}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
                       <Field name="statusKendaraanId">
                         {({ field, form }) => (
                           <FormControl
@@ -706,6 +803,19 @@ function DetailKendaraan(props) {
                             <Input type="number" {...field} />
                             <FormErrorMessage>
                               {form.errors.noKontak}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="link">
+                        {({ field, form }) => (
+                          <FormControl
+                            isInvalid={form.errors.link && form.touched.link}
+                          >
+                            <FormLabel>Link BPKB</FormLabel>
+                            <Input {...field} />
+                            <FormErrorMessage>
+                              {form.errors.link}
                             </FormErrorMessage>
                           </FormControl>
                         )}
