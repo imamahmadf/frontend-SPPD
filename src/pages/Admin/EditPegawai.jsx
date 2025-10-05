@@ -193,6 +193,30 @@ function EditPegawai(props) {
                   </Td>
                 </Tr>
                 <Tr>
+                  <Th minWidth={"100px"}>Jabatan</Th>
+                  <Td>
+                    <Flex>
+                      {isEditing ? (
+                        <>
+                          <Input
+                            value={dataPegawai.jabatan}
+                            onChange={(e) =>
+                              setDataPegawai({
+                                ...dataPegawai,
+                                jabatan: e.target.value,
+                              })
+                            }
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Text as="span">{dataPegawai.jabatan}</Text>
+                        </>
+                      )}
+                    </Flex>
+                  </Td>
+                </Tr>
+                <Tr>
                   <Th minWidth={"100px"}>Pendidikan</Th>
                   <Td>
                     <Flex>
