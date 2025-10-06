@@ -80,7 +80,11 @@ import verifikasi from "./pages/Verifikasi.jsx";
 import DashboardPerencanaan from "./pages/Perencanaan/DashboardPerencanaan.jsx";
 import DaftarProgram from "./pages/Perencanaan/DaftarProgram.jsx";
 import DetailSubKegiatan from "./pages/Perencanaan/DetailSubKegiatan.jsx";
+import DetailProgram from "./pages/Perencanaan/DetailProgram.jsx";
+import DetailKegiatan from "./pages/Perencanaan/DetailKegiatan.jsx";
 import DaftarIndikator from "./pages/Perencanaan/DaftarIndikator.jsx";
+import DaftarCapaian from "./pages/Perencanaan/DaftarCapaian.jsx";
+
 function App() {
   const dispatch = useDispatch();
 
@@ -535,6 +539,21 @@ function App() {
             exact
             roleRoute={[5, 11]}
           />
+
+          <ProtectedRoute
+            component={DetailKegiatan}
+            path="/perencanaan/detail-kegiatan/:id"
+            exact
+            roleRoute={[5, 11]}
+          />
+
+          <ProtectedRoute
+            component={DetailProgram}
+            path="/perencanaan/detail-program/:id"
+            exact
+            roleRoute={[5, 11]}
+          />
+
           <ProtectedRoute
             component={DashboardPerencanaan}
             path="/perencanaan"
@@ -551,6 +570,13 @@ function App() {
           <ProtectedRoute
             component={DaftarIndikator}
             path="/perencanaan/daftar-indikator"
+            exact
+            roleRoute={[5, 11]}
+          />
+
+          <ProtectedRoute
+            component={DaftarCapaian}
+            path="/perencanaan/daftar-capaian"
             exact
             roleRoute={[5, 11]}
           />

@@ -72,6 +72,7 @@ function Detail(props) {
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [dataSubKegiatan, setDataSubKegiatan] = useState(null);
+  const [dataDalamKota, setDataDalamKota] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Tambah state loading
   const {
     isOpen: isEditOpen,
@@ -125,13 +126,35 @@ function Detail(props) {
       });
   }
 
+  async function fetchDataDalamKota() {
+    await axios
+      .get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/dalam-kota/get/dalam-kota/${
+          user[0]?.unitKerja_profile?.indukUnitKerja.id
+        }`
+      )
+      .then((res) => {
+        setDataDalamKota(res.data.result);
+        console.log(res.data.result, "DALAM KOTA");
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
   const history = useHistory();
 
   useEffect(() => {
     // Jalankan kedua fetch dan set loading false setelah keduanya selesai
     const fetchAll = async () => {
       setIsLoading(true);
-      await Promise.all([fetchDataPerjalan(), fetchSubKegiatan()]);
+      await Promise.all([
+        fetchDataPerjalan(),
+        fetchSubKegiatan(),
+        fetchDataDalamKota(),
+      ]);
       setIsLoading(false);
     };
     fetchAll();
@@ -145,6 +168,20 @@ function Detail(props) {
   const [isEditUntukOpen, setIsEditUntukOpen] = useState(false); // modal edit untuk
   const [editUntukValue, setEditUntukValue] = useState(""); // nilai untuk yang diedit
   const [editSubKegiatanId, setEditSubKegiatanId] = useState(null); // nilai sub kegiatan yang diedit
+  const [isEditTempatOpen, setIsEditTempatOpen] = useState(false); // modal edit tempat terpadu
+  const [editTanggalBerangkat, setEditTanggalBerangkat] = useState(""); // nilai tanggal berangkat yang diedit
+  const [editTanggalPulang, setEditTanggalPulang] = useState(""); // nilai tanggal pulang yang diedit
+  const [editTujuan, setEditTujuan] = useState(""); // nilai tujuan yang diedit (untuk luar kota)
+  const [editDalamKotaId, setEditDalamKotaId] = useState(""); // nilai dalam kota yang dipilih
+  const [selectedTempatIndex, setSelectedTempatIndex] = useState(0); // index tempat yang sedang diedit
+  const [selectedTempatId, setSelectedTempatId] = useState(null); // ID tempat yang sedang diedit
+
+  // Fungsi untuk mengkonversi tanggal ke format YYYY-MM-DD untuk input date
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
+  };
 
   const handleEditPegawai = async () => {
     try {
@@ -173,6 +210,38 @@ function Detail(props) {
         }/pegawai/personil/hapus/${personilHapusId}`
       );
       onHapusClose();
+      fetchDataPerjalan(); // refresh data
+      setIsLoading(false);
+    } catch (err) {
+      console.error(err);
+      setIsLoading(false);
+    }
+  };
+
+  const handleEditTempat = async () => {
+    try {
+      const payload = {
+        tempatId: selectedTempatId,
+        tanggalBerangkat: editTanggalBerangkat,
+        tanggalPulang: editTanggalPulang,
+      };
+
+      // Tambahkan field yang sesuai berdasarkan tipe perjalanan
+      if (detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1) {
+        // Perjalanan dalam kota
+        payload.dalamKotaId = parseInt(editDalamKotaId);
+      } else {
+        // Perjalanan luar kota
+        payload.tujuan = editTujuan;
+      }
+      console.log(payload, "cek payload");
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perjalanan/edit-tempat/${props.match.params.id}`,
+        payload
+      );
+      setIsEditTempatOpen(false);
       fetchDataPerjalan(); // refresh data
       setIsLoading(false);
     } catch (err) {
@@ -400,58 +469,6 @@ function Detail(props) {
                     </HStack>
                   </VStack>
 
-                  {/* Tanggal Berangkat */}
-                  <VStack align="start" spacing={2}>
-                    <Text
-                      fontSize="sm"
-                      fontWeight="semibold"
-                      color="gray.500"
-                      textTransform="uppercase"
-                    >
-                      Tanggal Berangkat
-                    </Text>
-                    <HStack>
-                      <Icon as={FiCalendar} color="purple.600" />
-                      <Text fontSize="lg" fontWeight="medium">
-                        {new Date(
-                          detailPerjalanan.tempats?.[0]?.tanggalBerangkat
-                        ).toLocaleDateString("id-ID", {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </Text>
-                    </HStack>
-                  </VStack>
-
-                  {/* Tanggal Pulang */}
-                  <VStack align="start" spacing={2}>
-                    <Text
-                      fontSize="sm"
-                      fontWeight="semibold"
-                      color="gray.500"
-                      textTransform="uppercase"
-                    >
-                      Tanggal Pulang
-                    </Text>
-                    <HStack>
-                      <Icon as={FiCalendar} color="primary" />
-                      <Text fontSize="lg" fontWeight="medium">
-                        {new Date(
-                          detailPerjalanan.tempats?.[
-                            detailPerjalanan.tempats?.length - 1
-                          ]?.tanggalPulang
-                        ).toLocaleDateString("id-ID", {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </Text>
-                    </HStack>
-                  </VStack>
-
                   {/* Sumber Dana */}
                   <VStack align="start" spacing={2}>
                     <Text
@@ -469,25 +486,6 @@ function Detail(props) {
                       </Text>
                     </HStack>
                   </VStack>
-
-                  {/* Tujuan */}
-                  <VStack align="start" spacing={2}>
-                    <Text
-                      fontSize="sm"
-                      fontWeight="semibold"
-                      color="gray.500"
-                      textTransform="uppercase"
-                    >
-                      Tujuan
-                    </Text>
-                    <HStack>
-                      <Icon as={FiMapPin} color="primary" />
-                      <Text fontSize="lg" fontWeight="medium">
-                        {daftarTempat}
-                      </Text>
-                    </HStack>
-                  </VStack>
-
                   {/* Sub Kegiatan */}
                   <VStack align="start" spacing={2}>
                     <Text
@@ -523,6 +521,112 @@ function Detail(props) {
                         </Button>
                       )}
                     </HStack>
+                  </VStack>
+                  {/* Tujuan */}
+                  <VStack align="start" spacing={2}>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="semibold"
+                      color="gray.500"
+                      textTransform="uppercase"
+                    >
+                      Tujuan ({detailPerjalanan?.tempats?.length} tempat)
+                    </Text>
+                    <VStack
+                      align="start"
+                      flexDirection={"row"}
+                      spacing={3}
+                      w="100%"
+                    >
+                      {detailPerjalanan?.tempats?.map((tempat, index) => (
+                        <Box
+                          key={index}
+                          p={3}
+                          bg={useColorModeValue("gray.50", "gray.700")}
+                          borderRadius="lg"
+                          border="1px"
+                          borderColor={borderColor}
+                          w="full"
+                        >
+                          <VStack align="start" spacing={3}>
+                            <HStack justify="space-between" w="full">
+                              <HStack>
+                                <Icon as={FiMapPin} color="primary" />
+                                <Text fontSize="md" fontWeight="medium">
+                                  {detailPerjalanan.jenisPerjalanan
+                                    ?.tipePerjalananId === 1
+                                    ? tempat.dalamKota?.nama
+                                    : tempat.tempat}
+                                </Text>
+                              </HStack>
+                              <Spacer />
+                              {!adaStatusDuaAtauTiga && (
+                                <Button
+                                  size="sm"
+                                  leftIcon={<FiEdit3 />}
+                                  colorScheme="primary"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedTempatIndex(index); // Tetap gunakan index untuk array access
+                                    setSelectedTempatId(tempat.id); // Simpan ID untuk dikirim ke API
+
+                                    // Set nilai sesuai tipe perjalanan
+                                    if (
+                                      detailPerjalanan.jenisPerjalanan
+                                        ?.tipePerjalananId === 1
+                                    ) {
+                                      // Perjalanan dalam kota
+                                      setEditDalamKotaId(
+                                        tempat.dalamKota?.id || ""
+                                      );
+                                      setEditTujuan(""); // Reset untuk luar kota
+                                    } else {
+                                      // Perjalanan luar kota
+                                      setEditTujuan(tempat.tempat || "");
+                                      setEditDalamKotaId(""); // Reset untuk dalam kota
+                                    }
+
+                                    setEditTanggalBerangkat(
+                                      formatDateForInput(
+                                        tempat.tanggalBerangkat
+                                      )
+                                    );
+                                    setEditTanggalPulang(
+                                      formatDateForInput(tempat.tanggalPulang)
+                                    );
+                                    setIsEditTempatOpen(true);
+                                  }}
+                                  _hover={{ transform: "translateY(-1px)" }}
+                                  transition="all 0.2s"
+                                >
+                                  Edit Tempat
+                                </Button>
+                              )}
+                            </HStack>
+                            <HStack spacing={4} fontSize="sm" color="gray.600">
+                              <HStack>
+                                <Icon as={FiCalendar} color="purple.600" />
+                                <Text>
+                                  Berangkat:{" "}
+                                  {new Date(
+                                    tempat.tanggalBerangkat
+                                  ).toLocaleDateString("id-ID")}
+                                </Text>
+                              </HStack>
+                              <HStack>
+                                <Icon as={FiCalendar} color="primary" />
+                                <Text>
+                                  Pulang:{" "}
+                                  {new Date(
+                                    tempat.tanggalPulang
+                                  ).toLocaleDateString("id-ID")}
+                                </Text>
+                              </HStack>
+                            </HStack>
+                          </VStack>
+                        </Box>
+                      ))}
+                    </VStack>
                   </VStack>
                 </SimpleGrid>
               </CardBody>
@@ -944,6 +1048,172 @@ function Detail(props) {
                 _hover={{ transform: "translateY(-1px)" }}
                 transition="all 0.2s"
                 isDisabled={!editSubKegiatanId}
+              >
+                Simpan Perubahan
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Modal Edit Tempat Terpadu */}
+        <Modal
+          isOpen={isEditTempatOpen}
+          onClose={() => setIsEditTempatOpen(false)}
+          size="lg"
+        >
+          <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+          <ModalContent borderRadius="xl" maxWidth="600px" mx={4}>
+            <ModalHeader
+              bg={headerBg}
+              borderTopRadius="xl"
+              display="flex"
+              alignItems="center"
+              gap={2}
+            >
+              <Icon as={FiEdit3} color="purple.500" />
+              Edit Tempat
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={8}>
+              <VStack spacing={6} align="stretch">
+                <Box
+                  bg={useColorModeValue("gray.50", "gray.700")}
+                  p={4}
+                  borderRadius="lg"
+                  border="1px"
+                  borderColor={borderColor}
+                >
+                  <Text
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    color="gray.600"
+                    mb={2}
+                  >
+                    Tempat yang diedit:
+                  </Text>
+                  <Text fontSize="lg" fontWeight="medium">
+                    {detailPerjalanan?.tempats?.[selectedTempatIndex] &&
+                    detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1
+                      ? detailPerjalanan.tempats[selectedTempatIndex].dalamKota
+                          ?.nama
+                      : detailPerjalanan.tempats[selectedTempatIndex].tempat}
+                  </Text>
+                </Box>
+
+                <SimpleGrid columns={2} spacing={4}>
+                  <FormControl>
+                    <FormLabel fontSize="md" fontWeight="semibold">
+                      Tanggal Berangkat
+                    </FormLabel>
+                    <Input
+                      type="date"
+                      value={editTanggalBerangkat}
+                      onChange={(e) => setEditTanggalBerangkat(e.target.value)}
+                      borderRadius="lg"
+                      border="2px solid"
+                      borderColor="gray.200"
+                      _hover={{ borderColor: "purple.300" }}
+                      _focus={{
+                        borderColor: "purple.500",
+                        boxShadow: "0 0 0 1px purple.500",
+                      }}
+                      height="45px"
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontSize="md" fontWeight="semibold">
+                      Tanggal Pulang
+                    </FormLabel>
+                    <Input
+                      type="date"
+                      value={editTanggalPulang}
+                      onChange={(e) => setEditTanggalPulang(e.target.value)}
+                      borderRadius="lg"
+                      border="2px solid"
+                      borderColor="gray.200"
+                      _hover={{ borderColor: "purple.300" }}
+                      _focus={{
+                        borderColor: "purple.500",
+                        boxShadow: "0 0 0 1px purple.500",
+                      }}
+                      height="45px"
+                    />
+                  </FormControl>
+                </SimpleGrid>
+
+                <FormControl>
+                  <FormLabel fontSize="md" fontWeight="semibold">
+                    {detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1
+                      ? "Lokasi Dalam Kota"
+                      : "Tujuan"}
+                  </FormLabel>
+                  {detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1 ? (
+                    // Select untuk perjalanan dalam kota
+                    <Select
+                      placeholder="Pilih lokasi dalam kota..."
+                      value={editDalamKotaId}
+                      onChange={(e) => setEditDalamKotaId(e.target.value)}
+                      borderRadius="lg"
+                      border="2px solid"
+                      borderColor="gray.200"
+                      _hover={{ borderColor: "purple.300" }}
+                      _focus={{
+                        borderColor: "purple.500",
+                        boxShadow: "0 0 0 1px purple.500",
+                      }}
+                      height="45px"
+                    >
+                      {dataDalamKota &&
+                        dataDalamKota.map((item) => (
+                          <option key={item.id} value={item.id}>
+                            {item.nama}
+                          </option>
+                        ))}
+                    </Select>
+                  ) : (
+                    // Input text untuk perjalanan luar kota
+                    <Input
+                      type="text"
+                      value={editTujuan}
+                      onChange={(e) => setEditTujuan(e.target.value)}
+                      placeholder="Masukkan tujuan..."
+                      borderRadius="lg"
+                      border="2px solid"
+                      borderColor="gray.200"
+                      _hover={{ borderColor: "purple.300" }}
+                      _focus={{
+                        borderColor: "purple.500",
+                        boxShadow: "0 0 0 1px purple.500",
+                      }}
+                      height="45px"
+                    />
+                  )}
+                </FormControl>
+              </VStack>
+            </ModalBody>
+            <ModalFooter gap={3} p={8}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditTempatOpen(false)}
+                _hover={{ transform: "translateY(-1px)" }}
+                transition="all 0.2s"
+              >
+                Batal
+              </Button>
+              <Button
+                colorScheme="purple"
+                leftIcon={<FiCheckCircle />}
+                onClick={handleEditTempat}
+                _hover={{ transform: "translateY(-1px)" }}
+                transition="all 0.2s"
+                isDisabled={
+                  !editTanggalBerangkat ||
+                  !editTanggalPulang ||
+                  (detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1
+                    ? !editDalamKotaId
+                    : !editTujuan)
+                }
               >
                 Simpan Perubahan
               </Button>

@@ -60,7 +60,16 @@ function DaftarProgram() {
                       {program.kode} - {program.nama}
                     </Text>
                     <Spacer />
-                    <Button>detail</Button>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        history.push(
+                          `/perencanaan/detail-program/${program.id}`
+                        );
+                      }}
+                    >
+                      detail program
+                    </Button>
                   </Flex>
                   <AccordionIcon />
                 </AccordionButton>
@@ -75,7 +84,15 @@ function DaftarProgram() {
                                 {kegiatan.kode} - {kegiatan.nama}
                               </Text>
                               <Spacer />
-                              <Button>detail</Button>
+                              <Button
+                                onClick={() =>
+                                  history.push(
+                                    `/perencanaan/detail-kegiatan/${kegiatan.id}`
+                                  )
+                                }
+                              >
+                                detail kegiatan
+                              </Button>
                             </Flex>
                             <AccordionIcon />
                           </AccordionButton>

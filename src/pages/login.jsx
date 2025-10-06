@@ -24,6 +24,7 @@ import LogoDinkes from "../assets/logo.png";
 import LogoPena from "../assets/penaLogo.png";
 import LogoAset from "../assets/asetLogo.png";
 import LogoPegawai from "../assets/pegawaiLogo.png";
+import LogoPerencanaan from "../assets/perencanaanLogo.png";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -57,6 +58,8 @@ const Login = () => {
         history.push("/aset/dashboard");
       } else if (pilihanAplikasi === "pena") {
         history.push("/");
+      } else if (pilihanAplikasi === "perencanaan") {
+        history.push("/perencanaan");
       }
     } catch (err) {
       setError("Email atau password salah!");
@@ -154,6 +157,14 @@ const Login = () => {
                 transition="transform 0.3s ease"
                 _hover={{ transform: "scale(1.05)" }}
                 mb={"30px"}
+              />{" "}
+              <Image
+                height="40px"
+                objectFit="cover"
+                src={LogoPerencanaan}
+                transition="transform 0.3s ease"
+                _hover={{ transform: "scale(1.05)" }}
+                mb={"30px"}
               />
             </Flex>
             <FormControl>
@@ -191,6 +202,7 @@ const Login = () => {
                 <option value="pegawai">Kepegawaian</option>
                 <option value="aset">Aset</option>
                 <option value="pena">Pena</option>
+                <option value="perencanaan">Perencanaan</option>
               </Select>
             </FormControl>
 

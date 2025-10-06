@@ -35,7 +35,7 @@ import {
   Select,
 } from "@chakra-ui/react";
 import { Link, useHistory } from "react-router-dom";
-function DetailSubKegiatan(props) {
+function DetailProgram(props) {
   const [DataSubKegiatan, setDataSubKegiatan] = useState([]);
   const { colorMode } = useColorMode();
   const history = useHistory();
@@ -44,6 +44,7 @@ function DetailSubKegiatan(props) {
   const [selectedTarget, setSelectedTarget] = useState(null);
   const [nilai, setNilai] = useState("");
   const [anggaran, setAnggaran] = useState("");
+  const [bukti, setBukti] = useState("");
   const toast = useToast();
 
   const {
@@ -56,7 +57,7 @@ function DetailSubKegiatan(props) {
       const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/perencanaan/get/detail-sub-kegiatan/${props.match.params.id}`
+        }/perencanaan/get/detail-program/${props.match.params.id}`
       );
       setDataSubKegiatan(res.data.result || []);
       console.log(res.data.result);
@@ -75,6 +76,7 @@ function DetailSubKegiatan(props) {
           nilai: parseInt(nilai),
           bulan: parseInt(bulan),
           anggaran: parseInt(anggaran),
+          bukti,
         }
       );
       toast({
@@ -933,4 +935,4 @@ function DetailSubKegiatan(props) {
   );
 }
 
-export default DetailSubKegiatan;
+export default DetailProgram;

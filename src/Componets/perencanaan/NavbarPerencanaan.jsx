@@ -52,6 +52,7 @@ const menuData = [
     items: [
       { label: "Program", path: "/perencanaan/daftar-program" },
       { label: "Indikator", path: "/perencanaan/daftar-indikator" },
+      { label: "capaian", path: "/perencanaan/daftar-capaian" },
     ],
   },
 ];
