@@ -49,6 +49,16 @@ const socket = io("http://localhost:8000", {
 // Data menu untuk mapping
 const menuData = [
   {
+    title: "Barang & Jasa",
+    icon: GoShieldLock,
+    pathPrefix: "/barjas",
+    items: [
+      { label: "Daftar Surat Pesanan", path: "/barjas/daftar-dokumen-sp" },
+      { label: "Surat Pengantar", path: "/sijaka/daftar-kendaraan" },
+      { label: "template Surat", path: "/sijaka/template" },
+    ],
+  },
+  {
     title: "Administrator",
     icon: GoShieldLock,
     pathPrefix: "/sijaka",

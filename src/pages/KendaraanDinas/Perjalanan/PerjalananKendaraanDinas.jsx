@@ -3,10 +3,10 @@
 import React from "react";
 import { Box, Container, useToast, Center, Button } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
-import { userRedux } from "../../Redux/Reducers/auth";
+import { userRedux } from "../../../Redux/Reducers/auth";
 import { useHistory } from "react-router-dom";
-import Layout from "../../Componets/Layout";
-import Loading from "../../Componets/Loading";
+import Layout from "../../../Componets/Layout";
+import Loading from "../../../Componets/Loading";
 import usePerjalananData from "./hooks/usePerjalananData";
 import DataNotaDinas from "./Components/DataNotaDinas";
 import DaftarPersonil from "./Components/DaftarPersonil";
@@ -18,7 +18,7 @@ import SubmitButton from "./Components/SubmitButton";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 
-function Perjalanan() {
+function PerjalananKendaraanDinas() {
   const user = useSelector(userRedux);
   const history = useHistory();
   const toast = useToast();
@@ -58,7 +58,6 @@ function Perjalanan() {
     kodeKlasifikasi: null,
     subKegiatan: null,
     untuk: "",
-    dasar: state.dasar ?? "",
     pengajuan: "",
     asal: state.asal,
     sumberDana: null,
@@ -171,4 +170,4 @@ function Perjalanan() {
   );
 }
 
-export default Perjalanan;
+export default PerjalananKendaraanDinas;

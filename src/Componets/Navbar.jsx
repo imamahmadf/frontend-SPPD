@@ -19,6 +19,15 @@ import {
   PopoverBody,
   PopoverArrow,
   Spacer,
+  IconButton,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerHeader,
+  DrawerBody,
+  useDisclosure,
+  useBreakpointValue,
+  Divider,
 } from "@chakra-ui/react";
 import { FaRoute } from "react-icons/fa";
 import Logout from "./Logout";
@@ -40,6 +49,7 @@ import {
 import Logo from "../assets/logo.png";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { io } from "socket.io-client";
+import { FiMenu } from "react-icons/fi";
 
 const socket = io("http://localhost:8000", {
   transports: ["websocket"],
@@ -47,6 +57,20 @@ const socket = io("http://localhost:8000", {
 
 // Data menu untuk mapping
 const menuData = [
+  {
+    title: "Kendaraan",
+    icon: BiCar,
+    pathPrefix: "/kendaraan",
+    items: [
+      { label: "Kendaraan Saya", path: "/kendaraan/kendaraan-saya" },
+      { label: "Perjalanan", path: "/kendaraan/perjalanan" },
+      {
+        label: "Daftar Perjalanan",
+        path: "/kendaraan/daftar-perjalanan-kendaraan",
+      },
+      { label: "Admin Kendaraan", path: "/kendaraan/daftar-kendaraan" },
+    ],
+  },
   {
     title: "Perjalanan",
     icon: FaRoute,
@@ -143,6 +167,12 @@ function Navbar() {
   const history = useHistory();
   const location = useLocation();
   const [jumlahNotifikasi, setJumlahNotifikasi] = useState(0);
+  const {
+    isOpen: isMobileMenuOpen,
+    onOpen: openMobileMenu,
+    onClose: closeMobileMenu,
+  } = useDisclosure();
+  const headerSpacerHeight = useBreakpointValue({ base: "120px", md: "140px" });
 
   useEffect(() => {
     socket.on("notifikasi:terbaru", (data) => {
@@ -276,7 +306,7 @@ function Navbar() {
           bg="primary"
           px={4}
           py={4}
-          height="100px"
+          height={{ base: "auto", md: "100px" }}
           boxShadow="sm"
           display="flex"
           flexDirection="column"
@@ -288,7 +318,7 @@ function Navbar() {
             width="95vw"
             justifyContent="center"
             alignItems="center"
-            height="180px"
+            height={{ base: "auto", md: "180px" }}
           >
             {/* Logo dan Brand */}
             <Flex gap={3} alignItems="center">
@@ -305,85 +335,100 @@ function Navbar() {
             <Spacer />
             {/* User Menu dan Actions */}
             <HStack spacing={4}>
+              {/* Tombol Hamburger untuk Mobile */}
+              {isAuthenticated && (
+                <IconButton
+                  aria-label="Buka menu"
+                  icon={<FiMenu />}
+                  display={{ base: "inline-flex", md: "none" }}
+                  onClick={openMobileMenu}
+                  colorScheme="whiteAlpha"
+                  variant="ghost"
+                />
+              )}
               <Button onClick={toggleColorMode} size="sm">
                 {colorMode === "light" ? "🌙" : "☀️"}
               </Button>
 
               {isAuthenticated ? (
-                <Menu>
-                  <MenuButton as={Button} variant="ghost" size="sm">
-                    <HStack>
-                      <Box position="relative">
-                        <Avatar size="sm" name={user[0]?.nama} />
-                        {jumlahNotifikasi > 0 && (
-                          <Box
-                            position="absolute"
-                            top="-1"
-                            right="-1"
-                            bg="red.500"
-                            color="white"
-                            fontSize="xs"
-                            fontWeight="bold"
-                            px={2}
-                            py={0.5}
-                            borderRadius="full"
-                            minW="5"
-                            h="5"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                          >
-                            {jumlahNotifikasi}
-                          </Box>
-                        )}
-                      </Box>
-                      <Text color={"white"} fontSize="sm">
-                        {user[0]?.nama}
-                      </Text>
-                    </HStack>
-                  </MenuButton>
-                  <MenuList>
-                    <Link to={"/profile"}>
+                <Box display={{ base: "none", md: "block" }}>
+                  <Menu>
+                    <MenuButton as={Button} variant="ghost" size="sm">
+                      <HStack>
+                        <Box position="relative">
+                          <Avatar size="sm" name={user[0]?.nama} />
+                          {jumlahNotifikasi > 0 && (
+                            <Box
+                              position="absolute"
+                              top="-1"
+                              right="-1"
+                              bg="red.500"
+                              color="white"
+                              fontSize="xs"
+                              fontWeight="bold"
+                              px={2}
+                              py={0.5}
+                              borderRadius="full"
+                              minW="5"
+                              h="5"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                            >
+                              {jumlahNotifikasi}
+                            </Box>
+                          )}
+                        </Box>
+                        <Text color={"white"} fontSize="sm">
+                          {user[0]?.nama}
+                        </Text>
+                      </HStack>
+                    </MenuButton>
+                    <MenuList>
+                      <Link to={"/profile"}>
+                        <MenuItem>
+                          <Avatar me={"10px"} w={"20px"} h={"20px"} />
+                          Profile
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoPena} />
+                          Pena
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/aset/dashboard"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoAset} />
+                          Aset
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/pegawai/dashboard"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoPegawai} />
+                          Kepegawaian
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/perencanaan"}>
+                        <MenuItem>
+                          <Image me={"10px"} h={"20px"} src={LogoPerencanaan} />
+                          perencanaan
+                        </MenuItem>
+                      </Link>
                       <MenuItem>
-                        <Avatar me={"10px"} w={"20px"} h={"20px"} />
-                        Profile
+                        <Logout />
                       </MenuItem>
-                    </Link>
-                    <Link to={"/"}>
-                      <MenuItem>
-                        <Image me={"10px"} h={"20px"} src={LogoPena} />
-                        Pena
-                      </MenuItem>
-                    </Link>
-                    <Link to={"/aset/dashboard"}>
-                      <MenuItem>
-                        <Image me={"10px"} h={"20px"} src={LogoAset} />
-                        Aset
-                      </MenuItem>
-                    </Link>
-                    <Link to={"/pegawai/dashboard"}>
-                      <MenuItem>
-                        <Image me={"10px"} h={"20px"} src={LogoPegawai} />
-                        Kepegawaian
-                      </MenuItem>
-                    </Link>
-                    <Link to={"/perencanaan"}>
-                      <MenuItem>
-                        <Image me={"10px"} h={"20px"} src={LogoPerencanaan} />
-                        perencanaan
-                      </MenuItem>
-                    </Link>
-                    <MenuItem>
-                      <Logout />
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+                    </MenuList>
+                  </Menu>
+                </Box>
               ) : (
-                <Link to="/login">
-                  <Button variant={"primary"} size="sm">
-                    Login
-                  </Button>
-                </Link>
+                <Box display={{ base: "none", md: "block" }}>
+                  <Link to="/login">
+                    <Button variant={"primary"} size="sm">
+                      Login
+                    </Button>
+                  </Link>
+                </Box>
               )}
             </HStack>
           </Flex>
@@ -399,7 +444,7 @@ function Navbar() {
               width="95vw"
               mx="auto"
               mt={"20px"} // Jarak dari header ke menu
-              display="flex"
+              display={{ base: "none", md: "flex" }}
               alignItems="center"
               justifyContent="center"
             >
@@ -410,10 +455,122 @@ function Navbar() {
               </HStack>
             </Box>
           )}
+          {/* Drawer Menu Mobile */}
+          {isAuthenticated && (
+            <Drawer
+              placement="left"
+              onClose={closeMobileMenu}
+              isOpen={isMobileMenuOpen}
+            >
+              <DrawerOverlay />
+              <DrawerContent>
+                <DrawerHeader borderBottomWidth="1px">Menu</DrawerHeader>
+                <DrawerBody>
+                  <VStack align="stretch" spacing={4}>
+                    {menuData.map((menu, idx) => (
+                      <Box key={idx}>
+                        <Text fontWeight="bold" mb={2}>
+                          {menu.title}
+                        </Text>
+                        <VStack align="stretch" spacing={1}>
+                          {menu.items?.map((item, i) => (
+                            <Link
+                              key={i}
+                              to={item.path}
+                              onClick={closeMobileMenu}
+                            >
+                              <Box
+                                px={3}
+                                py={2}
+                                borderRadius="md"
+                                bg={
+                                  isItemActive(item.path)
+                                    ? "gray.100"
+                                    : "transparent"
+                                }
+                                _hover={{ bg: "gray.100" }}
+                              >
+                                {item.label}
+                              </Box>
+                            </Link>
+                          ))}
+                        </VStack>
+                        {idx !== menuData.length - 1 && <Divider mt={3} />}
+                      </Box>
+                    ))}
+                    <Divider />
+                    <Box>
+                      <Text fontWeight="bold" mb={2}>
+                        Akun
+                      </Text>
+                      <VStack align="stretch" spacing={1}>
+                        <Link to={"/profile"} onClick={closeMobileMenu}>
+                          <Box
+                            px={3}
+                            py={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100" }}
+                          >
+                            Profile
+                          </Box>
+                        </Link>
+                        <Link to={"/"} onClick={closeMobileMenu}>
+                          <Box
+                            px={3}
+                            py={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100" }}
+                          >
+                            Pena
+                          </Box>
+                        </Link>
+                        <Link to={"/aset/dashboard"} onClick={closeMobileMenu}>
+                          <Box
+                            px={3}
+                            py={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100" }}
+                          >
+                            Aset
+                          </Box>
+                        </Link>
+                        <Link
+                          to={"/pegawai/dashboard"}
+                          onClick={closeMobileMenu}
+                        >
+                          <Box
+                            px={3}
+                            py={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100" }}
+                          >
+                            Kepegawaian
+                          </Box>
+                        </Link>
+                        <Link to={"/perencanaan"} onClick={closeMobileMenu}>
+                          <Box
+                            px={3}
+                            py={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100" }}
+                          >
+                            Perencanaan
+                          </Box>
+                        </Link>
+                        <Box px={3} py={2} borderRadius="md">
+                          <Logout />
+                        </Box>
+                      </VStack>
+                    </Box>
+                  </VStack>
+                </DrawerBody>
+              </DrawerContent>
+            </Drawer>
+          )}
         </Box>
       </Box>
       {/* Spacing untuk konten utama */}
-      <Box height="140px" /> {/* Spacer untuk konten */}
+      <Box height={headerSpacerHeight} /> {/* Spacer untuk konten */}
     </>
   );
 }

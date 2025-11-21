@@ -167,6 +167,21 @@ function Rampung(props) {
     });
   }
 
+  const formatRupiah = (value) => {
+    if (value === null || value === undefined || isNaN(value)) return "";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const parseRupiah = (str) => {
+    if (!str) return 0;
+    const onlyDigits = str.toString().replace(/[^0-9]/g, "");
+    return onlyDigits ? parseInt(onlyDigits, 10) : 0;
+  };
+
   const pengajuan = () => {
     if (!dataRampung.result.id) {
       console.error("ID tidak valid");
@@ -1478,14 +1493,17 @@ function Rampung(props) {
                   Nilai
                 </FormLabel>
                 <Input
-                  placeholder="Contoh: 5000000"
+                  placeholder="Contoh: Rp 5.000.000"
                   height="50px"
                   bgColor="gray.50"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   border="1px solid"
                   borderColor="gray.300"
+                  value={formatRupiah(formik.values.nilai)}
                   onChange={(e) => {
-                    formik.setFieldValue("nilai", e.target.value);
+                    const parsed = parseRupiah(e.target.value);
+                    formik.setFieldValue("nilai", parsed);
                   }}
                   _focus={{ borderColor: "blue.500", boxShadow: "outline" }}
                 />

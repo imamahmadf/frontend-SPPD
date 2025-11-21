@@ -53,7 +53,20 @@ function Rill(props) {
       ...item,
     });
   };
+  const formatRupiah = (value) => {
+    if (value === null || value === undefined || isNaN(value)) return "";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
 
+  const parseRupiah = (str) => {
+    if (!str) return 0;
+    const onlyDigits = str.toString().replace(/[^0-9]/g, "");
+    return onlyDigits ? parseInt(onlyDigits, 10) : 0;
+  };
   function hapusRill(val) {
     console.log(val);
     axios
@@ -213,8 +226,13 @@ function Rill(props) {
                 />
                 <Input
                   placeholder="Nilai"
-                  type="number"
-                  onChange={(e) => setNilai(e.target.value)}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatRupiah(nilai)}
+                  onChange={(e) => {
+                    const parsed = parseRupiah(e.target.value);
+                    setNilai(parsed);
+                  }}
                 />
                 <Button onClick={submitRill} variant={"primary"}>
                   Tambah

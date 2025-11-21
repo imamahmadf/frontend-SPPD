@@ -134,7 +134,6 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             name="dasar"
             value={values.dasar}
             onChange={(e) => {
-              setFieldValue("dasar", e.target.value);
               actions.setDasar(e.target.value);
             }}
             placeholder="isi dengan telaah staff atau undangan"

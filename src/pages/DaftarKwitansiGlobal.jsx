@@ -214,6 +214,7 @@ function DaftarKwitansiGlobal() {
             <Table variant={"primary"}>
               <Thead>
                 <Tr>
+                  <Th>Tanggal pengajuan</Th>
                   <Th>jenis Perjalanan</Th>
                   <Th>Sub Kegiatan</Th>
                   <Th>Pengguna Anggaran</Th>
@@ -225,6 +226,14 @@ function DaftarKwitansiGlobal() {
               <Tbody>
                 {dataKwitGlobal?.map((item, index) => (
                   <Tr key={index}>
+                    <Td>
+                      {new Date(item?.createdAt).toLocaleDateString("id-ID", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }) || "-"}
+                    </Td>
                     <Td>{item?.jenisPerjalanan?.jenis || "-"}</Td>
                     <Td>{item?.subKegiatan?.subKegiatan || "-"}</Td>
                     <Td>{item?.KPA?.pegawai_KPA?.nama || "-"}</Td>
@@ -315,7 +324,7 @@ function DaftarKwitansiGlobal() {
               <Box>
                 <HStack>
                   <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-                  <Heading color={"primary"}>Buat Laporan</Heading>
+                  <Heading color={"primary"}>Buat Kwitansi Global</Heading>
                 </HStack>
 
                 <SimpleGrid columns={2} spacing={10} p={"30px"}>
@@ -645,7 +654,7 @@ function DaftarKwitansiGlobal() {
 
             <ModalFooter pe={"60px"} pb={"30px"}>
               <Button onClick={tambahKwitansiGlobal} variant={"primary"}>
-                buat Laporan
+                buat Kwitansi Global
               </Button>
             </ModalFooter>
           </ModalContent>

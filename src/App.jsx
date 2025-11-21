@@ -84,7 +84,15 @@ import DetailProgram from "./pages/Perencanaan/DetailProgram.jsx";
 import DetailKegiatan from "./pages/Perencanaan/DetailKegiatan.jsx";
 import DaftarIndikator from "./pages/Perencanaan/DaftarIndikator.jsx";
 import DaftarCapaian from "./pages/Perencanaan/DaftarCapaian.jsx";
-
+// ////////PENA///////////////////
+import DaftarKendaraanDinas from "./pages/KendaraanDinas/daftarKendaraanDinas.jsx";
+import KendaraanSaya from "./pages/KendaraanDinas/KendaraanSaya.jsx";
+import DetailkendaraanDinas from "./pages/KendaraanDinas/DetailKendaraanDinas.jsx";
+import PerjalananKendaraanDinas from "./pages/KendaraanDinas/Perjalanan/PerjalananKendaraanDinas.jsx";
+import DaftarPerjalananKendaraan from "./pages/KendaraanDinas/DaftarPerjalananKendaraan.jsx";
+// /////BARJAS///////////////////////
+import DaftarDokumen from "./pages/Barjas/DaftarDokumen.jsx";
+import DetailSP from "./pages/Barjas/DetailSP.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -216,28 +224,24 @@ function App() {
             exact
             roleRoute={[5, 7]}
           />
-
           <ProtectedRoute
             component={UsulanPegawai}
             path="/kepegawaian/usulan"
             exact
             roleRoute={[5, 7]}
           />
-
           <ProtectedRoute
             component={DaftarNaikJenjang}
             path="/kepegawaian/daftar-naik-jenjang"
             exact
             roleRoute={[5, 7]}
           />
-
           <ProtectedRoute
             component={LaporanUsulanPegawai}
             path="/kepegawaian/laporan-usulan-pegawai"
             exact
             roleRoute={[5, 7]}
           />
-
           <ProtectedRoute
             component={StatistikPegawai}
             path="/kepegawaian/statistik-pegawai"
@@ -255,7 +259,6 @@ function App() {
             path="/keuangan/dalam-kota"
             roleRoute={[3, 5]}
           />
-
           <ProtectedRoute
             component={DaftarKwitansiGlobalKeuangan}
             path="/keuangan/daftar-kwitansi-global"
@@ -266,7 +269,6 @@ function App() {
             path="/keuangan/detail-kwitansi-global/:id"
             roleRoute={[3, 5]}
           />
-
           <ProtectedRoute
             component={DaftarAdmin}
             path="/keuangan/daftar-perjalanan"
@@ -309,7 +311,6 @@ function App() {
             exact
             roleRoute={[5]}
           />
-
           <ProtectedRoute
             component={TambahUser}
             path="/admin/tambah-user"
@@ -322,7 +323,6 @@ function App() {
             exact
             roleRoute={[5]}
           />
-
           <ProtectedRoute
             component={DetailPegawaiAdmin}
             path="/admin/detail-pegawai/:id"
@@ -335,7 +335,6 @@ function App() {
             exact
             roleRoute={[4, 5]}
           />
-
           <ProtectedRoute
             component={DaftarSPPD}
             path="/surat/sppd"
@@ -360,7 +359,6 @@ function App() {
             exact
             roleRoute={[2, 5]}
           />
-
           <ProtectedRoute
             component={TambahBendahara}
             path="/admin/tambah-bendahara"
@@ -379,7 +377,6 @@ function App() {
             exact
             roleRoute={[2, 1]}
           />
-
           <ProtectedRoute
             component={PegawaiUnitKerja}
             path="/unit-kerja/daftar-pegawai"
@@ -392,7 +389,6 @@ function App() {
             exact
             roleRoute={[1, 5]}
           />
-
           <ProtectedRoute
             component={DaftarKendaraan}
             path="/sijaka/daftar-kendaraan"
@@ -429,7 +425,6 @@ function App() {
             exact
             roleRoute={[5, 2]}
           />
-
           <ProtectedRoute
             component={DashboradPegawai}
             path="/pegawai/dashboard"
@@ -454,14 +449,12 @@ function App() {
             exact
             roleRoute={[9, 5]}
           />
-
           <ProtectedRoute
             component={DetailNaikJenjang}
             path="/pegawai/detail-naik-jenjang/:id"
             exact
             roleRoute={[9, 5]}
           />
-
           <ProtectedRoute
             component={RekapAdminAset}
             path="/admin-aset/rekap-persediaan/:id"
@@ -480,7 +473,6 @@ function App() {
             exact
             roleRoute={[5, 10]}
           />
-
           <ProtectedRoute
             component={PersediaanMasuk}
             path="/aset/persediaan-masuk"
@@ -499,7 +491,6 @@ function App() {
             exact
             roleRoute={[5, 10, 8]}
           />
-
           <ProtectedRoute
             component={LaporanPersediaan}
             path="/aset/laporan-persediaan"
@@ -512,14 +503,12 @@ function App() {
             exact
             roleRoute={[5, 10, 8]}
           />
-
           <ProtectedRoute
             component={LaporanPersediaanKeluar}
             path="/aset/detail-laporan-keluar/:id"
             exact
             roleRoute={[5, 10, 8]}
           />
-
           <ProtectedRoute
             component={DaftarKwitansiGlobal}
             path="/perjalanan/kwitansi-global"
@@ -539,21 +528,18 @@ function App() {
             exact
             roleRoute={[5, 11]}
           />
-
           <ProtectedRoute
             component={DetailKegiatan}
             path="/perencanaan/detail-kegiatan/:id"
             exact
             roleRoute={[5, 11]}
           />
-
           <ProtectedRoute
             component={DetailProgram}
             path="/perencanaan/detail-program/:id"
             exact
             roleRoute={[5, 11]}
           />
-
           <ProtectedRoute
             component={DashboardPerencanaan}
             path="/perencanaan"
@@ -566,21 +552,62 @@ function App() {
             exact
             roleRoute={[5, 11]}
           />
-
           <ProtectedRoute
             component={DaftarIndikator}
             path="/perencanaan/daftar-indikator"
             exact
             roleRoute={[5, 11]}
           />
-
           <ProtectedRoute
             component={DaftarCapaian}
             path="/perencanaan/daftar-capaian"
             exact
             roleRoute={[5, 11]}
           />
-
+          {/* ////////PENA/////// */}
+          <ProtectedRoute
+            component={DaftarKendaraanDinas}
+            path="/kendaraan/daftar-kendaraan"
+            exact
+            roleRoute={[5, 8]}
+          />
+          <ProtectedRoute
+            component={KendaraanSaya}
+            path="/kendaraan/kendaraan-saya"
+            exact
+            roleRoute={[9, 5]}
+          />
+          <ProtectedRoute
+            component={PerjalananKendaraanDinas}
+            path="/kendaraan/perjalanan"
+            exact
+            roleRoute={[5, 8]}
+          />
+          <ProtectedRoute
+            component={DetailkendaraanDinas}
+            path="/perjalanan/detail-kendaraan-dinas/:id"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={DaftarPerjalananKendaraan}
+            path="/kendaraan/daftar-perjalanan-kendaraan"
+            exact
+            roleRoute={[5, 1]}
+          />
+          {/* ///////////////BARJAS/////////////////// */}
+          <ProtectedRoute
+            component={DaftarDokumen}
+            path="/barjas/daftar-dokumen-sp"
+            exact
+            roleRoute={[5, 1]}
+          />{" "}
+          <ProtectedRoute
+            component={DetailSP}
+            path="/barjas/detail-sp/:id"
+            exact
+            roleRoute={[5, 1]}
+          />
           <Route component={verifikasi} path="/verifikasi/:id" />
           <Route component={Home} path="/" />
         </Switch>

@@ -443,7 +443,7 @@ function EditPegawai(props) {
           pt={"30px"}
           ps={"0px"}
         >
-          {JSON.stringify(dataRiwayat)}
+          {/* {JSON.stringify(dataRiwayat)} */}
           <Table variant={"pegawai"}>
             <Thead>
               <Tr>

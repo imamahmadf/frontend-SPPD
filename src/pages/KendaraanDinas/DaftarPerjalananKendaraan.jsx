@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Layout from "../Componets/Layout";
+import Layout from "../../Componets/Layout";
 import ReactPaginate from "react-paginate";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
-import "../Style/pagination.css";
+import "../../Style/pagination.css";
+import Foto from "../../assets/add_photo.png";
 import { Link, useHistory } from "react-router-dom";
 import {
   Box,
@@ -35,7 +36,10 @@ import {
   Spacer,
   useToast,
   useDisclosure,
+  Heading,
+  SimpleGrid,
   useColorMode,
+  Checkbox,
   Badge,
   Menu,
   MenuButton,
@@ -45,9 +49,14 @@ import {
 } from "@chakra-ui/react";
 import { BsEyeFill, BsThreeDotsVertical } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { userRedux, selectRole } from "../Redux/Reducers/auth";
-import Loading from "../Componets/Loading";
-import DataKosong from "../Componets/DataKosong";
+import { userRedux, selectRole } from "../../Redux/Reducers/auth";
+import {
+  Select as Select2,
+  CreatableSelect,
+  AsyncSelect,
+} from "chakra-react-select";
+import Loading from "../../Componets/Loading";
+import DataKosong from "../../Componets/DataKosong";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import { format } from "date-fns";
@@ -69,50 +78,7 @@ function stringToColor(str) {
   return color;
 }
 
-function KalenderPerjalanan({ events, colorMode, formats, localizer }) {
-  return (
-    <Box
-      bgColor={"white"}
-      p={"30px"}
-      borderRadius={"5px"}
-      mb={"30px"}
-      bg={colorMode === "dark" ? "gray.800" : "white"}
-    >
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        formats={formats}
-        popup={false}
-        eventPropGetter={(event) => {
-          const backgroundColor = stringToColor(event.title || "");
-          return {
-            style: {
-              backgroundColor,
-              color: "white",
-              borderRadius: "4px",
-              border: "none",
-            },
-          };
-        }}
-      />
-      <style>{`
-        .rbc-month-row {
-          min-height: 140px !important;
-        }
-        .rbc-date-cell {
-          vertical-align: top !important;
-        }
-        .rbc-event {
-          font-size: 12px;
-          padding: 2px 4px;
-        }
-      `}</style>
-    </Box>
-  );
-}
-function Daftar() {
+function DaftarPerjalananKendaraan() {
   const [dataPerjalanan, setDataPerjalanan] = useState([]);
   const history = useHistory();
   const [page, setPage] = useState(0);
@@ -129,97 +95,43 @@ function Daftar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
-
+  const [DataKendaraan, setDataKendaraan] = useState([]);
+  const [kendaraanTerpilih, setKendaraanTerpilih] = useState(null);
+  const [kendaraanId, setKendaraanId] = useState(0);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const {
+    isOpen: isTambahOpen,
+    onOpen: onTambahOpen,
+    onClose: onTambahClose,
+  } = useDisclosure();
   const changePage = ({ selected }) => {
     setPage(selected);
   };
 
-  const postNotaDinas = (val) => {
-    console.log(val);
-    setIsLoading(true);
-
+  const bookingKendaraan = () => {
     axios
       .post(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/perjalanan/post/daftar/nota-dinas`,
+        }/kendaraan-dinas/booking`,
         {
-          indukUnitKerjaId: user[0]?.unitKerja_profile.indukUnitKerja.id,
-          pegawai: val.personils,
-          dataTtdSurTug: val.ttdSuratTuga,
-          dataTtdNotaDinas: val.ttdNotaDina,
-
-          tanggalPengajuan: val.tanggalPengajuan,
-          noSurTug: val.noSuratTugas,
-          noNotDis: val.noNotaDinas,
-
-          subKegiatan: val.daftarSubKegiatan.subKegiatan,
-          untuk: val.untuk,
-          dasar: val.dasar,
-          asal: val.asal,
-          kodeRekeningFE: `${val.daftarSubKegiatan.kodeRekening}${val.jenisPerjalanan.kodeRekening}`,
-          tempat: val.tempats,
-          // sumber: dataKegiatan.value.sumber,
-          jenis: val.jenisPerjalanan.id,
-          jenisPerjalanan: val.jenisPerjalanan.jenis,
-        },
-        {
-          responseType: "blob", // Penting untuk menerima file sebagai blob
+          selectedIds,
+          kendaraanId: parseInt(kendaraanTerpilih.id),
         }
       )
-      .then((res) => {
-        console.log(res.data); // Log respons dari backend
-
-        // Buat URL untuk file yang diunduh
-        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "nota_dinas.docx"); // Nama file yang diunduh
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        // Tampilkan toast sukses
+      .then(() => {
         toast({
           title: "Berhasil",
-          description: "File nota dinas berhasil diunduh",
+          description: "berhasil booking",
           status: "success",
           duration: 3000,
           isClosable: true,
-          position: "top",
         });
-
-        // Redirect setelah download selesai
-        history.push(`/daftar`);
-      })
-      .catch((err) => {
-        console.error(err); // Tangani error
-        setIsLoading(false);
-
-        // Tampilkan toast error
-        toast({
-          title: "Gagal",
-          description: "Terjadi kesalahan saat mengunduh file",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-          position: "top",
-        });
-      });
-  };
-  const hapusPerjalanan = (e) => {
-    console.log(e);
-    axios
-      .post(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/perjalanan/delete/${e}`
-      )
-      .then((res) => {
-        console.log(res.status, res.data, "tessss");
+        setKendaraanTerpilih(null);
         fetchDataPerjalanan();
-        onClose();
       })
       .catch((err) => {
-        console.error(err.message);
+        console.error(err);
       });
   };
 
@@ -241,7 +153,6 @@ function Daftar() {
           tempat: val.tempats,
           untuk: val.untuk,
           dasar: val.dasar,
-          isNotaDinas: val.isNotaDinas,
           ttdSurTugJabatan: val.ttdSuratTuga.jabatan,
           ttdSurTugNama: val.ttdSuratTuga.pegawai.nama,
           ttdSurTugNip: val.ttdSuratTuga.pegawai.nip,
@@ -366,14 +277,31 @@ function Daftar() {
         setIsLoading(false);
       });
   };
+  async function fetchDataKendaraan() {
+    await axios
+      .get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kendaraan/get/induk-unit-kerja/${
+          user[0]?.unitKerja_profile.indukUnitKerja.id
+        }`
+      )
+      .then((res) => {
+        setDataKendaraan(res.data.result);
 
+        console.log(res.data.result);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
   async function fetchDataPerjalanan() {
     await axios
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/perjalanan/get/all-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${
-          user[0]?.unitKerja_profile?.id
+        }/perjalanan/get/all-perjalanan-kendaraan?&time=${time}&page=${page}&limit=${limit}&indukUnitKerjaId=${
+          user[0]?.unitKerja_profile?.indukUnitKerja.id
         }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`
       )
       .then((res) => {
@@ -390,7 +318,14 @@ function Daftar() {
 
   useEffect(() => {
     fetchDataPerjalanan();
+
+    fetchDataKendaraan();
   }, [page, tanggalAkhir, tanggalAwal]);
+
+  // reset pilihan ketika kendaraan berganti/direset
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [kendaraanId]);
 
   // Mapping dataPerjalanan ke events untuk kalender, setiap personil jadi event terpisah
   const events = dataPerjalanan.flatMap((item) => {
@@ -430,15 +365,6 @@ function Daftar() {
 
         {dataPerjalanan[0] ? (
           <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-            {" "}
-            <Box bgColor={"secondary"} pb={"20px"} px={"30px"}>
-              <KalenderPerjalanan
-                events={events}
-                colorMode={colorMode}
-                formats={formats}
-                localizer={localizer}
-              />
-            </Box>
             <Box
               mt={"50px"}
               style={{ overflowX: "auto" }}
@@ -447,6 +373,220 @@ function Daftar() {
               borderRadius={"5px"}
               bg={colorMode === "dark" ? "gray.800" : "white"}
             >
+              <SimpleGrid columns={2} spacing={10} p={"30px"}>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Pilih Kendaraan</FormLabel>
+                  {/* {console.log("DataKendaraan:", DataKendaraan)} */}
+                  <Select2
+                    options={DataKendaraan?.map((val) => ({
+                      value: val.id,
+                      label: `KT ${val.nomor} ${val.seri} ${val.merek || "-"}`,
+                      foto: val.foto,
+                    }))}
+                    placeholder="Pilih Kendaraan"
+                    focusBorderColor="red"
+                    value={
+                      DataKendaraan?.find(
+                        (kendaraan) => kendaraan.id === kendaraanId
+                      )
+                        ? {
+                            value: kendaraanId,
+                            label: `${
+                              DataKendaraan.find(
+                                (kendaraan) => kendaraan.id === kendaraanId
+                              )?.nomor
+                            } - ${
+                              DataKendaraan.find(
+                                (kendaraan) => kendaraan.id === kendaraanId
+                              )?.seri
+                            }`,
+                            foto: DataKendaraan.find(
+                              (kendaraan) => kendaraan.id === kendaraanId
+                            )?.foto,
+                          }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      console.log("Selected kendaraan:", selectedOption);
+                      setKendaraanId(selectedOption?.value || 0);
+                      if (selectedOption) {
+                        const kendaraanData = DataKendaraan?.find(
+                          (k) => k.id === selectedOption.value
+                        );
+                        setKendaraanTerpilih(kendaraanData);
+                      } else {
+                        setKendaraanTerpilih(null);
+                      }
+                    }}
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                      Option: ({
+                        children,
+                        innerProps,
+                        innerRef,
+                        ...props
+                      }) => (
+                        <Box
+                          ref={innerRef}
+                          {...innerProps}
+                          display="flex"
+                          alignItems="center"
+                          p={2}
+                          cursor="pointer"
+                          _hover={{ bg: "primary", color: "white" }}
+                          bg={props.isFocused ? "primary" : "white"}
+                          color={props.isFocused ? "white" : "black"}
+                        >
+                          <Image
+                            src={
+                              props.data.foto
+                                ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                                  props.data.foto
+                                : Foto
+                            }
+                            alt="foto kendaraan"
+                            width="40px"
+                            height="40px"
+                            borderRadius="5px"
+                            objectFit="cover"
+                            mr={3}
+                          />
+                          <Text>{children}</Text>
+                        </Box>
+                      ),
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                    }}
+                  />
+                </FormControl>
+
+                {/* Tampilan Kendaraan Terpilih */}
+                {kendaraanTerpilih && (
+                  <FormControl my={"30px"}>
+                    {/* Hapus JSON.stringify di UI */}
+                    {/* {JSON.stringify(kendaraanTerpilih)} */}
+
+                    <FormLabel fontSize={"24px"} mb={3}>
+                      Kendaraan Terpilih
+                    </FormLabel>
+
+                    <Flex
+                      p={4}
+                      border="2px solid"
+                      borderColor="primary"
+                      borderRadius="8px"
+                      bg="gray.50"
+                    >
+                      <HStack spacing={4}>
+                        <Image
+                          src={
+                            kendaraanTerpilih.foto
+                              ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                                kendaraanTerpilih.foto
+                              : Foto
+                          }
+                          alt="foto kendaraan terpilih"
+                          width="120px"
+                          height="120px"
+                          borderRadius="8px"
+                          objectFit="cover"
+                        />
+                        <Box>
+                          <Text fontSize="24px" fontWeight="bold">
+                            {kendaraanTerpilih.merek}
+                          </Text>
+
+                          <Text
+                            fontSize="18px"
+                            fontWeight="bold"
+                            color="primary"
+                          >
+                            {`KT ${kendaraanTerpilih.nomor} ${kendaraanTerpilih.seri}`}
+                          </Text>
+
+                          <Text>
+                            Status:{" "}
+                            {kendaraanTerpilih?.kendaraanDinas?.[0]?.status ||
+                              "-"}
+                          </Text>
+
+                          {/* ✅ Tujuan Perjalanan */}
+                          <Text mt={2} fontWeight="semibold" color="gray.700">
+                            Tujuan:{" "}
+                            {kendaraanTerpilih?.kendaraanDinas?.[0]
+                              ?.perjalanans?.[0]?.tempats?.[0]?.dalamKota
+                              ?.nama || "-"}
+                          </Text>
+
+                          {/* ✅ Tanggal Berangkat */}
+                          <Text fontSize="14px" color="gray.600">
+                            Berangkat:{" "}
+                            {kendaraanTerpilih?.kendaraanDinas?.[0]
+                              ?.perjalanans?.[0]?.tempats?.[0]?.tanggalBerangkat
+                              ? new Date(
+                                  kendaraanTerpilih.kendaraanDinas[0].perjalanans[0].tempats[0].tanggalBerangkat
+                                ).toLocaleString("id-ID", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "-"}
+                          </Text>
+
+                          {/* ✅ Tanggal Pulang */}
+                          <Text fontSize="14px" color="gray.600">
+                            Pulang:{" "}
+                            {kendaraanTerpilih?.kendaraanDinas?.[0]
+                              ?.perjalanans?.[0]?.tempats?.[0]?.tanggalPulang
+                              ? new Date(
+                                  kendaraanTerpilih.kendaraanDinas[0].perjalanans[0].tempats[0].tanggalPulang
+                                ).toLocaleString("id-ID", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : "-"}
+                          </Text>
+                        </Box>
+                      </HStack>
+
+                      <Spacer />
+
+                      <Button
+                        onClick={bookingKendaraan}
+                        variant={"primary"}
+                        // isDisabled={
+                        //   kendaraanTerpilih?.kendaraanDinas?.[0]?.status ===
+                        //   "dipinjam"
+                        // }
+                      >
+                        Booking
+                      </Button>
+                    </Flex>
+                  </FormControl>
+                )}
+              </SimpleGrid>
               <Flex gap={4} mb={4}>
                 <FormControl>
                   <FormLabel>Tanggal Berangkat (Awal)</FormLabel>
@@ -468,12 +608,17 @@ function Daftar() {
               <Table variant={"primary"}>
                 <Thead>
                   <Tr>
+                    {kendaraanTerpilih && <Th>Pilih</Th>}
                     <Th>no.</Th>
-                    <Th maxWidth={"120px"}>Unit Kerja Surtug</Th>
-                    <Th>No Surat/Nota/Telaahan</Th>
+                    <Th maxWidth={"20px"}>jenis Perjalanan</Th>
+
+                    <Th>Unit Kerja Surat Tugas</Th>
+                    <Th>No Surat Tugas</Th>
+
+                    <Th>Kendaraan</Th>
                     <Th>Tanggal Berangkat</Th>
                     <Th>tanggal Pulang</Th>
-                    <Th>Jenis & Tujuan</Th>
+                    <Th>Tujuan</Th>
                     <Th>Personil 1</Th>
                     <Th>Personil 2</Th>
                     <Th>Personil 3</Th>
@@ -486,40 +631,42 @@ function Daftar() {
                 <Tbody>
                   {dataPerjalanan?.map((item, index) => (
                     <Tr key={item.id}>
+                      {kendaraanTerpilih && (
+                        <Td>
+                          {item?.kendaraanDina?.id ? null : (
+                            <Checkbox
+                              isChecked={selectedIds.includes(item.id)}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setSelectedIds((prev) =>
+                                  checked
+                                    ? [...prev, item.id]
+                                    : prev.filter((id) => id !== item.id)
+                                );
+                              }}
+                              colorScheme="green"
+                            />
+                          )}
+                        </Td>
+                      )}
                       <Td maxWidth={"20px"}>{index + 1}</Td>
+                      <Td>{item.jenisPerjalanan.jenis}</Td>
                       <Td>
                         {
                           item.ttdSuratTuga.indukUnitKerja_ttdSuratTugas
                             .kodeInduk
                         }
                       </Td>
+                      <Td>{item.noSuratTugas ? item?.noSuratTugas : "-"}</Td>
+
                       <Td>
-                        <Box>
-                          {item.noSuratTugas && (
-                            <Box mb={item?.suratKeluar?.nomor ? "8px" : "0"}>
-                              <Text fontSize={"xs"} color={"gray.600"}>
-                                Surat Tugas:
-                              </Text>
-                              <Text fontWeight={"medium"}>
-                                {item.noSuratTugas}
-                              </Text>
-                            </Box>
-                          )}
-                          {item?.suratKeluar?.nomor ? (
-                            <Box>
-                              <Text fontSize={"xs"} color={"gray.600"}>
-                                {item?.isNotaDinas === 0
-                                  ? "Telaahan Staf:"
-                                  : "Nota Dinas:"}
-                              </Text>
-                              <Text fontWeight={"medium"}>
-                                {item.suratKeluar.nomor}
-                              </Text>
-                            </Box>
-                          ) : (
-                            !item.noSuratTugas && <Text>-</Text>
-                          )}
-                        </Box>
+                        {item?.kendaraanDina?.kendaraan?.nomor
+                          ? `${
+                              item?.kendaraanDina?.kendaraan?.merek || ""
+                            } - KT ${item?.kendaraanDina?.kendaraan?.nomor} ${
+                              item?.kendaraanDina?.kendaraan?.seri
+                            }`
+                          : "-"}
                       </Td>
                       <Td>
                         {item.tempats?.[0]?.tanggalBerangkat
@@ -548,34 +695,13 @@ function Daftar() {
                           : "-"}
                       </Td>
                       <Td>
-                        <Box>
-                          <Box mb={item.tempats?.length > 0 ? "8px" : "0"}>
-                            <Text fontSize={"xs"} color={"gray.600"}>
-                              Jenis:
-                            </Text>
-                            <Text fontWeight={"medium"}>
-                              {item.jenisPerjalanan.jenis}
-                            </Text>
-                          </Box>
-                          {item.tempats?.length > 0 && (
-                            <Box>
-                              <Text fontSize={"xs"} color={"gray.600"}>
-                                Tujuan:
-                              </Text>
-                              {item.jenisPerjalanan.tipePerjalanan.id === 1
-                                ? item.tempats.map((val) => (
-                                    <Text key={val.id} fontWeight={"medium"}>
-                                      {val.dalamKota.nama}
-                                    </Text>
-                                  ))
-                                : item.tempats.map((val) => (
-                                    <Text key={val.id} fontWeight={"medium"}>
-                                      {val.tempat}
-                                    </Text>
-                                  ))}
-                            </Box>
-                          )}
-                        </Box>
+                        {item.jenisPerjalanan.tipePerjalanan.id === 1
+                          ? item.tempats.map((val) => (
+                              <Text key={val.id}>{val.dalamKota.nama}</Text>
+                            ))
+                          : item.tempats.map((val) => (
+                              <Text key={val.id}>{val.tempat}</Text>
+                            ))}
                       </Td>
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Td key={i}>
@@ -659,23 +785,10 @@ function Daftar() {
                             </MenuItem>
                             <MenuItem
                               icon={<BsFileEarmarkArrowDown />}
-                              onClick={() => postNotaDinas(item)}
+                              onClick={() => postSuratTugasKendaraan(item)}
                             >
-                              Cetak Nota Dinas
+                              Cetak Surat Tugas Kendaraan
                             </MenuItem>
-                            {!item.personils?.some(
-                              (p) => p?.statusId === 2 || p?.statusId === 3
-                            ) && (
-                              <MenuItem
-                                onClick={() => {
-                                  setSelectedPerjalanan(item.id);
-                                  onOpen();
-                                }}
-                                color="red.500"
-                              >
-                                Hapus
-                              </MenuItem>
-                            )}
                           </MenuList>
                         </Menu>
                       </Td>
@@ -744,4 +857,4 @@ function Daftar() {
   );
 }
 
-export default Daftar;
+export default DaftarPerjalananKendaraan;
