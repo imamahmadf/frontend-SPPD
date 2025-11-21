@@ -85,7 +85,7 @@ import DetailKegiatan from "./pages/Perencanaan/DetailKegiatan.jsx";
 import DaftarIndikator from "./pages/Perencanaan/DaftarIndikator.jsx";
 import DaftarCapaian from "./pages/Perencanaan/DaftarCapaian.jsx";
 // ////////PENA///////////////////
-import DaftarKendaraanDinas from "./pages/KendaraanDinas/daftarKendaraanDinas.jsx";
+import DaftarKendaraanDinas from "./pages/KendaraanDinas/DaftarKendaraanDinas.jsx";
 import KendaraanSaya from "./pages/KendaraanDinas/KendaraanSaya.jsx";
 import DetailkendaraanDinas from "./pages/KendaraanDinas/DetailKendaraanDinas.jsx";
 import PerjalananKendaraanDinas from "./pages/KendaraanDinas/Perjalanan/PerjalananKendaraanDinas.jsx";
