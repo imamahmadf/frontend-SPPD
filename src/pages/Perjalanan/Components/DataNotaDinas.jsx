@@ -20,17 +20,32 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
   const { values, errors, touched, setFieldValue } = useFormikContext();
 
   return (
-    <Container maxW={"1280px"} variant={"primary"} pt={"30px"} ps={"0px"}>
-      <HStack>
-        <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-        <Heading color={"primary"}>Data Surat Pengantar</Heading>
+    <Container
+      maxW={"1280px"}
+      variant={"primary"}
+      pt={"30px"}
+      ps={"0px"}
+      mb={"30px"}
+    >
+      <HStack mb={"20px"}>
+        <Box
+          bgColor={"primary"}
+          width={"30px"}
+          height={"30px"}
+          borderRadius={"4px"}
+        ></Box>
+        <Heading color={"primary"} fontSize={"28px"} fontWeight={"600"}>
+          Data Surat Pengantar
+        </Heading>
       </HStack>
       <Box p={"30px"}>
         <FormControl
-          my={"30px"}
+          mb={"25px"}
           isInvalid={touched.klasifikasi && errors.klasifikasi}
         >
-          <FormLabel fontSize={"24px"}>Klasifikasi</FormLabel>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Klasifikasi
+          </FormLabel>
           <Select2
             name="klasifikasi"
             options={dataSeed.resultKlasifikasi?.map((val) => ({
@@ -70,10 +85,12 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
 
         {dataKlasifikasi[0] && (
           <FormControl
-            my={"30px"}
+            mb={"25px"}
             isInvalid={touched.kodeKlasifikasi && errors.kodeKlasifikasi}
           >
-            <FormLabel fontSize={"24px"}>Kode Klasifikasi</FormLabel>
+            <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+              Kode Klasifikasi
+            </FormLabel>
             <Select2
               name="kodeKlasifikasi"
               options={dataKlasifikasi.map((val) => ({
@@ -111,8 +128,10 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
           </FormControl>
         )}
 
-        <FormControl my={"30px"} isInvalid={touched.untuk && errors.untuk}>
-          <FormLabel fontSize={"24px"}>Untuk</FormLabel>
+        <FormControl mb={"25px"} isInvalid={touched.untuk && errors.untuk}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Untuk
+          </FormLabel>
           <Textarea
             name="untuk"
             value={values.untuk}
@@ -128,8 +147,10 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
           <FormErrorMessage>{errors.untuk}</FormErrorMessage>
         </FormControl>
 
-        <FormControl my={"30px"}>
-          <FormLabel fontSize={"24px"}>Dasar</FormLabel>
+        <FormControl mb={"25px"}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Dasar
+          </FormLabel>
           <Textarea
             name="dasar"
             value={values.dasar}
@@ -143,14 +164,16 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             minHeight={"160px"}
           />
         </FormControl>
-        <FormControl my={"30px"}>
-          <FormLabel fontSize={"24px"}>Jenis </FormLabel>
+        <FormControl mb={"25px"}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Jenis
+          </FormLabel>
           <Select
-            mt="10px"
             border="1px"
             height={"60px"}
             borderRadius={"8px"}
             borderColor={"rgba(229, 231, 235, 1)"}
+            bgColor={"terang"}
             onChange={(e) => actions.setIsNotaDinas(parseInt(e.target.value))}
           >
             <option value="1">Nota Dinas</option>
@@ -158,15 +181,18 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             <option value="2">Undangan</option>
           </Select>
         </FormControl>
-        <Flex gap={4}>
+        <Flex gap={4} mt="30px">
           <Checkbox
             isChecked={state.isSrikandi === 0}
             onChange={(e) => actions.setIsSrikandi(e.target.checked ? 0 : 1)}
+            size="lg"
+            colorScheme="primary"
           >
-            Srikandi
+            <Box fontSize="18px" fontWeight="500">
+              Srikandi
+            </Box>
           </Checkbox>
         </Flex>
-        {JSON.stringify(state.isNotaDinas)}
       </Box>
     </Container>
   );

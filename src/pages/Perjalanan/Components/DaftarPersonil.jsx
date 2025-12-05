@@ -32,12 +32,19 @@ const DaftarPersonil = ({ dataPegawai }) => {
       variant={"primary"}
       pt={"30px"}
       ps={"0px"}
-      my={"30px"}
+      mb={"30px"}
     >
       <HStack justify="space-between" mb="20px">
         <HStack>
-          <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-          <Heading color={"primary"}>Daftar Personil</Heading>
+          <Box
+            bgColor={"primary"}
+            width={"30px"}
+            height={"30px"}
+            borderRadius={"4px"}
+          ></Box>
+          <Heading color={"primary"} fontSize={"28px"} fontWeight={"600"}>
+            Daftar Personil
+          </Heading>
         </HStack>
         <Button
           onClick={handleResetPersonil}
@@ -53,7 +60,7 @@ const DaftarPersonil = ({ dataPegawai }) => {
         </Button>
       </HStack>
 
-      <SimpleGrid columns={2} spacing={4} p={"30px"}>
+      <SimpleGrid columns={2} spacing={6} p={"30px"}>
         {[0, 1, 2, 3, 4].map((index) => {
           const fieldName = `personil[${index}]`;
           const error = index === 0 ? getIn(errors, fieldName) : null;
@@ -61,7 +68,9 @@ const DaftarPersonil = ({ dataPegawai }) => {
 
           return (
             <FormControl key={index} isInvalid={!!error && isTouched}>
-              <FormLabel fontSize={"24px"}>Personil {index + 1}</FormLabel>
+              <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+                Personil {index + 1}
+              </FormLabel>
               <AsyncSelect
                 loadOptions={async (inputValue) => {
                   if (!inputValue) return [];

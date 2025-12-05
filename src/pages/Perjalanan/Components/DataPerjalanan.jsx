@@ -29,20 +29,28 @@ const DataPerjalanan = ({
       maxW={"1280px"}
       pt={"30px"}
       ps={"0px"}
-      my={"30px"}
+      mb={"30px"}
     >
-      <HStack>
-        <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-        <Heading color={"primary"}>Data Perjalanan Dinas</Heading>
+      <HStack mb={"20px"}>
+        <Box
+          bgColor={"primary"}
+          width={"30px"}
+          height={"30px"}
+          borderRadius={"4px"}
+        ></Box>
+        <Heading color={"primary"} fontSize={"28px"} fontWeight={"600"}>
+          Data Perjalanan Dinas
+        </Heading>
       </HStack>
-      {/* {JSON.stringify(jenisPelayananKesehatan)} */}
 
       <Box p={"30px"}>
         <FormControl
-          my={"15px"}
+          mb={"25px"}
           isInvalid={touched.jenisPerjalanan && errors.jenisPerjalanan}
         >
-          <FormLabel fontSize={"24px"}>Jenis Perjalanan</FormLabel>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Jenis Perjalanan
+          </FormLabel>
           <Select2
             options={state.dataJenisPerjalanan?.map((val) => {
               return {
@@ -85,8 +93,10 @@ const DataPerjalanan = ({
           <FormErrorMessage>{errors.jenisPerjalanan}</FormErrorMessage>
         </FormControl>
         {state.jenisPerjalanan?.value?.jenis?.includes("Pelayanan") ? (
-          <FormControl my={"30px"}>
-            <FormLabel fontSize={"24px"}>Jenis Pelayanan Kesehatan</FormLabel>
+          <FormControl mb={"25px"}>
+            <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+              Jenis Pelayanan Kesehatan
+            </FormLabel>
             <Select2
               options={dataSeed.resultPelayananKesehatan.map((val) => {
                 return {
@@ -129,11 +139,13 @@ const DataPerjalanan = ({
         ) : null}
 
         {state.jenisPerjalanan?.value?.tipePerjalananId === 2 ? (
-          <Flex my={"30px"} gap={4} direction="column">
+          <Flex mb={"25px"} gap={4} direction="column">
             {perjalananKota?.map((item, index) => (
               <Flex key={index} gap={4}>
                 <FormControl>
-                  <FormLabel fontSize={"24px"}>Nama Kota</FormLabel>
+                  <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+                    Nama Kota
+                  </FormLabel>
                   <Input
                     height={"60px"}
                     bgColor={"terang"}
@@ -149,7 +161,9 @@ const DataPerjalanan = ({
                   />
                 </FormControl>
                 <FormControl>
-                  <FormLabel fontSize={"24px"}>Tanggal Berangkat</FormLabel>
+                  <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+                    Tanggal Berangkat
+                  </FormLabel>
                   <Input
                     height={"60px"}
                     bgColor={"terang"}
@@ -165,7 +179,9 @@ const DataPerjalanan = ({
                   />
                 </FormControl>
                 <FormControl>
-                  <FormLabel fontSize={"24px"}>Tanggal Pulang</FormLabel>
+                  <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+                    Tanggal Pulang
+                  </FormLabel>
                   <Input
                     height={"60px"}
                     bgColor={"terang"}
@@ -197,7 +213,9 @@ const DataPerjalanan = ({
               return (
                 <Flex key={index} gap={4}>
                   <FormControl border={0} bgColor={"white"}>
-                    <FormLabel fontSize={"24px"}>Tujuan</FormLabel>
+                    <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+                      Tujuan
+                    </FormLabel>
                     <Select2
                       options={dataSeed?.resultDalamKota?.map((val) => {
                         return {
@@ -252,7 +270,9 @@ const DataPerjalanan = ({
                     />
                   </FormControl>
                   <FormControl>
-                    <FormLabel fontSize={"24px"}>Tanggal berangkat</FormLabel>
+                    <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+                      Tanggal berangkat
+                    </FormLabel>
                     <Input
                       height={"60px"}
                       bgColor={"terang"}
@@ -268,7 +288,9 @@ const DataPerjalanan = ({
                     />
                   </FormControl>
                   <FormControl>
-                    <FormLabel fontSize={"24px"}>Tanggal Pulang</FormLabel>
+                    <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+                      Tanggal Pulang
+                    </FormLabel>
                     <Input
                       height={"60px"}
                       bgColor={"terang"}
@@ -301,10 +323,12 @@ const DataPerjalanan = ({
         ) : null}
 
         <FormControl
-          my={"30px"}
+          mb={"25px"}
           isInvalid={touched.subKegiatan && errors.subKegiatan}
         >
-          <FormLabel fontSize={"24px"}> Sub Kegiatan</FormLabel>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Sub Kegiatan
+          </FormLabel>
           <Select2
             options={dataSeed?.resultDaftarSubKegiatan?.map((val) => {
               return {
@@ -343,42 +367,50 @@ const DataPerjalanan = ({
                 color: state.isFocused ? "white" : "black",
               }),
             }}
-          />{" "}
+          />
           <FormErrorMessage>{errors.subKegiatan}</FormErrorMessage>
         </FormControl>
-        {/* {JSON.stringify(dataKota)} */}
 
         {state.dataSubKegiatan.value ? (
-          <Text>{`Kode Rekening: ${state.dataSubKegiatan?.value?.kodeRekening}${state.jenisPerjalanan?.value?.kodeRekening}`}</Text>
+          <Box mb={"25px"} p={"15px"} bgColor={"terang"} borderRadius={"6px"}>
+            <Text fontSize={"16px"} fontWeight={"500"}>
+              {`Kode Rekening: ${state.dataSubKegiatan?.value?.kodeRekening}${state.jenisPerjalanan?.value?.kodeRekening}`}
+            </Text>
+          </Box>
         ) : null}
 
-        <Flex mt={"40px"} gap={4}>
-          <FormControl isInvalid={touched.pengajuan && errors.pengajuan}>
-            <FormLabel fontSize={"24px"}>Tanggal Pengajuan</FormLabel>
+        <Flex gap={4} mb={"25px"}>
+          <FormControl
+            isInvalid={touched.pengajuan && errors.pengajuan}
+            flex={1}
+          >
+            <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+              Tanggal Pengajuan
+            </FormLabel>
             <Input
               name="tanggalPengajuan"
               type="date"
               value={values.pengajuan}
               onChange={(e) => setFieldValue("pengajuan", e.target.value)}
+              height={"60px"}
+              bgColor={"terang"}
             />
             <FormErrorMessage>{errors.pengajuan}</FormErrorMessage>
           </FormControl>
 
-          <FormControl>
-            <FormLabel
-              fontSize={"24px"}
-              isInvalid={touched.asal && errors.asal}
-            >
+          <FormControl isInvalid={touched.asal && errors.asal} flex={1}>
+            <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
               Asal
             </FormLabel>
             <Input
               onChange={(e) => {
-                setAsal(e.target.value);
+                actions.setAsal(e.target.value);
                 setFieldValue("asal", e.target.value);
               }}
-              defaultValue={values.asal}
+              value={values.asal}
               height={"60px"}
-            />{" "}
+              bgColor={"terang"}
+            />
             <FormErrorMessage>{errors.asal}</FormErrorMessage>
           </FormControl>
         </Flex>

@@ -21,18 +21,22 @@ const DataKeuangan = ({ dataSeed, actions }) => {
   const bendaharaTouched = getIn(touched, "bendahara");
 
   return (
-    <Container maxW="1280px" variant="primary" pt="30px" ps="0px" mt="30px">
-      <HStack>
-        <Box bgColor="primary" width="30px" height="30px" />
-        <Heading color="primary">Data Keuangan</Heading>
+    <Container maxW="1280px" variant="primary" pt="30px" ps="0px" mb="30px">
+      <HStack mb="20px">
+        <Box bgColor="primary" width="30px" height="30px" borderRadius="4px" />
+        <Heading color="primary" fontSize="28px" fontWeight="600">
+          Data Keuangan
+        </Heading>
       </HStack>
       <Box p="30px">
         {/* Sumber Dana */}
         <FormControl
-          my="15px"
+          mb="25px"
           isInvalid={!!sumberDanaError && sumberDanaTouched}
         >
-          <FormLabel fontSize="24px">Sumber Dana</FormLabel>
+          <FormLabel fontSize="20px" fontWeight="500" mb="10px">
+            Sumber Dana
+          </FormLabel>
           <Select2
             name="sumberDana"
             options={dataSeed?.resultSumberDana?.map((val) => ({
@@ -79,9 +83,11 @@ const DataKeuangan = ({ dataSeed, actions }) => {
         {values.sumberDana?.value && (
           <FormControl
             isInvalid={!!bendaharaError && bendaharaTouched}
-            mt="20px"
+            mb="25px"
           >
-            <FormLabel fontSize="24px">Bendahara</FormLabel>
+            <FormLabel fontSize="20px" fontWeight="500" mb="10px">
+              Bendahara
+            </FormLabel>
             <Select2
               name="bendahara"
               options={values.sumberDana?.value?.bendaharas?.map((val) => ({

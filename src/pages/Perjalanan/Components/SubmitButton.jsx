@@ -4,7 +4,7 @@ import { Button, Container } from "@chakra-ui/react";
 
 const SubmitButton = ({ isLoading }) => {
   return (
-    <Container maxW="1280px" variant="primary" p={0}>
+    <Container maxW="1280px" variant="primary" p={0} mb="40px">
       <Button
         type="submit" // ✅ ini penting agar Formik menangani validasi
         variant="primary"
@@ -12,6 +12,8 @@ const SubmitButton = ({ isLoading }) => {
         loadingText="Mengunduh..."
         width="100%"
         height="60px"
+        fontSize="18px"
+        fontWeight="600"
       >
         Submit
       </Button>

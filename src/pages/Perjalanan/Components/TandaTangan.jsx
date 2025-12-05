@@ -13,14 +13,27 @@ import { Select as Select2 } from "chakra-react-select";
 
 const TandaTangan = ({ dataSeed, state, actions }) => {
   return (
-    <Container maxW={"1280px"} variant={"primary"} pt={"30px"} ps={"0px"}>
-      <HStack>
-        <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-        <Heading color={"primary"}>Daftar Tanda Tangan</Heading>
+    <Container
+      maxW={"1280px"}
+      variant={"primary"}
+      pt={"30px"}
+      ps={"0px"}
+      mb={"30px"}
+    >
+      <HStack mb={"20px"}>
+        <Box
+          bgColor={"primary"}
+          width={"30px"}
+          height={"30px"}
+          borderRadius={"4px"}
+        ></Box>
+        <Heading color={"primary"} fontSize={"28px"} fontWeight={"600"}>
+          Daftar Tanda Tangan
+        </Heading>
       </HStack>
-      <SimpleGrid columns={2} spacing={4} p={"30px"}>
-        <FormControl border={0} flex="1" my={"15px"}>
-          <FormLabel fontSize={"24px"}>
+      <SimpleGrid columns={2} spacing={6} p={"30px"}>
+        <FormControl border={0} flex="1" mb={"20px"}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
             Tanda Tangan Nota Dinas/Telaahan Staf
           </FormLabel>
           <Select2
@@ -62,8 +75,10 @@ const TandaTangan = ({ dataSeed, state, actions }) => {
           />
         </FormControl>
 
-        <FormControl border={0} flex="1" my={"15px"}>
-          <FormLabel fontSize={"24px"}>Tanda tangan Surat Tugas</FormLabel>
+        <FormControl border={0} flex="1" mb={"20px"}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Tanda tangan Surat Tugas
+          </FormLabel>
           <Select2
             options={(() => {
               const uniqueIndukUnitKerjaIds = [
@@ -117,8 +132,8 @@ const TandaTangan = ({ dataSeed, state, actions }) => {
           />
         </FormControl>
 
-        <FormControl border={0} flex="1" my={"15px"}>
-          <FormLabel fontSize={"24px"}>
+        <FormControl border={0} flex="1" mb={"20px"}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
             Tanda Tangan Pengguna Anggaran
           </FormLabel>
           <Select2
@@ -160,8 +175,10 @@ const TandaTangan = ({ dataSeed, state, actions }) => {
           />
         </FormControl>
 
-        <FormControl border={0} flex="1" my={"15px"}>
-          <FormLabel fontSize={"24px"}>Tanda Tangan PPTK</FormLabel>
+        <FormControl border={0} flex="1" mb={"20px"}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Tanda Tangan PPTK
+          </FormLabel>
           <Select2
             options={
               dataSeed?.resultPPTK?.map((val) => ({

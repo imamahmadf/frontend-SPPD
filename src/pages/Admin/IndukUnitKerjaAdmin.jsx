@@ -31,16 +31,25 @@ import {
   Spacer,
   useDisclosure,
   Flex,
+  IconButton,
+  Center,
+  Alert,
+  AlertIcon,
+  Tooltip,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import Loading from "../../Componets/Loading";
-import TambahUnitKerja from "../../Componets/TambahUnitKerja";
 import { BsEyeFill } from "react-icons/bs";
 import { BsPencilFill } from "react-icons/bs";
+import { BsPlusCircle } from "react-icons/bs";
+import { BsTrash } from "react-icons/bs";
+import { BsBuilding } from "react-icons/bs";
+import { BsFileEarmarkText } from "react-icons/bs";
+import { BsCheckCircle, BsXCircle } from "react-icons/bs";
 function IndukUnitKerjaAdmin() {
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
@@ -248,8 +257,21 @@ function IndukUnitKerjaAdmin() {
 
   // Fungsi untuk render tabel
   const renderTable = (items, type, unitKerjaId) => {
-    if (isLoading) return <Text>Memuat data...</Text>;
-    if (!items || items.length === 0) return <Text>Tidak ada data</Text>;
+    if (isLoading) {
+      return (
+        <Center py={8}>
+          <Loading />
+        </Center>
+      );
+    }
+    if (!items || items.length === 0) {
+      return (
+        <Alert status="info" borderRadius="md">
+          <AlertIcon />
+          <Text>Tidak ada data tersedia</Text>
+        </Alert>
+      );
+    }
 
     return (
       <Table variant={"primary"}>
@@ -306,6 +328,7 @@ function IndukUnitKerjaAdmin() {
                         colorScheme="green"
                         onClick={handleSave}
                         isLoading={isLoading}
+                        leftIcon={<BsCheckCircle />}
                       >
                         Simpan
                       </Button>
@@ -314,34 +337,37 @@ function IndukUnitKerjaAdmin() {
                         colorScheme="red"
                         onClick={handleCancel}
                         isDisabled={isLoading}
+                        leftIcon={<BsXCircle />}
                       >
                         Batal
                       </Button>
                     </HStack>
                   ) : (
                     <HStack spacing={2}>
-                      <Button
-                        p={"0px"}
-                        fontSize={"14px"}
-                        variant={"secondary"}
-                        onClick={() =>
-                          handleEditClick(item.id, type, unitKerjaId)
-                        }
-                        isDisabled={isLoading}
-                      >
-                        <BsPencilFill />
-                      </Button>
-                      <Button
-                        p={"0px"}
-                        fontSize={"14px"}
-                        variant={"cancle"}
-                        onClick={() =>
-                          handleDeleteClick({ ...item, type, unitKerjaId })
-                        }
-                        isDisabled={isLoading}
-                      >
-                        X
-                      </Button>
+                      <Tooltip label="Edit" placement="top">
+                        <IconButton
+                          size="sm"
+                          variant={"secondary"}
+                          onClick={() =>
+                            handleEditClick(item.id, type, unitKerjaId)
+                          }
+                          isDisabled={isLoading}
+                          icon={<BsPencilFill />}
+                          aria-label="Edit"
+                        />
+                      </Tooltip>
+                      <Tooltip label="Hapus" placement="top">
+                        <IconButton
+                          size="sm"
+                          variant={"cancle"}
+                          onClick={() =>
+                            handleDeleteClick({ ...item, type, unitKerjaId })
+                          }
+                          isDisabled={isLoading}
+                          icon={<BsTrash />}
+                          aria-label="Hapus"
+                        />
+                      </Tooltip>
                     </HStack>
                   )}
                 </Td>
@@ -354,6 +380,26 @@ function IndukUnitKerjaAdmin() {
   };
 
   // Render komponen utama
+  if (isLoading && !data) {
+    return (
+      <Layout>
+        <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH="80vh">
+          <Container
+            maxW={"1280px"}
+            variant={"primary"}
+            pt={"30px"}
+            px={"20px"}
+            my={"30px"}
+          >
+            <Center py={20}>
+              <Loading />
+            </Center>
+          </Container>
+        </Box>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
@@ -365,229 +411,441 @@ function IndukUnitKerjaAdmin() {
           my={"30px"}
         >
           {/* Modal Konfirmasi Hapus */}
-          <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Konfirmasi Hapus</ModalHeader>
+          <Modal isOpen={isOpen} onClose={onClose} isCentered>
+            <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+            <ModalContent borderRadius="lg" maxW="500px">
+              <ModalHeader fontSize="xl" color="gray.700">
+                Konfirmasi Hapus Data
+              </ModalHeader>
               <ModalCloseButton />
-              {JSON.stringify(selectedItem?.type)}
-              <ModalBody>Apakah Anda yakin ingin menghapus data ini?</ModalBody>
+              <ModalBody>
+                <VStack align="start" spacing={3}>
+                  <Alert status="warning" borderRadius="md">
+                    <AlertIcon />
+                    <Text fontWeight="medium">
+                      Apakah Anda yakin ingin menghapus data ini?
+                    </Text>
+                  </Alert>
+                  {selectedItem && (
+                    <Box
+                      p={3}
+                      bg="gray.50"
+                      borderRadius="md"
+                      w="100%"
+                      borderLeft="4px solid"
+                      borderColor="danger"
+                    >
+                      <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                        Data yang akan dihapus:
+                      </Text>
+                      <Text fontSize="sm" color="gray.700" mt={1}>
+                        {selectedItem.jabatan || "Data ini"}
+                      </Text>
+                    </Box>
+                  )}
+                  <Text fontSize="sm" color="gray.600">
+                    Tindakan ini tidak dapat dibatalkan.
+                  </Text>
+                </VStack>
+              </ModalBody>
               <ModalFooter>
                 <Button
-                  colorScheme="red"
-                  mr={3}
-                  onClick={confirmDelete}
-                  isLoading={isLoading}
-                >
-                  Ya, Hapus
-                </Button>
-                <Button
                   variant="ghost"
+                  mr={3}
                   onClick={onClose}
                   isDisabled={isLoading}
                 >
                   Batal
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={confirmDelete}
+                  isLoading={isLoading}
+                  leftIcon={<BsTrash />}
+                >
+                  Ya, Hapus
                 </Button>
               </ModalFooter>
             </ModalContent>
           </Modal>
 
           {/* Header Induk Unit Kerja */}
-          <VStack align="start" spacing={2} mb={6} px={4}>
-            <Heading size="lg">{data?.indukUnitKerja}</Heading>
-            <Badge colorScheme="blue" fontSize="md">
-              Kode: {data?.kodeInduk}
-            </Badge>
-            <Text>Asal: {data?.daftarUnitKerjas[0]?.asal}</Text>
-          </VStack>
+          {data && (
+            <Card
+              mb={6}
+              bg="primary"
+              color="white"
+              borderRadius="lg"
+              boxShadow="lg"
+            >
+              <CardBody>
+                <HStack spacing={4} align="start">
+                  <Box
+                    bg="whiteAlpha.200"
+                    p={4}
+                    borderRadius="lg"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    <BsBuilding size={32} />
+                  </Box>
+                  <VStack align="start" spacing={2} flex={1}>
+                    <Heading size="lg" color="white">
+                      {data?.indukUnitKerja}
+                    </Heading>
+                    <HStack spacing={4} flexWrap="wrap">
+                      <Badge
+                        colorScheme="blue"
+                        fontSize="sm"
+                        px={3}
+                        py={1}
+                        borderRadius="full"
+                        bg="whiteAlpha.200"
+                        color="white"
+                      >
+                        Kode: {data?.kodeInduk}
+                      </Badge>
+                      {data?.daftarUnitKerjas?.[0]?.asal && (
+                        <Badge
+                          fontSize="sm"
+                          px={3}
+                          py={1}
+                          borderRadius="full"
+                          bg="whiteAlpha.200"
+                          color="white"
+                        >
+                          Asal: {data?.daftarUnitKerjas[0]?.asal}
+                        </Badge>
+                      )}
+                    </HStack>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+          )}
 
           {/* Tabel Tanda Tangan Surat Tugas */}
-          <Box>
-            <Flex mb={"20px"}>
-              <Heading size="md" mb={4}>
-                Tanda Tangan Surat Tugas
-              </Heading>
+          <Box mb={8}>
+            <Flex mb={6} align="center">
+              <HStack spacing={3}>
+                <Box
+                  bg="primary"
+                  color="white"
+                  p={2}
+                  borderRadius="md"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <BsFileEarmarkText size={20} />
+                </Box>
+                <Heading size="md" color="gray.700">
+                  Tanda Tangan Surat Tugas
+                </Heading>
+              </HStack>
               <Spacer />
               <Button
                 variant={"primary"}
                 onClick={() => {
                   history.push("/admin/ttd-surat-tugas");
                 }}
+                leftIcon={<BsPlusCircle />}
               >
-                Tambah TTD Surat Tugas +
+                Tambah TTD Surat Tugas
               </Button>
             </Flex>
             {isLoading ? (
-              <Text>Memuat data...</Text>
+              <Center py={8}>
+                <Loading />
+              </Center>
+            ) : !data?.indukUnitKerja_ttdSuratTugas ||
+              data?.indukUnitKerja_ttdSuratTugas?.length === 0 ? (
+              <Alert status="info" borderRadius="md">
+                <AlertIcon />
+                <Text>Tidak ada data Tanda Tangan Surat Tugas</Text>
+              </Alert>
             ) : (
-              <Table variant={"primary"}>
-                <Thead>
-                  <Tr>
-                    <Th width="50px">No</Th>
-                    <Th>Nama</Th>
-                    <Th width="550px">Jabatan</Th>
-                    <Th width="150px">Aksi</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {data?.indukUnitKerja_ttdSuratTugas?.map((item, index) => {
-                    const uniqueId = `ttdSuratTugas-induk-${item.id}`;
-                    const isEditing = editingId === uniqueId;
-                    const currentValue = isEditing
-                      ? editValues[uniqueId] || item.jabatan
-                      : item.jabatan;
+              <Box overflowX="auto">
+                <Table variant={"primary"}>
+                  <Thead>
+                    <Tr>
+                      <Th width="50px">No</Th>
+                      <Th>Nama</Th>
+                      <Th width="550px">Jabatan</Th>
+                      <Th width="150px">Aksi</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {data?.indukUnitKerja_ttdSuratTugas?.map((item, index) => {
+                      const uniqueId = `ttdSuratTugas-induk-${item.id}`;
+                      const isEditing = editingId === uniqueId;
+                      const currentValue = isEditing
+                        ? editValues[uniqueId] || item.jabatan
+                        : item.jabatan;
 
-                    const handleSave = () => {
-                      handleSaveEdit(
-                        { ...item, type: "ttdSuratTugas" },
-                        "jabatan",
-                        editValues[uniqueId]
+                      const handleSave = () => {
+                        handleSaveEdit(
+                          { ...item, type: "ttdSuratTugas" },
+                          "jabatan",
+                          editValues[uniqueId]
+                        );
+                      };
+
+                      const handleCancel = () => {
+                        setEditingId(null);
+                      };
+
+                      return (
+                        <Tr key={item.id}>
+                          <Td>{index + 1}</Td>
+                          <Td>{item.pegawai.nama}</Td>
+                          <Td>
+                            <EditableCell
+                              value={currentValue}
+                              isEditing={isEditing}
+                              onChange={(value) =>
+                                handleEditChange(uniqueId, value)
+                              }
+                            />
+                          </Td>
+                          <Td>
+                            {isEditing ? (
+                              <HStack spacing={2}>
+                                <Button
+                                  size="sm"
+                                  colorScheme="green"
+                                  onClick={handleSave}
+                                  isLoading={isLoading}
+                                  leftIcon={<BsCheckCircle />}
+                                >
+                                  Simpan
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  colorScheme="red"
+                                  onClick={handleCancel}
+                                  isDisabled={isLoading}
+                                  leftIcon={<BsXCircle />}
+                                >
+                                  Batal
+                                </Button>
+                              </HStack>
+                            ) : (
+                              <HStack spacing={2}>
+                                <Tooltip label="Edit" placement="top">
+                                  <IconButton
+                                    size="sm"
+                                    variant={"secondary"}
+                                    onClick={() =>
+                                      handleEditClick(item.id, "ttdSuratTugas")
+                                    }
+                                    isDisabled={isLoading}
+                                    icon={<BsPencilFill />}
+                                    aria-label="Edit"
+                                  />
+                                </Tooltip>
+                                <Tooltip label="Hapus" placement="top">
+                                  <IconButton
+                                    size="sm"
+                                    variant={"cancle"}
+                                    onClick={() =>
+                                      handleDeleteClick({
+                                        ...item,
+                                        type: "ttdSuratTugas",
+                                      })
+                                    }
+                                    isDisabled={isLoading}
+                                    icon={<BsTrash />}
+                                    aria-label="Hapus"
+                                  />
+                                </Tooltip>
+                              </HStack>
+                            )}
+                          </Td>
+                        </Tr>
                       );
-                    };
-
-                    const handleCancel = () => {
-                      setEditingId(null);
-                    };
-
-                    return (
-                      <Tr key={item.id}>
-                        <Td>{index + 1}</Td>
-                        <Td>{item.pegawai.nama}</Td>
-                        <Td>
-                          <EditableCell
-                            value={currentValue}
-                            isEditing={isEditing}
-                            onChange={(value) =>
-                              handleEditChange(uniqueId, value)
-                            }
-                          />
-                        </Td>
-                        <Td>
-                          {isEditing ? (
-                            <HStack spacing={2}>
-                              <Button
-                                size="sm"
-                                colorScheme="green"
-                                onClick={handleSave}
-                                isLoading={isLoading}
-                              >
-                                Simpan
-                              </Button>
-                              <Button
-                                size="sm"
-                                colorScheme="red"
-                                onClick={handleCancel}
-                                isDisabled={isLoading}
-                              >
-                                Batal
-                              </Button>
-                            </HStack>
-                          ) : (
-                            <HStack spacing={2}>
-                              <Button
-                                p={"0px"}
-                                fontSize={"14px"}
-                                variant={"secondary"}
-                                onClick={() =>
-                                  handleEditClick(item.id, "ttdSuratTugas")
-                                }
-                                isDisabled={isLoading}
-                              >
-                                <BsPencilFill />
-                              </Button>
-                              <Button
-                                p={"0px"}
-                                fontSize={"14px"}
-                                variant={"cancle"}
-                                onClick={() =>
-                                  handleDeleteClick({
-                                    ...item,
-                                    type: "ttdSuratTugas",
-                                  })
-                                }
-                                isDisabled={isLoading}
-                              >
-                                X
-                              </Button>
-                            </HStack>
-                          )}
-                        </Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
+                    })}
+                  </Tbody>
+                </Table>
+              </Box>
             )}
           </Box>
 
-          <Divider my={6} />
+          <Divider my={8} borderColor="gray.300" />
 
           {/* Daftar Unit Kerja */}
-          <Flex mb={"20px"}>
-            <Heading size="md" mb={4}>
-              Daftar Unit Kerja
-            </Heading>
-            <Spacer />
-          </Flex>
-          {isLoading ? (
-            <Text>Memuat data...</Text>
-          ) : (
-            <Stack>
-              {data?.daftarUnitKerjas?.map((unitKerja) => (
-                <Card key={unitKerja.id} variant="outline">
-                  <CardHeader bg="primary" borderBottomWidth="1px">
-                    <HStack>
-                      <Box color="white">
-                        <Heading size="sm">{unitKerja.unitKerja}</Heading>
-                        <Text fontSize="sm">
-                          Asal: {unitKerja.asal} | Kode: {unitKerja.kode}
-                        </Text>
+          <Box>
+            <Flex mb={6} align="center">
+              <HStack spacing={3}>
+                <Box
+                  bg="primary"
+                  color="white"
+                  p={2}
+                  borderRadius="md"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <BsBuilding size={20} />
+                </Box>
+                <Heading size="md" color="gray.700">
+                  Daftar Unit Kerja
+                </Heading>
+              </HStack>
+            </Flex>
+            {isLoading ? (
+              <Center py={8}>
+                <Loading />
+              </Center>
+            ) : !data?.daftarUnitKerjas ||
+              data?.daftarUnitKerjas?.length === 0 ? (
+              <Alert status="info" borderRadius="md">
+                <AlertIcon />
+                <Text>Tidak ada data Unit Kerja</Text>
+              </Alert>
+            ) : (
+              <Stack spacing={6}>
+                {data?.daftarUnitKerjas?.map((unitKerja) => (
+                  <Card
+                    key={unitKerja.id}
+                    variant="outline"
+                    borderRadius="lg"
+                    boxShadow="sm"
+                    _hover={{ boxShadow: "md" }}
+                    transition="all 0.2s"
+                  >
+                    <CardHeader
+                      bg="primary"
+                      borderTopRadius="lg"
+                      borderBottomWidth="2px"
+                      borderBottomColor="primaryGelap"
+                    >
+                      <HStack>
+                        <Box color="white" flex={1}>
+                          <Heading size="md" mb={2} color="white">
+                            {unitKerja.unitKerja}
+                          </Heading>
+                          <HStack spacing={4} flexWrap="wrap">
+                            <Badge
+                              fontSize="sm"
+                              px={3}
+                              py={1}
+                              borderRadius="full"
+                              bg="whiteAlpha.200"
+                              color="white"
+                            >
+                              Asal: {unitKerja.asal}
+                            </Badge>
+                            <Badge
+                              fontSize="sm"
+                              px={3}
+                              py={1}
+                              borderRadius="full"
+                              bg="whiteAlpha.200"
+                              color="white"
+                            >
+                              Kode: {unitKerja.kode}
+                            </Badge>
+                          </HStack>
+                        </Box>
+                        <Tooltip label="Kelola Unit Kerja" placement="top">
+                          <IconButton
+                            variant="primary"
+                            colorScheme="whiteAlpha"
+                            color="white"
+                            borderColor="whiteAlpha.300"
+                            _hover={{
+                              bg: "whiteAlpha.200",
+                              borderColor: "white",
+                            }}
+                            onClick={() => {
+                              history.push(`/admin/unit-kerja/${unitKerja.id}`);
+                            }}
+                            icon={<BsEyeFill />}
+                            aria-label="Kelola Unit Kerja"
+                            size="md"
+                          />
+                        </Tooltip>
+                      </HStack>
+                    </CardHeader>
+                    <CardBody p={6}>
+                      {/* Tabel Nota Dinas */}
+                      <Box mb={6}>
+                        <HStack mb={3} spacing={2}>
+                          <Box
+                            bg="primary"
+                            color="white"
+                            p={1.5}
+                            borderRadius="md"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                          >
+                            <BsFileEarmarkText size={16} />
+                          </Box>
+                          <Heading size="sm" color="gray.700">
+                            Nota Dinas
+                          </Heading>
+                        </HStack>
+                        {renderTable(
+                          unitKerja.unitKerja_notaDinas,
+                          "notaDinas",
+                          unitKerja.id
+                        )}
                       </Box>
-                      <Spacer />
-                      <Button
-                        variant={"primary"}
-                        width={"60px"}
-                        onClick={() => {
-                          history.push(`/admin/unit-kerja/${unitKerja.id}`);
-                        }}
-                      >
-                        +
-                      </Button>
-                    </HStack>
-                  </CardHeader>
-                  <CardBody>
-                    {/* Tabel Nota Dinas */}
-                    <Box mb={6}>
-                      <Heading size="sm" mb={3}>
-                        Nota Dinas
-                      </Heading>
-                      {renderTable(
-                        unitKerja.unitKerja_notaDinas,
-                        "notaDinas",
-                        unitKerja.id
-                      )}
-                    </Box>
 
-                    {/* Tabel PPTK */}
-                    <Box mb={6}>
-                      <Heading size="sm" mb={3}>
-                        PPTK
-                      </Heading>
-                      {renderTable(unitKerja.PPTKs, "PPTK", unitKerja.id)}
-                    </Box>
+                      <Divider my={4} />
 
-                    {/* Tabel KPA */}
-                    <Box mb={6}>
-                      <Heading size="sm" mb={3}>
-                        KPA
-                      </Heading>
-                      {renderTable(unitKerja.KPAs, "KPA", unitKerja.id)}
-                    </Box>
-                  </CardBody>
-                </Card>
-              ))}
-            </Stack>
-          )}
+                      {/* Tabel PPTK */}
+                      <Box mb={6}>
+                        <HStack mb={3} spacing={2}>
+                          <Box
+                            bg="primary"
+                            color="white"
+                            p={1.5}
+                            borderRadius="md"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                          >
+                            <BsFileEarmarkText size={16} />
+                          </Box>
+                          <Heading size="sm" color="gray.700">
+                            PPTK
+                          </Heading>
+                        </HStack>
+                        {renderTable(unitKerja.PPTKs, "PPTK", unitKerja.id)}
+                      </Box>
+
+                      <Divider my={4} />
+
+                      {/* Tabel KPA */}
+                      <Box>
+                        <HStack mb={3} spacing={2}>
+                          <Box
+                            bg="primary"
+                            color="white"
+                            p={1.5}
+                            borderRadius="md"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                          >
+                            <BsFileEarmarkText size={16} />
+                          </Box>
+                          <Heading size="sm" color="gray.700">
+                            KPA
+                          </Heading>
+                        </HStack>
+                        {renderTable(unitKerja.KPAs, "KPA", unitKerja.id)}
+                      </Box>
+                    </CardBody>
+                  </Card>
+                ))}
+              </Stack>
+            )}
+          </Box>
         </Container>
       </Box>
     </Layout>

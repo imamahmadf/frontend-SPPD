@@ -98,7 +98,7 @@ function Perjalanan() {
 
   return (
     <Layout>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"} pt={"30px"}>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}

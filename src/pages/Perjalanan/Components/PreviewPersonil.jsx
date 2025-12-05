@@ -18,10 +18,12 @@ const PreviewPersonil = () => {
   const selectedPegawai = values.personil || [];
 
   return (
-    <Container maxW="1280px" variant="primary" pt="30px" ps="0px" my="20px">
-      <HStack>
-        <Box bgColor="primary" width="30px" height="30px" />
-        <Heading color="primary">Data Personil</Heading>
+    <Container maxW="1280px" variant="primary" pt="30px" ps="0px" mb="30px">
+      <HStack mb="20px">
+        <Box bgColor="primary" width="30px" height="30px" borderRadius="4px" />
+        <Heading color="primary" fontSize="28px" fontWeight="600">
+          Data Personil
+        </Heading>
       </HStack>
       <Box p="30px">
         <Table variant="primary">
