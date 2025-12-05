@@ -50,6 +50,8 @@ export const login = (namaPengguna, password) => async (dispatch) => {
     console.log(data, "data dri API");
   } catch (error) {
     console.error("Login failed", error);
+    // Lempar error agar bisa ditangkap di komponen
+    throw error;
   }
 };
 export const selectRole = (state) => state.auth.role;

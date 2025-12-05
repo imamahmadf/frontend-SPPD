@@ -31,7 +31,10 @@ export const myNewTheme = extendTheme({
     terang: "rgba(243, 243, 243, 1)",
     background: "rgba(243, 243, 243, 1)",
     aset: "rgba(0, 125, 226, 1)",
-    pegawai: "rgba(212, 39, 39, 1)",
+    // Warna untuk fitur Pegawai - Merah Profesional untuk Kepegawaian
+    // Merah yang lebih dalam dan elegan, cocok untuk HR/People Management
+    pegawai: "rgba(185, 28, 28, 1)", // Merah profesional (Red-700) - Lebih dalam dan elegan
+    pegawaiGelap: "rgba(153, 27, 27, 1)", // Merah gelap (Red-800) - Untuk hover dan accent
     perencanaan: "rgba(235, 106, 63,1)",
   },
 

@@ -25,16 +25,24 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerBody,
+  DrawerCloseButton,
   useDisclosure,
   useBreakpointValue,
   Divider,
+  Icon,
+  Badge,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  SimpleGrid,
 } from "@chakra-ui/react";
-import { FaRoute } from "react-icons/fa";
-import Logout from "./Logout";
+import { FaRoute, FaBars, FaSignOutAlt, FaMoon, FaSun } from "react-icons/fa";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import { BiWallet } from "react-icons/bi";
 import { BsHouseDoor, BsStar, BsEnvelope } from "react-icons/bs";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { GoShieldLock } from "react-icons/go";
 import { BiCar } from "react-icons/bi";
 import LogoPena from "../assets/penaLogo.png";
@@ -45,11 +53,12 @@ import {
   selectIsAuthenticated,
   userRedux,
   selectRole,
+  performLogout,
 } from "../Redux/Reducers/auth";
 import Logo from "../assets/logo.png";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { io } from "socket.io-client";
-import { FiMenu } from "react-icons/fi";
+import { useColorModeValues } from "../Style/colorModeValues";
 
 const socket = io("http://localhost:8000", {
   transports: ["websocket"],
@@ -166,13 +175,30 @@ function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const history = useHistory();
   const location = useLocation();
+  const dispatch = useDispatch();
   const [jumlahNotifikasi, setJumlahNotifikasi] = useState(0);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [accordionIndex, setAccordionIndex] = useState(-1);
+
+  // Color mode values untuk mobile drawer (dari Style folder)
   const {
-    isOpen: isMobileMenuOpen,
-    onOpen: openMobileMenu,
-    onClose: closeMobileMenu,
-  } = useDisclosure();
-  const headerSpacerHeight = useBreakpointValue({ base: "120px", md: "140px" });
+    drawerBg,
+    boxBg,
+    textColor,
+    textColorLight,
+    borderColor,
+    borderColorLight,
+    borderColorDark,
+    hoverBg,
+    hoverBgWhite,
+    accordionPanelBg,
+    footerBoxShadow,
+  } = useColorModeValues();
+
+  const handleLogout = () => {
+    dispatch(performLogout());
+    setIsDrawerOpen(false);
+  };
 
   useEffect(() => {
     socket.on("notifikasi:terbaru", (data) => {
@@ -213,7 +239,7 @@ function Navbar() {
   };
 
   // Komponen untuk menu item
-  const MenuItemComponent = ({ item }) => {
+  const MenuItemComponent = ({ item, onItemClick }) => {
     if (!item || !item.path || !item.label) {
       return null;
     }
@@ -221,15 +247,38 @@ function Navbar() {
     const isActive = isItemActive(item.path);
 
     return (
-      <Link to={item.path}>
+      <Link to={item.path} onClick={onItemClick}>
         <Box
-          px={3}
-          py={2}
-          _hover={{ bg: "gray.100" }}
-          borderRadius="md"
-          borderBottom={isActive ? "2px solid" : "none"}
-          borderColor={isActive ? "primary" : "transparent"}
-          fontWeight={isActive ? "semibold" : "normal"}
+          px={4}
+          py={3}
+          borderRadius="xl"
+          bg={isActive ? "primary" : "transparent"}
+          color={isActive ? "white" : "gray.700"}
+          fontWeight={isActive ? "700" : "600"}
+          fontSize="14px"
+          position="relative"
+          overflow="hidden"
+          _hover={{
+            bg: isActive ? "primaryGelap" : "gray.50",
+            transform: "translateX(6px)",
+            boxShadow: isActive
+              ? "0 4px 12px rgba(55, 176, 134, 0.3)"
+              : "0 2px 8px rgba(0, 0, 0, 0.08)",
+            _before: {
+              content: '""',
+              position: "absolute",
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: "4px",
+              bg: isActive ? "white" : "primary",
+              borderRadius: "0 4px 4px 0",
+            },
+          }}
+          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          borderLeft={isActive ? "4px solid" : "4px solid transparent"}
+          borderColor={isActive ? "white" : "transparent"}
+          mx={1}
         >
           {item.label}
         </Box>
@@ -246,49 +295,139 @@ function Navbar() {
     const IconComponent = menu.icon;
     const isActive = isMenuActive(menu);
 
-    // State untuk hover
+    // State untuk hover dan klik
     const [isOpen, setIsOpen] = useState(false);
+    const [isClicked, setIsClicked] = useState(false);
+
+    // Handler untuk toggle saat diklik
+    const handleClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const newState = !isOpen;
+      setIsOpen(newState);
+      setIsClicked(newState);
+    };
+
+    // Handler untuk mouse enter (hover)
+    const handleMouseEnter = () => {
+      setIsOpen(true);
+    };
+
+    // Handler untuk mouse leave (hanya tutup jika tidak diklik)
+    const handleMouseLeave = () => {
+      if (!isClicked) {
+        setIsOpen(false);
+      }
+    };
+
+    // Handler untuk menutup saat klik di luar
+    const handleClose = () => {
+      setIsOpen(false);
+      setIsClicked(false);
+    };
+
+    // Handler untuk menutup saat item menu diklik
+    const handleItemClick = () => {
+      // Tidak menutup submenu saat item diklik, biarkan user navigasi
+      // Submenu akan menutup otomatis saat klik di luar (closeOnBlur)
+    };
 
     return (
       <Popover
         placement="bottom"
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        // Chakra UI Popover tidak punya onOpen, jadi kita atur manual
+        onClose={handleClose}
+        closeOnBlur={true}
       >
         <PopoverTrigger>
           <Button
             variant="ghost"
             leftIcon={<IconComponent />}
             position="relative"
-            _hover={{ bg: "primary", color: "white" }}
+            color={"white"}
+            fontWeight="700"
+            fontSize="15px"
+            px={5}
+            py={3}
+            borderRadius="xl"
+            bg={isActive ? "rgba(255, 255, 255, 0.2)" : "transparent"}
+            backdropFilter="blur(10px)"
+            border="1px solid"
+            borderColor={isActive ? "rgba(255, 255, 255, 0.3)" : "transparent"}
+            boxShadow={
+              isActive
+                ? "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+                : "none"
+            }
+            _hover={{
+              bg: "rgba(255, 255, 255, 0.25)",
+              color: "white",
+              transform: "translateY(-2px)",
+              borderColor: "rgba(255, 255, 255, 0.4)",
+              boxShadow:
+                "0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
+            }}
+            _active={{
+              bg: "rgba(255, 255, 255, 0.3)",
+              transform: "translateY(0px)",
+            }}
+            transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
             _after={{
               content: '""',
               position: "absolute",
-              bottom: "0",
+              bottom: "4px",
               left: "50%",
               transform: "translateX(-50%)",
-              width: isActive ? "80%" : "0%",
+              width: isActive ? "70%" : "0%",
               height: "3px",
-              bg: "primary",
-              transition: "width 0.2s ease-in-out",
+              bg: "white",
+              borderRadius: "full",
+              boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
+              transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
-            onMouseEnter={() => setIsOpen(true)}
-            onMouseLeave={() => setIsOpen(false)}
+            onClick={handleClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             {menu.title}
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          mt={1}
-          onMouseEnter={() => setIsOpen(true)}
-          onMouseLeave={() => setIsOpen(false)}
+          mt={3}
+          boxShadow="0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1)"
+          borderRadius="2xl"
+          border="1px solid"
+          borderColor="gray.200"
+          bg="white"
+          backdropFilter="blur(20px)"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          overflow="hidden"
+          _before={{
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "3px",
+            bgGradient: "linear(to-r, primary, primaryGelap)",
+          }}
         >
-          <PopoverArrow />
+          <PopoverArrow
+            bg="white"
+            borderColor="gray.200"
+            borderWidth="1px"
+            borderTop="none"
+            borderLeft="none"
+          />
           <PopoverBody p={2}>
-            <VStack spacing={1} align="stretch">
+            <VStack spacing={0.5} align="stretch">
               {menu.items.map((item, index) => (
-                <MenuItemComponent key={index} item={item} />
+                <MenuItemComponent
+                  key={index}
+                  item={item}
+                  onItemClick={handleItemClick}
+                />
               ))}
             </VStack>
           </PopoverBody>
@@ -301,276 +440,783 @@ function Navbar() {
     <>
       {/* Main Navbar */}
       <Box position="fixed" top={0} left={0} right={0} zIndex={999}>
-        {/* Header Oranye */}
+        {/* Header dengan Gradient dan Glassmorphism */}
         <Box
-          bg="primary"
-          px={4}
-          py={4}
-          height={{ base: "auto", md: "100px" }}
-          boxShadow="sm"
-          display="flex"
-          flexDirection="column"
-          justifyContent="flex-start"
-          alignItems="center"
+          bgGradient="linear(to-r, primary, primaryGelap)"
+          px={{ base: 4, md: 6, lg: 8 }}
+          py={5}
+          minH="85px"
+          boxShadow="0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)"
+          position="relative"
+          _before={{
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            bg: "linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)",
+            pointerEvents: "none",
+          }}
         >
-          {/* Atas: Logo dan User */}
+          {/* Container untuk konten navbar */}
           <Flex
-            width="95vw"
-            justifyContent="center"
+            w="100%"
+            px={{ base: 4, md: 6, lg: 8 }}
+            justifyContent="space-between"
             alignItems="center"
-            height={{ base: "auto", md: "180px" }}
+            gap={4}
+            flexWrap="nowrap"
           >
-            {/* Logo dan Brand */}
-            <Flex gap={3} alignItems="center">
-              <Image height="40px" src={Logo} alt="Logo" />
-              <Box>
-                <Text color={"white"} fontSize={"16px"} fontWeight={700}>
-                  Dinas Kesehatan
-                </Text>
-                <Text color={"white"} mt={0} fontSize={"14px"}>
-                  Kabupaten Paser
-                </Text>
-              </Box>
-            </Flex>
-            <Spacer />
-            {/* User Menu dan Actions */}
-            <HStack spacing={4}>
-              {/* Tombol Hamburger untuk Mobile */}
-              {isAuthenticated && (
-                <IconButton
-                  aria-label="Buka menu"
-                  icon={<FiMenu />}
-                  display={{ base: "inline-flex", md: "none" }}
-                  onClick={openMobileMenu}
-                  colorScheme="whiteAlpha"
-                  variant="ghost"
-                />
-              )}
-              <Button onClick={toggleColorMode} size="sm">
-                {colorMode === "light" ? "🌙" : "☀️"}
-              </Button>
-
-              {isAuthenticated ? (
-                <Box display={{ base: "none", md: "block" }}>
-                  <Menu>
-                    <MenuButton as={Button} variant="ghost" size="sm">
-                      <HStack>
-                        <Box position="relative">
-                          <Avatar size="sm" name={user[0]?.nama} />
-                          {jumlahNotifikasi > 0 && (
-                            <Box
-                              position="absolute"
-                              top="-1"
-                              right="-1"
-                              bg="red.500"
-                              color="white"
-                              fontSize="xs"
-                              fontWeight="bold"
-                              px={2}
-                              py={0.5}
-                              borderRadius="full"
-                              minW="5"
-                              h="5"
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="center"
-                            >
-                              {jumlahNotifikasi}
-                            </Box>
-                          )}
-                        </Box>
-                        <Text color={"white"} fontSize="sm">
-                          {user[0]?.nama}
-                        </Text>
-                      </HStack>
-                    </MenuButton>
-                    <MenuList>
-                      <Link to={"/profile"}>
-                        <MenuItem>
-                          <Avatar me={"10px"} w={"20px"} h={"20px"} />
-                          Profile
-                        </MenuItem>
-                      </Link>
-                      <Link to={"/"}>
-                        <MenuItem>
-                          <Image me={"10px"} h={"20px"} src={LogoPena} />
-                          Pena
-                        </MenuItem>
-                      </Link>
-                      <Link to={"/aset/dashboard"}>
-                        <MenuItem>
-                          <Image me={"10px"} h={"20px"} src={LogoAset} />
-                          Aset
-                        </MenuItem>
-                      </Link>
-                      <Link to={"/pegawai/dashboard"}>
-                        <MenuItem>
-                          <Image me={"10px"} h={"20px"} src={LogoPegawai} />
-                          Kepegawaian
-                        </MenuItem>
-                      </Link>
-                      <Link to={"/perencanaan"}>
-                        <MenuItem>
-                          <Image me={"10px"} h={"20px"} src={LogoPerencanaan} />
-                          perencanaan
-                        </MenuItem>
-                      </Link>
-                      <MenuItem>
-                        <Logout />
-                      </MenuItem>
-                    </MenuList>
-                  </Menu>
-                </Box>
-              ) : (
-                <Box display={{ base: "none", md: "block" }}>
-                  <Link to="/login">
-                    <Button variant={"primary"} size="sm">
-                      Login
-                    </Button>
-                  </Link>
-                </Box>
-              )}
-            </HStack>
-          </Flex>
-
-          {/* Bawah: Menu Putih */}
-          {isAuthenticated && (
-            <Box
-              bg="white"
-              boxShadow="md"
-              borderRadius="md"
-              px={6}
-              py={3}
-              width="95vw"
-              mx="auto"
-              mt={"20px"} // Jarak dari header ke menu
-              display={{ base: "none", md: "flex" }}
+            {/* Left Section: Logo */}
+            <Flex
+              gap={4}
               alignItems="center"
-              justifyContent="center"
+              flexShrink={0}
+              flex="1"
+              position="relative"
+              zIndex={1}
             >
-              <HStack spacing={6}>
+              {/* Logo dan Brand */}
+              <Flex gap={4} alignItems="center" flexShrink={0}>
+                <Box
+                  p={3}
+                  bg="rgba(255, 255, 255, 0.2)"
+                  borderRadius="xl"
+                  backdropFilter="blur(20px)"
+                  boxShadow="0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)"
+                  border="1px solid"
+                  borderColor="rgba(255, 255, 255, 0.3)"
+                  transition="all 0.3s ease"
+                  _hover={{
+                    transform: "scale(1.05) translateY(-2px)",
+                    boxShadow:
+                      "0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
+                    bg: "rgba(255, 255, 255, 0.25)",
+                  }}
+                >
+                  <Image height="42px" src={Logo} alt="Logo" />
+                </Box>
+                <Box display={{ base: "none", sm: "block" }}>
+                  <Text
+                    color={"white"}
+                    fontSize={{ base: "15px", md: "17px" }}
+                    fontWeight={800}
+                    letterSpacing="0.3px"
+                    textShadow="0 2px 4px rgba(0, 0, 0, 0.2)"
+                  >
+                    Dinas Kesehatan
+                  </Text>
+                  <Text
+                    color={"whiteAlpha.900"}
+                    fontSize={{ base: "12px", md: "14px" }}
+                    fontWeight={500}
+                    letterSpacing="0.2px"
+                    mt={0.5}
+                  >
+                    Kabupaten Paser
+                  </Text>
+                </Box>
+              </Flex>
+            </Flex>
+
+            {/* Center Section: Menu Navigation - Hidden on mobile */}
+            <Box
+              display={{ base: "none", lg: "block" }}
+              flex="1"
+              mx={6}
+              position="relative"
+              zIndex={1}
+            >
+              <HStack spacing={1} justifyContent="center">
                 {menuData.map((menu, index) => (
                   <MenuDropdown key={index} menu={menu} />
                 ))}
               </HStack>
             </Box>
-          )}
-          {/* Drawer Menu Mobile */}
-          {isAuthenticated && (
-            <Drawer
-              placement="left"
-              onClose={closeMobileMenu}
-              isOpen={isMobileMenuOpen}
-            >
-              <DrawerOverlay />
-              <DrawerContent>
-                <DrawerHeader borderBottomWidth="1px">Menu</DrawerHeader>
-                <DrawerBody>
-                  <VStack align="stretch" spacing={4}>
-                    {menuData.map((menu, idx) => (
-                      <Box key={idx}>
-                        <Text fontWeight="bold" mb={2}>
-                          {menu.title}
-                        </Text>
-                        <VStack align="stretch" spacing={1}>
-                          {menu.items?.map((item, i) => (
-                            <Link
-                              key={i}
-                              to={item.path}
-                              onClick={closeMobileMenu}
+
+            {/* Right Section: User Menu (Desktop) dan Hamburger (Mobile) */}
+            <HStack spacing={3} flexShrink={0} position="relative" zIndex={1}>
+              {/* Color Mode Toggle - Hidden on mobile */}
+              <IconButton
+                display={{ base: "none", lg: "flex" }}
+                onClick={toggleColorMode}
+                aria-label="Toggle color mode"
+                icon={<Icon as={colorMode === "light" ? FaMoon : FaSun} />}
+                size="md"
+                variant="ghost"
+                color="white"
+                borderRadius="xl"
+                bg="rgba(255, 255, 255, 0.15)"
+                backdropFilter="blur(10px)"
+                border="1px solid"
+                borderColor="rgba(255, 255, 255, 0.2)"
+                _hover={{
+                  bg: "rgba(255, 255, 255, 0.25)",
+                  transform: "scale(1.1) rotate(15deg)",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  borderColor: "rgba(255, 255, 255, 0.3)",
+                }}
+                _active={{
+                  transform: "scale(0.95) rotate(0deg)",
+                }}
+                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+              />
+
+              {/* User Menu - Hidden on mobile, shown on desktop */}
+              {isAuthenticated ? (
+                <>
+                  <Menu>
+                    <MenuButton
+                      as={Button}
+                      variant="ghost"
+                      size="md"
+                      color="white"
+                      display={{ base: "none", lg: "flex" }}
+                      borderRadius="xl"
+                      bg="rgba(255, 255, 255, 0.15)"
+                      backdropFilter="blur(10px)"
+                      border="1px solid"
+                      borderColor="rgba(255, 255, 255, 0.2)"
+                      px={3}
+                      py={2}
+                      _hover={{
+                        bg: "rgba(255, 255, 255, 0.25)",
+                        borderColor: "rgba(255, 255, 255, 0.3)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                      }}
+                      _active={{
+                        bg: "rgba(255, 255, 255, 0.3)",
+                        transform: "translateY(0px)",
+                      }}
+                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                    >
+                      <HStack spacing={3}>
+                        <Box position="relative">
+                          <Avatar
+                            size="sm"
+                            name={user[0]?.nama}
+                            border="2px solid"
+                            borderColor="rgba(255, 255, 255, 0.4)"
+                            boxShadow="0 2px 8px rgba(0, 0, 0, 0.15)"
+                          />
+                          {jumlahNotifikasi > 0 && (
+                            <Badge
+                              position="absolute"
+                              top="-2"
+                              right="-2"
+                              bg="red.500"
+                              color="white"
+                              fontSize="10px"
+                              fontWeight="bold"
+                              borderRadius="full"
+                              minW="6"
+                              h="6"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                              boxShadow="0 2px 8px rgba(220, 38, 38, 0.4)"
+                              border="2px solid white"
+                              animation="pulse 2s infinite"
                             >
-                              <Box
-                                px={3}
-                                py={2}
-                                borderRadius="md"
-                                bg={
-                                  isItemActive(item.path)
-                                    ? "gray.100"
-                                    : "transparent"
-                                }
-                                _hover={{ bg: "gray.100" }}
-                              >
-                                {item.label}
-                              </Box>
-                            </Link>
-                          ))}
-                        </VStack>
-                        {idx !== menuData.length - 1 && <Divider mt={3} />}
-                      </Box>
-                    ))}
-                    <Divider />
-                    <Box>
-                      <Text fontWeight="bold" mb={2}>
-                        Akun
-                      </Text>
-                      <VStack align="stretch" spacing={1}>
-                        <Link to={"/profile"} onClick={closeMobileMenu}>
-                          <Box
-                            px={3}
-                            py={2}
-                            borderRadius="md"
-                            _hover={{ bg: "gray.100" }}
-                          >
-                            Profile
-                          </Box>
-                        </Link>
-                        <Link to={"/"} onClick={closeMobileMenu}>
-                          <Box
-                            px={3}
-                            py={2}
-                            borderRadius="md"
-                            _hover={{ bg: "gray.100" }}
-                          >
-                            Pena
-                          </Box>
-                        </Link>
-                        <Link to={"/aset/dashboard"} onClick={closeMobileMenu}>
-                          <Box
-                            px={3}
-                            py={2}
-                            borderRadius="md"
-                            _hover={{ bg: "gray.100" }}
-                          >
-                            Aset
-                          </Box>
-                        </Link>
-                        <Link
-                          to={"/pegawai/dashboard"}
-                          onClick={closeMobileMenu}
-                        >
-                          <Box
-                            px={3}
-                            py={2}
-                            borderRadius="md"
-                            _hover={{ bg: "gray.100" }}
-                          >
-                            Kepegawaian
-                          </Box>
-                        </Link>
-                        <Link to={"/perencanaan"} onClick={closeMobileMenu}>
-                          <Box
-                            px={3}
-                            py={2}
-                            borderRadius="md"
-                            _hover={{ bg: "gray.100" }}
-                          >
-                            Perencanaan
-                          </Box>
-                        </Link>
-                        <Box px={3} py={2} borderRadius="md">
-                          <Logout />
+                              {jumlahNotifikasi > 9 ? "9+" : jumlahNotifikasi}
+                            </Badge>
+                          )}
                         </Box>
-                      </VStack>
-                    </Box>
-                  </VStack>
-                </DrawerBody>
-              </DrawerContent>
-            </Drawer>
-          )}
+                        <Text
+                          color={"white"}
+                          fontSize="sm"
+                          fontWeight="700"
+                          letterSpacing="0.2px"
+                        >
+                          {user[0]?.nama}
+                        </Text>
+                      </HStack>
+                    </MenuButton>
+                    <MenuList
+                      boxShadow="0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1)"
+                      borderRadius="2xl"
+                      border="1px solid"
+                      borderColor="gray.200"
+                      mt={3}
+                      overflow="hidden"
+                      _before={{
+                        content: '""',
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: "3px",
+                        bgGradient: "linear(to-r, primary, primaryGelap)",
+                      }}
+                    >
+                      <Link to={"/profile"}>
+                        <MenuItem
+                          icon={<Avatar size="xs" name={user[0]?.nama} />}
+                          _hover={{
+                            bg: "gray.50",
+                            transform: "translateX(4px)",
+                            transition: "all 0.2s ease",
+                          }}
+                          borderRadius="lg"
+                          transition="all 0.2s ease"
+                        >
+                          Profile
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/"}>
+                        <MenuItem
+                          icon={<Image h={"20px"} src={LogoPena} />}
+                          _hover={{
+                            bg: "gray.50",
+                            transform: "translateX(4px)",
+                            transition: "all 0.2s ease",
+                          }}
+                          borderRadius="lg"
+                          transition="all 0.2s ease"
+                        >
+                          Pena
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/aset/dashboard"}>
+                        <MenuItem
+                          icon={<Image h={"20px"} src={LogoAset} />}
+                          _hover={{
+                            bg: "gray.50",
+                            transform: "translateX(4px)",
+                            transition: "all 0.2s ease",
+                          }}
+                          borderRadius="lg"
+                          transition="all 0.2s ease"
+                        >
+                          Aset
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/pegawai/dashboard"}>
+                        <MenuItem
+                          icon={<Image h={"20px"} src={LogoPegawai} />}
+                          _hover={{
+                            bg: "gray.50",
+                            transform: "translateX(4px)",
+                            transition: "all 0.2s ease",
+                          }}
+                          borderRadius="lg"
+                          transition="all 0.2s ease"
+                        >
+                          Kepegawaian
+                        </MenuItem>
+                      </Link>
+                      <Link to={"/perencanaan"}>
+                        <MenuItem
+                          icon={<Image h={"20px"} src={LogoPerencanaan} />}
+                          _hover={{
+                            bg: "gray.50",
+                            transform: "translateX(4px)",
+                            transition: "all 0.2s ease",
+                          }}
+                          borderRadius="lg"
+                          transition="all 0.2s ease"
+                        >
+                          Perencanaan
+                        </MenuItem>
+                      </Link>
+                      <Box px={2} py={1}>
+                        <Box
+                          as="hr"
+                          borderColor="gray.200"
+                          borderWidth="1px"
+                          my={1}
+                        />
+                      </Box>
+                      <MenuItem
+                        icon={<Icon as={FaSignOutAlt} />}
+                        _hover={{
+                          bg: "red.50",
+                          color: "red.600",
+                          transform: "translateX(4px)",
+                          transition: "all 0.2s ease",
+                        }}
+                        onClick={handleLogout}
+                        color="red.500"
+                        fontWeight="700"
+                        borderRadius="lg"
+                        transition="all 0.2s ease"
+                      >
+                        Keluar
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </>
+              ) : (
+                <Link to="/login">
+                  <Button
+                    variant={"primary"}
+                    size="sm"
+                    display={{ base: "none", lg: "flex" }}
+                    _hover={{
+                      transform: "translateY(-2px)",
+                      boxShadow: "lg",
+                    }}
+                    transition="all 0.2s ease"
+                  >
+                    Login
+                  </Button>
+                </Link>
+              )}
+
+              {/* Hamburger Menu Button - Visible on mobile, positioned on right */}
+              <IconButton
+                display={{ base: "flex", lg: "none" }}
+                aria-label="Open menu"
+                icon={<FaBars />}
+                size="md"
+                variant="ghost"
+                color="white"
+                onClick={() => setIsDrawerOpen(true)}
+                _hover={{
+                  bg: "rgba(255, 255, 255, 0.15)",
+                  transform: "scale(1.1)",
+                }}
+                transition="all 0.2s ease"
+              />
+            </HStack>
+          </Flex>
         </Box>
       </Box>
+      {/* Mobile Drawer Menu */}
+      <Drawer
+        isOpen={isDrawerOpen}
+        placement="left"
+        onClose={() => setIsDrawerOpen(false)}
+        size="xs"
+      >
+        <DrawerOverlay />
+        <DrawerContent bg={boxBg}>
+          <DrawerCloseButton color="white" />
+          <DrawerHeader
+            bgGradient="linear(to-r, primary, primaryGelap)"
+            color="white"
+            borderBottom="1px solid"
+            borderColor="rgba(0,0,0,0.1)"
+          >
+            <Flex gap={3} alignItems="center">
+              <Image height="32px" src={Logo} alt="Logo" />
+              <Box>
+                <Text fontSize="14px" fontWeight={700}>
+                  Dinas Kesehatan
+                </Text>
+                <Text fontSize="12px" opacity={0.9}>
+                  Kabupaten Paser
+                </Text>
+              </Box>
+            </Flex>
+          </DrawerHeader>
+
+          <DrawerBody
+            p={0}
+            bg={drawerBg}
+            display="flex"
+            flexDirection="column"
+            maxH="calc(100vh - 60px)"
+            overflow="hidden"
+          >
+            {/* User Profile Section - Mobile Only */}
+            {isAuthenticated ? (
+              <>
+                <Box
+                  bgGradient="linear(to-r, primary, primaryGelap)"
+                  color="white"
+                  p={5}
+                  borderBottom="2px solid"
+                  borderColor="rgba(255,255,255,0.1)"
+                  flexShrink={0}
+                >
+                  <Flex gap={3} alignItems="center" mb={4}>
+                    <Box position="relative">
+                      <Avatar
+                        size="lg"
+                        name={user[0]?.nama}
+                        border="3px solid"
+                        borderColor="rgba(255, 255, 255, 0.4)"
+                        boxShadow="0 4px 12px rgba(0,0,0,0.2)"
+                      />
+                      {jumlahNotifikasi > 0 && (
+                        <Badge
+                          position="absolute"
+                          top="-2"
+                          right="-2"
+                          bg="red.500"
+                          color="white"
+                          fontSize="11px"
+                          fontWeight="bold"
+                          borderRadius="full"
+                          minW="7"
+                          h="7"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          boxShadow="0 2px 8px rgba(0,0,0,0.3)"
+                          border="2px solid white"
+                        >
+                          {jumlahNotifikasi > 9 ? "9+" : jumlahNotifikasi}
+                        </Badge>
+                      )}
+                    </Box>
+                    <VStack align="start" spacing={1} flex="1">
+                      <Text fontSize="lg" fontWeight={700}>
+                        {user[0]?.nama || "User"}
+                      </Text>
+                      <Text fontSize="sm" opacity={0.9}>
+                        {user[0]?.email || ""}
+                      </Text>
+                    </VStack>
+                  </Flex>
+
+                  {/* Profile Button */}
+                  <Link to="/profile" onClick={() => setIsDrawerOpen(false)}>
+                    <Button
+                      w="full"
+                      variant="outline"
+                      colorScheme="whiteAlpha"
+                      size="md"
+                      leftIcon={<Avatar size="xs" name={user[0]?.nama} />}
+                      _hover={{
+                        bg: "rgba(255, 255, 255, 0.25)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "md",
+                      }}
+                      transition="all 0.2s ease"
+                      mb={3}
+                    >
+                      Lihat Profile
+                    </Button>
+                  </Link>
+                </Box>
+
+                {/* Quick Actions Section */}
+                <Box
+                  p={4}
+                  bg={boxBg}
+                  borderBottom="1px solid"
+                  borderColor={borderColor}
+                  flexShrink={0}
+                >
+                  <Text
+                    fontSize="xs"
+                    fontWeight={700}
+                    color={textColorLight}
+                    textTransform="uppercase"
+                    letterSpacing="wide"
+                    mb={3}
+                  >
+                    Aplikasi Lain
+                  </Text>
+                  <SimpleGrid columns={2} spacing={2}>
+                    <Link to="/" onClick={() => setIsDrawerOpen(false)}>
+                      <Button
+                        w="full"
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<Image h={"18px"} src={LogoPena} />}
+                        _hover={{
+                          bg: hoverBg,
+                          borderColor: "primary",
+                          transform: "translateY(-2px)",
+                        }}
+                        transition="all 0.2s ease"
+                      >
+                        Pena
+                      </Button>
+                    </Link>
+                    <Link
+                      to="/aset/dashboard"
+                      onClick={() => setIsDrawerOpen(false)}
+                    >
+                      <Button
+                        w="full"
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<Image h={"18px"} src={LogoAset} />}
+                        _hover={{
+                          bg: hoverBg,
+                          borderColor: "primary",
+                          transform: "translateY(-2px)",
+                        }}
+                        transition="all 0.2s ease"
+                      >
+                        Aset
+                      </Button>
+                    </Link>
+                    <Link
+                      to="/pegawai/dashboard"
+                      onClick={() => setIsDrawerOpen(false)}
+                    >
+                      <Button
+                        w="full"
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<Image h={"18px"} src={LogoPegawai} />}
+                        _hover={{
+                          bg: hoverBg,
+                          borderColor: "primary",
+                          transform: "translateY(-2px)",
+                        }}
+                        transition="all 0.2s ease"
+                      >
+                        Kepegawaian
+                      </Button>
+                    </Link>
+                    <Link
+                      to="/perencanaan"
+                      onClick={() => setIsDrawerOpen(false)}
+                    >
+                      <Button
+                        w="full"
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<Image h={"18px"} src={LogoPerencanaan} />}
+                        _hover={{
+                          bg: hoverBg,
+                          borderColor: "primary",
+                          transform: "translateY(-2px)",
+                        }}
+                        transition="all 0.2s ease"
+                      >
+                        Perencanaan
+                      </Button>
+                    </Link>
+                  </SimpleGrid>
+                </Box>
+              </>
+            ) : (
+              <Box
+                p={5}
+                bg={boxBg}
+                borderBottom="1px solid"
+                borderColor={borderColor}
+                flexShrink={0}
+              >
+                <Link to="/login" onClick={() => setIsDrawerOpen(false)}>
+                  <Button
+                    w="full"
+                    variant="solid"
+                    colorScheme="primary"
+                    size="lg"
+                    _hover={{
+                      transform: "translateY(-2px)",
+                      boxShadow: "lg",
+                    }}
+                    transition="all 0.2s ease"
+                  >
+                    Login
+                  </Button>
+                </Link>
+              </Box>
+            )}
+
+            {/* Menu Navigation */}
+            <Box
+              bg={boxBg}
+              flex="1"
+              overflowY="auto"
+              minH={0}
+              display="flex"
+              flexDirection="column"
+            >
+              <Box
+                px={4}
+                py={3}
+                borderBottom="1px solid"
+                borderColor={borderColor}
+                flexShrink={0}
+              >
+                <Text
+                  fontSize="xs"
+                  fontWeight={700}
+                  color={textColorLight}
+                  textTransform="uppercase"
+                  letterSpacing="wide"
+                >
+                  Menu
+                </Text>
+              </Box>
+              <Accordion
+                allowToggle
+                index={accordionIndex}
+                onChange={(index) => {
+                  // Hanya satu accordion yang bisa terbuka pada satu waktu
+                  setAccordionIndex(
+                    Array.isArray(index)
+                      ? index.length > 0
+                        ? index[0]
+                        : -1
+                      : index
+                  );
+                }}
+              >
+                {menuData.map((menu, index) => {
+                  const IconComponent = menu.icon;
+                  const isActive = isMenuActive(menu);
+
+                  return (
+                    <AccordionItem
+                      key={index}
+                      border="none"
+                      borderTop="1px solid"
+                      borderColor={borderColorLight}
+                    >
+                      <AccordionButton
+                        px={4}
+                        py={3.5}
+                        bg={isActive ? "primary" : boxBg}
+                        color={isActive ? "white" : textColor}
+                        fontWeight="600"
+                        _hover={{
+                          bg: isActive ? "primaryGelap" : hoverBg,
+                        }}
+                        borderLeft={
+                          isActive ? "4px solid" : "4px solid transparent"
+                        }
+                        borderColor={isActive ? "primaryGelap" : "transparent"}
+                        transition="all 0.2s ease"
+                      >
+                        <HStack flex="1" spacing={3}>
+                          <Icon
+                            as={IconComponent}
+                            boxSize={5}
+                            color={isActive ? "white" : "primary"}
+                          />
+                          <Text textAlign="left" fontSize="sm">
+                            {menu.title}
+                          </Text>
+                        </HStack>
+                        <AccordionIcon
+                          color={isActive ? "white" : textColorLight}
+                        />
+                      </AccordionButton>
+                      <AccordionPanel pb={3} px={0} bg={accordionPanelBg}>
+                        <VStack spacing={1} align="stretch" px={2}>
+                          {menu.items.map((item, itemIndex) => {
+                            const itemIsActive = isItemActive(item.path);
+                            return (
+                              <Link
+                                key={itemIndex}
+                                to={item.path}
+                                onClick={() => setIsDrawerOpen(false)}
+                              >
+                                <Box
+                                  px={6}
+                                  py={2.5}
+                                  bg={itemIsActive ? "primary" : "transparent"}
+                                  color={itemIsActive ? "white" : textColor}
+                                  fontWeight={
+                                    itemIsActive ? "semibold" : "medium"
+                                  }
+                                  fontSize="sm"
+                                  borderRadius="md"
+                                  _hover={{
+                                    bg: itemIsActive
+                                      ? "primaryGelap"
+                                      : hoverBgWhite,
+                                    transform: "translateX(4px)",
+                                    boxShadow: itemIsActive ? "none" : "sm",
+                                  }}
+                                  transition="all 0.2s ease"
+                                  borderLeft={
+                                    itemIsActive
+                                      ? "3px solid"
+                                      : "3px solid transparent"
+                                  }
+                                  borderColor={
+                                    itemIsActive ? "white" : "transparent"
+                                  }
+                                >
+                                  {item.label}
+                                </Box>
+                              </Link>
+                            );
+                          })}
+                        </VStack>
+                      </AccordionPanel>
+                    </AccordionItem>
+                  );
+                })}
+              </Accordion>
+            </Box>
+
+            {/* Footer Section - Color Mode & Logout */}
+            <Box
+              borderTop="2px solid"
+              borderColor={borderColorDark}
+              bg={boxBg}
+              boxShadow={footerBoxShadow}
+              display={{ base: "block", lg: "none" }}
+              flexShrink={0}
+            >
+              <Box p={4}>
+                <HStack spacing={3}>
+                  {/* Color Mode Toggle */}
+                  <Button
+                    flex="1"
+                    variant="outline"
+                    size="md"
+                    leftIcon={
+                      <Box
+                        as="span"
+                        fontSize="lg"
+                        filter={
+                          colorMode === "light" ? "none" : "grayscale(0%)"
+                        }
+                      >
+                        {colorMode === "light" ? "🌙" : "☀️"}
+                      </Box>
+                    }
+                    onClick={toggleColorMode}
+                    justifyContent="center"
+                    bg={colorMode === "light" ? "gray.900" : "yellow.100"}
+                    color={colorMode === "light" ? "white" : "gray.800"}
+                    borderColor={
+                      colorMode === "light" ? "gray.700" : "yellow.300"
+                    }
+                    _hover={{
+                      bg: colorMode === "light" ? "gray.800" : "yellow.200",
+                      transform: "translateY(-2px)",
+                      boxShadow: "md",
+                    }}
+                    transition="all 0.2s ease"
+                  >
+                    {colorMode === "light" ? "Gelap" : "Terang"}
+                  </Button>
+
+                  {/* Logout Button */}
+                  {isAuthenticated && (
+                    <Button
+                      flex="1"
+                      variant="outline"
+                      colorScheme="red"
+                      size="md"
+                      leftIcon={<Icon as={FaSignOutAlt} />}
+                      onClick={handleLogout}
+                      _hover={{
+                        bg: "red.50",
+                        borderColor: "red.400",
+                        transform: "translateY(-2px)",
+                        boxShadow: "md",
+                      }}
+                      transition="all 0.2s ease"
+                    >
+                      Keluar
+                    </Button>
+                  )}
+                </HStack>
+              </Box>
+            </Box>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
       {/* Spacing untuk konten utama */}
-      <Box height={headerSpacerHeight} /> {/* Spacer untuk konten */}
+      <Box h="85px" /> {/* Spacer untuk konten */}
     </>
   );
 }

@@ -93,6 +93,13 @@ import DaftarPerjalananKendaraan from "./pages/KendaraanDinas/DaftarPerjalananKe
 // /////BARJAS///////////////////////
 import DaftarDokumen from "./pages/Barjas/DaftarDokumen.jsx";
 import DetailSP from "./pages/Barjas/DetailSP.jsx";
+//////PJPL//////////////////////
+
+import PejabatVerifikator from "./pages/PJPL/PejabatVerifikator.jsx";
+import KontrakPJPL from "./pages/PJPL/KontrakPJPL.jsx";
+import KinerjaPJPL from "./pages/PJPL/KinerjaPJPL.jsx";
+import DetailKinerjaPJPL from "./pages/PJPL/DetailKinerjaPJPL.jsx";
+
 function App() {
   const dispatch = useDispatch();
 
@@ -607,6 +614,31 @@ function App() {
             path="/barjas/detail-sp/:id"
             exact
             roleRoute={[5, 1]}
+          />
+          {/* //////////////////PJPL////////////////////// */}
+          <ProtectedRoute
+            component={PejabatVerifikator}
+            path="/pegawai/pejabat-verifikator"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={KontrakPJPL}
+            path="/pegawai/kontrak-PJPL"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={KinerjaPJPL}
+            path="/kepegawaian/kinerja-PJPL"
+            exact
+            roleRoute={[5, 1, 9]}
+          />
+          <ProtectedRoute
+            component={DetailKinerjaPJPL}
+            path="/kepegawaian/detail/kinerja/:id"
+            exact
+            roleRoute={[5, 1, 9]}
           />
           <Route component={verifikasi} path="/verifikasi/:id" />
           <Route component={Home} path="/" />

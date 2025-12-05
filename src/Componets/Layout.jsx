@@ -10,7 +10,7 @@ import {
 } from "../Redux/Reducers/auth";
 import { useSelector } from "react-redux";
 
-function Layout({ children, seoProps }) {
+function Layout({ children, seoProps, noPaddingTop = false }) {
   const isAuthenticated =
     useSelector(selectIsAuthenticated) || localStorage.getItem("token");
 
@@ -42,6 +42,9 @@ function Layout({ children, seoProps }) {
   // Gabungkan default SEO dengan props yang diberikan
   const finalSEO = { ...defaultSEO, ...seoProps };
 
+  // Tentukan padding top: jika noPaddingTop true, selalu 0, jika tidak ikuti kondisi authenticated
+  const paddingTop = noPaddingTop ? "0" : isAuthenticated ? "80px" : "0";
+
   return (
     <Box>
       <SEO {...finalSEO} />
@@ -49,7 +52,7 @@ function Layout({ children, seoProps }) {
         bgColor={"secondary"}
         minH={"75vh"}
         // ms={isAuthenticated ? "250px" : "0"}
-        pt={isAuthenticated ? "80px" : "0"}
+        pt={paddingTop}
       >
         <Navbar />
         {children}
