@@ -18,7 +18,7 @@ function LayoutAset({ children }) {
         bgColor={"secondary"}
         minH={"75vh"}
         // ms={isAuthenticated ? "250px" : "0"}
-        pt={isAuthenticated ? "180px" : "0"}
+        pt={isAuthenticated ? "80px" : "0"}
       >
         <NavbarAset />
         {children}

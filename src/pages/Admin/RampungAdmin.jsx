@@ -921,17 +921,6 @@ function RampungAdmin(props) {
                         >
                           Verifikasi
                         </Button>
-                        <Button
-                          colorScheme="red"
-                          size="md"
-                          onClick={() => {
-                            setSelectedItemId(item.id);
-                            setIsModalBatalOpen(true);
-                          }}
-                          leftIcon={<Box as="span">❌</Box>}
-                        >
-                          Batalkan
-                        </Button>
                       </>
                     )}
                     <Button
@@ -946,6 +935,17 @@ function RampungAdmin(props) {
                       isDisabled={!templateId}
                     >
                       Cetak Kwitansi
+                    </Button>{" "}
+                    <Button
+                      colorScheme="red"
+                      size="md"
+                      onClick={() => {
+                        setSelectedItemId(item.id);
+                        setIsModalBatalOpen(true);
+                      }}
+                      leftIcon={<Box as="span">❌</Box>}
+                    >
+                      Batalkan
                     </Button>
                   </Flex>
                 </CardBody>

@@ -42,6 +42,7 @@ import SumberDanaAdmin from "./pages/Admin/SumberDanaAdmin.jsx";
 import StatistikPegawai from "./pages/Admin/StatistikPegawai.jsx";
 import SuratTugasKadis from "./pages/SuratTugasKadis.jsx";
 import Profile from "./pages/Profile.jsx";
+import DeveloperProfile from "./pages/DeveloperProfile.jsx";
 import TemplateKadis from "./pages/TemplateKadis.jsx";
 import PegawaiUnitKerja from "./pages/PegawaiUnitKerja.jsx";
 import PerjalananKadis from "./pages/PerjalananKadis.jsx";
@@ -641,6 +642,7 @@ function App() {
             roleRoute={[5, 1, 9]}
           />
           <Route component={verifikasi} path="/verifikasi/:id" />
+          <Route component={DeveloperProfile} path="/developer-profile" />
           <Route component={Home} path="/" />
         </Switch>
       </BrowserRouter>

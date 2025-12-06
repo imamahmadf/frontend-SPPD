@@ -125,14 +125,23 @@ function DaftarKwitansiGlobalKeuangan() {
             p={"30px"}
             borderRadius={"5px"}
             bg={colorMode === "dark" ? "gray.800" : "white"}
+            boxShadow="md"
           >
+            <Heading
+              size="lg"
+              mb={6}
+              color={colorMode === "dark" ? "white" : "gray.700"}
+            >
+              Daftar Kwitansi Global Keuangan
+            </Heading>
             <HStack gap={5} mb={"30px"}>
               <Spacer />
             </HStack>
-            <Table variant={"primary"}>
+            <Table variant={"primary"} size="md">
               <Thead>
                 <Tr>
-                  <Th>jenis Perjalanan</Th>
+                  <Th>Tanggal Pengajuan</Th>
+                  <Th>Jenis Perjalanan</Th>
                   <Th>Unit Kerja</Th>
                   <Th>Sub Kegiatan</Th>
                   <Th>Pengguna Anggaran</Th>
@@ -145,12 +154,25 @@ function DaftarKwitansiGlobalKeuangan() {
               <Tbody>
                 {dataKwitGlobal?.map((item, index) => (
                   <Tr key={index}>
+                    <Td>
+                      {item?.createdAt
+                        ? new Date(item?.createdAt).toLocaleDateString(
+                            "id-ID",
+                            {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )
+                        : "-"}
+                    </Td>
                     <Td>{item?.jenisPerjalanan?.jenis || "-"}</Td>
                     <Td>{item?.unitKerja?.unitKerja || "-"}</Td>
                     <Td>{item?.subKegiatan?.subKegiatan || "-"}</Td>
                     <Td>{item?.KPA?.pegawai_KPA?.nama || "-"}</Td>
-                    <Td>{item?.bendahara?.pegawai_bendahara?.nama}</Td>
-                    <Td>{item?.bendahara?.sumberDana?.sumber}</Td>
+                    <Td>{item?.bendahara?.pegawai_bendahara?.nama || "-"}</Td>
+                    <Td>{item?.bendahara?.sumberDana?.sumber || "-"}</Td>
                     <Td>
                       <Badge
                         colorScheme={
@@ -168,12 +190,15 @@ function DaftarKwitansiGlobalKeuangan() {
                         py={1}
                         borderRadius="md"
                         fontSize="sm"
+                        textTransform="capitalize"
                       >
-                        {item?.status}
+                        {item?.status || "-"}
                       </Badge>
                     </Td>
                     <Td>
                       <Button
+                        colorScheme="blue"
+                        size="sm"
                         onClick={() =>
                           history.push(
                             `/keuangan/detail-kwitansi-global/${item.id}`
@@ -186,16 +211,22 @@ function DaftarKwitansiGlobalKeuangan() {
                   </Tr>
                 ))}
               </Tbody>
-            </Table>{" "}
+            </Table>
+            <Box mt={6}>
+              <Text fontSize="sm" color="gray.600" mb={2}>
+                Total Data: {rows} | Halaman {page + 1} dari {pages}
+              </Text>
+            </Box>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
-
+                alignItems: "center",
                 boxSizing: "border-box",
                 width: "100%",
                 height: "100%",
+                marginTop: "20px",
               }}
             >
               <ReactPaginate
@@ -215,8 +246,8 @@ function DaftarKwitansiGlobalKeuangan() {
                 previousClassName={"item previous"}
               />
             </div>
-          </Container>{" "}
-        </Box>{" "}
+          </Container>
+        </Box>
       </Layout>
     </>
   );

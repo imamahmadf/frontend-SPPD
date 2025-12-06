@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Text,
@@ -59,10 +59,9 @@ import Logo from "../assets/logo.png";
 import { HiOutlineUsers } from "react-icons/hi2";
 import { io } from "socket.io-client";
 import { useColorModeValues } from "../Style/colorModeValues";
-
-const socket = io("http://localhost:8000", {
-  transports: ["websocket"],
-});
+import { FaBell } from "react-icons/fa";
+import axios from "axios";
+import { useToast } from "@chakra-ui/react";
 
 // Data menu untuk mapping
 const menuData = [
@@ -179,6 +178,19 @@ function Navbar() {
   const [jumlahNotifikasi, setJumlahNotifikasi] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [accordionIndex, setAccordionIndex] = useState(-1);
+  const [notifikasiList, setNotifikasiList] = useState([]);
+  const [isNotifikasiOpen, setIsNotifikasiOpen] = useState(false);
+  const toast = useToast();
+
+  // Check apakah user memiliki role keuangan (roleId: 3)
+  // Notifikasi hanya muncul untuk user dengan role keuangan
+  const hasKeuanganRole = React.useMemo(() => {
+    if (!role || !Array.isArray(role)) return false;
+    // Extract roleIds dari array role objects
+    const userRoleIds = role.map((roleObj) => roleObj.roleId || roleObj.id);
+    // Check apakah user memiliki roleId 3 (keuangan)
+    return userRoleIds.includes(3);
+  }, [role]);
 
   // Color mode values untuk mobile drawer (dari Style folder)
   const {
@@ -200,32 +212,146 @@ function Navbar() {
     setIsDrawerOpen(false);
   };
 
+  // Fetch daftar notifikasi dari API
+  const fetchNotifikasi = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/notifikasi/get`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // PENTING: SELALU update count dengan nilai dari backend (sumber kebenaran)
+      // Count akan tetap sama jika tidak ada perubahan statusId di database
+      // Jangan mengurangi count berdasarkan "user sudah melihat" atau "dropdown dibuka"
+      // Count = jumlah personil dengan statusId == 2 (atau kondisi lain sesuai backend)
+      // Count HANYA berubah jika backend mengirim update melalui socket.io atau ada perubahan di database
+      // Membuka dropdown notifikasi TIDAK akan mengurangi count
+      if (response.data.count !== undefined) {
+        const backendCount = response.data.count;
+        console.log("📊 Count dari backend:", backendCount);
+        // Update count dengan nilai dari backend (bisa sama atau berbeda dengan nilai sebelumnya)
+        // Jika tidak ada perubahan di database, nilainya akan tetap sama
+        setJumlahNotifikasi(backendCount);
+      }
+
+      // Jika response berisi daftar notifikasi, update state
+      if (response.data.notifikasi) {
+        setNotifikasiList(response.data.notifikasi);
+      }
+    } catch (error) {
+      console.error("Error fetching notifikasi:", error);
+    }
+  }, []);
+
+  // Inisialisasi Socket.io dan listener notifikasi
+  // HANYA untuk user dengan role keuangan (roleId: 3)
   useEffect(() => {
-    socket.on("notifikasi:terbaru", (data) => {
+    if (!isAuthenticated || !hasKeuanganRole) return;
+
+    // Gunakan environment variable untuk URL socket.io
+    const socketUrl =
+      import.meta.env.VITE_REACT_APP_API_BASE_URL || "http://localhost:8000";
+    const socket = io(socketUrl, {
+      transports: ["websocket"],
+    });
+
+    // Listener untuk notifikasi baru
+    const handleNotifikasi = (data) => {
       console.log("📡 Notifikasi baru diterima di React:", data);
       if (data.count !== undefined) {
-        console.log("🧠 Update state jumlahNotifikasi ke:", data.count);
-        setJumlahNotifikasi(data.count);
+        setJumlahNotifikasi((prevCount) => {
+          const newCount = data.count;
+
+          // PENTING: SELALU update count dengan nilai dari backend (sumber kebenaran)
+          // Count akan tetap sama jika tidak ada perubahan statusId di database
+          // Count HANYA berubah jika backend mengirim update melalui socket.io atau ada perubahan di database
+          // Membuka dropdown notifikasi TIDAK akan mengurangi count
+
+          // Tampilkan toast notification hanya jika count bertambah (ada notifikasi baru)
+          if (newCount > prevCount && data.message) {
+            toast({
+              title: "Notifikasi Baru",
+              description: data.message || "Anda memiliki notifikasi baru",
+              status: "info",
+              duration: 3000,
+              isClosable: true,
+              position: "top-right",
+            });
+          }
+
+          // Return newCount dari backend
+          // Jika tidak ada perubahan di database, newCount akan sama dengan prevCount
+          // Tapi kita tetap return newCount untuk memastikan sinkronisasi dengan backend
+          return newCount;
+        });
+
+        // Fetch ulang daftar notifikasi jika dropdown sedang terbuka
+        // Ini hanya untuk refresh list, count sudah diupdate di atas dari data.count
+        // Membuka dropdown TIDAK akan mengurangi count
+        if (isNotifikasiOpen) {
+          fetchNotifikasi();
+        }
       }
+    };
+
+    socket.on("notifikasi:terbaru", handleNotifikasi);
+
+    // Connect event
+    socket.on("connect", () => {
+      console.log("✅ Socket.io connected:", socket.id);
     });
 
-    return () => {
-      socket.off("notifikasi:terbaru");
-    };
-  }, []);
+    // Disconnect event
+    socket.on("disconnect", () => {
+      console.log("❌ Socket.io disconnected");
+    });
 
+    // Cleanup
+    return () => {
+      socket.off("notifikasi:terbaru", handleNotifikasi);
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.disconnect();
+    };
+  }, [
+    isAuthenticated,
+    hasKeuanganRole,
+    toast,
+    fetchNotifikasi,
+    isNotifikasiOpen,
+  ]);
+
+  // Fetch count dan daftar notifikasi saat komponen mount atau saat user sudah authenticated
+  // HANYA untuk user dengan role keuangan (roleId: 3)
+  // Ini untuk memastikan count dan daftar notifikasi selalu tersedia bahkan setelah berpindah halaman
   useEffect(() => {
-    socket.on("notifikasi:terbaru", (data) => {
-      console.log("📡 Notifikasi baru:", data);
-      if (data.count !== undefined) {
-        setJumlahNotifikasi(data.count);
-      }
-    });
+    if (isAuthenticated && hasKeuanganRole) {
+      // Fetch count dan daftar notifikasi saat pertama kali mount atau saat authenticated berubah
+      // Ini memastikan notifikasi tersedia sejak awal dan tidak hilang saat user berpindah halaman
+      // Hanya untuk user dengan role keuangan
+      fetchNotifikasi();
+    } else {
+      // Reset state jika user logout atau tidak memiliki role keuangan
+      setJumlahNotifikasi(0);
+      setNotifikasiList([]);
+    }
+  }, [isAuthenticated, hasKeuanganRole, fetchNotifikasi]);
 
-    return () => {
-      socket.off("notifikasi:terbaru");
-    };
-  }, []);
+  // Fetch notifikasi saat dropdown dibuka (refresh daftar notifikasi)
+  // HANYA untuk user dengan role keuangan (roleId: 3)
+  // CATATAN: Fungsi ini untuk refresh daftar notifikasi saat dropdown dibuka
+  // Count tidak akan berkurang - selalu mengikuti nilai dari backend
+  // Count hanya berubah jika backend mengirim update melalui socket.io atau jika ada perubahan di database
+  useEffect(() => {
+    if (isNotifikasiOpen && isAuthenticated && hasKeuanganRole) {
+      // Refresh daftar notifikasi saat dropdown dibuka
+      // Hanya untuk user dengan role keuangan
+      fetchNotifikasi();
+    }
+  }, [isNotifikasiOpen, isAuthenticated, hasKeuanganRole, fetchNotifikasi]);
 
   // Fungsi untuk mengecek apakah menu sedang aktif
   const isMenuActive = (menu) => {
@@ -562,6 +688,193 @@ function Navbar() {
                 }}
                 transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
               />
+
+              {/* Notifikasi Bell Icon - Desktop & Mobile */}
+              {/* Hanya tampilkan untuk user dengan role keuangan (roleId: 3) */}
+              {isAuthenticated && hasKeuanganRole && (
+                <Popover
+                  placement="bottom-end"
+                  isOpen={isNotifikasiOpen}
+                  onOpen={() => setIsNotifikasiOpen(true)}
+                  onClose={() => setIsNotifikasiOpen(false)}
+                  closeOnBlur={true}
+                >
+                  <PopoverTrigger>
+                    <Box
+                      position="relative"
+                      display={{ base: "none", lg: "block" }}
+                    >
+                      <IconButton
+                        aria-label="Notifikasi"
+                        icon={<Icon as={FaBell} />}
+                        size="md"
+                        variant="ghost"
+                        color="white"
+                        borderRadius="xl"
+                        bg="rgba(255, 255, 255, 0.15)"
+                        backdropFilter="blur(10px)"
+                        border="1px solid"
+                        borderColor="rgba(255, 255, 255, 0.2)"
+                        _hover={{
+                          bg: "rgba(255, 255, 255, 0.25)",
+                          transform: "scale(1.1)",
+                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                          borderColor: "rgba(255, 255, 255, 0.3)",
+                        }}
+                        _active={{
+                          transform: "scale(0.95)",
+                        }}
+                        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      />
+                      {jumlahNotifikasi > 0 && (
+                        <Badge
+                          position="absolute"
+                          top="-2"
+                          right="-2"
+                          bg="red.500"
+                          color="white"
+                          fontSize="10px"
+                          fontWeight="bold"
+                          borderRadius="full"
+                          minW="6"
+                          h="6"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          boxShadow="0 2px 8px rgba(220, 38, 38, 0.4)"
+                          border="2px solid white"
+                          animation="pulse 2s infinite"
+                        >
+                          {jumlahNotifikasi > 9 ? "9+" : jumlahNotifikasi}
+                        </Badge>
+                      )}
+                    </Box>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    w="400px"
+                    maxH="500px"
+                    boxShadow="0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1)"
+                    borderRadius="2xl"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    mt={3}
+                    overflow="hidden"
+                    _before={{
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: "3px",
+                      bgGradient: "linear(to-r, primary, primaryGelap)",
+                    }}
+                  >
+                    <PopoverArrow
+                      bg="white"
+                      borderColor="gray.200"
+                      borderWidth="1px"
+                      borderTop="none"
+                      borderLeft="none"
+                    />
+                    <PopoverBody p={0}>
+                      <Box
+                        p={4}
+                        borderBottom="1px solid"
+                        borderColor="gray.200"
+                        bg="gray.50"
+                      >
+                        <Flex
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <Text fontWeight="bold" fontSize="lg">
+                            Notifikasi
+                          </Text>
+                          {jumlahNotifikasi > 0 && (
+                            <Badge colorScheme="red" borderRadius="full">
+                              {jumlahNotifikasi}
+                            </Badge>
+                          )}
+                        </Flex>
+                      </Box>
+                      <Box
+                        maxH="400px"
+                        overflowY="auto"
+                        css={{
+                          "&::-webkit-scrollbar": {
+                            width: "8px",
+                          },
+                          "&::-webkit-scrollbar-track": {
+                            background: "#f1f1f1",
+                          },
+                          "&::-webkit-scrollbar-thumb": {
+                            background: "#888",
+                            borderRadius: "4px",
+                          },
+                          "&::-webkit-scrollbar-thumb:hover": {
+                            background: "#555",
+                          },
+                        }}
+                      >
+                        {jumlahNotifikasi === 0 ? (
+                          <Box p={6} textAlign="center">
+                            <Icon
+                              as={FaBell}
+                              boxSize={12}
+                              color="gray.300"
+                              mb={3}
+                            />
+                            <Text color="gray.500" fontSize="sm">
+                              Tidak ada notifikasi
+                            </Text>
+                          </Box>
+                        ) : (
+                          <VStack spacing={0} align="stretch">
+                            {notifikasiList.length > 0 ? (
+                              notifikasiList.map((notif, index) => (
+                                <Box
+                                  key={index}
+                                  p={4}
+                                  borderBottom="1px solid"
+                                  borderColor="gray.100"
+                                  _hover={{
+                                    bg: "gray.50",
+                                  }}
+                                  cursor="pointer"
+                                  transition="all 0.2s ease"
+                                >
+                                  <Text
+                                    fontWeight="medium"
+                                    fontSize="sm"
+                                    mb={1}
+                                  >
+                                    {notif.message || "Notifikasi baru"}
+                                  </Text>
+                                  {notif.timestamp && (
+                                    <Text color="gray.500" fontSize="xs">
+                                      {new Date(notif.timestamp).toLocaleString(
+                                        "id-ID"
+                                      )}
+                                    </Text>
+                                  )}
+                                </Box>
+                              ))
+                            ) : (
+                              <Box p={4}>
+                                <Text fontSize="sm" color="gray.600">
+                                  {jumlahNotifikasi > 0
+                                    ? `Anda memiliki ${jumlahNotifikasi} notifikasi baru`
+                                    : "Tidak ada notifikasi"}
+                                </Text>
+                              </Box>
+                            )}
+                          </VStack>
+                        )}
+                      </Box>
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              )}
 
               {/* User Menu - Hidden on mobile, shown on desktop */}
               {isAuthenticated ? (

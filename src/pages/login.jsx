@@ -29,8 +29,17 @@ import {
   ModalFooter,
   ModalCloseButton,
   useDisclosure,
+  Heading,
+  HStack,
+  Badge,
 } from "@chakra-ui/react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaUser,
+  FaLock,
+  FaLayerGroup,
+} from "react-icons/fa";
 // import LogoPena from "../assets/Logo Pena.png";
 import { login } from "../Redux/Reducers/auth";
 import { selectIsAuthenticated, selectRole } from "../Redux/Reducers/auth";
@@ -175,185 +184,438 @@ const Login = () => {
   }
 
   return (
-    <Flex>
-      <Box w={"50%"}>
+    <Flex minH="100vh" position="relative" overflow="hidden">
+      {/* Bagian Gambar */}
+      <Box
+        w={{ base: "0%", md: "50%" }}
+        display={{ base: "none", md: "block" }}
+        position="relative"
+        _before={{
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bg: "rgba(0, 0, 0, 0.1)",
+          zIndex: 1,
+        }}
+      >
         <Image
-          h={"100%"}
-          w={"100%"}
-          overflow="hiden"
+          h="100vh"
+          w="100%"
           objectFit="cover"
           src={FotoLogin}
+          alt="Background Login"
         />
-      </Box>{" "}
+      </Box>
+
+      {/* Bagian Form Login */}
       <Center
-        bgGradient="radial-gradient(circle,rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
-        height={"100vh"}
-        w={"50%"}
+        bgGradient="linear-gradient(135deg, rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)"
+        height="100vh"
+        w={{ base: "100%", md: "50%" }}
+        position="relative"
+        p={{ base: 4, md: 8 }}
       >
-        <Center
-          transform="translateY(-2px)"
-          boxShadow="md"
-          bgColor={colorMode === "dark" ? "gray.800" : "white"}
-          borderRadius={"8px"}
-          p={"100px"}
+        <Box
+          w="100%"
+          maxW="600px"
+          bg={colorMode === "dark" ? "gray.800" : "white"}
+          borderRadius="xl"
+          boxShadow="2xl"
+          p={{ base: 6, md: 10 }}
+          position="relative"
+          _before={{
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "4px",
+            bgGradient:
+              "linear-gradient(90deg, rgba(55, 176, 134, 1) 0%, rgba(19, 122, 106, 1) 100%)",
+            borderRadius: "xl xl 0 0",
+          }}
         >
-          <VStack p={"0px"} spacing={6}>
-            <Flex>
-              <Image
-                height="100px"
-                objectFit="cover"
-                src={LogoDinkes}
-                transition="transform 0.3s ease"
-                _hover={{ transform: "scale(1.05)" }}
-                me={"20px"}
-              />
-              <Box>
-                <Text
-                  color={"rgba(35, 178, 196, 1)"}
-                  fontSize={"30px"}
-                  fontWeight={900}
-                >
-                  DINAS KESEHATAN
-                </Text>
-                <Text fontSize={"25px"} fontWeight={700}>
-                  KABUPATEN PASER
-                </Text>
-              </Box>
-            </Flex>
-            <Divider orientation="horizontal" />
-            <Flex gap={"40px"}>
-              <Image
-                height="40px"
-                objectFit="cover"
-                src={LogoPena}
-                transition="transform 0.3s ease"
-                _hover={{ transform: "scale(1.05)" }}
-                mb={"30px"}
-              />
-              <Image
-                height="40px"
-                objectFit="cover"
-                src={LogoPegawai}
-                transition="transform 0.3s ease"
-                _hover={{ transform: "scale(1.05)" }}
-                mb={"30px"}
-              />
-              <Image
-                height="40px"
-                objectFit="cover"
-                src={LogoAset}
-                transition="transform 0.3s ease"
-                _hover={{ transform: "scale(1.05)" }}
-                mb={"30px"}
-              />{" "}
-              <Image
-                height="40px"
-                objectFit="cover"
-                src={LogoPerencanaan}
-                transition="transform 0.3s ease"
-                _hover={{ transform: "scale(1.05)" }}
-                mb={"30px"}
-              />
-            </Flex>
-            <FormControl>
-              <FormLabel fontSize={"24px"}>Akun Pengguna</FormLabel>
-              <Input
-                value={namaPengguna}
-                onChange={(e) => setNamaPengguna(e.target.value)}
-                height="60px"
-                placeholder="Masukkan NIP"
-                w={"600px"}
-              />
-            </FormControl>
-
-            <FormControl>
-              <FormLabel fontSize={"24px"}>Password</FormLabel>
-              <InputGroup w={"600px"}>
-                <Input
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  height="60px"
-                  type={showPassword ? "text" : "password"}
-                  pr="60px"
+          <VStack spacing={6} align="stretch">
+            {/* Header dengan Logo */}
+            <VStack spacing={4} mb={2}>
+              <Flex align="center" gap={4} flexWrap="wrap" justify="center">
+                <Image
+                  height="90px"
+                  objectFit="contain"
+                  src={LogoDinkes}
+                  alt="Logo Dinkes"
+                  transition="transform 0.3s ease"
+                  _hover={{ transform: "scale(1.05)" }}
                 />
-                <InputRightElement height="60px" width="60px">
-                  <IconButton
-                    aria-label={
-                      showPassword
-                        ? "Sembunyikan password"
-                        : "Tampilkan password"
-                    }
-                    icon={showPassword ? <FaEyeSlash /> : <FaEye />}
-                    onClick={() => setShowPassword(!showPassword)}
-                    variant="ghost"
-                    size="md"
-                    _hover={{ bg: "transparent" }}
-                    color="gray.500"
-                  />
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
+                <Box textAlign={{ base: "center", md: "left" }}>
+                  <Heading
+                    as="h1"
+                    size={{ base: "md", md: "lg" }}
+                    color="rgba(35, 178, 196, 1)"
+                    fontWeight={900}
+                    lineHeight="1.2"
+                  >
+                    DINAS KESEHATAN
+                  </Heading>
+                  <Text
+                    fontSize={{ base: "18px", md: "22px" }}
+                    fontWeight={700}
+                    color="gray.700"
+                    mt={1}
+                  >
+                    KABUPATEN PASER
+                  </Text>
+                </Box>
+              </Flex>
+              <Divider borderColor="gray.200" />
+            </VStack>
 
-            <FormControl>
-              <FormLabel fontSize={"24px"}>Pilih Aplikasi</FormLabel>
-              <Select
-                placeholder="Pilih aplikasi"
-                value={pilihanAplikasi}
-                onChange={(e) => setPilihanAplikasi(e.target.value)}
-                height="60px"
-                w={"600px"}
+            {/* Logo Aplikasi */}
+            <Box>
+              <Text
+                fontSize="sm"
+                fontWeight={600}
+                color="gray.600"
+                mb={3}
+                textAlign="center"
               >
-                <option value="pegawai">Kepegawaian</option>
-                <option value="aset">Aset</option>
-                <option value="pena">Pena</option>
-                <option value="perencanaan">Perencanaan</option>
-              </Select>
-            </FormControl>
+                Pilih Aplikasi
+              </Text>
+              <HStack spacing={4} justify="center" flexWrap="wrap" gap={3}>
+                <Box
+                  as="button"
+                  onClick={() => setPilihanAplikasi("pena")}
+                  p={3}
+                  borderRadius="lg"
+                  border="2px solid"
+                  borderColor={
+                    pilihanAplikasi === "pena" ? "teal.500" : "gray.200"
+                  }
+                  bg={pilihanAplikasi === "pena" ? "teal.50" : "transparent"}
+                  transition="all 0.3s ease"
+                  _hover={{
+                    borderColor: "teal.500",
+                    transform: "translateY(-2px)",
+                    boxShadow: "md",
+                  }}
+                  cursor="pointer"
+                >
+                  <Image
+                    height="35px"
+                    objectFit="contain"
+                    src={LogoPena}
+                    alt="Pena"
+                  />
+                </Box>
+                <Box
+                  as="button"
+                  onClick={() => setPilihanAplikasi("pegawai")}
+                  p={3}
+                  borderRadius="lg"
+                  border="2px solid"
+                  borderColor={
+                    pilihanAplikasi === "pegawai" ? "teal.500" : "gray.200"
+                  }
+                  bg={pilihanAplikasi === "pegawai" ? "teal.50" : "transparent"}
+                  transition="all 0.3s ease"
+                  _hover={{
+                    borderColor: "teal.500",
+                    transform: "translateY(-2px)",
+                    boxShadow: "md",
+                  }}
+                  cursor="pointer"
+                >
+                  <Image
+                    height="35px"
+                    objectFit="contain"
+                    src={LogoPegawai}
+                    alt="Pegawai"
+                  />
+                </Box>
+                <Box
+                  as="button"
+                  onClick={() => setPilihanAplikasi("aset")}
+                  p={3}
+                  borderRadius="lg"
+                  border="2px solid"
+                  borderColor={
+                    pilihanAplikasi === "aset" ? "teal.500" : "gray.200"
+                  }
+                  bg={pilihanAplikasi === "aset" ? "teal.50" : "transparent"}
+                  transition="all 0.3s ease"
+                  _hover={{
+                    borderColor: "teal.500",
+                    transform: "translateY(-2px)",
+                    boxShadow: "md",
+                  }}
+                  cursor="pointer"
+                >
+                  <Image
+                    height="35px"
+                    objectFit="contain"
+                    src={LogoAset}
+                    alt="Aset"
+                  />
+                </Box>
+                <Box
+                  as="button"
+                  onClick={() => setPilihanAplikasi("perencanaan")}
+                  p={3}
+                  borderRadius="lg"
+                  border="2px solid"
+                  borderColor={
+                    pilihanAplikasi === "perencanaan" ? "teal.500" : "gray.200"
+                  }
+                  bg={
+                    pilihanAplikasi === "perencanaan"
+                      ? "teal.50"
+                      : "transparent"
+                  }
+                  transition="all 0.3s ease"
+                  _hover={{
+                    borderColor: "teal.500",
+                    transform: "translateY(-2px)",
+                    boxShadow: "md",
+                  }}
+                  cursor="pointer"
+                >
+                  <Image
+                    height="35px"
+                    objectFit="contain"
+                    src={LogoPerencanaan}
+                    alt="Perencanaan"
+                  />
+                </Box>
+              </HStack>
+              {pilihanAplikasi && (
+                <Badge
+                  colorScheme="teal"
+                  mt={2}
+                  display="block"
+                  textAlign="center"
+                  p={1}
+                  borderRadius="md"
+                >
+                  {pilihanAplikasi === "pegawai" && "Kepegawaian"}
+                  {pilihanAplikasi === "aset" && "Aset"}
+                  {pilihanAplikasi === "pena" && "Pena"}
+                  {pilihanAplikasi === "perencanaan" && "Perencanaan"}
+                </Badge>
+              )}
+            </Box>
 
-            {error && (
-              <Alert status="error" borderRadius="md" w={"600px"}>
-                <AlertIcon />
-                <Text fontSize="md">{error}</Text>
-              </Alert>
-            )}
+            {/* Form Input */}
+            <VStack spacing={5} align="stretch" mt={4}>
+              <FormControl>
+                <FormLabel
+                  fontSize="md"
+                  fontWeight={600}
+                  color="gray.700"
+                  mb={2}
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <FaUser size="14px" />
+                  Akun Pengguna
+                </FormLabel>
+                <Input
+                  value={namaPengguna}
+                  onChange={(e) => setNamaPengguna(e.target.value)}
+                  height="50px"
+                  placeholder="Masukkan NIP"
+                  size="lg"
+                  borderRadius="lg"
+                  borderColor="gray.300"
+                  _hover={{ borderColor: "teal.400" }}
+                  _focus={{
+                    borderColor: "teal.500",
+                    boxShadow: "0 0 0 1px rgba(55, 176, 134, 0.3)",
+                  }}
+                  transition="all 0.2s"
+                />
+              </FormControl>
 
-            <Button
-              mt={"10px"}
-              w={"600px"}
-              onClick={handleSubmit}
-              variant={"primary"}
-              height="60px"
-              isLoading={isLoading}
-              loadingText="Memproses..."
-              isDisabled={isLoading}
-            >
-              Login
-            </Button>
+              <FormControl>
+                <FormLabel
+                  fontSize="md"
+                  fontWeight={600}
+                  color="gray.700"
+                  mb={2}
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <FaLock size="14px" />
+                  Password
+                </FormLabel>
+                <InputGroup size="lg">
+                  <Input
+                    placeholder="Masukkan Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    height="50px"
+                    type={showPassword ? "text" : "password"}
+                    pr="50px"
+                    borderRadius="lg"
+                    borderColor="gray.300"
+                    _hover={{ borderColor: "teal.400" }}
+                    _focus={{
+                      borderColor: "teal.500",
+                      boxShadow: "0 0 0 1px rgba(55, 176, 134, 0.3)",
+                    }}
+                    transition="all 0.2s"
+                  />
+                  <InputRightElement height="50px" width="50px">
+                    <IconButton
+                      aria-label={
+                        showPassword
+                          ? "Sembunyikan password"
+                          : "Tampilkan password"
+                      }
+                      icon={showPassword ? <FaEyeSlash /> : <FaEye />}
+                      onClick={() => setShowPassword(!showPassword)}
+                      variant="ghost"
+                      size="sm"
+                      _hover={{ bg: "gray.100", color: "teal.500" }}
+                      color="gray.500"
+                    />
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel
+                  fontSize="md"
+                  fontWeight={600}
+                  color="gray.700"
+                  mb={2}
+                  display="flex"
+                  alignItems="center"
+                  gap={2}
+                >
+                  <FaLayerGroup size="14px" />
+                  Pilih Aplikasi
+                </FormLabel>
+                <Select
+                  placeholder="Pilih aplikasi yang ingin digunakan"
+                  value={pilihanAplikasi}
+                  onChange={(e) => setPilihanAplikasi(e.target.value)}
+                  height="50px"
+                  size="lg"
+                  borderRadius="lg"
+                  borderColor="gray.300"
+                  _hover={{ borderColor: "teal.400" }}
+                  _focus={{
+                    borderColor: "teal.500",
+                    boxShadow: "0 0 0 1px rgba(55, 176, 134, 0.3)",
+                  }}
+                  transition="all 0.2s"
+                >
+                  <option value="pegawai">Kepegawaian</option>
+                  <option value="aset">Aset</option>
+                  <option value="pena">Pena</option>
+                  <option value="perencanaan">Perencanaan</option>
+                </Select>
+              </FormControl>
+
+              {error && (
+                <Alert
+                  status="error"
+                  borderRadius="lg"
+                  variant="left-accent"
+                  fontSize="sm"
+                >
+                  <AlertIcon />
+                  <Text fontSize="sm" fontWeight={500}>
+                    {error}
+                  </Text>
+                </Alert>
+              )}
+
+              <Button
+                mt={2}
+                w="100%"
+                onClick={handleSubmit}
+                variant="primary"
+                size="lg"
+                height="50px"
+                fontSize="md"
+                fontWeight={600}
+                isLoading={isLoading}
+                loadingText="Memproses..."
+                isDisabled={isLoading}
+                borderRadius="lg"
+                _hover={{
+                  transform: "translateY(-2px)",
+                  boxShadow: "lg",
+                }}
+                _active={{
+                  transform: "translateY(0)",
+                }}
+                transition="all 0.2s"
+              >
+                Masuk
+              </Button>
+            </VStack>
           </VStack>
-        </Center>
+        </Box>
       </Center>
       {/* Modal Error Login */}
-      <Modal isOpen={isErrorModalOpen} onClose={onErrorModalClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader color="red.500">Login Gagal</ModalHeader>
+      <Modal
+        isOpen={isErrorModalOpen}
+        onClose={onErrorModalClose}
+        isCentered
+        size="md"
+      >
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent borderRadius="xl" overflow="hidden">
+          <ModalHeader
+            color="red.500"
+            fontSize="xl"
+            fontWeight={700}
+            bg="red.50"
+            borderBottom="1px solid"
+            borderColor="red.100"
+          >
+            Login Gagal
+          </ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
-            <Alert status="error" borderRadius="md" mb={4}>
+          <ModalBody py={6}>
+            <Alert
+              status="error"
+              borderRadius="lg"
+              mb={4}
+              variant="left-accent"
+            >
               <AlertIcon />
-              <Text fontSize="md" fontWeight="medium">
+              <Text fontSize="md" fontWeight={600}>
                 {errorMessage ||
                   "Terjadi kesalahan saat melakukan login. Silakan coba lagi."}
               </Text>
             </Alert>
-            <Text fontSize="sm" color="gray.600">
+            <Text fontSize="sm" color="gray.600" lineHeight="1.6">
               Pastikan NIP dan password yang Anda masukkan sudah benar. Jika
               masalah masih berlanjut, silakan hubungi administrator.
             </Text>
           </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="red" onClick={onErrorModalClose} w="100%">
+          <ModalFooter borderTop="1px solid" borderColor="gray.200">
+            <Button
+              colorScheme="red"
+              onClick={onErrorModalClose}
+              w="100%"
+              size="md"
+              borderRadius="lg"
+              fontWeight={600}
+              _hover={{
+                transform: "translateY(-2px)",
+                boxShadow: "md",
+              }}
+              transition="all 0.2s"
+            >
               Tutup
             </Button>
           </ModalFooter>
