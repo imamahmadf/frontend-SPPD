@@ -202,7 +202,7 @@ function DaftarDokumen() {
   const downloadExcel = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/get/download`,
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/get/download`,
         {
           responseType: "blob", // agar respons dibaca sebagai file
           // headers: { Authorization: `Bearer ${token}` },

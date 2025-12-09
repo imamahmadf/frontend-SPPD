@@ -180,6 +180,15 @@ function Navbar() {
   const [accordionIndex, setAccordionIndex] = useState(-1);
   const [notifikasiList, setNotifikasiList] = useState([]);
   const [isNotifikasiOpen, setIsNotifikasiOpen] = useState(false);
+  // State untuk 2 jenis notifikasi: pengajuan dan ditolak
+  const [notifikasiPengajuan, setNotifikasiPengajuan] = useState({
+    count: 0,
+    message: "",
+  });
+  const [notifikasiDitolak, setNotifikasiDitolak] = useState({
+    count: 0,
+    message: "",
+  });
   const toast = useToast();
 
   // Check apakah user memiliki role keuangan (roleId: 3)
@@ -226,15 +235,34 @@ function Navbar() {
       // PENTING: SELALU update count dengan nilai dari backend (sumber kebenaran)
       // Count akan tetap sama jika tidak ada perubahan statusId di database
       // Jangan mengurangi count berdasarkan "user sudah melihat" atau "dropdown dibuka"
-      // Count = jumlah personil dengan statusId == 2 (atau kondisi lain sesuai backend)
+      // Count = jumlah personil dengan statusId == 2 (pengajuan) + statusId == 4 (ditolak)
       // Count HANYA berubah jika backend mengirim update melalui socket.io atau ada perubahan di database
       // Membuka dropdown notifikasi TIDAK akan mengurangi count
-      if (response.data.count !== undefined) {
-        const backendCount = response.data.count;
+
+      // Update total count
+      if (
+        response.data.count !== undefined ||
+        response.data.total !== undefined
+      ) {
+        const backendCount = response.data.total || response.data.count;
         console.log("📊 Count dari backend:", backendCount);
-        // Update count dengan nilai dari backend (bisa sama atau berbeda dengan nilai sebelumnya)
-        // Jika tidak ada perubahan di database, nilainya akan tetap sama
         setJumlahNotifikasi(backendCount);
+      }
+
+      // Update notifikasi pengajuan (statusId == 2)
+      if (response.data.pengajuan !== undefined) {
+        setNotifikasiPengajuan({
+          count: response.data.pengajuan.count || response.data.pengajuan,
+          message: response.data.pengajuan.message || "",
+        });
+      }
+
+      // Update notifikasi ditolak (statusId == 4)
+      if (response.data.ditolak !== undefined) {
+        setNotifikasiDitolak({
+          count: response.data.ditolak.count || response.data.ditolak,
+          message: response.data.ditolak.message || "",
+        });
       }
 
       // Jika response berisi daftar notifikasi, update state
@@ -252,8 +280,23 @@ function Navbar() {
     if (!isAuthenticated || !hasKeuanganRole) return;
 
     // Gunakan environment variable untuk URL socket.io
-    const socketUrl =
-      import.meta.env.VITE_REACT_APP_API_BASE_URL || "http://localhost:8000";
+    const socketUrl = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+
+    // Validasi: Pastikan environment variable sudah diset (penting untuk produksi)
+    if (!socketUrl) {
+      console.error(
+        "⚠️ VITE_REACT_APP_API_BASE_URL tidak diset! Socket.io tidak dapat terhubung."
+      );
+      return; // Jangan inisialisasi socket jika URL tidak ada
+    }
+
+    // Peringatan jika masih menggunakan localhost di produksi
+    if (socketUrl.includes("localhost") && import.meta.env.PROD) {
+      console.warn(
+        "⚠️ PERINGATAN: Menggunakan localhost di produksi! Pastikan environment variable sudah diset dengan benar."
+      );
+    }
+
     const socket = io(socketUrl, {
       transports: ["websocket"],
     });
@@ -261,6 +304,8 @@ function Navbar() {
     // Listener untuk notifikasi baru
     const handleNotifikasi = (data) => {
       console.log("📡 Notifikasi baru diterima di React:", data);
+
+      // Update total count
       if (data.count !== undefined) {
         setJumlahNotifikasi((prevCount) => {
           const newCount = data.count;
@@ -287,13 +332,29 @@ function Navbar() {
           // Tapi kita tetap return newCount untuk memastikan sinkronisasi dengan backend
           return newCount;
         });
+      }
 
-        // Fetch ulang daftar notifikasi jika dropdown sedang terbuka
-        // Ini hanya untuk refresh list, count sudah diupdate di atas dari data.count
-        // Membuka dropdown TIDAK akan mengurangi count
-        if (isNotifikasiOpen) {
-          fetchNotifikasi();
-        }
+      // Update notifikasi pengajuan (statusId == 2)
+      if (data.pengajuan !== undefined) {
+        setNotifikasiPengajuan({
+          count: data.pengajuan.count || 0,
+          message: data.pengajuan.message || "",
+        });
+      }
+
+      // Update notifikasi ditolak (statusId == 4)
+      if (data.ditolak !== undefined) {
+        setNotifikasiDitolak({
+          count: data.ditolak.count || 0,
+          message: data.ditolak.message || "",
+        });
+      }
+
+      // Fetch ulang daftar notifikasi jika dropdown sedang terbuka
+      // Ini hanya untuk refresh list, count sudah diupdate di atas dari data.count
+      // Membuka dropdown TIDAK akan mengurangi count
+      if (isNotifikasiOpen) {
+        fetchNotifikasi();
       }
     };
 
@@ -337,6 +398,8 @@ function Navbar() {
       // Reset state jika user logout atau tidak memiliki role keuangan
       setJumlahNotifikasi(0);
       setNotifikasiList([]);
+      setNotifikasiPengajuan({ count: 0, message: "" });
+      setNotifikasiDitolak({ count: 0, message: "" });
     }
   }, [isAuthenticated, hasKeuanganRole, fetchNotifikasi]);
 
@@ -830,7 +893,94 @@ function Navbar() {
                           </Box>
                         ) : (
                           <VStack spacing={0} align="stretch">
-                            {notifikasiList.length > 0 ? (
+                            {/* Notifikasi Pengajuan Kwitansi */}
+                            {notifikasiPengajuan.count > 0 && (
+                              <Box
+                                p={4}
+                                borderBottom="1px solid"
+                                borderColor="gray.100"
+                                bg="blue.50"
+                                borderLeft="4px solid"
+                                borderLeftColor="blue.500"
+                                _hover={{
+                                  bg: "blue.100",
+                                }}
+                                cursor="pointer"
+                                transition="all 0.2s ease"
+                              >
+                                <Flex
+                                  justifyContent="space-between"
+                                  alignItems="start"
+                                  mb={1}
+                                >
+                                  <Text
+                                    fontWeight="bold"
+                                    fontSize="sm"
+                                    color="blue.700"
+                                  >
+                                    Pengajuan Kwitansi
+                                  </Text>
+                                  <Badge
+                                    colorScheme="blue"
+                                    borderRadius="full"
+                                    fontSize="xs"
+                                  >
+                                    {notifikasiPengajuan.count}
+                                  </Badge>
+                                </Flex>
+                                <Text fontSize="sm" color="gray.700" mt={1}>
+                                  {notifikasiPengajuan.message ||
+                                    `Ada ${notifikasiPengajuan.count} pengajuan kwitansi`}
+                                </Text>
+                              </Box>
+                            )}
+
+                            {/* Notifikasi Kwitansi Ditolak */}
+                            {notifikasiDitolak.count > 0 && (
+                              <Box
+                                p={4}
+                                borderBottom="1px solid"
+                                borderColor="gray.100"
+                                bg="red.50"
+                                borderLeft="4px solid"
+                                borderLeftColor="red.500"
+                                _hover={{
+                                  bg: "red.100",
+                                }}
+                                cursor="pointer"
+                                transition="all 0.2s ease"
+                              >
+                                <Flex
+                                  justifyContent="space-between"
+                                  alignItems="start"
+                                  mb={1}
+                                >
+                                  <Text
+                                    fontWeight="bold"
+                                    fontSize="sm"
+                                    color="red.700"
+                                  >
+                                    Kwitansi Ditolak
+                                  </Text>
+                                  <Badge
+                                    colorScheme="red"
+                                    borderRadius="full"
+                                    fontSize="xs"
+                                  >
+                                    {notifikasiDitolak.count}
+                                  </Badge>
+                                </Flex>
+                                <Text fontSize="sm" color="gray.700" mt={1}>
+                                  {notifikasiDitolak.message ||
+                                    `Ada ${notifikasiDitolak.count} kwitansi yang ditolak`}
+                                </Text>
+                              </Box>
+                            )}
+
+                            {/* Fallback: Tampilkan daftar notifikasi jika ada */}
+                            {notifikasiList.length > 0 &&
+                              notifikasiPengajuan.count === 0 &&
+                              notifikasiDitolak.count === 0 &&
                               notifikasiList.map((notif, index) => (
                                 <Box
                                   key={index}
@@ -858,16 +1008,20 @@ function Navbar() {
                                     </Text>
                                   )}
                                 </Box>
-                              ))
-                            ) : (
-                              <Box p={4}>
-                                <Text fontSize="sm" color="gray.600">
-                                  {jumlahNotifikasi > 0
-                                    ? `Anda memiliki ${jumlahNotifikasi} notifikasi baru`
-                                    : "Tidak ada notifikasi"}
-                                </Text>
-                              </Box>
-                            )}
+                              ))}
+
+                            {/* Fallback: Jika tidak ada notifikasi spesifik tapi ada count */}
+                            {notifikasiPengajuan.count === 0 &&
+                              notifikasiDitolak.count === 0 &&
+                              notifikasiList.length === 0 &&
+                              jumlahNotifikasi > 0 && (
+                                <Box p={4}>
+                                  <Text fontSize="sm" color="gray.600">
+                                    Anda memiliki {jumlahNotifikasi} notifikasi
+                                    baru
+                                  </Text>
+                                </Box>
+                              )}
                           </VStack>
                         )}
                       </Box>

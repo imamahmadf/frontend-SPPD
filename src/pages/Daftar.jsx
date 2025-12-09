@@ -57,6 +57,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 
 // Fungsi untuk menghasilkan warna unik dari nama pegawai
 function stringToColor(str) {
+  if (!str) return "#000000";
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -144,24 +145,27 @@ function Daftar() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/post/daftar/nota-dinas`,
         {
-          indukUnitKerjaId: user[0]?.unitKerja_profile.indukUnitKerja.id,
-          pegawai: val.personils,
-          dataTtdSurTug: val.ttdSuratTuga,
-          dataTtdNotaDinas: val.ttdNotaDina,
+          indukUnitKerjaId:
+            user[0]?.unitKerja_profile?.indukUnitKerja?.id || "",
+          pegawai: val?.personils || [],
+          dataTtdSurTug: val?.ttdSuratTuga || null,
+          dataTtdNotaDinas: val?.ttdNotaDina || null,
 
-          tanggalPengajuan: val.tanggalPengajuan,
-          noSurTug: val.noSuratTugas,
-          noNotDis: val.noNotaDinas,
+          tanggalPengajuan: val?.tanggalPengajuan || "",
+          noSurTug: val?.noSuratTugas || "",
+          noNotDis: val?.noNotaDinas || "",
 
-          subKegiatan: val.daftarSubKegiatan.subKegiatan,
-          untuk: val.untuk,
-          dasar: val.dasar,
-          asal: val.asal,
-          kodeRekeningFE: `${val.daftarSubKegiatan.kodeRekening}${val.jenisPerjalanan.kodeRekening}`,
-          tempat: val.tempats,
+          subKegiatan: val?.daftarSubKegiatan?.subKegiatan || "",
+          untuk: val?.untuk || "",
+          dasar: val?.dasar || "",
+          asal: val?.asal || "",
+          kodeRekeningFE: `${val?.daftarSubKegiatan?.kodeRekening || ""}${
+            val?.jenisPerjalanan?.kodeRekening || ""
+          }`,
+          tempat: val?.tempats || [],
           // sumber: dataKegiatan.value.sumber,
-          jenis: val.jenisPerjalanan.id,
-          jenisPerjalanan: val.jenisPerjalanan.jenis,
+          jenis: val?.jenisPerjalanan?.id || "",
+          jenisPerjalanan: val?.jenisPerjalanan?.jenis || "",
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -231,34 +235,38 @@ function Daftar() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/post/surat-tugas`,
         {
-          asal: val.asal,
-          jenis: val.jenisPerjalanan.id,
-          kode: `${val.daftarSubKegiatan.kodeRekening}${val.jenisPerjalanan.kodeRekening}`,
-          personilFE: val.personils,
-          ttdSurTug: val.ttdSuratTuga,
-          id: val.id,
-          tanggalPengajuan: val.tanggalPengajuan,
-          tempat: val.tempats,
-          untuk: val.untuk,
-          dasar: val.dasar,
-          isNotaDinas: val.isNotaDinas,
-          ttdSurTugJabatan: val.ttdSuratTuga.jabatan,
-          ttdSurTugNama: val.ttdSuratTuga.pegawai.nama,
-          ttdSurTugNip: val.ttdSuratTuga.pegawai.nip,
-          ttdSurTugPangkat: val.ttdSuratTuga.pegawai.daftarPangkat.pangkat,
-          ttdSurTugGolongan: val.ttdSuratTuga.pegawai.daftarGolongan.golongan,
-          ttdSurTugUnitKerja: val.ttdSuratTuga.indukUnitKerjaId,
+          asal: val?.asal || "",
+          jenis: val?.jenisPerjalanan?.id || "",
+          kode: `${val?.daftarSubKegiatan?.kodeRekening || ""}${
+            val?.jenisPerjalanan?.kodeRekening || ""
+          }`,
+          personilFE: val?.personils || [],
+          ttdSurTug: val?.ttdSuratTuga || null,
+          id: val?.id || "",
+          tanggalPengajuan: val?.tanggalPengajuan || "",
+          tempat: val?.tempats || [],
+          untuk: val?.untuk || "",
+          dasar: val?.dasar || "",
+          isNotaDinas: val?.isNotaDinas || 0,
+          ttdSurTugJabatan: val?.ttdSuratTuga?.jabatan || "",
+          ttdSurTugNama: val?.ttdSuratTuga?.pegawai?.nama || "",
+          ttdSurTugNip: val?.ttdSuratTuga?.pegawai?.nip || "",
+          ttdSurTugPangkat:
+            val?.ttdSuratTuga?.pegawai?.daftarPangkat?.pangkat || "",
+          ttdSurTugGolongan:
+            val?.ttdSuratTuga?.pegawai?.daftarGolongan?.golongan || "",
+          ttdSurTugUnitKerja: val?.ttdSuratTuga?.indukUnitKerjaId || "",
           ttdSurtTugKode:
-            val.ttdSuratTuga.indukUnitKerja_ttdSuratTugas.kodeInduk,
-          KPANama: val.KPA.pegawai_KPA.nama,
-          KPANip: val.KPA.pegawai_KPA.nip,
-          KPAPangkat: val.KPA.pegawai_KPA.daftarPangkat.pangkat,
-          KPAGolongan: val.KPA.pegawai_KPA.daftarGolongan.golongan,
-          KPAJabatan: val.KPA.jabatan,
-          noNotaDinas: val.suratKeluar?.nomor || "",
-          noSuratTugas: val.noSuratTugas,
-          unitKerja: user[0]?.unitKerja_profile,
-          indukUnitKerjaFE: user[0]?.unitKerja_profile,
+            val?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas?.kodeInduk || "",
+          KPANama: val?.KPA?.pegawai_KPA?.nama || "",
+          KPANip: val?.KPA?.pegawai_KPA?.nip || "",
+          KPAPangkat: val?.KPA?.pegawai_KPA?.daftarPangkat?.pangkat || "",
+          KPAGolongan: val?.KPA?.pegawai_KPA?.daftarGolongan?.golongan || "",
+          KPAJabatan: val?.KPA?.jabatan || "",
+          noNotaDinas: val?.suratKeluar?.nomor || "",
+          noSuratTugas: val?.noSuratTugas || "",
+          unitKerja: user[0]?.unitKerja_profile || null,
+          indukUnitKerjaFE: user[0]?.unitKerja_profile || null,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -271,7 +279,9 @@ function Daftar() {
         link.href = url;
         link.setAttribute(
           "download",
-          `Surat_Tugas_${user[0]?.unitKerja_profile?.kode}_${Date.now()}.docx`
+          `Surat_Tugas_${
+            user[0]?.unitKerja_profile?.kode || "unknown"
+          }_${Date.now()}.docx`
         ); // Nama file yang diunduh
         document.body.appendChild(link);
         link.click();
@@ -309,33 +319,37 @@ function Daftar() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/post/surat-tugas-kendaraan`,
         {
-          asal: val.asal,
-          jenis: val.jenisPerjalanan.id,
-          kode: `${val.daftarSubKegiatan.kodeRekening}${val.jenisPerjalanan.kodeRekening}`,
-          personilFE: val.personils,
-          ttdSurTug: val.ttdSuratTuga,
-          id: val.id,
-          tanggalPengajuan: val.tanggalPengajuan,
-          tempat: val.tempats,
-          untuk: val.untuk,
-          dasar: val.dasar,
-          ttdSurTugJabatan: val.ttdSuratTuga.jabatan,
-          ttdSurTugNama: val.ttdSuratTuga.pegawai.nama,
-          ttdSurTugNip: val.ttdSuratTuga.pegawai.nip,
-          ttdSurTugPangkat: val.ttdSuratTuga.pegawai.daftarPangkat.pangkat,
-          ttdSurTugGolongan: val.ttdSuratTuga.pegawai.daftarGolongan.golongan,
-          ttdSurTugUnitKerja: val.ttdSuratTuga.indukUnitKerjaId,
+          asal: val?.asal || "",
+          jenis: val?.jenisPerjalanan?.id || "",
+          kode: `${val?.daftarSubKegiatan?.kodeRekening || ""}${
+            val?.jenisPerjalanan?.kodeRekening || ""
+          }`,
+          personilFE: val?.personils || [],
+          ttdSurTug: val?.ttdSuratTuga || null,
+          id: val?.id || "",
+          tanggalPengajuan: val?.tanggalPengajuan || "",
+          tempat: val?.tempats || [],
+          untuk: val?.untuk || "",
+          dasar: val?.dasar || "",
+          ttdSurTugJabatan: val?.ttdSuratTuga?.jabatan || "",
+          ttdSurTugNama: val?.ttdSuratTuga?.pegawai?.nama || "",
+          ttdSurTugNip: val?.ttdSuratTuga?.pegawai?.nip || "",
+          ttdSurTugPangkat:
+            val?.ttdSuratTuga?.pegawai?.daftarPangkat?.pangkat || "",
+          ttdSurTugGolongan:
+            val?.ttdSuratTuga?.pegawai?.daftarGolongan?.golongan || "",
+          ttdSurTugUnitKerja: val?.ttdSuratTuga?.indukUnitKerjaId || "",
           ttdSurtTugKode:
-            val.ttdSuratTuga.indukUnitKerja_ttdSuratTugas.kodeInduk,
-          KPANama: val.KPA.pegawai_KPA.nama,
-          KPANip: val.KPA.pegawai_KPA.nip,
-          KPAPangkat: val.KPA.pegawai_KPA.daftarPangkat.pangkat,
-          KPAGolongan: val.KPA.pegawai_KPA.daftarGolongan.golongan,
-          KPAJabatan: val.KPA.jabatan,
-          noNotaDinas: val.suratKeluar?.nomor || "",
-          noSuratTugas: val.noSuratTugas,
-          unitKerja: user[0]?.unitKerja_profile,
-          indukUnitKerjaFE: user[0]?.unitKerja_profile,
+            val?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas?.kodeInduk || "",
+          KPANama: val?.KPA?.pegawai_KPA?.nama || "",
+          KPANip: val?.KPA?.pegawai_KPA?.nip || "",
+          KPAPangkat: val?.KPA?.pegawai_KPA?.daftarPangkat?.pangkat || "",
+          KPAGolongan: val?.KPA?.pegawai_KPA?.daftarGolongan?.golongan || "",
+          KPAJabatan: val?.KPA?.jabatan || "",
+          noNotaDinas: val?.suratKeluar?.nomor || "",
+          noSuratTugas: val?.noSuratTugas || "",
+          unitKerja: user[0]?.unitKerja_profile || null,
+          indukUnitKerjaFE: user[0]?.unitKerja_profile || null,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -373,18 +387,22 @@ function Daftar() {
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/get/all-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${
-          user[0]?.unitKerja_profile?.id
+          user[0]?.unitKerja_profile?.id || ""
         }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`
       )
       .then((res) => {
-        setDataPerjalanan(res.data.result);
-        setPage(res.data.page);
-        setPages(res.data.totalPage);
-        setRows(res.data.totalRows);
+        setDataPerjalanan(res?.data?.result || []);
+        setPage(res?.data?.page || 0);
+        setPages(res?.data?.totalPage || 0);
+        setRows(res?.data?.totalRows || 0);
         console.log(res.data);
       })
       .catch((err) => {
         console.error(err);
+        setDataPerjalanan([]);
+        setPage(0);
+        setPages(0);
+        setRows(0);
       });
   }
 
@@ -393,15 +411,16 @@ function Daftar() {
   }, [page, tanggalAkhir, tanggalAwal]);
 
   // Mapping dataPerjalanan ke events untuk kalender, setiap personil jadi event terpisah
-  const events = dataPerjalanan.flatMap((item) => {
-    const start = item.tempats?.[0]?.tanggalBerangkat
-      ? new Date(item.tempats[0].tanggalBerangkat)
+  const events = (dataPerjalanan || []).flatMap((item) => {
+    if (!item) return [];
+    const start = item?.tempats?.[0]?.tanggalBerangkat
+      ? new Date(item?.tempats?.[0]?.tanggalBerangkat)
       : null;
-    const end = item.tempats?.[item.tempats.length - 1]?.tanggalPulang
-      ? new Date(item.tempats[item.tempats.length - 1].tanggalPulang)
+    const end = item?.tempats?.[item?.tempats?.length - 1]?.tanggalPulang
+      ? new Date(item?.tempats?.[item?.tempats?.length - 1]?.tanggalPulang)
       : start;
-    return (item.personils || []).map((p) => ({
-      title: p.pegawai?.nama || "-",
+    return (item?.personils || []).map((p) => ({
+      title: p?.pegawai?.nama || "-",
       start,
       end,
       allDay: true,
@@ -485,23 +504,21 @@ function Daftar() {
                 </Thead>
                 <Tbody>
                   {dataPerjalanan?.map((item, index) => (
-                    <Tr key={item.id}>
+                    <Tr key={item?.id || index}>
                       <Td maxWidth={"20px"}>{index + 1}</Td>
                       <Td>
-                        {
-                          item.ttdSuratTuga.indukUnitKerja_ttdSuratTugas
-                            .kodeInduk
-                        }
+                        {item?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas
+                          ?.kodeInduk || "-"}
                       </Td>
                       <Td>
                         <Box>
-                          {item.noSuratTugas && (
+                          {item?.noSuratTugas && (
                             <Box mb={item?.suratKeluar?.nomor ? "8px" : "0"}>
                               <Text fontSize={"xs"} color={"gray.600"}>
                                 Surat Tugas:
                               </Text>
                               <Text fontWeight={"medium"}>
-                                {item.noSuratTugas}
+                                {item?.noSuratTugas || "-"}
                               </Text>
                             </Box>
                           )}
@@ -513,18 +530,18 @@ function Daftar() {
                                   : "Nota Dinas:"}
                               </Text>
                               <Text fontWeight={"medium"}>
-                                {item.suratKeluar.nomor}
+                                {item?.suratKeluar?.nomor || "-"}
                               </Text>
                             </Box>
                           ) : (
-                            !item.noSuratTugas && <Text>-</Text>
+                            !item?.noSuratTugas && <Text>-</Text>
                           )}
                         </Box>
                       </Td>
                       <Td>
-                        {item.tempats?.[0]?.tanggalBerangkat
+                        {item?.tempats?.[0]?.tanggalBerangkat
                           ? new Date(
-                              item.tempats[0].tanggalBerangkat
+                              item?.tempats?.[0]?.tanggalBerangkat
                             ).toLocaleDateString("id-ID", {
                               weekday: "long",
                               day: "numeric",
@@ -534,11 +551,12 @@ function Daftar() {
                           : "-"}
                       </Td>
                       <Td>
-                        {item.tempats?.[item.tempats.length - 1]?.tanggalPulang
+                        {item?.tempats?.[item?.tempats?.length - 1]
+                          ?.tanggalPulang
                           ? new Date(
-                              item.tempats[
-                                item.tempats.length - 1
-                              ].tanggalPulang
+                              item?.tempats?.[
+                                item?.tempats?.length - 1
+                              ]?.tanggalPulang
                             ).toLocaleDateString("id-ID", {
                               weekday: "long",
                               day: "numeric",
@@ -549,28 +567,34 @@ function Daftar() {
                       </Td>
                       <Td>
                         <Box>
-                          <Box mb={item.tempats?.length > 0 ? "8px" : "0"}>
+                          <Box mb={item?.tempats?.length > 0 ? "8px" : "0"}>
                             <Text fontSize={"xs"} color={"gray.600"}>
                               Jenis:
                             </Text>
                             <Text fontWeight={"medium"}>
-                              {item.jenisPerjalanan.jenis}
+                              {item?.jenisPerjalanan?.jenis || "-"}
                             </Text>
                           </Box>
-                          {item.tempats?.length > 0 && (
+                          {item?.tempats?.length > 0 && (
                             <Box>
                               <Text fontSize={"xs"} color={"gray.600"}>
                                 Tujuan:
                               </Text>
-                              {item.jenisPerjalanan.tipePerjalanan.id === 1
-                                ? item.tempats.map((val) => (
-                                    <Text key={val.id} fontWeight={"medium"}>
-                                      {val.dalamKota.nama}
+                              {item?.jenisPerjalanan?.tipePerjalanan?.id === 1
+                                ? item?.tempats?.map((val) => (
+                                    <Text
+                                      key={val?.id || Math.random()}
+                                      fontWeight={"medium"}
+                                    >
+                                      {val?.dalamKota?.nama || "-"}
                                     </Text>
                                   ))
-                                : item.tempats.map((val) => (
-                                    <Text key={val.id} fontWeight={"medium"}>
-                                      {val.tempat}
+                                : item?.tempats?.map((val) => (
+                                    <Text
+                                      key={val?.id || Math.random()}
+                                      fontWeight={"medium"}
+                                    >
+                                      {val?.tempat || "-"}
                                     </Text>
                                   ))}
                             </Box>
@@ -580,16 +604,19 @@ function Daftar() {
                       {Array.from({ length: 5 }).map((_, i) => (
                         <Td key={i}>
                           <Tooltip
-                            label={item.personils?.[i]?.status?.statusKuitansi}
+                            label={
+                              item?.personils?.[i]?.status?.statusKuitansi ||
+                              "-"
+                            }
                             aria-label="A tooltip"
                             bgColor={
-                              item.personils?.[i]?.statusId === 1
+                              item?.personils?.[i]?.statusId === 1
                                 ? "gelap"
-                                : item.personils?.[i]?.statusId === 2
+                                : item?.personils?.[i]?.statusId === 2
                                 ? "ungu"
-                                : item.personils?.[i]?.statusId === 3
+                                : item?.personils?.[i]?.statusId === 3
                                 ? "primary"
-                                : item.personils?.[i]?.statusId === 4
+                                : item?.personils?.[i]?.statusId === 4
                                 ? "danger"
                                 : null
                             }
@@ -607,26 +634,26 @@ function Daftar() {
                               borderRadius={"md"}
                               textTransform={"none"}
                               bgColor={
-                                item.personils?.[i]?.statusId === 1
+                                item?.personils?.[i]?.statusId === 1
                                   ? "gelap"
-                                  : item.personils?.[i]?.statusId === 2
+                                  : item?.personils?.[i]?.statusId === 2
                                   ? "ungu"
-                                  : item.personils?.[i]?.statusId === 3
+                                  : item?.personils?.[i]?.statusId === 3
                                   ? "primary"
-                                  : item.personils?.[i]?.statusId === 4
+                                  : item?.personils?.[i]?.statusId === 4
                                   ? "danger"
                                   : "gray.200"
                               }
                               color={
-                                item.personils?.[i]?.statusId === 1 ||
-                                item.personils?.[i]?.statusId === 2 ||
-                                item.personils?.[i]?.statusId === 3 ||
-                                item.personils?.[i]?.statusId === 4
+                                item?.personils?.[i]?.statusId === 1 ||
+                                item?.personils?.[i]?.statusId === 2 ||
+                                item?.personils?.[i]?.statusId === 3 ||
+                                item?.personils?.[i]?.statusId === 4
                                   ? "white"
                                   : "gray.700"
                               }
                             >
-                              {item.personils?.[i]?.pegawai?.nama || "-"}
+                              {item?.personils?.[i]?.pegawai?.nama || "-"}
                             </Badge>
                           </Tooltip>
                         </Td>
@@ -641,11 +668,13 @@ function Daftar() {
                             aria-label="Menu aksi"
                           />
                           <MenuList>
-                            {item.noSuratTugas && (
+                            {item?.noSuratTugas && (
                               <MenuItem
                                 icon={<BsEyeFill />}
                                 onClick={() =>
-                                  history.push(`/detail-perjalanan/${item.id}`)
+                                  history.push(
+                                    `/detail-perjalanan/${item?.id || ""}`
+                                  )
                                 }
                               >
                                 Lihat Detail
@@ -663,12 +692,12 @@ function Daftar() {
                             >
                               Cetak Nota Dinas
                             </MenuItem>
-                            {!item.personils?.some(
+                            {!item?.personils?.some(
                               (p) => p?.statusId === 2 || p?.statusId === 3
                             ) && (
                               <MenuItem
                                 onClick={() => {
-                                  setSelectedPerjalanan(item.id);
+                                  setSelectedPerjalanan(item?.id || 0);
                                   onOpen();
                                 }}
                                 color="red.500"

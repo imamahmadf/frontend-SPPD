@@ -145,7 +145,7 @@ function DetailKinerjaPJPL(props) {
           {JSON.stringify()}
           <HStack gap={5} mb={"30px"}>
             <Button onClick={onTambahOpen} variant={"primary"} px={"50px"}>
-              Tambah ddd+
+              Tambah indikator kinerja +
             </Button>{" "}
           </HStack>{" "}
         </Container>
@@ -164,113 +164,27 @@ function DetailKinerjaPJPL(props) {
             <Box>
               <HStack>
                 <Box bgColor={"pegawai"} width={"30px"} height={"30px"}></Box>
-                <Heading color={"pegawai"}>Tambah Pejabat</Heading>
+                <Heading color={"pegawai"}>Tambah indikator</Heading>
               </HStack>
 
               <SimpleGrid columns={2} spacing={10} p={"30px"}>
                 <FormControl my={"30px"}>
-                  <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
-                  <AsyncSelect
-                    loadOptions={async (inputValue) => {
-                      if (!inputValue) return [];
-                      try {
-                        const res = await axios.get(
-                          `${
-                            import.meta.env.VITE_REACT_APP_API_BASE_URL
-                          }/pegawai/search?q=${inputValue}`
-                        );
-
-                        const filtered = res.data.result;
-
-                        return filtered.map((val) => ({
-                          value: val.id,
-                          label: val.nama,
-                        }));
-                      } catch (err) {
-                        console.error("Failed to load options:", err.message);
-                        return [];
-                      }
-                    }}
-                    placeholder="Ketik Nama Pegawai"
-                    onChange={(selectedOption) => {
-                      setPegawaiId(selectedOption.value);
-                    }}
-                    components={{
-                      DropdownIndicator: () => null,
-                      IndicatorSeparator: () => null,
-                    }}
-                    chakraStyles={{
-                      container: (provided) => ({
-                        ...provided,
-                        borderRadius: "6px",
-                      }),
-                      control: (provided) => ({
-                        ...provided,
-                        backgroundColor: "terang",
-                        border: "0px",
-                        height: "60px",
-                        _hover: { borderColor: "yellow.700" },
-                        minHeight: "40px",
-                      }),
-                      option: (provided, state) => ({
-                        ...provided,
-                        bg: state.isFocused ? "pegawai" : "white",
-                        color: state.isFocused ? "white" : "black",
-                      }),
-                    }}
+                  <FormLabel fontSize={"24px"}>indikator</FormLabel>
+                  <Input
+                    height={"60px"}
+                    bgColor={"terang"}
+                    onChange={(e) => handleSubmitChange("seri", e.target.value)}
+                    placeholder="Contoh: E"
                   />
                 </FormControl>
-
                 <FormControl my={"30px"}>
-                  <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
-                  <AsyncSelect
-                    loadOptions={async (inputValue) => {
-                      if (!inputValue) return [];
-                      try {
-                        const res = await axios.get(
-                          `${
-                            import.meta.env.VITE_REACT_APP_API_BASE_URL
-                          }/admin/search/unit-kerja?q=${inputValue}`
-                        );
-
-                        const filtered = res.data.result;
-
-                        return filtered.map((val) => ({
-                          value: val.id,
-                          label: val.unitKerja,
-                        }));
-                      } catch (err) {
-                        console.error("Failed to load options:", err.message);
-                        return [];
-                      }
-                    }}
-                    placeholder="Ketik Nama Unit Kerja"
-                    onChange={(selectedOption) => {
-                      setUnitKerjaId(selectedOption.value);
-                    }}
-                    components={{
-                      DropdownIndicator: () => null,
-                      IndicatorSeparator: () => null,
-                    }}
-                    chakraStyles={{
-                      container: (provided) => ({
-                        ...provided,
-                        borderRadius: "6px",
-                      }),
-                      control: (provided) => ({
-                        ...provided,
-                        backgroundColor: "terang",
-                        border: "0px",
-                        height: "60px",
-                        _hover: { borderColor: "yellow.700" },
-                        minHeight: "40px",
-                      }),
-                      option: (provided, state) => ({
-                        ...provided,
-                        bg: state.isFocused ? "pegawai" : "white",
-                        color: state.isFocused ? "white" : "black",
-                      }),
-                    }}
+                  <FormLabel fontSize={"24px"}>target</FormLabel>
+                  <Input
+                    height={"60px"}
+                    bgColor={"terang"}
+                    type="number"
+                    onChange={(e) => handleSubmitChange("seri", e.target.value)}
+                    placeholder="2"
                   />
                 </FormControl>
               </SimpleGrid>
