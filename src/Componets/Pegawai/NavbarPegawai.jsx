@@ -71,35 +71,40 @@ const menuData = [
   {
     title: "ASN",
     icon: HiOutlineUsers,
-    pathPrefix: "/kepegawaian",
+    pathPrefix: "/kepegawaian-ASN",
     items: [
-      { label: "Usulan Naik Pangkat", path: "/pegawai/naik-golongan" },
-      { label: "Usulan Naik Jenjang", path: "/pegawai/naik-Jenjang" },
+      { label: "Usulan Naik Pangkat", path: "/kepegawaian-ASN/naik-golongan" },
+      { label: "Usulan Naik Jenjang", path: "/kepegawaian-ASN/naik-jenjang" },
       { label: "Data Saya", path: "/kepegawaian/profile" },
+      // { label: "Laporan PJPL", path: "/kepegawaian/daftar-laporan-pjpl" },
+      { label: "Laporan PJPL", path: "/kepegawaian-ASN/atasan/daftar-kontrak" },
     ],
   },
   {
     title: "PJPL",
     icon: HiOutlineUsers,
-    pathPrefix: "/kepegawaian",
-    items: [{ label: "Kinerja PJPL", path: "/kepegawaian/kinerja-PJPL" }],
+    pathPrefix: "/kepegawaian-PJPL",
+    items: [{ label: "Kinerja PJPL", path: "/kepegawaian-PJPL/kinerja-PJPL" }],
   },
   {
-    title: "Admiistrator",
+    title: "Administrator",
     icon: HiOutlineUsers,
-    pathPrefix: "/kepegawaian",
+    pathPrefix: "/admin-pegawai",
     items: [
-      { label: "Daftar Pegawai", path: "/kepegawaian/daftar-pegawai" },
-      { label: "Statistik Pegawai", path: "/kepegawaian/statistik-pegawai" },
-      { label: "Pejabat Verifikator", path: "/pegawai/pejabat-verifikator" },
+      { label: "Daftar Pegawai", path: "/admin-pegawai/daftar-pegawai" },
+      { label: "Statistik Pegawai", path: "/admin-pegawai/statistik-pegawai" },
+      {
+        label: "Pejabat Verifikator",
+        path: "/admin-pegawai/pejabat-verifikator",
+      },
 
-      { label: "Kontrak PJPL", path: "/pegawai/kontrak-PJPL" },
+      { label: "Kontrak PJPL", path: "/admin-pegawai/kontrak-PJPL" },
 
       {
         label: "Daftar Naik Jenjang",
-        path: "/kepegawaian/daftar-naik-jenjang",
+        path: "/admin-pegawai/daftar-naik-jenjang",
       },
-      { label: "Pengaturan", path: "/kepegawaian/laporan-usulan-pegawai" },
+      { label: "Pengaturan", path: "/admin-pegawai/laporan-usulan-pegawai" },
     ],
   },
 ];
@@ -116,6 +121,7 @@ function NavbarPegawai() {
   const [jumlahNotifikasi, setJumlahNotifikasi] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [accordionIndex, setAccordionIndex] = useState(-1);
+  const isDesktop = useBreakpointValue({ base: false, lg: true });
 
   // Color mode values untuk mobile drawer (dari Style folder)
   const {
@@ -281,31 +287,58 @@ function NavbarPegawai() {
             variant="ghost"
             leftIcon={<IconComponent />}
             position="relative"
-            color={"white"}
+            color={{
+              base: "white",
+              lg: isActive ? "white" : "gray.700",
+            }}
             fontWeight="700"
             fontSize="15px"
             px={5}
             py={3}
             borderRadius="xl"
-            bg={isActive ? "rgba(255, 255, 255, 0.2)" : "transparent"}
-            backdropFilter="blur(10px)"
+            bg={{
+              base: isActive ? "rgba(255, 255, 255, 0.2)" : "transparent",
+              lg: isActive ? "pegawai" : "transparent",
+            }}
+            backdropFilter={{
+              base: "blur(10px)",
+              lg: "none",
+            }}
             border="1px solid"
-            borderColor={isActive ? "rgba(255, 255, 255, 0.3)" : "transparent"}
-            boxShadow={
-              isActive
+            borderColor={{
+              base: isActive ? "rgba(255, 255, 255, 0.3)" : "transparent",
+              lg: isActive ? "pegawai" : "transparent",
+            }}
+            boxShadow={{
+              base: isActive
                 ? "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
-                : "none"
-            }
+                : "none",
+              lg: isActive ? "0 4px 12px rgba(185, 28, 28, 0.3)" : "none",
+            }}
             _hover={{
-              bg: "rgba(255, 255, 255, 0.25)",
-              color: "white",
+              bg: {
+                base: "rgba(255, 255, 255, 0.25)",
+                lg: isActive ? "pegawaiGelap" : "pegawai",
+              },
+              color: {
+                base: "white",
+                lg: "white",
+              },
               transform: "translateY(-2px)",
-              borderColor: "rgba(255, 255, 255, 0.4)",
-              boxShadow:
-                "0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
+              borderColor: {
+                base: "rgba(255, 255, 255, 0.4)",
+                lg: "pegawai",
+              },
+              boxShadow: {
+                base: "0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
+                lg: "0 6px 16px rgba(185, 28, 28, 0.4)",
+              },
             }}
             _active={{
-              bg: "rgba(255, 255, 255, 0.3)",
+              bg: {
+                base: "rgba(255, 255, 255, 0.3)",
+                lg: "pegawaiGelap",
+              },
               transform: "translateY(0px)",
             }}
             transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
@@ -317,9 +350,15 @@ function NavbarPegawai() {
               transform: "translateX(-50%)",
               width: isActive ? "70%" : "0%",
               height: "3px",
-              bg: "white",
+              bg: {
+                base: "white",
+                lg: "white",
+              },
               borderRadius: "full",
-              boxShadow: "0 0 8px rgba(255, 255, 255, 0.6)",
+              boxShadow: {
+                base: "0 0 8px rgba(255, 255, 255, 0.6)",
+                lg: "0 0 8px rgba(255, 255, 255, 0.8)",
+              },
               transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
             onClick={handleClick}
@@ -379,12 +418,32 @@ function NavbarPegawai() {
       <Box position="fixed" top={0} left={0} right={0} zIndex={999}>
         {/* Header dengan Gradient dan Glassmorphism */}
         <Box
-          bgGradient="linear(to-r, pegawai, pegawaiGelap)"
+          bgGradient={{
+            base: "linear(to-r, pegawai, pegawaiGelap)",
+            lg: "none",
+          }}
+          bg={{
+            lg: colorMode === "light" ? "white" : "gray.800",
+          }}
           px={{ base: 4, md: 6, lg: 8 }}
           py={5}
           minH="85px"
-          boxShadow="0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)"
+          boxShadow={{
+            base: "0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)",
+            lg:
+              colorMode === "light"
+                ? "0 2px 8px rgba(0, 0, 0, 0.08)"
+                : "0 2px 8px rgba(0, 0, 0, 0.3)",
+          }}
           position="relative"
+          borderBottom={{
+            base: "none",
+            lg: "1px solid",
+          }}
+          borderColor={{
+            base: "transparent",
+            lg: colorMode === "light" ? "gray.200" : "gray.700",
+          }}
           _before={{
             content: '""',
             position: "absolute",
@@ -392,7 +451,10 @@ function NavbarPegawai() {
             left: 0,
             right: 0,
             bottom: 0,
-            bg: "linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)",
+            bg: {
+              base: "linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)",
+              lg: "transparent",
+            },
             pointerEvents: "none",
           }}
         >
@@ -416,6 +478,25 @@ function NavbarPegawai() {
             >
               {/* Logo dan Brand */}
               <Flex gap={4} alignItems="center" flexShrink={0}>
+                {" "}
+                <Box
+                  p={3}
+                  bg="rgba(255, 255, 255, 0.2)"
+                  borderRadius="xl"
+                  backdropFilter="blur(20px)"
+                  boxShadow="0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)"
+                  border="1px solid"
+                  borderColor="rgba(255, 255, 255, 0.3)"
+                  transition="all 0.3s ease"
+                  _hover={{
+                    transform: "scale(1.05) translateY(-2px)",
+                    boxShadow:
+                      "0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
+                    bg: "rgba(255, 255, 255, 0.25)",
+                  }}
+                >
+                  <Image height="42px" src={LogoPegawai} alt="Logo" />
+                </Box>
                 <Box
                   p={3}
                   bg="rgba(255, 255, 255, 0.2)"
@@ -436,16 +517,25 @@ function NavbarPegawai() {
                 </Box>
                 <Box display={{ base: "none", sm: "block" }}>
                   <Text
-                    color={"white"}
+                    color={{
+                      base: "white",
+                      lg: colorMode === "light" ? "gray.800" : "white",
+                    }}
                     fontSize={{ base: "15px", md: "17px" }}
                     fontWeight={800}
                     letterSpacing="0.3px"
-                    textShadow="0 2px 4px rgba(0, 0, 0, 0.2)"
+                    textShadow={{
+                      base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                      lg: "none",
+                    }}
                   >
                     Dinas Kesehatan
                   </Text>
                   <Text
-                    color={"whiteAlpha.900"}
+                    color={{
+                      base: "whiteAlpha.900",
+                      lg: colorMode === "light" ? "gray.600" : "gray.300",
+                    }}
                     fontSize={{ base: "12px", md: "14px" }}
                     fontWeight={500}
                     letterSpacing="0.2px"
@@ -482,17 +572,16 @@ function NavbarPegawai() {
                 icon={<Icon as={colorMode === "light" ? FaMoon : FaSun} />}
                 size="md"
                 variant="ghost"
-                color="white"
+                color={colorMode === "light" ? "gray.700" : "gray.200"}
                 borderRadius="xl"
-                bg="rgba(255, 255, 255, 0.15)"
-                backdropFilter="blur(10px)"
+                bg={colorMode === "light" ? "gray.100" : "gray.700"}
                 border="1px solid"
-                borderColor="rgba(255, 255, 255, 0.2)"
+                borderColor={colorMode === "light" ? "gray.200" : "gray.600"}
                 _hover={{
-                  bg: "rgba(255, 255, 255, 0.25)",
+                  bg: colorMode === "light" ? "gray.200" : "gray.600",
                   transform: "scale(1.1) rotate(15deg)",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                  borderColor: "rgba(255, 255, 255, 0.3)",
+                  borderColor: colorMode === "light" ? "gray.300" : "gray.500",
                 }}
                 _active={{
                   transform: "scale(0.95) rotate(0deg)",
@@ -508,23 +597,25 @@ function NavbarPegawai() {
                       as={Button}
                       variant="ghost"
                       size="md"
-                      color="white"
+                      color={colorMode === "light" ? "gray.700" : "gray.200"}
                       display={{ base: "none", lg: "flex" }}
                       borderRadius="xl"
-                      bg="rgba(255, 255, 255, 0.15)"
-                      backdropFilter="blur(10px)"
+                      bg={colorMode === "light" ? "gray.100" : "gray.700"}
                       border="1px solid"
-                      borderColor="rgba(255, 255, 255, 0.2)"
+                      borderColor={
+                        colorMode === "light" ? "gray.200" : "gray.600"
+                      }
                       px={3}
                       py={2}
                       _hover={{
-                        bg: "rgba(255, 255, 255, 0.25)",
-                        borderColor: "rgba(255, 255, 255, 0.3)",
+                        bg: colorMode === "light" ? "gray.200" : "gray.600",
+                        borderColor:
+                          colorMode === "light" ? "gray.300" : "gray.500",
                         transform: "translateY(-2px)",
                         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                       }}
                       _active={{
-                        bg: "rgba(255, 255, 255, 0.3)",
+                        bg: colorMode === "light" ? "gray.300" : "gray.500",
                         transform: "translateY(0px)",
                       }}
                       transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
@@ -535,7 +626,9 @@ function NavbarPegawai() {
                             size="sm"
                             name={user[0]?.nama}
                             border="2px solid"
-                            borderColor="rgba(255, 255, 255, 0.4)"
+                            borderColor={
+                              colorMode === "light" ? "gray.300" : "gray.600"
+                            }
                             boxShadow="0 2px 8px rgba(0, 0, 0, 0.15)"
                           />
                           {jumlahNotifikasi > 0 && (
@@ -562,7 +655,9 @@ function NavbarPegawai() {
                           )}
                         </Box>
                         <Text
-                          color={"white"}
+                          color={
+                            colorMode === "light" ? "gray.700" : "gray.200"
+                          }
                           fontSize="sm"
                           fontWeight="700"
                           letterSpacing="0.2px"

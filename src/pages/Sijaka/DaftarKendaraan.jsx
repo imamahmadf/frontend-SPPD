@@ -456,7 +456,7 @@ function DaftarKendaraan() {
                     }),
                   }}
                 />
-              </FormControl>{" "}
+              </FormControl>
               <FormControl>
                 <FormLabel fontSize={"24px"}>Nomor Plat</FormLabel>
                 <Input

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Text,
@@ -8,6 +8,14 @@ import {
   HStack,
   SimpleGrid,
   Icon,
+  Card,
+  CardBody,
+  CardHeader,
+  Heading,
+  Spinner,
+  FormControl,
+  FormLabel,
+  Select,
 } from "@chakra-ui/react";
 import { keyframes, css } from "@emotion/react";
 import {
@@ -20,10 +28,33 @@ import {
 } from "react-icons/fa";
 import Layout from "../Componets/Layout";
 import { useSelector } from "react-redux";
-import { selectIsAuthenticated } from "../Redux/Reducers/auth";
+import { selectIsAuthenticated, userRedux } from "../Redux/Reducers/auth";
 import FotoDinkes from "../assets/dinkes.jpg";
 import { getSEOConfig } from "../config/seoConfig";
 import { useHistory } from "react-router-dom";
+import axios from "axios";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar, Pie } from "react-chartjs-2";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // Animasi keyframes
 const fadeIn = keyframes`
@@ -86,6 +117,273 @@ function Home() {
   const isAuthenticated =
     useSelector(selectIsAuthenticated) || localStorage.getItem("token");
   const history = useHistory();
+  const user = useSelector(userRedux);
+  const [dataSubKegiatan, setDataSubKegiatan] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [filterTahun, setFilterTahun] = useState(
+    new Date().getFullYear().toString()
+  );
+
+  // Fetch data sub kegiatan untuk dashboard
+  async function fetchDataSubKegiatan() {
+    if (!user?.[0]?.unitKerja_profile?.id || !isAuthenticated) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/sub-kegiatan/get/${
+          user[0]?.unitKerja_profile?.id
+        }?&filterTahun=${filterTahun}`
+      );
+      setDataSubKegiatan(res.data.result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isAuthenticated && user?.[0]?.unitKerja_profile?.id) {
+      fetchDataSubKegiatan();
+    } else {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, filterTahun]);
+
+  // Fungsi untuk memformat rupiah
+  const formatRupiah = (value) => {
+    if (value === null || value === undefined || isNaN(value)) return "Rp 0";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  // Fungsi untuk menyiapkan data grafik total anggaran vs realisasi
+  const prepareAnggaranRealisasiData = () => {
+    if (!dataSubKegiatan || dataSubKegiatan.length === 0) return null;
+
+    const labels = dataSubKegiatan.map((item) => item.subKegiatan);
+    const anggaranData = dataSubKegiatan.map((item) => {
+      return (
+        item.anggaranByTipe?.reduce(
+          (sum, tipe) => sum + (tipe.anggaran || 0),
+          0
+        ) || 0
+      );
+    });
+    const realisasiData = dataSubKegiatan.map((item) => {
+      return (
+        item.anggaranByTipe?.reduce(
+          (sum, tipe) => sum + (tipe.totalRealisasi || 0),
+          0
+        ) || 0
+      );
+    });
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          label: "Anggaran",
+          data: anggaranData,
+          backgroundColor: "rgba(54, 162, 235, 0.6)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+        },
+        {
+          label: "Realisasi",
+          data: realisasiData,
+          backgroundColor: "rgba(34, 197, 94, 0.9)", // Hijau lebih terang dan solid
+          borderColor: "rgba(22, 163, 74, 1)", // Border hijau lebih gelap
+          borderWidth: 3, // Border lebih tebal
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data grafik persentase realisasi
+  const preparePersentaseRealisasiData = () => {
+    if (!dataSubKegiatan || dataSubKegiatan.length === 0) return null;
+
+    const labels = dataSubKegiatan.map((item) => item.subKegiatan);
+    const persentaseData = dataSubKegiatan.map((item) => {
+      const totalAnggaran =
+        item.anggaranByTipe?.reduce(
+          (sum, tipe) => sum + (tipe.anggaran || 0),
+          0
+        ) || 0;
+      const totalRealisasi =
+        item.anggaranByTipe?.reduce(
+          (sum, tipe) => sum + (tipe.totalRealisasi || 0),
+          0
+        ) || 0;
+      return totalAnggaran > 0
+        ? ((totalRealisasi / totalAnggaran) * 100).toFixed(2)
+        : 0;
+    });
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          label: "Persentase Realisasi (%)",
+          data: persentaseData,
+          backgroundColor: "rgba(34, 197, 94, 0.8)",
+          borderColor: "rgba(22, 163, 74, 1)",
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data grafik dalam daerah vs luar daerah
+  const prepareTipePerjalananData = () => {
+    if (!dataSubKegiatan || dataSubKegiatan.length === 0) return null;
+
+    let totalDalamDaerah = 0;
+    let totalLuarDaerah = 0;
+    let realisasiDalamDaerah = 0;
+    let realisasiLuarDaerah = 0;
+
+    dataSubKegiatan.forEach((item) => {
+      item.anggaranByTipe?.forEach((tipe) => {
+        if (tipe.tipePerjalananId === 1) {
+          totalDalamDaerah += tipe.anggaran || 0;
+          realisasiDalamDaerah += tipe.totalRealisasi || 0;
+        } else if (tipe.tipePerjalananId === 2) {
+          totalLuarDaerah += tipe.anggaran || 0;
+          realisasiLuarDaerah += tipe.totalRealisasi || 0;
+        }
+      });
+    });
+
+    return {
+      labels: ["Dalam Daerah", "Luar Daerah"],
+      datasets: [
+        {
+          label: "Anggaran",
+          data: [totalDalamDaerah, totalLuarDaerah],
+          backgroundColor: [
+            "rgba(54, 162, 235, 0.8)",
+            "rgba(255, 99, 132, 0.8)",
+          ],
+          borderColor: ["rgba(54, 162, 235, 1)", "rgba(255, 99, 132, 1)"],
+          borderWidth: 2,
+        },
+        {
+          label: "Realisasi",
+          data: [realisasiDalamDaerah, realisasiLuarDaerah],
+          backgroundColor: [
+            "rgba(75, 192, 192, 0.8)",
+            "rgba(255, 159, 64, 0.8)",
+          ],
+          borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 159, 64, 1)"],
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menghitung total statistik
+  const calculateTotals = () => {
+    if (!dataSubKegiatan || dataSubKegiatan.length === 0)
+      return {
+        totalAnggaran: 0,
+        totalRealisasi: 0,
+        totalSisa: 0,
+        persentase: 0,
+      };
+
+    let totalAnggaran = 0;
+    let totalRealisasi = 0;
+
+    dataSubKegiatan.forEach((item) => {
+      item.anggaranByTipe?.forEach((tipe) => {
+        totalAnggaran += tipe.anggaran || 0;
+        totalRealisasi += tipe.totalRealisasi || 0;
+      });
+    });
+
+    const totalSisa = totalAnggaran - totalRealisasi;
+    const persentase =
+      totalAnggaran > 0
+        ? ((totalRealisasi / totalAnggaran) * 100).toFixed(2)
+        : 0;
+
+    return {
+      totalAnggaran,
+      totalRealisasi,
+      totalSisa,
+      persentase,
+    };
+  };
+
+  const anggaranRealisasiData = prepareAnggaranRealisasiData();
+  const persentaseRealisasiData = preparePersentaseRealisasiData();
+  const tipePerjalananData = prepareTipePerjalananData();
+  const totals = calculateTotals();
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: false,
+      },
+    },
+  };
+
+  const barChartOptions = {
+    ...chartOptions,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function (value) {
+            // Format angka menjadi format yang lebih mudah dibaca (dalam jutaan)
+            if (value >= 1000000000) {
+              return (value / 1000000000).toFixed(1) + "M";
+            } else if (value >= 1000000) {
+              return (value / 1000000).toFixed(1) + "Jt";
+            } else if (value >= 1000) {
+              return (value / 1000).toFixed(1) + "K";
+            }
+            return value;
+          },
+        },
+      },
+    },
+    plugins: {
+      ...chartOptions.plugins,
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                maximumFractionDigits: 0,
+              }).format(context.parsed.y);
+            }
+            return label;
+          },
+        },
+      },
+    },
+  };
 
   const features = [
     {
@@ -261,6 +559,275 @@ function Home() {
             </Box>
           </Box>
         </Box>
+
+        {/* Dashboard Section - Hanya muncul jika user login */}
+        {isAuthenticated && (
+          <Box bg="gray.50" py={20} position="relative">
+            <Container maxW="container.xl">
+              <VStack spacing={8}>
+                <Box textAlign="center" width="100%">
+                  <Heading
+                    fontSize={{ base: "2xl", md: "3xl", lg: "4xl" }}
+                    fontWeight={800}
+                    color="primary"
+                    mb={4}
+                  >
+                    Dashboard Sub Kegiatan
+                  </Heading>
+                  <VStack spacing={4} align="center">
+                    <Text
+                      fontSize={{ base: "md", md: "lg" }}
+                      color="gray.600"
+                      maxW="600px"
+                      mx="auto"
+                    >
+                      Ringkasan anggaran dan realisasi sub kegiatan
+                    </Text>
+                    <FormControl maxW="200px">
+                      <FormLabel>Tahun Anggaran</FormLabel>
+                      <Select
+                        value={filterTahun}
+                        onChange={(e) => {
+                          setFilterTahun(e.target.value);
+                          setLoading(true);
+                        }}
+                        bg="white"
+                      >
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                      </Select>
+                    </FormControl>
+                  </VStack>
+                </Box>
+
+                {loading ? (
+                  <Box py={20}>
+                    <Spinner size="xl" />
+                  </Box>
+                ) : dataSubKegiatan && dataSubKegiatan.length > 0 ? (
+                  <>
+                    {/* Ringkasan Statistik */}
+                    <SimpleGrid
+                      columns={{ base: 2, md: 4 }}
+                      spacing={6}
+                      width="100%"
+                    >
+                      <Card>
+                        <CardBody>
+                          <VStack align="flex-start" spacing={2}>
+                            <Text fontSize="sm" color="gray.600">
+                              Total Anggaran
+                            </Text>
+                            <Text
+                              fontSize="2xl"
+                              fontWeight="bold"
+                              color="blue.600"
+                            >
+                              {formatRupiah(totals.totalAnggaran)}
+                            </Text>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                      <Card>
+                        <CardBody>
+                          <VStack align="flex-start" spacing={2}>
+                            <Text fontSize="sm" color="gray.600">
+                              Total Realisasi
+                            </Text>
+                            <Text
+                              fontSize="2xl"
+                              fontWeight="bold"
+                              color="green.600"
+                            >
+                              {formatRupiah(totals.totalRealisasi)}
+                            </Text>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                      <Card>
+                        <CardBody>
+                          <VStack align="flex-start" spacing={2}>
+                            <Text fontSize="sm" color="gray.600">
+                              Sisa Anggaran
+                            </Text>
+                            <Text
+                              fontSize="2xl"
+                              fontWeight="bold"
+                              color={
+                                totals.totalSisa >= 0 ? "gray.600" : "red.600"
+                              }
+                            >
+                              {formatRupiah(totals.totalSisa)}
+                            </Text>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                      <Card>
+                        <CardBody>
+                          <VStack align="flex-start" spacing={2}>
+                            <Text fontSize="sm" color="gray.600">
+                              Persentase
+                            </Text>
+                            <Text
+                              fontSize="2xl"
+                              fontWeight="bold"
+                              color="purple.600"
+                            >
+                              {totals.persentase}%
+                            </Text>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                    </SimpleGrid>
+
+                    {/* Grafik Anggaran vs Realisasi per Sub Kegiatan */}
+                    {anggaranRealisasiData && (
+                      <Card width="100%">
+                        <CardHeader>
+                          <Heading size="md">
+                            Perbandingan Anggaran vs Realisasi per Sub Kegiatan
+                          </Heading>
+                        </CardHeader>
+                        <CardBody>
+                          <Box height="400px">
+                            <Bar
+                              data={anggaranRealisasiData}
+                              options={barChartOptions}
+                            />
+                          </Box>
+                        </CardBody>
+                      </Card>
+                    )}
+
+                    {/* Grafik Persentase Realisasi */}
+                    {persentaseRealisasiData && (
+                      <Card width="100%">
+                        <CardHeader>
+                          <Heading size="md">
+                            Persentase Realisasi per Sub Kegiatan
+                          </Heading>
+                        </CardHeader>
+                        <CardBody>
+                          <Box height="400px">
+                            <Bar
+                              data={persentaseRealisasiData}
+                              options={{
+                                ...barChartOptions,
+                                scales: {
+                                  y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: {
+                                      callback: function (value) {
+                                        return value + "%";
+                                      },
+                                    },
+                                  },
+                                },
+                                plugins: {
+                                  ...barChartOptions.plugins,
+                                  tooltip: {
+                                    callbacks: {
+                                      label: function (context) {
+                                        let label = context.dataset.label || "";
+                                        if (label) {
+                                          label += ": ";
+                                        }
+                                        if (context.parsed.y !== null) {
+                                          label +=
+                                            parseFloat(
+                                              context.parsed.y
+                                            ).toFixed(2) + "%";
+                                        }
+                                        return label;
+                                      },
+                                    },
+                                  },
+                                },
+                              }}
+                            />
+                          </Box>
+                        </CardBody>
+                      </Card>
+                    )}
+
+                    {/* Grafik Dalam Daerah vs Luar Daerah */}
+                    {tipePerjalananData && (
+                      <SimpleGrid
+                        columns={{ base: 1, md: 2 }}
+                        spacing={6}
+                        width="100%"
+                      >
+                        <Card>
+                          <CardHeader>
+                            <Heading size="md">
+                              Distribusi Anggaran & Realisasi: Dalam vs Luar
+                              Daerah
+                            </Heading>
+                          </CardHeader>
+                          <CardBody>
+                            <Box height="300px">
+                              <Bar
+                                data={tipePerjalananData}
+                                options={barChartOptions}
+                              />
+                            </Box>
+                          </CardBody>
+                        </Card>
+                        <Card>
+                          <CardHeader>
+                            <Heading size="md">
+                              Distribusi Anggaran: Dalam vs Luar Daerah
+                            </Heading>
+                          </CardHeader>
+                          <CardBody>
+                            <Box height="300px">
+                              <Pie
+                                data={{
+                                  labels: tipePerjalananData.labels,
+                                  datasets: [
+                                    {
+                                      label: "Anggaran",
+                                      data: [
+                                        tipePerjalananData.datasets[0].data[0],
+                                        tipePerjalananData.datasets[0].data[1],
+                                      ],
+                                      backgroundColor: [
+                                        "rgba(54, 162, 235, 0.8)",
+                                        "rgba(255, 99, 132, 0.8)",
+                                      ],
+                                      borderColor: [
+                                        "rgba(54, 162, 235, 1)",
+                                        "rgba(255, 99, 132, 1)",
+                                      ],
+                                      borderWidth: 2,
+                                    },
+                                  ],
+                                }}
+                                options={chartOptions}
+                              />
+                            </Box>
+                          </CardBody>
+                        </Card>
+                      </SimpleGrid>
+                    )}
+                  </>
+                ) : (
+                  <Card width="100%">
+                    <CardBody>
+                      <Text textAlign="center" color="gray.500">
+                        Tidak ada data sub kegiatan untuk tahun {filterTahun}
+                      </Text>
+                    </CardBody>
+                  </Card>
+                )}
+              </VStack>
+            </Container>
+          </Box>
+        )}
 
         {/* Features Section */}
         <Box bg="background" py={20} position="relative">

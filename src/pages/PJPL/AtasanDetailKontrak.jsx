@@ -49,7 +49,7 @@ import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import Loading from "../../Componets/Loading";
-function DetailKinerjaPJPL(props) {
+function AtasanDetailKontrak(props) {
   const [dataBendahara, setDataBendahara] = useState(null);
   const [dataPejabat, setDataPejabat] = useState(null);
   const [dataKinerjaPJPL, setDataKinerjaPJPL] = useState([]);
@@ -65,7 +65,6 @@ function DetailKinerjaPJPL(props) {
   const [indikatorPejabatId, setIndikatorPejabatId] = useState(null);
   const [rencanaHasilKerja, setRencanaHasilKerja] = useState("");
   const [target, setTarget] = useState("");
-  const [satuan, setSatuan] = useState("");
   const [bulanRealisasi, setBulanRealisasi] = useState(null);
   const [tahunRealisasi, setTahunRealisasi] = useState(null);
   const [selectedKinerjaPJPLIds, setSelectedKinerjaPJPLIds] = useState([]);
@@ -166,7 +165,6 @@ function DetailKinerjaPJPL(props) {
     setIndikatorPejabatId(null);
     setRencanaHasilKerja("");
     setTarget("");
-    setSatuan("");
   };
 
   const handleResetFormRealisasi = () => {
@@ -198,36 +196,6 @@ function DetailKinerjaPJPL(props) {
       tanggalAwal: formatDate(tanggalAwal),
       tanggalAkhir: formatDate(tanggalAkhir),
     };
-  };
-
-  // Fungsi untuk mendapatkan daftar bulan dan tahun yang valid berdasarkan range kontrak
-  const getValidBulanTahun = () => {
-    const kontrak = dataKinerjaPJPL[0]?.kontrakPJPL;
-    if (!kontrak || !kontrak.tanggalAwal || !kontrak.tanggalAkhir) {
-      return { validBulan: [], validTahun: [], validBulanTahun: [] };
-    }
-
-    const tanggalAwal = new Date(kontrak.tanggalAwal);
-    const tanggalAkhir = new Date(kontrak.tanggalAkhir);
-
-    const validBulanTahun = [];
-    const currentDate = new Date(tanggalAwal);
-
-    // Iterasi dari tanggal awal sampai tanggal akhir per bulan
-    while (currentDate <= tanggalAkhir) {
-      const tahun = currentDate.getFullYear();
-      const bulan = currentDate.getMonth() + 1; // getMonth() returns 0-11
-      validBulanTahun.push({ bulan, tahun });
-
-      // Pindah ke bulan berikutnya
-      currentDate.setMonth(currentDate.getMonth() + 1);
-    }
-
-    // Ekstrak bulan dan tahun unik
-    const validBulan = [...new Set(validBulanTahun.map((item) => item.bulan))];
-    const validTahun = [...new Set(validBulanTahun.map((item) => item.tahun))];
-
-    return { validBulan, validTahun, validBulanTahun };
   };
 
   const tambahRealisasiPJPL = async () => {
@@ -354,7 +322,6 @@ function DetailKinerjaPJPL(props) {
           rencanaHasilKerja,
           target: parseInt(target),
           kontrakPJPLId: props.match.params.id,
-          satuan,
         }
       )
       .then((res) => {
@@ -392,101 +359,7 @@ function DetailKinerjaPJPL(props) {
 
   return (
     <LayoutPegawai>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
-          <HStack gap={5} mb={"30px"}>
-            <Button onClick={onTambahOpen} variant={"primary"} px={"50px"}>
-              Tambah indikator kinerja +
-            </Button>
-            <Button onClick={onRealisasiOpen} variant={"primary"} px={"50px"}>
-              Tambah Realisasi +
-            </Button>
-          </HStack>
-          {isLoading ? (
-            <Center py={"50px"}>
-              <Spinner size="xl" color="pegawai" />
-            </Center>
-          ) : (
-            <Table variant={"pegawai"}>
-              <Thead>
-                <Tr>
-                  <Th>No</Th>
-                  <Th>Indikator</Th>
-                  <Th>Rencana Hasil Kerja</Th>
-                  <Th>Target</Th>
-                  <Th>Satuan</Th>
-                  <Th>Status</Th>
-                  <Th>Pegawai Kontrak</Th>
-                  <Th>Pejabat Verifikator</Th>
-                  <Th>Tanggal Dibuat</Th>
-                </Tr>
-              </Thead>
-              <Tbody bgColor={"secondary"}>
-                {dataKinerjaPJPL && dataKinerjaPJPL.length > 0 ? (
-                  dataKinerjaPJPL.map((item, index) => (
-                    <Tr key={item.id}>
-                      <Td>{index + 1}</Td>
-                      <Td>{item.indikatorPejabat?.indikator || "-"}</Td>
-                      <Td>{item.indikator || "-"}</Td>
-                      <Td>{item.target || "-"}</Td>
-                      <Td>{item.satuan || "-"}</Td>
-                      <Td>
-                        <Badge
-                          colorScheme={
-                            item.status === "diajukan"
-                              ? "blue"
-                              : item.status === "disetujui"
-                              ? "green"
-                              : item.status === "ditolak"
-                              ? "red"
-                              : "gray"
-                          }
-                        >
-                          {item.status || "-"}
-                        </Badge>
-                      </Td>
-                      <Td>
-                        {item.kontrakPJPL?.pegawai?.nama || "-"}
-                        <br />
-                        <Text fontSize="sm" color="gray.500">
-                          {item.kontrakPJPL?.pegawai?.jabatan || ""}
-                        </Text>
-                      </Td>
-                      <Td>
-                        {item.indikatorPejabat?.pejabatVerifikator?.pegawai
-                          ?.nama || "-"}
-                        <br />
-                        <Text fontSize="sm" color="gray.500">
-                          {item.indikatorPejabat?.pejabatVerifikator?.pegawai
-                            ?.jabatan || ""}
-                        </Text>
-                      </Td>
-                      <Td>
-                        {item.createdAt
-                          ? new Date(item.createdAt).toLocaleDateString(
-                              "id-ID",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )
-                          : "-"}
-                      </Td>
-                    </Tr>
-                  ))
-                ) : (
-                  <Tr>
-                    <Td colSpan={8} textAlign="center" py={"30px"}>
-                      <Text>Tidak ada data kinerja PJPL</Text>
-                    </Td>
-                  </Tr>
-                )}
-              </Tbody>
-            </Table>
-          )}
-        </Container>
-
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"60vh"}>
         {/* Tabel Realisasi PJPL */}
         <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
           <Heading mb={"30px"} fontSize={"28px"}>
@@ -502,7 +375,7 @@ function DetailKinerjaPJPL(props) {
                 <Tr>
                   <Th>No</Th>
                   <Th>Periode</Th>
-                  <Th>Status</Th>
+
                   <Th>Jumlah Hasil Kerja</Th>
                   <Th>Aksi</Th>
                 </Tr>
@@ -530,21 +403,7 @@ function DetailKinerjaPJPL(props) {
                             })}`
                           : "-"}
                       </Td>
-                      <Td>
-                        <Badge
-                          colorScheme={
-                            item.status === "diajukan"
-                              ? "blue"
-                              : item.status === "disetujui"
-                              ? "green"
-                              : item.status === "ditolak"
-                              ? "red"
-                              : "gray"
-                          }
-                        >
-                          {item.status || "-"}
-                        </Badge>
-                      </Td>
+
                       <Td>{item.hasilKerjaPJPLs?.length || 0} hasil kerja</Td>
                       <Td>
                         <Button
@@ -553,11 +412,11 @@ function DetailKinerjaPJPL(props) {
                           colorScheme="blue"
                           onClick={() =>
                             history.push(
-                              `/kepegawaian/hasil-kerja-pjpl/${item.id}`
+                              `/kepegawaian-ASN/atasan/penilaian/${item.id}`
                             )
                           }
                         >
-                          Lihat Hasil Kerja
+                          Detail
                         </Button>
                       </Td>
                     </Tr>
@@ -674,17 +533,6 @@ function DetailKinerjaPJPL(props) {
                     placeholder="Contoh: 2"
                   />
                 </FormControl>
-                <FormControl my={"30px"}>
-                  <FormLabel fontSize={"24px"}>Satuan</FormLabel>
-                  <Input
-                    height={"60px"}
-                    bgColor={"terang"}
-                    type="text"
-                    value={satuan}
-                    onChange={(e) => setSatuan(e.target.value)}
-                    placeholder="Contoh: Dokumen"
-                  />
-                </FormControl>
               </SimpleGrid>
             </Box>
           </ModalBody>
@@ -706,6 +554,7 @@ function DetailKinerjaPJPL(props) {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
       {/* Modal Tambah Realisasi PJPL */}
       <Modal
         closeOnOverlayClick={false}
@@ -813,54 +662,20 @@ function DetailKinerjaPJPL(props) {
                 <FormControl>
                   <FormLabel fontSize={"24px"}>Bulan</FormLabel>
                   <Select2
-                    options={(() => {
-                      const { validBulanTahun } = getValidBulanTahun();
-                      const namaBulan = [
-                        "Januari",
-                        "Februari",
-                        "Maret",
-                        "April",
-                        "Mei",
-                        "Juni",
-                        "Juli",
-                        "Agustus",
-                        "September",
-                        "Oktober",
-                        "November",
-                        "Desember",
-                      ];
-
-                      // Jika tahun sudah dipilih, filter bulan berdasarkan tahun yang dipilih
-                      if (tahunRealisasi) {
-                        return (validBulanTahun || [])
-                          .filter((item) => item?.tahun === tahunRealisasi)
-                          .map((item) => ({
-                            value: item?.bulan,
-                            label: namaBulan[item?.bulan - 1],
-                          }));
-                      }
-
-                      // Jika tahun belum dipilih, tampilkan semua bulan yang valid
-                      return (validBulanTahun || [])
-                        .map((item) => ({
-                          value: item?.bulan,
-                          label: `${namaBulan[item?.bulan - 1]} ${item?.tahun}`,
-                          tahun: item?.tahun,
-                        }))
-                        .reduce((acc, curr) => {
-                          // Hapus duplikat bulan (ambil yang pertama)
-                          if (
-                            !acc.find((item) => item?.value === curr?.value)
-                          ) {
-                            acc.push(curr);
-                          }
-                          return acc;
-                        }, [])
-                        .map((item) => ({
-                          value: item?.value,
-                          label: item?.label,
-                        }));
-                    })()}
+                    options={[
+                      { value: 1, label: "Januari" },
+                      { value: 2, label: "Februari" },
+                      { value: 3, label: "Maret" },
+                      { value: 4, label: "April" },
+                      { value: 5, label: "Mei" },
+                      { value: 6, label: "Juni" },
+                      { value: 7, label: "Juli" },
+                      { value: 8, label: "Agustus" },
+                      { value: 9, label: "September" },
+                      { value: 10, label: "Oktober" },
+                      { value: 11, label: "November" },
+                      { value: 12, label: "Desember" },
+                    ]}
                     value={
                       bulanRealisasi
                         ? {
@@ -885,21 +700,9 @@ function DetailKinerjaPJPL(props) {
                     placeholder="Pilih Bulan"
                     focusBorderColor="red"
                     onChange={(selectedOption) => {
-                      const newBulan = selectedOption
-                        ? selectedOption.value
-                        : null;
-                      setBulanRealisasi(newBulan);
-
-                      // Jika bulan dipilih dan tahun belum dipilih, set tahun dari opsi yang dipilih
-                      if (newBulan && !tahunRealisasi) {
-                        const { validBulanTahun } = getValidBulanTahun();
-                        const selectedItem = validBulanTahun.find(
-                          (item) => item.bulan === newBulan
-                        );
-                        if (selectedItem) {
-                          setTahunRealisasi(selectedItem.tahun);
-                        }
-                      }
+                      setBulanRealisasi(
+                        selectedOption ? selectedOption.value : null
+                      );
                     }}
                     components={{
                       DropdownIndicator: () => null,
@@ -931,28 +734,10 @@ function DetailKinerjaPJPL(props) {
                 <FormControl>
                   <FormLabel fontSize={"24px"}>Tahun</FormLabel>
                   <Select2
-                    options={(() => {
-                      const { validBulanTahun } = getValidBulanTahun();
-
-                      // Jika bulan sudah dipilih, filter tahun berdasarkan bulan yang dipilih
-                      if (bulanRealisasi) {
-                        return validBulanTahun
-                          .filter((item) => item.bulan === bulanRealisasi)
-                          .map((item) => ({
-                            value: item.tahun,
-                            label: item.tahun.toString(),
-                          }));
-                      }
-
-                      // Jika bulan belum dipilih, tampilkan semua tahun yang valid
-                      const uniqueTahun = [
-                        ...new Set(validBulanTahun?.map((item) => item.tahun)),
-                      ];
-                      return uniqueTahun.map((tahun) => ({
-                        value: tahun,
-                        label: tahun.toString(),
-                      }));
-                    })()}
+                    options={Array.from({ length: 10 }, (_, i) => {
+                      const tahun = new Date().getFullYear() - 5 + i;
+                      return { value: tahun, label: tahun.toString() };
+                    })}
                     value={
                       tahunRealisasi
                         ? {
@@ -964,34 +749,9 @@ function DetailKinerjaPJPL(props) {
                     placeholder="Pilih Tahun"
                     focusBorderColor="red"
                     onChange={(selectedOption) => {
-                      const newTahun = selectedOption
-                        ? selectedOption.value
-                        : null;
-                      setTahunRealisasi(newTahun);
-
-                      // Jika tahun dipilih dan bulan belum dipilih, set bulan dari opsi yang valid
-                      if (newTahun && !bulanRealisasi) {
-                        const { validBulanTahun } = getValidBulanTahun();
-                        const selectedItem = validBulanTahun.find(
-                          (item) => item.tahun === newTahun
-                        );
-                        if (selectedItem) {
-                          setBulanRealisasi(selectedItem.bulan);
-                        }
-                      }
-
-                      // Jika tahun berubah dan bulan yang dipilih tidak valid untuk tahun baru, reset bulan
-                      if (newTahun && bulanRealisasi) {
-                        const { validBulanTahun } = getValidBulanTahun();
-                        const isValid = validBulanTahun.some(
-                          (item) =>
-                            item.bulan === bulanRealisasi &&
-                            item.tahun === newTahun
-                        );
-                        if (!isValid) {
-                          setBulanRealisasi(null);
-                        }
-                      }
+                      setTahunRealisasi(
+                        selectedOption ? selectedOption.value : null
+                      );
                     }}
                     components={{
                       DropdownIndicator: () => null,
@@ -1100,4 +860,4 @@ function DetailKinerjaPJPL(props) {
   );
 }
 
-export default DetailKinerjaPJPL;
+export default AtasanDetailKontrak;

@@ -80,7 +80,7 @@ const menuData = [
     pathPrefix: "/sijaka",
     items: [
       { label: "Daftar Kendaraan", path: "/sijaka/daftar-kendaraan" },
-      { label: "Surat Pengantar", path: "/sijaka/daftar-kendaraan" },
+      // { label: "Surat Pengantar", path: "/sijaka/daftar-kendaraan" },
       { label: "template Surat", path: "/sijaka/template" },
     ],
   },

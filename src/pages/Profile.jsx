@@ -46,7 +46,32 @@ import {
   Input,
   FormHelperText,
   Spacer,
+  VStack,
+  Badge,
+  Icon,
+  Divider,
+  InputGroup,
+  InputRightElement,
+  IconButton,
+  useToast,
 } from "@chakra-ui/react";
+import {
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaEye,
+  FaEyeSlash,
+  FaLock,
+} from "react-icons/fa";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import { parseISO } from "date-fns";
+import moment from "moment";
+import "moment/locale/id";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { useColorModeValues } from "../Style/colorModeValues";
+import { getCalendarStyles } from "../Style/calendarStyles";
+import { useColorMode } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import {
   selectIsAuthenticated,
@@ -54,10 +79,54 @@ import {
   selectRole,
 } from "../Redux/Reducers/auth";
 
+moment.locale("id");
+const localizer = momentLocalizer(moment);
+
+const formats = {
+  dayFormat: (date, culture, localizer) =>
+    format(date, "EEEE", { locale: idLocale }), // Senin, Selasa, ...
+  weekdayFormat: (date, culture, localizer) =>
+    format(date, "EEEEEE", { locale: idLocale }), // S, S, R, K, ...
+  monthHeaderFormat: (date, culture, localizer) =>
+    format(date, "MMMM yyyy", { locale: idLocale }), // Juni 2025
+  dayHeaderFormat: (date, culture, localizer) =>
+    format(date, "EEEE, d MMMM", { locale: idLocale }), // Senin, 16 Juni
+};
+
 function Profile() {
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
+  const { colorMode } = useColorMode();
+  const toast = useToast();
   const [dataProfile, setDataProfile] = useState(null);
+  const [dataPegawai, setDataPegawai] = useState(null);
+  const [events, setEvents] = useState([]);
+
+  // State untuk modal ganti password
+  const {
+    isOpen: isOpenGantiPassword,
+    onOpen: onOpenGantiPassword,
+    onClose: onCloseGantiPassword,
+  } = useDisclosure();
+  const [passwordLama, setPasswordLama] = useState("");
+  const [passwordBaru, setPasswordBaru] = useState("");
+  const [showPasswordLama, setShowPasswordLama] = useState(false);
+  const [showPasswordBaru, setShowPasswordBaru] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const token = localStorage.getItem("token");
+
+  // Color mode values
+  const {
+    boxBg,
+    textColor,
+    textColorLight,
+    borderColor,
+    borderColorLight,
+    borderColorDark,
+    hoverBg,
+    drawerBg,
+  } = useColorModeValues();
+
   async function fetchProfile() {
     axios
       .get(
@@ -75,9 +144,115 @@ function Profile() {
       });
   }
 
+  async function fetchDataPegawai() {
+    if (!user[0]?.pegawaiId) return;
+    try {
+      const res = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/pegawai/get/detail-pegawai/${user[0].pegawaiId}`
+      );
+      setDataPegawai(res.data.result[0]);
+      console.log(res.data.result[0]);
+
+      // Format events untuk kalender
+      if (res.data.result[0]?.personils) {
+        const formattedEvents = res.data.result[0].personils.map((item) => {
+          const startDate = item.tanggalBerangkat
+            ? parseISO(item.tanggalBerangkat)
+            : new Date();
+
+          const endDate = item.tanggalPulang
+            ? parseISO(item.tanggalPulang)
+            : startDate;
+
+          return {
+            title: Array.isArray(item.tujuan)
+              ? item.tujuan.join(", ")
+              : item.tujuan || "Perjalanan Dinas",
+            start: startDate,
+            end: endDate,
+            allDay: true,
+            resource: item,
+          };
+        });
+        setEvents(formattedEvents);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   useEffect(() => {
     fetchProfile();
+    fetchDataPegawai();
   }, []);
+
+  // Function untuk handle ganti password
+  const handleChangePassword = async () => {
+    // Validasi
+    if (!passwordLama || !passwordBaru) {
+      toast({
+        title: "Error",
+        description: "Password lama dan password baru harus diisi",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (passwordBaru.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password baru minimal 6 karakter",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/change-password`,
+        {
+          passwordLama,
+          passwordBaru,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast({
+        title: "Berhasil",
+        description: res.data.message || "Password berhasil diubah",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      // Reset form dan tutup modal
+      setPasswordLama("");
+      setPasswordBaru("");
+      onCloseGantiPassword();
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message ||
+        "Gagal mengubah password. Silakan coba lagi.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Layout>
@@ -91,9 +266,480 @@ function Profile() {
           pt={"30px"}
           ps={"0px"}
         >
-          {/* {JSON.stringify(dataProfile)} */}
+          <Box p={"30px"}>
+            {dataProfile ? (
+              <>
+                <Heading size="lg" mb={"30px"}>
+                  Profil Pengguna
+                </Heading>
+
+                {/* Informasi Dasar */}
+                <Box mb={"30px"}>
+                  <Heading size="md" mb={"15px"}>
+                    Informasi Dasar
+                  </Heading>
+                  <Box
+                    border={"1px"}
+                    borderColor={"rgba(229, 231, 235, 1)"}
+                    borderRadius={"6px"}
+                    p={"20px"}
+                  >
+                    <Table variant="simple">
+                      <Tbody>
+                        <Tr>
+                          <Th width={"30%"}>Nama</Th>
+                          <Td>{dataProfile.nama}</Td>
+                        </Tr>
+                        <Tr>
+                          <Th>Unit Kerja</Th>
+                          <Td>
+                            {dataProfile.unitKerja_profile?.unitkerja || "-"}
+                          </Td>
+                        </Tr>
+                        <Tr>
+                          <Th>Kode Unit Kerja</Th>
+                          <Td>{dataProfile.unitKerja_profile?.kode || "-"}</Td>
+                        </Tr>
+                        <Tr>
+                          <Th>Induk Unit Kerja</Th>
+                          <Td>
+                            {dataProfile.unitKerja_profile?.indukUnitKerja
+                              ?.indukUnitKerja || "-"}
+                          </Td>
+                        </Tr>
+                        <Tr>
+                          <Th>Kode Induk Unit Kerja</Th>
+                          <Td>
+                            {dataProfile.unitKerja_profile?.indukUnitKerja
+                              ?.kodeInduk || "-"}
+                          </Td>
+                        </Tr>
+                      </Tbody>
+                    </Table>
+                  </Box>
+                </Box>
+
+                {/* Informasi User */}
+                {dataProfile.user && (
+                  <Box mb={"30px"}>
+                    <HStack justify="space-between" mb={"15px"}>
+                      <Heading size="md">Informasi User</Heading>
+                      <Button
+                        colorScheme="blue"
+                        leftIcon={<Icon as={FaLock} />}
+                        onClick={onOpenGantiPassword}
+                      >
+                        Ganti Password
+                      </Button>
+                    </HStack>
+                    <Box
+                      border={"1px"}
+                      borderColor={"rgba(229, 231, 235, 1)"}
+                      borderRadius={"6px"}
+                      p={"20px"}
+                    >
+                      <Table variant="simple">
+                        <Tbody>
+                          <Tr>
+                            <Th width={"30%"}>Nama Pengguna</Th>
+                            <Td>{dataProfile.user.namaPengguna}</Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Roles</Th>
+                            <Td>
+                              {dataProfile.user.userRoles?.map(
+                                (userRole, index) => (
+                                  <Text
+                                    key={index}
+                                    as="span"
+                                    mr={"10px"}
+                                    px={"10px"}
+                                    py={"5px"}
+                                    bgColor={"blue.100"}
+                                    borderRadius={"4px"}
+                                    display={"inline-block"}
+                                    mb={"5px"}
+                                  >
+                                    {userRole.role.nama}
+                                  </Text>
+                                )
+                              ) || "-"}
+                            </Td>
+                          </Tr>
+                        </Tbody>
+                      </Table>
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Informasi Pegawai */}
+                {dataProfile.pegawai && (
+                  <Box mb={"30px"}>
+                    <Heading size="md" mb={"15px"}>
+                      Informasi Pegawai
+                    </Heading>
+                    <Box
+                      border={"1px"}
+                      borderColor={"rgba(229, 231, 235, 1)"}
+                      borderRadius={"6px"}
+                      p={"20px"}
+                    >
+                      <Table variant="simple">
+                        <Tbody>
+                          <Tr>
+                            <Th width={"30%"}>Nama</Th>
+                            <Td>{dataProfile.pegawai.nama}</Td>
+                          </Tr>
+                          <Tr>
+                            <Th>NIP</Th>
+                            <Td>{dataProfile.pegawai.nip}</Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Pendidikan</Th>
+                            <Td>{dataProfile.pegawai.pendidikan}</Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Jabatan</Th>
+                            <Td>{dataProfile.pegawai.jabatan}</Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Tanggal TMT</Th>
+                            <Td>
+                              {dataProfile.pegawai.tanggalTMT
+                                ? new Date(
+                                    dataProfile.pegawai.tanggalTMT
+                                  ).toLocaleDateString("id-ID")
+                                : "-"}
+                            </Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Tingkatan</Th>
+                            <Td>
+                              {dataProfile.pegawai.daftarTingkatan?.tingkatan ||
+                                "-"}
+                            </Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Golongan</Th>
+                            <Td>
+                              {dataProfile.pegawai.daftarGolongan?.golongan ||
+                                "-"}
+                            </Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Pangkat</Th>
+                            <Td>
+                              {dataProfile.pegawai.daftarPangkat?.pangkat ||
+                                "-"}
+                            </Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Profesi</Th>
+                            <Td>{dataProfile.pegawai.profesi?.nama || "-"}</Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Status Pegawai</Th>
+                            <Td>
+                              {dataProfile.pegawai.statusPegawai?.status || "-"}
+                            </Td>
+                          </Tr>
+                          <Tr>
+                            <Th>Unit Kerja</Th>
+                            <Td>
+                              {dataProfile.pegawai.daftarUnitKerja?.unitKerja ||
+                                "-"}
+                            </Td>
+                          </Tr>
+                        </Tbody>
+                      </Table>
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Kalender Perjalanan Dinas */}
+                <Box mb={"30px"}>
+                  <HStack spacing={3} mb={4}>
+                    <Box
+                      p={2}
+                      bgGradient="linear(to-br, blue.400, blue.600)"
+                      borderRadius="8px"
+                    >
+                      <Icon as={FaCalendarAlt} color="white" boxSize={5} />
+                    </Box>
+                    <Heading size="md" color="blue.600">
+                      Kalender Perjalanan Dinas
+                    </Heading>
+                  </HStack>
+                  <Divider mb={6} borderColor={"rgba(229, 231, 235, 1)"} />
+                  <Box
+                    mb={6}
+                    borderRadius="8px"
+                    overflow="hidden"
+                    border="1px solid"
+                    borderColor={"rgba(229, 231, 235, 1)"}
+                    bg="white"
+                    position="relative"
+                  >
+                    <Calendar
+                      localizer={localizer}
+                      events={events}
+                      startAccessor="start"
+                      endAccessor="end"
+                      style={{ height: 600 }}
+                      formats={formats}
+                      eventPropGetter={(event) => {
+                        return {
+                          style: {
+                            backgroundColor: "rgba(59, 130, 246, 0.9)",
+                            color: "white",
+                            borderRadius: "6px",
+                            border: "none",
+                            padding: "4px 8px",
+                            fontSize: "13px",
+                            fontWeight: "500",
+                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                            cursor: "pointer",
+                          },
+                        };
+                      }}
+                    />
+                    <style>{getCalendarStyles(colorMode)}</style>
+                  </Box>
+                </Box>
+
+                {/* Daftar Perjalanan Dinas */}
+                <Box mb={"30px"}>
+                  <HStack spacing={3} mb={4}>
+                    <Box
+                      p={2}
+                      bgGradient="linear(to-br, blue.400, blue.600)"
+                      borderRadius="8px"
+                    >
+                      <Icon as={FaMapMarkerAlt} color="white" boxSize={5} />
+                    </Box>
+                    <Heading size="md" color="blue.600">
+                      Daftar Perjalanan Dinas
+                    </Heading>
+                    {dataPegawai?.personils &&
+                      dataPegawai.personils.length > 0 && (
+                        <Badge
+                          colorScheme="blue"
+                          variant="subtle"
+                          fontSize="sm"
+                        >
+                          {dataPegawai.personils.length} perjalanan
+                        </Badge>
+                      )}
+                  </HStack>
+                  <Divider mb={6} borderColor={"rgba(229, 231, 235, 1)"} />
+                  <Box
+                    overflowX="auto"
+                    borderRadius="8px"
+                    border="1px solid"
+                    borderColor={"rgba(229, 231, 235, 1)"}
+                  >
+                    <Table variant="simple">
+                      <Thead>
+                        <Tr>
+                          <Th>Nomor SPD</Th>
+                          <Th>Tanggal Berangkat</Th>
+                          <Th>Tanggal Pulang</Th>
+                          <Th>Tujuan</Th>
+                          <Th>Biaya Perjalanan</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {dataPegawai?.personils &&
+                        dataPegawai.personils.length > 0 ? (
+                          dataPegawai.personils.map((item, index) => (
+                            <Tr
+                              key={index}
+                              _hover={{
+                                bg: "gray.50",
+                                transition: "background 0.2s ease",
+                              }}
+                            >
+                              <Td fontWeight="medium">
+                                {item?.nomorSPD || "-"}
+                              </Td>
+                              <Td>
+                                {item?.tanggalBerangkat
+                                  ? new Date(
+                                      item.tanggalBerangkat
+                                    ).toLocaleDateString("id-ID", {
+                                      weekday: "long",
+                                      day: "numeric",
+                                      month: "long",
+                                      year: "numeric",
+                                    })
+                                  : "-"}
+                              </Td>
+                              <Td>
+                                {item?.tanggalPulang
+                                  ? new Date(
+                                      item.tanggalPulang
+                                    ).toLocaleDateString("id-ID", {
+                                      weekday: "long",
+                                      day: "numeric",
+                                      month: "long",
+                                      year: "numeric",
+                                    })
+                                  : "-"}
+                              </Td>
+                              <Td>
+                                {item?.tujuan && item.tujuan.length > 0 ? (
+                                  <VStack align="start" spacing={1}>
+                                    {item.tujuan.map((val, idx) => (
+                                      <HStack key={idx} spacing={1}>
+                                        <Icon
+                                          as={FaMapMarkerAlt}
+                                          color="blue.500"
+                                          boxSize={3}
+                                        />
+                                        <Text fontSize="sm">{val || "-"}</Text>
+                                      </HStack>
+                                    ))}
+                                  </VStack>
+                                ) : (
+                                  "-"
+                                )}
+                              </Td>
+                              <Td fontWeight="semibold" color="blue.600">
+                                {item?.totaluang
+                                  ? new Intl.NumberFormat("id-ID", {
+                                      style: "currency",
+                                      currency: "IDR",
+                                    }).format(item.totaluang)
+                                  : "-"}
+                              </Td>
+                            </Tr>
+                          ))
+                        ) : (
+                          <Tr>
+                            <Td colSpan={5} textAlign="center" py={10}>
+                              <VStack spacing={3}>
+                                <Icon
+                                  as={FaMapMarkerAlt}
+                                  color="gray.400"
+                                  boxSize={10}
+                                />
+                                <Text color="gray.500" fontWeight="medium">
+                                  Tidak ada data perjalanan dinas
+                                </Text>
+                                <Text color="gray.400" fontSize="sm">
+                                  Data perjalanan dinas akan muncul di sini
+                                </Text>
+                              </VStack>
+                            </Td>
+                          </Tr>
+                        )}
+                      </Tbody>
+                    </Table>
+                  </Box>
+                </Box>
+              </>
+            ) : (
+              <Text>Memuat data profil...</Text>
+            )}
+          </Box>
         </Container>
       </Box>
+
+      {/* Modal Ganti Password */}
+      <Modal
+        isOpen={isOpenGantiPassword}
+        onClose={onCloseGantiPassword}
+        size="md"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Ganti Password</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4}>
+              <FormControl>
+                <FormLabel display="flex" alignItems="center" gap={2}>
+                  <Icon as={FaLock} />
+                  Password Lama
+                </FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showPasswordLama ? "text" : "password"}
+                    placeholder="Masukkan password lama"
+                    value={passwordLama}
+                    onChange={(e) => setPasswordLama(e.target.value)}
+                    pr="50px"
+                  />
+                  <InputRightElement width="50px">
+                    <IconButton
+                      aria-label={
+                        showPasswordLama
+                          ? "Sembunyikan password"
+                          : "Tampilkan password"
+                      }
+                      icon={showPasswordLama ? <FaEyeSlash /> : <FaEye />}
+                      onClick={() => setShowPasswordLama(!showPasswordLama)}
+                      variant="ghost"
+                      size="sm"
+                    />
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel display="flex" alignItems="center" gap={2}>
+                  <Icon as={FaLock} />
+                  Password Baru
+                </FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showPasswordBaru ? "text" : "password"}
+                    placeholder="Masukkan password baru (min. 6 karakter)"
+                    value={passwordBaru}
+                    onChange={(e) => setPasswordBaru(e.target.value)}
+                    pr="50px"
+                  />
+                  <InputRightElement width="50px">
+                    <IconButton
+                      aria-label={
+                        showPasswordBaru
+                          ? "Sembunyikan password"
+                          : "Tampilkan password"
+                      }
+                      icon={showPasswordBaru ? <FaEyeSlash /> : <FaEye />}
+                      onClick={() => setShowPasswordBaru(!showPasswordBaru)}
+                      variant="ghost"
+                      size="sm"
+                    />
+                  </InputRightElement>
+                </InputGroup>
+                <FormHelperText>
+                  Password baru minimal 6 karakter
+                </FormHelperText>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={onCloseGantiPassword}
+              isDisabled={isSubmitting}
+            >
+              Batal
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={handleChangePassword}
+              isLoading={isSubmitting}
+              loadingText="Mengubah..."
+            >
+              Ubah Password
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Layout>
   );
 }

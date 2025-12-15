@@ -1,218 +1,426 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { login } from "../Redux/Reducers/auth"; // Import action creator
-import { Route, Redirect, useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
-import BGPegawai from "../assets/bgPegawai.png";
 import {
   Box,
-  Center,
   Text,
-  Button,
-  FormControl,
-  FormLabel,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Container,
-  HStack,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
   Heading,
-  Stack,
   Card,
   CardBody,
   CardHeader,
-  Input,
-  useToast,
-  Badge,
-  VStack,
-  Divider,
-  Spacer,
-  Image,
-  useDisclosure,
-  useColorMode,
-  Flex,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
+  SimpleGrid,
+  Spinner,
 } from "@chakra-ui/react";
-import {
-  selectIsAuthenticated,
-  userRedux,
-  selectRole,
-} from "../Redux/Reducers/auth";
 import axios from "axios";
 import LayoutPegawai from "../Componets/Pegawai/LayoutPegawai";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar, Pie, Doughnut } from "react-chartjs-2";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default function DashboradPegawai() {
-  const history = useHistory();
-  const [data, setData] = useState(null);
+  const [dataPegawai, setDataPegawai] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Fungsi untuk menghitung sisa hari
-  const hitungSisaHari = (tanggalAwal, tanggalAkhir) => {
-    if (!tanggalAwal || !tanggalAkhir) return null;
-
-    const sekarang = new Date();
-    const tanggalAwalDate = new Date(tanggalAwal);
-    const tanggalAkhirDate = new Date(tanggalAkhir);
-
-    // Jika sudah melewati tanggal akhir
-    if (sekarang > tanggalAkhirDate) {
-      const selisihHari = Math.ceil(
-        (sekarang - tanggalAkhirDate) / (1000 * 60 * 60 * 24)
-      );
-      return { status: "terlambat", hari: selisihHari };
-    }
-
-    // Jika masih dalam rentang waktu
-    if (sekarang >= tanggalAwalDate && sekarang <= tanggalAkhirDate) {
-      const selisihHari = Math.ceil(
-        (tanggalAkhirDate - sekarang) / (1000 * 60 * 60 * 24)
-      );
-      return { status: "aktif", hari: selisihHari };
-    }
-
-    // Jika belum dimulai
-    if (sekarang < tanggalAwalDate) {
-      const selisihHari = Math.ceil(
-        (tanggalAwalDate - sekarang) / (1000 * 60 * 60 * 24)
-      );
-      return { status: "belum_mulai", hari: selisihHari };
-    }
-
-    return null;
-  };
-
-  // Fungsi untuk mendapatkan deskripsi status
-  const getDeskripsiStatus = (status, hari) => {
-    switch (status) {
-      case "aktif":
-        return `Sisa waktu: ${hari} hari lagi`;
-      case "terlambat":
-        return `Terlambat: ${hari} hari`;
-      case "belum_mulai":
-        return `Akan dimulai dalam: ${hari} hari`;
-      default:
-        return "";
-    }
-  };
-
-  async function fetchData() {
-    axios
-      .get(
+  async function fetchDataPegawai() {
+    try {
+      const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/usulan/get/one/laporan-usulan-pegawai`
-      )
-      .then((res) => {
-        setData(res.data.result[0]);
-        console.log(res.data, "DATASEEED");
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+        }/pegawai/get/unit-kerja-pegawai`
+      );
+      setDataPegawai(res.data.result);
+      console.log(res.data.result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    fetchData();
+    fetchDataPegawai();
   }, []);
+
+  // Fungsi untuk menyiapkan data grafik berdasarkan Status
+  const prepareStatusData = () => {
+    if (!dataPegawai) return null;
+
+    const statusCount = {
+      PNS: 0,
+      CPNS: 0,
+      P3K: 0,
+      PJPL: 0,
+    };
+
+    dataPegawai.forEach((unit) => {
+      statusCount.PNS += unit.statusPegawai?.PNS || 0;
+      statusCount.CPNS += unit.statusPegawai?.CPNS || 0;
+      statusCount.P3K += unit.statusPegawai?.P3K || 0;
+      statusCount.PJPL += unit.statusPegawai?.PJPL || 0;
+    });
+
+    return {
+      labels: Object.keys(statusCount),
+      datasets: [
+        {
+          label: "Jumlah Pegawai",
+          data: Object.values(statusCount),
+          backgroundColor: [
+            "rgba(54, 162, 235, 0.8)",
+            "rgba(255, 99, 132, 0.8)",
+            "rgba(255, 206, 86, 0.8)",
+            "rgba(75, 192, 192, 0.8)",
+          ],
+          borderColor: [
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 99, 132, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+          ],
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data grafik berdasarkan Unit Kerja
+  const prepareUnitKerjaData = () => {
+    if (!dataPegawai) return null;
+
+    const labels = dataPegawai.map((unit) => unit.namaUnitKerja);
+    const data = dataPegawai.map((unit) => unit.totalPegawai);
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          label: "Jumlah Pegawai per Unit Kerja",
+          data: data,
+          backgroundColor: "rgba(54, 162, 235, 0.8)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data grafik berdasarkan Profesi
+  const prepareProfesiData = () => {
+    if (!dataPegawai) return null;
+
+    const profesiCount = {};
+
+    dataPegawai.forEach((unit) => {
+      Object.values(unit.profesi || {}).forEach((profesi) => {
+        const namaProfesi = profesi.namaProfesi;
+        if (!profesiCount[namaProfesi]) {
+          profesiCount[namaProfesi] = 0;
+        }
+        profesiCount[namaProfesi] +=
+          (profesi.jumlah?.PNS || 0) +
+          (profesi.jumlah?.CPNS || 0) +
+          (profesi.jumlah?.P3K || 0) +
+          (profesi.jumlah?.PJPL || 0);
+      });
+    });
+
+    const labels = Object.keys(profesiCount);
+    const data = Object.values(profesiCount);
+
+    // Generate colors dynamically
+    const colors = labels.map(
+      (_, i) => `hsla(${(i * 360) / labels.length}, 70%, 50%, 0.8)`
+    );
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          label: "Jumlah Pegawai per Profesi",
+          data: data,
+          backgroundColor: colors,
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data grafik kombinasi Status dan Profesi
+  const prepareStatusProfesiData = () => {
+    if (!dataPegawai) return null;
+
+    const statusList = ["PNS", "CPNS", "P3K", "PJPL"];
+    const statusColors = [
+      "rgba(54, 162, 235, 0.8)", // PNS - Blue
+      "rgba(255, 99, 132, 0.8)", // CPNS - Red
+      "rgba(255, 206, 86, 0.8)", // P3K - Yellow
+      "rgba(75, 192, 192, 0.8)", // PJPL - Teal
+    ];
+    const profesiSet = new Set();
+
+    // Collect all profesi names
+    dataPegawai.forEach((unit) => {
+      Object.values(unit.profesi || {}).forEach((profesi) => {
+        profesiSet.add(profesi.namaProfesi);
+      });
+    });
+
+    const profesiList = Array.from(profesiSet);
+    const datasets = statusList.map((status, index) => {
+      const data = profesiList.map((profesiName) => {
+        let total = 0;
+        dataPegawai.forEach((unit) => {
+          Object.values(unit.profesi || {}).forEach((profesi) => {
+            if (profesi.namaProfesi === profesiName) {
+              total += profesi.jumlah?.[status] || 0;
+            }
+          });
+        });
+        return total;
+      });
+
+      return {
+        label: status,
+        data: data,
+        backgroundColor: statusColors[index],
+        borderColor: statusColors[index].replace("0.8", "1"),
+        borderWidth: 2,
+      };
+    });
+
+    return {
+      labels: profesiList,
+      datasets: datasets,
+    };
+  };
+
+  const statusData = prepareStatusData();
+  const unitKerjaData = prepareUnitKerjaData();
+  const profesiData = prepareProfesiData();
+  const statusProfesiData = prepareStatusProfesiData();
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: false,
+      },
+    },
+  };
+
+  const barChartOptions = {
+    ...chartOptions,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  };
+  if (loading) {
+    return (
+      <LayoutPegawai>
+        <Box
+          bgColor={"secondary"}
+          pb={"40px"}
+          px={"30px"}
+          minHeight="80vh"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Spinner size="xl" />
+        </Box>
+      </LayoutPegawai>
+    );
+  }
+
   return (
     <LayoutPegawai>
-      <Box
-        height="80vh"
-        backgroundImage={`url(${BGPegawai})`}
-        backgroundSize="cover"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        position="relative"
-      >
-        <Center>
-          <Box>
-            <Container
-              border={"1px"}
-              borderRadius={"6px"}
-              borderColor={"rgba(229, 231, 235, 1)"}
-              bgColor={"white"}
-              py={"30px"}
-              ps={"0px"}
-              mb={"50px"}
-            >
-              <Center gap={5}>
-                <Text>{data?.tanggalAwal}</Text>
-                <Text>{data?.tanggalAkhir}</Text>
-              </Center>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Container maxW={"full"} variant={"primary"} p={"30px"}>
+          <Heading size="lg" mb={6}>
+            Dashboard Statistik Pegawai
+          </Heading>
 
-              {/* Deskripsi Sisa Hari */}
-              {data?.tanggalAwal && data?.tanggalAkhir && (
-                <Center mt={3}>
-                  <Badge
-                    colorScheme={
-                      hitungSisaHari(data.tanggalAwal, data.tanggalAkhir)
-                        ?.status === "aktif"
-                        ? "green"
-                        : hitungSisaHari(data.tanggalAwal, data.tanggalAkhir)
-                            ?.status === "terlambat"
-                        ? "red"
-                        : "blue"
-                    }
-                    variant="subtle"
-                    fontSize="sm"
-                    px={3}
-                    py={2}
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={6}>
+            {/* Grafik Distribusi Status Pegawai - Pie Chart */}
+            <Card>
+              <CardHeader>
+                <Heading size="md">
+                  Distribusi Pegawai Berdasarkan Status
+                </Heading>
+              </CardHeader>
+              <CardBody>
+                <Box height="300px">
+                  {statusData && (
+                    <Pie data={statusData} options={chartOptions} />
+                  )}
+                </Box>
+              </CardBody>
+            </Card>
+
+            {/* Grafik Distribusi Status Pegawai - Doughnut Chart */}
+            <Card>
+              <CardHeader>
+                <Heading size="md">Distribusi Status Pegawai (Donat)</Heading>
+              </CardHeader>
+              <CardBody>
+                <Box height="300px">
+                  {statusData && (
+                    <Doughnut data={statusData} options={chartOptions} />
+                  )}
+                </Box>
+              </CardBody>
+            </Card>
+          </SimpleGrid>
+
+          {/* Grafik Distribusi Pegawai berdasarkan Unit Kerja */}
+          <Card mb={6}>
+            <CardHeader>
+              <Heading size="md">Distribusi Pegawai per Unit Kerja</Heading>
+            </CardHeader>
+            <CardBody>
+              <Box height="400px">
+                {unitKerjaData && (
+                  <Bar data={unitKerjaData} options={barChartOptions} />
+                )}
+              </Box>
+            </CardBody>
+          </Card>
+
+          {/* Grafik Distribusi Pegawai berdasarkan Profesi */}
+          <Card mb={6}>
+            <CardHeader>
+              <Heading size="md">Distribusi Pegawai per Profesi</Heading>
+            </CardHeader>
+            <CardBody>
+              <Box height="400px">
+                {profesiData && (
+                  <Bar data={profesiData} options={barChartOptions} />
+                )}
+              </Box>
+            </CardBody>
+          </Card>
+
+          {/* Grafik Kombinasi Status dan Profesi */}
+          <Card mb={6}>
+            <CardHeader>
+              <Heading size="md">Distribusi Pegawai: Status vs Profesi</Heading>
+            </CardHeader>
+            <CardBody>
+              <Box height="500px">
+                {statusProfesiData && (
+                  <Bar data={statusProfesiData} options={barChartOptions} />
+                )}
+              </Box>
+            </CardBody>
+          </Card>
+
+          {/* Ringkasan Statistik */}
+          <Card>
+            <CardHeader>
+              <Heading size="md">Ringkasan Statistik</Heading>
+            </CardHeader>
+            <CardBody>
+              {dataPegawai && (
+                <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+                  <Box
+                    p={4}
                     borderRadius="md"
+                    bg="blue.50"
+                    borderLeft="4px solid"
+                    borderColor="blue.500"
                   >
-                    {getDeskripsiStatus(
-                      hitungSisaHari(data.tanggalAwal, data.tanggalAkhir)
-                        ?.status,
-                      hitungSisaHari(data.tanggalAwal, data.tanggalAkhir)?.hari
-                    )}
-                  </Badge>
-                </Center>
+                    <Text fontSize="sm" color="gray.600">
+                      Total Unit Kerja
+                    </Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+                      {dataPegawai.length}
+                    </Text>
+                  </Box>
+                  <Box
+                    p={4}
+                    borderRadius="md"
+                    bg="green.50"
+                    borderLeft="4px solid"
+                    borderColor="green.500"
+                  >
+                    <Text fontSize="sm" color="gray.600">
+                      Total Pegawai
+                    </Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="green.600">
+                      {dataPegawai.reduce(
+                        (sum, unit) => sum + (unit.totalPegawai || 0),
+                        0
+                      )}
+                    </Text>
+                  </Box>
+                  <Box
+                    p={4}
+                    borderRadius="md"
+                    bg="purple.50"
+                    borderLeft="4px solid"
+                    borderColor="purple.500"
+                  >
+                    <Text fontSize="sm" color="gray.600">
+                      Total PNS
+                    </Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="purple.600">
+                      {dataPegawai.reduce(
+                        (sum, unit) => sum + (unit.statusPegawai?.PNS || 0),
+                        0
+                      )}
+                    </Text>
+                  </Box>
+                  <Box
+                    p={4}
+                    borderRadius="md"
+                    bg="orange.50"
+                    borderLeft="4px solid"
+                    borderColor="orange.500"
+                  >
+                    <Text fontSize="sm" color="gray.600">
+                      Total Profesi
+                    </Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="orange.600">
+                      {
+                        new Set(
+                          dataPegawai.flatMap((unit) =>
+                            Object.values(unit.profesi || {}).map(
+                              (p) => p.namaProfesi
+                            )
+                          )
+                        ).size
+                      }
+                    </Text>
+                  </Box>
+                </SimpleGrid>
               )}
-            </Container>
-
-            {data?.status ? (
-              <Flex gap={5}>
-                <Menu>
-                  <MenuButton as={Button}>Usulan Kenaikan Pangkat</MenuButton>
-                  <MenuList>
-                    <MenuItem
-                      onClick={() => {
-                        history.push("/pegawai/naik-golongan");
-                      }}
-                    >
-                      kenaikan pangkat Berkala
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
-
-                <Menu>
-                  <MenuButton as={Button}>Usulan Kenaikan Jenjang</MenuButton>
-                  <MenuList>
-                    <MenuItem
-                      onClick={() => {
-                        history.push("/pegawai/naik-Jenjang");
-                      }}
-                    >
-                      kenaikan Jenjang
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
-              </Flex>
-            ) : null}
-          </Box>
-        </Center>
+            </CardBody>
+          </Card>
+        </Container>
       </Box>
     </LayoutPegawai>
   );

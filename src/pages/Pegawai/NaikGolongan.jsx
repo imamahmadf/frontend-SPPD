@@ -138,7 +138,7 @@ function NaikGolongan() {
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/usulan/update/usulan-pangkat`,
-        { id: dataProfile.pegawai.usulanPegawais[0].id, status: 0 }
+        { id: dataProfile?.pegawai?.usulanPegawais?.[0]?.id, status: 0 }
       )
       .then((res) => {
         console.log(res.data);
@@ -385,7 +385,7 @@ function NaikGolongan() {
     }
 
     setUploadLoading(true);
-    const usulanId = dataProfile?.pegawai?.usulanPegawais[0]?.id;
+    const usulanId = dataProfile?.pegawai?.usulanPegawais?.[0]?.id;
     const formData = new FormData();
 
     // Data file yang akan diupload
@@ -400,7 +400,7 @@ function NaikGolongan() {
     formData.append("field_name", fieldName); // Nama field di database
 
     // Mendapatkan nama file dokumen yang lama (jika ada)
-    const usulanPegawai = dataProfile?.pegawai?.usulanPegawais[0];
+    const usulanPegawai = dataProfile?.pegawai?.usulanPegawais?.[0];
     const namaFileLama = getNamaFileLama(fieldName, usulanPegawai);
 
     // Menambahkan nama file dokumen yang lama
@@ -549,7 +549,7 @@ function NaikGolongan() {
   };
 
   const statusInfo = getStatusInfo(
-    dataProfile?.pegawai?.usulanPegawais[0]?.status
+    dataProfile?.pegawai?.usulanPegawais?.[0]?.status
   );
 
   return (
@@ -600,8 +600,8 @@ function NaikGolongan() {
                       <HStack>
                         <Icon as={FaShieldAlt} />
                         <Text>
-                          {dataProfile?.pegawai?.daftarPangkat.pangkat}/
-                          {dataProfile?.pegawai?.daftarGolongan.golongan}
+                          {dataProfile?.pegawai?.daftarPangkat?.pangkat}/
+                          {dataProfile?.pegawai?.daftarGolongan?.golongan}
                         </Text>
                       </HStack>
                     </HStack>
@@ -609,7 +609,7 @@ function NaikGolongan() {
                       <HStack>
                         <Icon as={FaBuilding} />
                         <Text>
-                          {dataProfile?.pegawai?.daftarUnitKerja.unitKerja}
+                          {dataProfile?.pegawai?.daftarUnitKerja?.unitKerja}
                         </Text>
                       </HStack>
                       <HStack>
@@ -625,7 +625,7 @@ function NaikGolongan() {
                   <VStack spacing={3}>
                     <Badge
                       size="lg"
-                      colorScheme={statusInfo.color}
+                      colorScheme={statusInfo?.color}
                       px={4}
                       py={2}
                       borderRadius="full"
@@ -633,7 +633,7 @@ function NaikGolongan() {
                     >
                       <HStack spacing={2}>
                         <Icon as={statusInfo.icon} />
-                        <Text>{statusInfo.text}</Text>
+                        <Text>{statusInfo?.text}</Text>
                       </HStack>
                     </Badge>
 
@@ -643,7 +643,7 @@ function NaikGolongan() {
                       maxW="300px"
                       textAlign="center"
                     >
-                      {statusInfo.description}
+                      {statusInfo?.description}
                     </Text>
                   </VStack>
                 </Box>
@@ -652,7 +652,7 @@ function NaikGolongan() {
           </Card>
 
           {/* Documents Section */}
-          {dataProfile?.pegawai?.usulanPegawais[0]?.status === 2 ? (
+          {dataProfile?.pegawai?.usulanPegawais?.[0]?.status === 2 ? (
             <Card
               shadow="xl"
               border="1px"
@@ -678,7 +678,8 @@ function NaikGolongan() {
                       icon={FaFileAlt}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].formulirUsulan
+                          dataProfile?.pegawai?.usulanPegawais?.[0]
+                            ?.formulirUsulan
                         )
                       }
                       onUpload={() =>
@@ -692,7 +693,8 @@ function NaikGolongan() {
                       }
                       color="blue"
                       hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].formulirUsulan
+                        !!dataProfile?.pegawai?.usulanPegawais?.[0]
+                          ?.formulirUsulan
                       }
                     />
                     <DocumentUploadItem
@@ -700,7 +702,7 @@ function NaikGolongan() {
                       icon={FaCertificate}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skCpns
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.skCpns
                         )
                       }
                       onUpload={() =>
@@ -713,14 +715,16 @@ function NaikGolongan() {
                         })
                       }
                       color="green"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].skCpns}
+                      hasFile={
+                        !!dataProfile?.pegawai?.usulanPegawais?.[0]?.skCpns
+                      }
                     />
                     <DocumentUploadItem
                       title="SK PNS"
                       icon={FaFileContract}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skPns
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.skPns
                         )
                       }
                       onUpload={() =>
@@ -733,14 +737,16 @@ function NaikGolongan() {
                         })
                       }
                       color="purple"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].skPns}
+                      hasFile={
+                        !!dataProfile?.pegawai?.usulanPegawais?.[0]?.skPns
+                      }
                     />
                     <DocumentUploadItem
                       title="PAK"
                       icon={FaFileInvoiceDollar}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].PAK
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.PAK
                         )
                       }
                       onUpload={() =>
@@ -753,14 +759,14 @@ function NaikGolongan() {
                         })
                       }
                       color="orange"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].PAK}
+                      hasFile={!!dataProfile?.pegawai?.usulanPegawais?.[0]?.PAK}
                     />
                     <DocumentUploadItem
                       title="SK Mutasi"
                       icon={FaFileSignature}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skMutasi
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.skMutasi
                         )
                       }
                       onUpload={() =>
@@ -774,7 +780,7 @@ function NaikGolongan() {
                       }
                       color="teal"
                       hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].skMutasi
+                        !!dataProfile?.pegawai?.usulanPegawais?.[0]?.skMutasi
                       }
                     />
                   </VStack>
@@ -786,7 +792,7 @@ function NaikGolongan() {
                       icon={FaGraduationCap}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skJafung
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.skJafung
                         )
                       }
                       onUpload={() =>
@@ -800,7 +806,7 @@ function NaikGolongan() {
                       }
                       color="cyan"
                       hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].skJafung
+                        !!dataProfile?.pegawai?.usulanPegawais?.[0]?.skJafung
                       }
                     />
                     <DocumentUploadItem
@@ -808,7 +814,7 @@ function NaikGolongan() {
                       icon={FaFileAlt}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].skp
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.skp
                         )
                       }
                       onUpload={() =>
@@ -821,14 +827,14 @@ function NaikGolongan() {
                         })
                       }
                       color="pink"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].skp}
+                      hasFile={!!dataProfile?.pegawai?.usulanPegawais?.[0]?.skp}
                     />
                     <DocumentUploadItem
                       title="STR"
                       icon={FaCertificate}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].str
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.str
                         )
                       }
                       onUpload={() =>
@@ -841,14 +847,14 @@ function NaikGolongan() {
                         })
                       }
                       color="indigo"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].str}
+                      hasFile={!!dataProfile?.pegawai?.usulanPegawais?.[0]?.str}
                     />
                     <DocumentUploadItem
                       title="Surat Cuti"
                       icon={FaFileContract}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].suratCuti
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.suratCuti
                         )
                       }
                       onUpload={() =>
@@ -862,7 +868,7 @@ function NaikGolongan() {
                       }
                       color="red"
                       hasFile={
-                        !!dataProfile?.pegawai.usulanPegawais[0].suratCuti
+                        !!dataProfile?.pegawai?.usulanPegawais?.[0]?.suratCuti
                       }
                     />
                     <DocumentUploadItem
@@ -870,7 +876,7 @@ function NaikGolongan() {
                       icon={FaUserGraduate}
                       onPreview={() =>
                         handlePreview(
-                          dataProfile?.pegawai.usulanPegawais[0].gelar
+                          dataProfile?.pegawai?.usulanPegawais?.[0]?.gelar
                         )
                       }
                       onUpload={() =>
@@ -883,7 +889,9 @@ function NaikGolongan() {
                         })
                       }
                       color="yellow"
-                      hasFile={!!dataProfile?.pegawai.usulanPegawais[0].gelar}
+                      hasFile={
+                        !!dataProfile?.pegawai?.usulanPegawais?.[0]?.gelar
+                      }
                     />
                   </VStack>
                 </SimpleGrid>
@@ -906,7 +914,7 @@ function NaikGolongan() {
                 </Box>
               </CardBody>
             </Card>
-          ) : dataProfile?.pegawai?.usulanPegawais[0]?.status === 0 ? (
+          ) : dataProfile?.pegawai?.usulanPegawais?.[0]?.status === 0 ? (
             <Card
               shadow="xl"
               border="1px"
@@ -936,7 +944,7 @@ function NaikGolongan() {
                 </Center>
               </CardBody>
             </Card>
-          ) : dataProfile?.pegawai?.usulanPegawais[0]?.status === 1 ? (
+          ) : dataProfile?.pegawai?.usulanPegawais?.[0]?.status === 1 ? (
             <Card
               shadow="xl"
               border="1px"
@@ -952,7 +960,7 @@ function NaikGolongan() {
                       Usulan Diterima!
                     </Heading>{" "}
                     <Badge colorScheme="blue" fontSize={"20px"} px={4} py={2}>
-                      {`NOMOR PERMOHONAN:  ${dataProfile?.pegawai?.usulanPegawais[0]?.nomorUsulan}`}
+                      {`NOMOR PERMOHONAN:  ${dataProfile?.pegawai?.usulanPegawais?.[0]?.nomorUsulan}`}
                     </Badge>
                     <Text color="gray.600" textAlign="center">
                       Selamat! Usulan naik golongan Anda telah disetujui dan
@@ -968,7 +976,7 @@ function NaikGolongan() {
                       <Button
                         onClick={() =>
                           handleLinkClick(
-                            dataProfile?.pegawai?.usulanPegawais[0]
+                            dataProfile?.pegawai?.usulanPegawais?.[0]
                               ?.linkSertifikat
                           )
                         }
@@ -987,7 +995,7 @@ function NaikGolongan() {
                         whiteSpace="normal"
                       >
                         {
-                          dataProfile?.pegawai?.usulanPegawais[0]
+                          dataProfile?.pegawai?.usulanPegawais?.[0]
                             ?.linkSertifikat
                         }
                       </Button>
@@ -1215,7 +1223,7 @@ function NaikGolongan() {
                     {/* Menampilkan nama file lama jika ada */}
                     {(() => {
                       const usulanPegawai =
-                        dataProfile?.pegawai?.usulanPegawais[0];
+                        dataProfile?.pegawai?.usulanPegawais?.[0];
                       const namaFileLama = getNamaFileLama(
                         uploadModal.field,
                         usulanPegawai

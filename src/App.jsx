@@ -100,7 +100,12 @@ import PejabatVerifikator from "./pages/PJPL/PejabatVerifikator.jsx";
 import KontrakPJPL from "./pages/PJPL/KontrakPJPL.jsx";
 import KinerjaPJPL from "./pages/PJPL/KinerjaPJPL.jsx";
 import DetailKinerjaPJPL from "./pages/PJPL/DetailKinerjaPJPL.jsx";
-
+import HasilKerjaPJPL from "./pages/PJPL/HasilKerjaPJPL.jsx";
+import DaftarLaporanPJPL from "./pages/PJPL/DaftarLaporanPJPL.jsx";
+import AtasanDaftarKontrak from "./pages/PJPL/AtasanDaftarKontrak.jsx";
+import AtasanDetailKontrak from "./pages/PJPL/AtasanDetailKontrak.jsx";
+import PenilaianAtasan from "./pages/PJPL/PenilaianAtasan.jsx";
+import DashboardKeuangan from "./pages/Keuangan/DashboardKeuangan.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -164,7 +169,7 @@ function App() {
             component={Profile}
             path="/profile"
             exact
-            roleRoute={[1, 2, 3, 4, 5]}
+            roleRoute={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
           />
           <ProtectedRoute
             component={Rampung}
@@ -228,7 +233,7 @@ function App() {
           />
           <ProtectedRoute
             component={DaftarPegawai}
-            path="/kepegawaian/daftar-pegawai"
+            path="/admin-pegawai/daftar-pegawai"
             exact
             roleRoute={[5, 7]}
           />
@@ -240,19 +245,19 @@ function App() {
           />
           <ProtectedRoute
             component={DaftarNaikJenjang}
-            path="/kepegawaian/daftar-naik-jenjang"
+            path="/admin-pegawai/daftar-naik-jenjang"
             exact
             roleRoute={[5, 7]}
           />
           <ProtectedRoute
             component={LaporanUsulanPegawai}
-            path="/kepegawaian/laporan-usulan-pegawai"
+            path="/admin-pegawai/laporan-usulan-pegawai"
             exact
             roleRoute={[5, 7]}
           />
           <ProtectedRoute
             component={StatistikPegawai}
-            path="/kepegawaian/statistik-pegawai"
+            path="/admin-pegawai/statistik-pegawai"
             exact
             roleRoute={[5, 7]}
           />
@@ -431,7 +436,7 @@ function App() {
             component={pegawaiProfile}
             path="/kepegawaian/profile"
             exact
-            roleRoute={[5, 2]}
+            roleRoute={[5, 2, 9]}
           />
           <ProtectedRoute
             component={DashboradPegawai}
@@ -441,13 +446,13 @@ function App() {
           />
           <ProtectedRoute
             component={NaikGolongan}
-            path="/pegawai/naik-golongan"
+            path="/kepegawaian-ASN/naik-golongan"
             exact
             roleRoute={[9, 5]}
           />
           <ProtectedRoute
             component={NaikJenjang}
-            path="/pegawai/naik-jenjang"
+            path="/kepegawaian-ASN/naik-jenjang"
             exact
             roleRoute={[9, 5]}
           />
@@ -619,19 +624,19 @@ function App() {
           {/* //////////////////PJPL////////////////////// */}
           <ProtectedRoute
             component={PejabatVerifikator}
-            path="/pegawai/pejabat-verifikator"
+            path="/admin-pegawai/pejabat-verifikator"
             exact
             roleRoute={[5, 1]}
           />
           <ProtectedRoute
             component={KontrakPJPL}
-            path="/pegawai/kontrak-PJPL"
+            path="/admin-pegawai/kontrak-PJPL"
             exact
             roleRoute={[5, 1]}
           />
           <ProtectedRoute
             component={KinerjaPJPL}
-            path="/kepegawaian/kinerja-PJPL"
+            path="/kepegawaian-PJPL/kinerja-PJPL"
             exact
             roleRoute={[5, 1, 9]}
           />
@@ -640,6 +645,42 @@ function App() {
             path="/kepegawaian/detail/kinerja/:id"
             exact
             roleRoute={[5, 1, 9]}
+          />{" "}
+          <ProtectedRoute
+            component={HasilKerjaPJPL}
+            path="/kepegawaian/hasil-kerja-pjpl/:id"
+            exact
+            roleRoute={[5, 1, 9]}
+          />
+          <ProtectedRoute
+            component={DaftarLaporanPJPL}
+            path="/kepegawaian/daftar-laporan-pjpl"
+            exact
+            roleRoute={[5, 1, 9]}
+          />
+          <ProtectedRoute
+            component={AtasanDaftarKontrak}
+            path="/kepegawaian-ASN/atasan/daftar-kontrak"
+            exact
+            roleRoute={[5, 1, 9]}
+          />
+          <ProtectedRoute
+            component={AtasanDetailKontrak}
+            path="/kepegawaian-ASN/atasan/kontrak/:id"
+            exact
+            roleRoute={[5, 1, 9]}
+          />
+          <ProtectedRoute
+            component={PenilaianAtasan}
+            path="/kepegawaian-ASN/atasan/penilaian/:id"
+            exact
+            roleRoute={[5, 1, 9]}
+          />
+          <ProtectedRoute
+            component={DashboardKeuangan}
+            path="/keuangan/dashboard"
+            exact
+            roleRoute={[3, 5]}
           />
           <Route component={verifikasi} path="/verifikasi/:id" />
           <Route component={DeveloperProfile} path="/developer-profile" />

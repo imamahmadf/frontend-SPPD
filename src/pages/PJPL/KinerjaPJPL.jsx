@@ -122,20 +122,16 @@ function KinerjaPJPL() {
 
   return (
     <LayoutPegawai>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"60vh"}>
         <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
-          {JSON.stringify(user[0].pegawaiId)}
-          <HStack gap={5} mb={"30px"}>
-            <Button onClick={onTambahOpen} variant={"primary"} px={"50px"}>
-              Tambah ddd+
-            </Button>{" "}
-          </HStack>{" "}
+          {/* {JSON.stringify(user[0].pegawaiId)} */}
+          <HStack gap={5} mb={"30px"}></HStack>{" "}
           <Table variant={"pegawai"}>
             <Thead>
               <Tr>
                 <Th>No</Th>
-                <Th>Tanggal Awal</Th>
-                <Th>Tanggal Akhir</Th>
+                <Th>Periode Kontrak</Th>
+
                 <Th>Aksi</Th>
               </Tr>
             </Thead>
@@ -144,8 +140,25 @@ function KinerjaPJPL() {
                 dataKontrak.map((item, index) => (
                   <Tr key={`${index}`}>
                     <Td>{index + 1}</Td>
-                    <Td>{item.tanggalAwal}</Td>
-                    <Td>{item.tanggalAkhir}</Td>
+                    <Td>
+                      {item?.tanggalAwal && item?.tanggalAkhir
+                        ? `${new Date(item?.tanggalAwal).toLocaleDateString(
+                            "id-ID",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            }
+                          )} - ${new Date(
+                            item?.tanggalAkhir
+                          ).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}`
+                        : "-"}
+                    </Td>
+
                     <Td>
                       <Button
                         onClick={() =>

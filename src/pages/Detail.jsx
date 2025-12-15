@@ -52,6 +52,7 @@ import {
   FiClock,
   FiArrowRight,
   FiInfo,
+  FiUserPlus,
 } from "react-icons/fi";
 import {
   Select as Select2,
@@ -85,6 +86,12 @@ function Detail(props) {
     onOpen: onHapusOpen,
     onClose: onHapusClose,
   } = useDisclosure();
+
+  const {
+    isOpen: isTambahOpen,
+    onOpen: onTambahOpen,
+    onClose: onTambahClose,
+  } = useDisclosure();
   const daftarTempat = detailPerjalanan.tempats?.map(
     (tempat, index) =>
       `${
@@ -95,19 +102,19 @@ function Detail(props) {
   );
   async function fetchDataPerjalan() {
     setIsLoading(true); // Set loading true sebelum fetch
-    await axios
-      .get(
+    try {
+      const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/get/detail-perjalanan/${props.match.params.id}`
-      )
-      .then((res) => {
-        setDetailPerjalanan(res.data.result);
-        console.log(res.data.result);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+      );
+      setDetailPerjalanan(res.data.result);
+      console.log(res.data.result);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false); // Set loading false setelah fetch selesai
+    }
   }
 
   async function fetchSubKegiatan() {
@@ -165,6 +172,7 @@ function Detail(props) {
   const [pegawaiLamaId, setPegawaiLamaId] = useState(null); // id pegawai lama
   const [personilHapusId, setPersonilHapusId] = useState(null); // id personil yang akan dihapus
   const [namaPegawaiHapus, setNamaPegawaiHapus] = useState(""); // nama pegawai yang akan dihapus
+  const [pegawaiTambahId, setPegawaiTambahId] = useState(null); // id pegawai yang akan ditambahkan
   const [isEditUntukOpen, setIsEditUntukOpen] = useState(false); // modal edit untuk
   const [editUntukValue, setEditUntukValue] = useState(""); // nilai untuk yang diedit
   const [editSubKegiatanId, setEditSubKegiatanId] = useState(null); // nilai sub kegiatan yang diedit
@@ -196,7 +204,7 @@ function Detail(props) {
         }
       );
       onEditClose();
-      fetchDataPerjalan(); // refresh data
+      await fetchDataPerjalan(); // refresh data
     } catch (err) {
       console.error(err);
     }
@@ -210,11 +218,31 @@ function Detail(props) {
         }/pegawai/personil/hapus/${personilHapusId}`
       );
       onHapusClose();
-      fetchDataPerjalan(); // refresh data
-      setIsLoading(false);
+      await fetchDataPerjalan(); // refresh data
     } catch (err) {
       console.error(err);
-      setIsLoading(false);
+    }
+  };
+
+  const handleTambahPersonil = async () => {
+    try {
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/pegawai/personil/tambah`,
+        {
+          perjalananId: props.match.params.id,
+          pegawaiId: pegawaiTambahId,
+          indukUnitKerjaId: user[0].unitKerja_profile.indukUnitKerja.id,
+          kode: user[0].unitKerja_profile.kode,
+          tanggalPengajuan: detailPerjalanan.tanggalPengajuan,
+        }
+      );
+      onTambahClose();
+      setPegawaiTambahId(null);
+      await fetchDataPerjalan(); // refresh data
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -242,11 +270,9 @@ function Detail(props) {
         payload
       );
       setIsEditTempatOpen(false);
-      fetchDataPerjalan(); // refresh data
-      setIsLoading(false);
+      await fetchDataPerjalan(); // refresh data
     } catch (err) {
       console.error(err);
-      setIsLoading(false);
     }
   };
 
@@ -307,6 +333,7 @@ function Detail(props) {
                   </Button>
                 )}
               </Flex>
+              {JSON.stringify(user[0].unitKerja_profile.kode)}
             </Container>
           </Box>
 
@@ -644,16 +671,39 @@ function Detail(props) {
                 borderBottom="1px"
                 borderColor={borderColor}
               >
-                <Heading
-                  color={"white"}
-                  size="md"
-                  display="flex"
-                  align="center"
-                  gap={2}
-                >
-                  <Icon as={FiUsers} color="white" />
-                  Daftar Personil ({detailPerjalanan?.personils?.length} orang)
-                </Heading>
+                <Flex justify="space-between" align="center">
+                  <Heading
+                    color={"white"}
+                    size="md"
+                    display="flex"
+                    align="center"
+                    gap={2}
+                  >
+                    <Icon as={FiUsers} color="white" />
+                    Daftar Personil ({detailPerjalanan?.personils?.length}{" "}
+                    orang)
+                  </Heading>
+                  {!adaStatusDuaAtauTiga &&
+                    detailPerjalanan?.personils?.length < 5 && (
+                      <Button
+                        leftIcon={<FiUserPlus />}
+                        colorScheme="whiteAlpha"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setPegawaiTambahId(null);
+                          onTambahOpen();
+                        }}
+                        _hover={{
+                          bg: "whiteAlpha.200",
+                          transform: "translateY(-1px)",
+                        }}
+                        transition="all 0.2s"
+                      >
+                        Tambah Personil
+                      </Button>
+                    )}
+                </Flex>
               </CardHeader>
               <CardBody p={6}>
                 <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
@@ -829,7 +879,7 @@ function Detail(props) {
                   }}
                   placeholder="Ketik nama pegawai untuk mencari..."
                   onChange={(selectedOption) => {
-                    setPegawaiId(selectedOption.value);
+                    setPegawaiId(selectedOption?.value || null);
                   }}
                   components={{
                     DropdownIndicator: () => null,
@@ -880,6 +930,167 @@ function Detail(props) {
                 transition="all 0.2s"
               >
                 Simpan Perubahan
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Modal Tambah Personil */}
+        <Modal
+          closeOnOverlayClick={false}
+          isOpen={isTambahOpen}
+          onClose={onTambahClose}
+          size="lg"
+        >
+          <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+          <ModalContent borderRadius="xl" maxWidth="600px" mx={4}>
+            <ModalHeader
+              bg={headerBg}
+              borderTopRadius="xl"
+              display="flex"
+              alignItems="center"
+              gap={2}
+            >
+              <Icon as={FiUserPlus} color="purple.500" />
+              Tambah Personil
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={8}>
+              <VStack spacing={4} align="stretch">
+                {detailPerjalanan?.personils?.length >= 5 ? (
+                  <Box
+                    bg="orange.50"
+                    p={4}
+                    borderRadius="lg"
+                    border="1px"
+                    borderColor="orange.200"
+                  >
+                    <HStack spacing={2}>
+                      <Icon as={FiInfo} color="orange.500" />
+                      <Text
+                        fontSize="md"
+                        color="orange.700"
+                        fontWeight="medium"
+                      >
+                        Maksimal personil adalah 5 orang. Tidak dapat menambah
+                        personil lagi.
+                      </Text>
+                    </HStack>
+                  </Box>
+                ) : (
+                  <>
+                    <Box
+                      bg={useColorModeValue("blue.50", "blue.900")}
+                      p={3}
+                      borderRadius="md"
+                      border="1px"
+                      borderColor="blue.200"
+                    >
+                      <HStack spacing={2}>
+                        <Icon as={FiInfo} color="blue.500" />
+                        <Text fontSize="sm" color="blue.700">
+                          Personil saat ini:{" "}
+                          {detailPerjalanan?.personils?.length} dari 5 orang
+                        </Text>
+                      </HStack>
+                    </Box>
+                    <FormControl>
+                      <FormLabel fontSize="lg" fontWeight="semibold" mb={3}>
+                        Pilih Pegawai
+                      </FormLabel>
+                      <AsyncSelect
+                        loadOptions={async (inputValue) => {
+                          if (!inputValue) return [];
+                          try {
+                            const res = await axios.get(
+                              `${
+                                import.meta.env.VITE_REACT_APP_API_BASE_URL
+                              }/pegawai/search?q=${inputValue}`
+                            );
+
+                            const filtered = res.data.result;
+
+                            // Filter out pegawai yang sudah ada di personil
+                            const existingPegawaiIds =
+                              detailPerjalanan?.personils?.map(
+                                (p) => p.pegawai.id
+                              ) || [];
+
+                            return filtered
+                              .filter(
+                                (val) => !existingPegawaiIds.includes(val.id)
+                              )
+                              .map((val) => ({
+                                value: val.id,
+                                label: val.nama,
+                              }));
+                          } catch (err) {
+                            console.error(
+                              "Failed to load options:",
+                              err.message
+                            );
+                            return [];
+                          }
+                        }}
+                        placeholder="Ketik nama pegawai untuk mencari..."
+                        onChange={(selectedOption) => {
+                          setPegawaiTambahId(selectedOption?.value || null);
+                        }}
+                        components={{
+                          DropdownIndicator: () => null,
+                          IndicatorSeparator: () => null,
+                        }}
+                        chakraStyles={{
+                          container: (provided) => ({
+                            ...provided,
+                            borderRadius: "8px",
+                          }),
+                          control: (provided) => ({
+                            ...provided,
+                            backgroundColor: "white",
+                            border: "2px solid",
+                            borderColor: "gray.200",
+                            height: "50px",
+                            _hover: { borderColor: "blue.300" },
+                            _focus: {
+                              borderColor: "blue.500",
+                              boxShadow: "0 0 0 1px blue.500",
+                            },
+                            minHeight: "50px",
+                          }),
+                          option: (provided, state) => ({
+                            ...provided,
+                            bg: state.isFocused ? "purple.500" : "white",
+                            color: state.isFocused ? "white" : "black",
+                            _hover: { bg: "purple.500", color: "white" },
+                          }),
+                        }}
+                      />
+                    </FormControl>
+                  </>
+                )}
+              </VStack>
+            </ModalBody>
+            <ModalFooter gap={3} p={8}>
+              <Button
+                variant="outline"
+                onClick={onTambahClose}
+                _hover={{ transform: "translateY(-1px)" }}
+                transition="all 0.2s"
+              >
+                Batal
+              </Button>
+              <Button
+                colorScheme="purple"
+                leftIcon={<FiUserPlus />}
+                onClick={handleTambahPersonil}
+                _hover={{ transform: "translateY(-1px)" }}
+                transition="all 0.2s"
+                isDisabled={
+                  !pegawaiTambahId || detailPerjalanan?.personils?.length >= 5
+                }
+              >
+                Tambah Personil
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -1028,7 +1239,6 @@ function Detail(props) {
                 colorScheme="purple"
                 leftIcon={<FiCheckCircle />}
                 onClick={async () => {
-                  setIsLoading(true); // Mulai loading
                   try {
                     await axios.post(
                       `${
@@ -1043,7 +1253,6 @@ function Detail(props) {
                   } catch (err) {
                     console.error(err);
                   }
-                  setIsLoading(false); // Pastikan loading di-set false
                 }}
                 _hover={{ transform: "translateY(-1px)" }}
                 transition="all 0.2s"

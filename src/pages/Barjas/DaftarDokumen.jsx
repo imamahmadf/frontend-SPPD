@@ -86,10 +86,12 @@ function DaftarDokumen() {
   const [tanggalAkhir, setTanggalAkhir] = useState("");
   const [subKegPerId, setSubKegPerId] = useState(null);
   const [rekananId, setRekananId] = useState(null);
+  const [unitKerjaId, setUnitKerjaId] = useState(null);
   const [nomorSPId, setNomorSPId] = useState(null);
   const [akunBelanjaId, setAkunBelanjaId] = useState(null);
   const [tanggal, setTanggal] = useState("");
   const [isTambahRekananBaru, setIsTambahRekananBaru] = useState(false);
+  const [subKegPerFilterId, setSubKegPerFilterId] = useState(null);
   const [namaRekananBaru, setNamaRekananBaru] = useState("");
   const {
     isOpen: isTambahOpen,
@@ -139,6 +141,7 @@ function DaftarDokumen() {
         akunBelanjaId,
         tanggal,
         indukUnitKerjaId: user[0]?.unitKerja_profile?.indukUnitKerja?.id,
+        unitKerjaId,
       })
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -185,7 +188,7 @@ function DaftarDokumen() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/barjas/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&nomor=${nomorPlat}&startDate=${tanggalAwal}&endDate=${tanggalAkhir}`
+        }/barjas/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&startDate=${tanggalAwal}&endDate=${tanggalAkhir}&subKegPerId=${subKegPerFilterId}`
       )
       .then((res) => {
         setDataDokumen(res.data.result);
@@ -239,6 +242,7 @@ function DaftarDokumen() {
     nomorPlat,
     tanggalAkhir,
     tanggalAwal,
+    subKegPerFilterId,
   ]);
   return (
     <>
@@ -264,136 +268,112 @@ function DaftarDokumen() {
                 <BsDownload />
               </Button>{" "}
             </HStack>{" "}
-            {/* <Flex
-              borderRadius={"5px"}
-              bg={colorMode === "dark" ? "gray.800" : "white"}
-              mb={"30px"}
-              gap={5}
-            >
-              <FormControl>
-                <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
-                <AsyncSelect
-                  loadOptions={async (inputValue) => {
-                    if (!inputValue) return [];
-                    try {
-                      const res = await axios.get(
-                        `${
-                          import.meta.env.VITE_REACT_APP_API_BASE_URL
-                        }/pegawai/search?q=${inputValue}`
-                      );
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+              <AsyncSelect
+                loadOptions={async (inputValue) => {
+                  if (!inputValue) return [];
+                  try {
+                    const res = await axios.get(
+                      `${
+                        import.meta.env.VITE_REACT_APP_API_BASE_URL
+                      }/admin/search/unit-kerja?q=${inputValue}`
+                    );
 
-                      const filtered = res.data.result;
+                    const filtered = res.data.result;
 
-                      return filtered.map((val) => ({
-                        value: val.id,
-                        label: val.nama,
-                      }));
-                    } catch (err) {
-                      console.error("Failed to load options:", err.message);
-                      return [];
-                    }
-                  }}
-                  placeholder="Ketik Nama Pegawai"
-                  onChange={(selectedOption) => {
-                    setPegawaiFilterId(selectedOption.value);
-                  }}
-                  components={{
-                    DropdownIndicator: () => null,
-                    IndicatorSeparator: () => null,
-                  }}
-                  chakraStyles={{
-                    container: (provided) => ({
-                      ...provided,
-                      borderRadius: "6px",
-                    }),
-                    control: (provided) => ({
-                      ...provided,
-                      backgroundColor: "terang",
-                      border: "0px",
-                      height: "60px",
-                      _hover: { borderColor: "yellow.700" },
-                      minHeight: "40px",
-                    }),
-                    option: (provided, state) => ({
-                      ...provided,
-                      bg: state.isFocused ? "aset" : "white",
-                      color: state.isFocused ? "white" : "black",
-                    }),
-                  }}
-                />
-              </FormControl>{" "}
-              {JSON.stringify(user[0]?.unitKerja_profile.indukUnitKerja.id)}
-              <FormControl border={0}>
-                <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
-                <Select2
-                  options={dataSeed?.unitKerja?.map((val) => ({
-                    value: val.id,
-                    label: `${val.unitKerja}`,
-                  }))}
-                  placeholder="Contoh: Laboratorium kesehatan daerah"
-                  focusBorderColor="red"
-                  onChange={(selectedOption) => {
-                    setUnitKerjaFilterId(selectedOption.value);
-                  }}
-                  components={{
-                    DropdownIndicator: () => null, // Hilangkan tombol panah
-                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                  }}
-                  chakraStyles={{
-                    container: (provided) => ({
-                      ...provided,
-                      borderRadius: "6px",
-                    }),
-                    control: (provided) => ({
-                      ...provided,
-                      backgroundColor: "terang",
-                      border: "0px",
-                      height: "60px",
-                      _hover: {
-                        borderColor: "yellow.700",
-                      },
-                      minHeight: "40px",
-                    }),
-                    option: (provided, state) => ({
-                      ...provided,
-                      bg: state.isFocused ? "aset" : "white",
-                      color: state.isFocused ? "white" : "black",
-                    }),
-                  }}
-                />
-              </FormControl>{" "}
-              <FormControl>
-                <FormLabel fontSize={"24px"}>Nomor Plat</FormLabel>
-                <Input
-                  height={"60px"}
-                  bgColor={"terang"}
-                  onChange={inputHandler}
-                  placeholder="Contoh : 3321"
-                />
-              </FormControl>{" "}
-              <FormControl>
-                <FormLabel fontSize={"24px"}>Awal</FormLabel>
-                <Input
-                  minWidth={"200px"}
-                  bgColor={"terang"}
-                  height={"60px"}
-                  type="date"
-                  value={tanggalAwal}
-                  onChange={(e) => setTanggalAwal(e.target.value)}
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel fontSize={"24px"}> Akhir</FormLabel>
-                <Input
-                  type="date"
-                  minWidth={"200px"}
-                  bgColor={"terang"}
-                  height={"60px"}
-                  value={tanggalAkhir}
-                  onChange={(e) => setTanggalAkhir(e.target.value)}
-                />
-              </FormControl>
-            </Flex> */}
+                    return filtered.map((val) => ({
+                      value: val.id,
+                      label: val.unitKerja,
+                    }));
+                  } catch (err) {
+                    console.error("Failed to load options:", err.message);
+                    return [];
+                  }
+                }}
+                placeholder="Ketik Nama Unit Kerja"
+                onChange={(selectedOption) => {
+                  setUnitKerjaFilterId(selectedOption.value);
+                }}
+                components={{
+                  DropdownIndicator: () => null,
+                  IndicatorSeparator: () => null,
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: { borderColor: "yellow.700" },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "aset" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>{" "}
+            <FormControl my={"30px"}>
+              <FormLabel fontSize={"24px"}>SubKegiatan</FormLabel>
+              <AsyncSelect
+                loadOptions={async (inputValue) => {
+                  if (!inputValue) return [];
+                  try {
+                    const res = await axios.get(
+                      `${
+                        import.meta.env.VITE_REACT_APP_API_BASE_URL
+                      }/barjas/get/sub-kegiatan/search?q=${inputValue}&indukUnitKerjaId=${
+                        user[0]?.unitKerja_profile?.id
+                      }`
+                    );
+
+                    const filtered = res.data.result;
+
+                    return filtered.map((val) => ({
+                      value: val.id,
+                      label: val.nama,
+                    }));
+                  } catch (err) {
+                    console.error("Failed to load options:", err.message);
+                    return [];
+                  }
+                }}
+                placeholder="Ketik Nama Pegawai"
+                onChange={(selectedOption) => {
+                  setSubKegPerFilterId(selectedOption.value);
+                }}
+                components={{
+                  DropdownIndicator: () => null,
+                  IndicatorSeparator: () => null,
+                }}
+                chakraStyles={{
+                  container: (provided) => ({
+                    ...provided,
+                    borderRadius: "6px",
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: "terang",
+                    border: "0px",
+                    height: "60px",
+                    _hover: { borderColor: "yellow.700" },
+                    minHeight: "40px",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    bg: state.isFocused ? "aset" : "white",
+                    color: state.isFocused ? "white" : "black",
+                  }),
+                }}
+              />
+            </FormControl>
             <Table variant={"aset"}>
               <Thead>
                 <Tr>
@@ -764,6 +744,61 @@ function DaftarDokumen() {
                         type="date"
                         value={tanggalAwal}
                         onChange={(e) => setTanggal(e.target.value)}
+                      />
+                    </FormControl>{" "}
+                    <FormControl my={"30px"}>
+                      <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                      <AsyncSelect
+                        loadOptions={async (inputValue) => {
+                          if (!inputValue) return [];
+                          try {
+                            const res = await axios.get(
+                              `${
+                                import.meta.env.VITE_REACT_APP_API_BASE_URL
+                              }/admin/search/unit-kerja?q=${inputValue}`
+                            );
+
+                            const filtered = res.data.result;
+
+                            return filtered.map((val) => ({
+                              value: val.id,
+                              label: val.unitKerja,
+                            }));
+                          } catch (err) {
+                            console.error(
+                              "Failed to load options:",
+                              err.message
+                            );
+                            return [];
+                          }
+                        }}
+                        placeholder="Ketik Nama Unit Kerja"
+                        onChange={(selectedOption) => {
+                          setUnitKerjaId(selectedOption.value);
+                        }}
+                        components={{
+                          DropdownIndicator: () => null,
+                          IndicatorSeparator: () => null,
+                        }}
+                        chakraStyles={{
+                          container: (provided) => ({
+                            ...provided,
+                            borderRadius: "6px",
+                          }),
+                          control: (provided) => ({
+                            ...provided,
+                            backgroundColor: "terang",
+                            border: "0px",
+                            height: "60px",
+                            _hover: { borderColor: "yellow.700" },
+                            minHeight: "40px",
+                          }),
+                          option: (provided, state) => ({
+                            ...provided,
+                            bg: state.isFocused ? "aset" : "white",
+                            color: state.isFocused ? "white" : "black",
+                          }),
+                        }}
                       />
                     </FormControl>
                   </SimpleGrid>
