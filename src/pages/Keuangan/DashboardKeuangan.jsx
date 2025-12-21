@@ -25,14 +25,15 @@ import {
   HStack,
   Divider,
   Flex,
+  Button,
 } from "@chakra-ui/react";
 import axios from "axios";
 import Layout from "../../Componets/Layout";
-
+import { Link, useHistory } from "react-router-dom";
 export default function DashboardKeuangan() {
   const [dataDashboard, setDataDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const history = useHistory();
   async function fetchDashboardKeuangan() {
     try {
       const token = localStorage.getItem("token");
@@ -76,13 +77,13 @@ export default function DashboardKeuangan() {
   const getStatusLabel = (statusId) => {
     switch (statusId) {
       case 1:
-        return "Status 1";
+        return "SPD Sudah dibuat";
       case 2:
-        return "Status 2";
+        return "Pengajuan kwitansi";
       case 3:
-        return "Status 3";
+        return "Kwitansi Terverivikasi";
       case 4:
-        return "Status 4";
+        return "Kwitansi ditolak";
       default:
         return "Unknown";
     }
@@ -237,7 +238,7 @@ export default function DashboardKeuangan() {
                     <CardBody>
                       <VStack align="flex-start" spacing={2}>
                         <Text fontSize="sm" color="gray.600">
-                          Personil Status 1
+                          SPD Sudah dibuat
                         </Text>
                         <Text fontSize="2xl" fontWeight="bold" color="blue.600">
                           {totals.totalPersonilStatus1}
@@ -249,7 +250,7 @@ export default function DashboardKeuangan() {
                     <CardBody>
                       <VStack align="flex-start" spacing={2}>
                         <Text fontSize="sm" color="gray.600">
-                          Personil Status 2
+                          Pengajuan kwitansi
                         </Text>
                         <Text
                           fontSize="2xl"
@@ -265,7 +266,7 @@ export default function DashboardKeuangan() {
                     <CardBody>
                       <VStack align="flex-start" spacing={2}>
                         <Text fontSize="sm" color="gray.600">
-                          Personil Status 3
+                          Kwitansi Terverivikasi
                         </Text>
                         <Text
                           fontSize="2xl"
@@ -281,7 +282,7 @@ export default function DashboardKeuangan() {
                     <CardBody>
                       <VStack align="flex-start" spacing={2}>
                         <Text fontSize="sm" color="gray.600">
-                          Personil Status 4
+                          Kwitansi ditolak
                         </Text>
                         <Text fontSize="2xl" fontWeight="bold" color="red.600">
                           {totals.totalPersonilStatus4}
@@ -307,12 +308,20 @@ export default function DashboardKeuangan() {
                                   {unitKerja.unitKerja}
                                 </Text>
                                 <Badge colorScheme="blue">
-                                  {unitKerja.daftarSubKegiatans?.length || 0}{" "}
-                                  Sub Kegiatan
+                                  {unitKerja.totalPersonilStatus1 || 0} SPD
+                                  Sudah dibuat
                                 </Badge>
                                 <Badge colorScheme="green">
-                                  {unitKerja.totalPersonilUnitKerja || 0}{" "}
-                                  Personil
+                                  {unitKerja.totalPersonilStatus2 || 0}{" "}
+                                  Pengajuan Kwitansi
+                                </Badge>
+                                <Badge colorScheme="yellow">
+                                  {unitKerja.totalPersonilStatus3 || 0} Kwitansi
+                                  Terverivikasi
+                                </Badge>
+                                <Badge colorScheme="red">
+                                  {unitKerja.totalPersonilStatus4 || 0} Kwitansi
+                                  ditolak
                                 </Badge>
                               </HStack>
                             </Box>
@@ -335,7 +344,7 @@ export default function DashboardKeuangan() {
                                 </Box>
                                 <Box>
                                   <Text fontSize="sm" color="gray.600">
-                                    Status 1
+                                    SPD Sudah dibuat
                                   </Text>
                                   <Text
                                     fontSize="lg"
@@ -347,7 +356,7 @@ export default function DashboardKeuangan() {
                                 </Box>
                                 <Box>
                                   <Text fontSize="sm" color="gray.600">
-                                    Status 2
+                                    Pengajuan kwitansi
                                   </Text>
                                   <Text
                                     fontSize="lg"
@@ -359,7 +368,7 @@ export default function DashboardKeuangan() {
                                 </Box>
                                 <Box>
                                   <Text fontSize="sm" color="gray.600">
-                                    Status 3
+                                    Kwitansi Terverivikasi
                                   </Text>
                                   <Text
                                     fontSize="lg"
@@ -371,7 +380,7 @@ export default function DashboardKeuangan() {
                                 </Box>
                                 <Box>
                                   <Text fontSize="sm" color="gray.600">
-                                    Status 4
+                                    Kwitansi ditolak
                                   </Text>
                                   <Text
                                     fontSize="lg"
@@ -450,7 +459,7 @@ export default function DashboardKeuangan() {
                                                     fontSize="sm"
                                                     color="gray.600"
                                                   >
-                                                    Status 1
+                                                    SPD Sudah dibuat
                                                   </Text>
                                                   <Text
                                                     fontSize="lg"
@@ -466,7 +475,7 @@ export default function DashboardKeuangan() {
                                                     fontSize="sm"
                                                     color="gray.600"
                                                   >
-                                                    Status 2
+                                                    Pengajuan kwitansi
                                                   </Text>
                                                   <Text
                                                     fontSize="lg"
@@ -482,7 +491,7 @@ export default function DashboardKeuangan() {
                                                     fontSize="sm"
                                                     color="gray.600"
                                                   >
-                                                    Status 3
+                                                    Kwitansi Terverivikasi
                                                   </Text>
                                                   <Text
                                                     fontSize="lg"
@@ -498,7 +507,7 @@ export default function DashboardKeuangan() {
                                                     fontSize="sm"
                                                     color="gray.600"
                                                   >
-                                                    Status 4
+                                                    Kwitansi ditolak
                                                   </Text>
                                                   <Text
                                                     fontSize="lg"
@@ -692,15 +701,18 @@ export default function DashboardKeuangan() {
                                                               Total Personil
                                                             </Th>
                                                             <Th>
-                                                              SPJ sudah dibuat
+                                                              SPD Sudah dibuat
                                                             </Th>
                                                             <Th>
-                                                              Pengajuan SPJ
+                                                              Pengajuan kwitansi
                                                             </Th>
                                                             <Th>
-                                                              SPJ Terverivikasi
+                                                              Kwitansi
+                                                              Terverivikasi
                                                             </Th>
-                                                            <Th>SPJ ditolak</Th>
+                                                            <Th>
+                                                              Kwitansi ditolak
+                                                            </Th>
                                                           </Tr>
                                                         </Thead>
                                                         <Tbody>
@@ -728,9 +740,20 @@ export default function DashboardKeuangan() {
                                                                   }
                                                                 >
                                                                   <Td>
-                                                                    {
-                                                                      perjalanan.id
-                                                                    }
+                                                                    <Button
+                                                                      onClick={() =>
+                                                                        history.push(
+                                                                          `/admin/rampung/${
+                                                                            perjalanan.id ||
+                                                                            ""
+                                                                          }`
+                                                                        )
+                                                                      }
+                                                                    >
+                                                                      {" "}
+                                                                      Lihat
+                                                                      Detail
+                                                                    </Button>
                                                                   </Td>
                                                                   <Td>
                                                                     {tempatTujuan.length >

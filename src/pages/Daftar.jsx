@@ -258,6 +258,79 @@ function Daftar() {
           ttdSurTugUnitKerja: val?.ttdSuratTuga?.indukUnitKerjaId || "",
           ttdSurtTugKode:
             val?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas?.kodeInduk || "",
+
+          noNotaDinas: val?.suratKeluar?.nomor || "",
+          noSuratTugas: val?.noSuratTugas || "",
+          unitKerja: user[0]?.unitKerja_profile || null,
+          indukUnitKerjaFE: user[0]?.unitKerja_profile || null,
+        },
+        {
+          responseType: "blob", // Penting untuk menerima file sebagai blob
+        }
+      )
+      .then((res) => {
+        // Buat URL untuk file yang diunduh
+        const url = window.URL.createObjectURL(new Blob([res.data])); // Perbaikan di sini
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute(
+          "download",
+          `Surat_Tugas_${
+            user[0]?.unitKerja_profile?.kode || "unknown"
+          }_${Date.now()}.docx`
+        ); // Nama file yang diunduh
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        fetchDataPerjalanan();
+
+        toast({
+          title: "Berhasil",
+          description: "File surat tugas berhasil diunduh",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .catch((err) => {
+        console.error(err); // Tangani error
+        toast({
+          title: "Gagal",
+          description: "Gagal mengunduh file surat tugas",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  const postSPD = (val) => {
+    setIsLoading(true);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perjalanan/post/surat-perjalanan-dinas`,
+        {
+          asal: val?.asal || "",
+          jenis: val?.jenisPerjalanan?.id || "",
+          kode: `${val?.daftarSubKegiatan?.kodeRekening || ""}${
+            val?.jenisPerjalanan?.kodeRekening || ""
+          }`,
+          personilFE: val?.personils || [],
+          ttdSurTug: val?.ttdSuratTuga || null,
+          id: val?.id || "",
+          tanggalPengajuan: val?.tanggalPengajuan || "",
+          tempat: val?.tempats || [],
+          untuk: val?.untuk || "",
+          dasar: val?.dasar || "",
+          isNotaDinas: val?.isNotaDinas || 0,
+          ttdSurTugUnitKerja: val?.ttdSuratTuga?.indukUnitKerjaId || "",
+          ttdSurtTugKode:
+            val?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas?.kodeInduk || "",
           KPANama: val?.KPA?.pegawai_KPA?.nama || "",
           KPANip: val?.KPA?.pegawai_KPA?.nip || "",
           KPAPangkat: val?.KPA?.pegawai_KPA?.daftarPangkat?.pangkat || "",
@@ -685,6 +758,13 @@ function Daftar() {
                               onClick={() => postSuratTugas(item)}
                             >
                               Cetak Surat Tugas
+                            </MenuItem>
+
+                            <MenuItem
+                              icon={<BsFileEarmarkArrowDown />}
+                              onClick={() => postSPD(item)}
+                            >
+                              Cetak Surat Perjalanan Dinas
                             </MenuItem>
                             <MenuItem
                               icon={<BsFileEarmarkArrowDown />}

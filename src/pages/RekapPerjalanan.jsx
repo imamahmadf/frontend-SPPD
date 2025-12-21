@@ -8,6 +8,7 @@ import {
   CreatableSelect,
   AsyncSelect,
 } from "chakra-react-select";
+import { BsDownload } from "react-icons/bs";
 import "../Style/pagination.css";
 import { Link, useHistory } from "react-router-dom";
 import {
@@ -81,6 +82,34 @@ function RekapPerjalanan() {
       console.error(err);
     }
   }
+
+  const downloadExcel = async () => {
+    try {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/rekap/get/perjalanan/download?subKegiatanId=${subKegiatanId}&unitKerjaId=${
+          user[0]?.unitKerja_profile?.id
+        }`,
+        {
+          responseType: "blob", // agar respons dibaca sebagai file
+          // headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "data-Kendaraan-dinas.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Gagal mengunduh file Excel:", error);
+      alert("Terjadi kesalahan saat mengunduh file.");
+    }
+  };
+
   async function fetchDataRekap() {
     try {
       const res = await axios.get(
@@ -117,6 +146,14 @@ function RekapPerjalanan() {
           mb={"40px"}
         >
           <Flex gap={4} mb={4} zIndex={999}>
+            {" "}
+            <Button
+              variant={"primary"}
+              fontWeight={900}
+              onClick={downloadExcel}
+            >
+              <BsDownload />
+            </Button>{" "}
             <FormControl my={"30px"}>
               <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
               <AsyncSelect

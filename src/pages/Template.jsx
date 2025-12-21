@@ -186,6 +186,7 @@ const Template = () => {
                         <option value="2">Nota Dinas</option>
                         <option value="3">Surat Tugas Singkat </option>{" "}
                         <option value="4">Telahaan Staf </option>
+                        <option value="5">SPD </option>
                       </Select>
                       <FormErrorMessage>{errors.jenis}</FormErrorMessage>
                     </FormControl>
@@ -228,8 +229,9 @@ const Template = () => {
                   <Tr>
                     <Th>Unit Kerja</Th>
                     <Th>Nota Dinas</Th> <Th>Telahaan Staf</Th>
-                    <Th>Surat Tugas & SPD</Th>
-                    <Th>Surat Tugas</Th>
+                    <Th>Surat Tugas </Th>
+                    <Th> SPD</Th>
+                    <Th>Surat Tugas Singkat</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -274,7 +276,21 @@ const Template = () => {
                       ) : (
                         "-"
                       )}
-                    </Td>{" "}
+                    </Td>
+                    <Td>
+                      {dataTemplate.templateSuratTugas ? (
+                        <Button
+                          variant={"primary"}
+                          onClick={() =>
+                            handleDownload(dataTemplate.templateSuratTugas)
+                          }
+                        >
+                          lihatxx
+                        </Button>
+                      ) : (
+                        "-"
+                      )}
+                    </Td>
                     <Td>
                       {dataTemplate.templateSuratTugasSingkat ? (
                         <Button
