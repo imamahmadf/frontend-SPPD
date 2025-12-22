@@ -96,6 +96,7 @@ import DaftarDokumen from "./pages/Barjas/DaftarDokumen.jsx";
 import DetailSP from "./pages/Barjas/DetailSP.jsx";
 import PengaturanBarjas from "./pages/Barjas/PengaturanBarjas.jsx";
 import JenisDokumenBarjas from "./pages/Barjas/JenisDokumenBarjas.jsx";
+import NomorSPBarjas from "./pages/Barjas/NomorSPBarjas.jsx";
 //////PJPL//////////////////////
 
 import PejabatVerifikator from "./pages/PJPL/PejabatVerifikator.jsx";
@@ -626,6 +627,12 @@ function App() {
           <ProtectedRoute
             component={JenisDokumenBarjas}
             path="/barjas/jenis-dokumen"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={NomorSPBarjas}
+            path="/barjas/nomor-sp"
             exact
             roleRoute={[5, 1]}
           />

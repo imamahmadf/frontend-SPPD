@@ -111,6 +111,17 @@ function DaftarDokumen() {
     setPage(selected);
   };
 
+  // Reset ke halaman pertama saat filter berubah
+  useEffect(() => {
+    setPage(0);
+  }, [
+    unitKerjaFilterId,
+    pegawaiFilterId,
+    tanggalAwal,
+    tanggalAkhir,
+    subKegPerFilterId,
+  ]);
+
   const handleCloseModal = () => {
     setNomorSPId(null);
     setNomorSPManual("");
@@ -215,7 +226,7 @@ function DaftarDokumen() {
       )
       .then((res) => {
         setDataDokumen(res.data.result);
-        setPage(res.data.page);
+        // Jangan set page dari response, biarkan dikontrol oleh user
         setPages(res.data.totalPage);
         setRows(res.data.totalRows);
         console.log(res.data.result);
@@ -248,7 +259,7 @@ function DaftarDokumen() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "data-Kendaraan-dinas.xlsx");
+      link.setAttribute("download", "data-nomor-dokumen.xlsx");
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -270,6 +281,7 @@ function DaftarDokumen() {
     fetchSeed();
   }, [
     page,
+    limit,
     unitKerjaFilterId,
     pegawaiFilterId,
     nomorPlat,
@@ -626,26 +638,29 @@ function DaftarDokumen() {
               </Table>
             </Box>
             {/* Pagination */}
-            {pages > 1 && (
-              <Box mt={6} display="flex" justifyContent="center">
-                <ReactPaginate
-                  previousLabel={"←"}
-                  nextLabel={"→"}
-                  pageCount={pages}
-                  onPageChange={changePage}
-                  activeClassName={"item active "}
-                  breakClassName={"item break-me "}
-                  breakLabel={"..."}
-                  containerClassName={"pagination"}
-                  disabledClassName={"disabled-page"}
-                  marginPagesDisplayed={1}
-                  nextClassName={"item next "}
-                  pageClassName={"item pagination-page "}
-                  pageRangeDisplayed={2}
-                  previousClassName={"item previous"}
-                />
-              </Box>
-            )}
+            <Box
+              mt={6}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+            >
+              <ReactPaginate
+                previousLabel={"←"}
+                nextLabel={"→"}
+                pageCount={pages}
+                onPageChange={changePage}
+                activeClassName={"item active "}
+                breakClassName={"item break-me "}
+                breakLabel={"..."}
+                containerClassName={"pagination"}
+                disabledClassName={"disabled-page"}
+                marginPagesDisplayed={1}
+                nextClassName={"item next "}
+                pageClassName={"item pagination-page "}
+                pageRangeDisplayed={2}
+                previousClassName={"item previous"}
+              />
+            </Box>
           </Box>
 
           <Modal

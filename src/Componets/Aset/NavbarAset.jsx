@@ -70,8 +70,8 @@ const menuData = [
     pathPrefix: "/barjas",
     items: [
       { label: "Daftar Surat Pesanan", path: "/barjas/daftar-dokumen-sp" },
-      { label: "Jenis Dokumen Barjas", path: "/barjas/jenis-dokumen" },
-      { label: "template Surat", path: "/sijaka/template" },
+      { label: "Pengaturan Dokumen Barjas", path: "/barjas/jenis-dokumen" },
+      { label: "Pengaturan SP", path: "/barjas/nomor-sp" },
     ],
   },
   {
