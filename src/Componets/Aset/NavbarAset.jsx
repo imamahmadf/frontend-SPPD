@@ -70,7 +70,7 @@ const menuData = [
     pathPrefix: "/barjas",
     items: [
       { label: "Daftar Surat Pesanan", path: "/barjas/daftar-dokumen-sp" },
-      { label: "Surat Pengantar", path: "/sijaka/daftar-kendaraan" },
+      { label: "Jenis Dokumen Barjas", path: "/barjas/jenis-dokumen" },
       { label: "template Surat", path: "/sijaka/template" },
     ],
   },
@@ -82,6 +82,7 @@ const menuData = [
       { label: "Daftar Kendaraan", path: "/sijaka/daftar-kendaraan" },
       // { label: "Surat Pengantar", path: "/sijaka/daftar-kendaraan" },
       { label: "template Surat", path: "/sijaka/template" },
+      { label: "Pengaturan", path: "/barjas/pengaturan" },
     ],
   },
   {

@@ -45,6 +45,11 @@ import {
   MenuList,
   MenuItem,
   IconButton,
+  VStack,
+  Divider,
+  Badge,
+  Skeleton,
+  SkeletonText,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -74,6 +79,7 @@ function DaftarDokumen() {
   const [loadingItems, setLoadingItems] = useState({});
   const [loadingSurat, setLoadingSurat] = useState({});
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
 
@@ -93,6 +99,8 @@ function DaftarDokumen() {
   const [isTambahRekananBaru, setIsTambahRekananBaru] = useState(false);
   const [subKegPerFilterId, setSubKegPerFilterId] = useState(null);
   const [namaRekananBaru, setNamaRekananBaru] = useState("");
+  const [isTulisManualSP, setIsTulisManualSP] = useState(false);
+  const [nomorSPManual, setNomorSPManual] = useState("");
   const {
     isOpen: isTambahOpen,
     onOpen: onTambahOpen,
@@ -101,6 +109,20 @@ function DaftarDokumen() {
 
   const changePage = ({ selected }) => {
     setPage(selected);
+  };
+
+  const handleCloseModal = () => {
+    setNomorSPId(null);
+    setNomorSPManual("");
+    setIsTulisManualSP(false);
+    setSubKegPerId(null);
+    setRekananId(null);
+    setUnitKerjaId(null);
+    setAkunBelanjaId(null);
+    setTanggal("");
+    setNamaRekananBaru("");
+    setIsTambahRekananBaru(false);
+    onTambahClose();
   };
 
   const tambahRekanan = () => {
@@ -129,14 +151,14 @@ function DaftarDokumen() {
           duration: 5000,
           isClosable: true,
         });
-        onTambahClose();
       });
   };
   const tambahSP = () => {
     axios
       .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/post/sp`, {
         subKegPerId,
-        nomorSPId,
+        nomorSPId: isTulisManualSP ? null : nomorSPId,
+        nomorSPManual: isTulisManualSP ? nomorSPManual : null,
         rekananId,
         akunBelanjaId,
         tanggal,
@@ -153,7 +175,7 @@ function DaftarDokumen() {
           isClosable: true,
         });
         fetchDataDokumen();
-        onTambahClose();
+        handleCloseModal();
       })
       .catch((err) => {
         console.error(err.message);
@@ -164,7 +186,7 @@ function DaftarDokumen() {
           duration: 5000,
           isClosable: true,
         });
-        onTambahClose();
+        handleCloseModal();
       });
   };
   async function fetchSeed() {
@@ -184,6 +206,7 @@ function DaftarDokumen() {
   }
 
   async function fetchDataDokumen() {
+    setIsLoading(true);
     await axios
       .get(
         `${
@@ -199,6 +222,16 @@ function DaftarDokumen() {
       })
       .catch((err) => {
         console.error(err);
+        toast({
+          title: "Error!",
+          description: "Gagal memuat data dokumen",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }
 
@@ -247,214 +280,378 @@ function DaftarDokumen() {
   return (
     <>
       <LayoutAset>
-        <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Box bgColor={"secondary"} pb={"40px"} px={"30px"} pt={"30px"}>
           <Box
             style={{ overflowX: "auto" }}
             bgColor={"white"}
             p={"30px"}
-            borderRadius={"5px"}
+            borderRadius={"10px"}
             bg={colorMode === "dark" ? "gray.800" : "white"}
+            boxShadow="sm"
           >
-            <HStack gap={5} mb={"30px"}>
-              <Button onClick={onTambahOpen} variant={"primary"} px={"50px"}>
-                Tambah +
-              </Button>{" "}
-              <Spacer />
-              <Button
-                variant={"primary"}
-                fontWeight={900}
-                onClick={downloadExcel}
-              >
-                <BsDownload />
-              </Button>{" "}
-            </HStack>{" "}
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
-              <AsyncSelect
-                loadOptions={async (inputValue) => {
-                  if (!inputValue) return [];
-                  try {
-                    const res = await axios.get(
-                      `${
-                        import.meta.env.VITE_REACT_APP_API_BASE_URL
-                      }/admin/search/unit-kerja?q=${inputValue}`
-                    );
-
-                    const filtered = res.data.result;
-
-                    return filtered.map((val) => ({
-                      value: val.id,
-                      label: val.unitKerja,
-                    }));
-                  } catch (err) {
-                    console.error("Failed to load options:", err.message);
-                    return [];
-                  }
-                }}
-                placeholder="Ketik Nama Unit Kerja"
-                onChange={(selectedOption) => {
-                  setUnitKerjaFilterId(selectedOption.value);
-                }}
-                components={{
-                  DropdownIndicator: () => null,
-                  IndicatorSeparator: () => null,
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: { borderColor: "yellow.700" },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "aset" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>{" "}
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>SubKegiatan</FormLabel>
-              <AsyncSelect
-                loadOptions={async (inputValue) => {
-                  if (!inputValue) return [];
-                  try {
-                    const res = await axios.get(
-                      `${
-                        import.meta.env.VITE_REACT_APP_API_BASE_URL
-                      }/barjas/get/sub-kegiatan/search?q=${inputValue}&indukUnitKerjaId=${
-                        user[0]?.unitKerja_profile?.id
-                      }`
-                    );
-
-                    const filtered = res.data.result;
-
-                    return filtered.map((val) => ({
-                      value: val.id,
-                      label: val.nama,
-                    }));
-                  } catch (err) {
-                    console.error("Failed to load options:", err.message);
-                    return [];
-                  }
-                }}
-                placeholder="Ketik Nama Pegawai"
-                onChange={(selectedOption) => {
-                  setSubKegPerFilterId(selectedOption.value);
-                }}
-                components={{
-                  DropdownIndicator: () => null,
-                  IndicatorSeparator: () => null,
-                }}
-                chakraStyles={{
-                  container: (provided) => ({
-                    ...provided,
-                    borderRadius: "6px",
-                  }),
-                  control: (provided) => ({
-                    ...provided,
-                    backgroundColor: "terang",
-                    border: "0px",
-                    height: "60px",
-                    _hover: { borderColor: "yellow.700" },
-                    minHeight: "40px",
-                  }),
-                  option: (provided, state) => ({
-                    ...provided,
-                    bg: state.isFocused ? "aset" : "white",
-                    color: state.isFocused ? "white" : "black",
-                  }),
-                }}
-              />
-            </FormControl>
-            <Table variant={"aset"}>
-              <Thead>
-                <Tr>
-                  <Th>nomor</Th>
-                  <Th>tanggal</Th>
-                  <Th>Bidang</Th>
-                  <Th>Sub Kegiatan</Th>
-                  <Th>Akun Belanja</Th> <Th>Rekanan</Th> <Th>Nominal</Th>{" "}
-                  <Th>Aksi</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {DataDokumen?.map((item, index) => (
-                  <Tr key={item.id}>
-                    <Td>{item?.nomor}</Td>
-                    <Td>
-                      {item?.tanggal
-                        ? new Date(item?.tanggal).toLocaleDateString("id-ID", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
-                        : "-"}
-                    </Td>
-                    <Td>{item?.subKegPer?.daftarUnitKerja?.unitKerja}</Td>
-                    <Td>{item?.subKegPer?.nama}</Td>
-                    <Td>{item?.akunBelanja?.akun}</Td>
-                    <Td>{item?.rekanan?.nama}</Td>
-                    <Td>
-                      {" "}
-                      Rp
-                      {Number(item?.total).toLocaleString("id-ID")}
-                    </Td>
-                    <Td>
-                      <Button
-                        onClick={() =>
-                          history.push(`/barjas/detail-sp/${item.id}`)
-                        }
-                      >
-                        Detail
-                      </Button>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-
-                boxSizing: "border-box",
-                width: "100%",
-                height: "100%",
-              }}
+            {/* Header Section */}
+            <Flex
+              justify="space-between"
+              align="center"
+              mb={"30px"}
+              flexWrap="wrap"
+              gap={4}
             >
-              <ReactPaginate
-                previousLabel={"+"}
-                nextLabel={"-"}
-                pageCount={pages}
-                onPageChange={changePage}
-                activeClassName={"item active "}
-                breakClassName={"item break-me "}
-                breakLabel={"..."}
-                containerClassName={"pagination"}
-                disabledClassName={"disabled-page"}
-                marginPagesDisplayed={1}
-                nextClassName={"item next "}
-                pageClassName={"item pagination-page "}
-                pageRangeDisplayed={2}
-                previousClassName={"item previous"}
-              />
-            </div>
+              <VStack align="start" spacing={1}>
+                <Heading size="lg" color="gray.700">
+                  Daftar Dokumen Barjas
+                </Heading>
+                <Text fontSize="sm" color="gray.500">
+                  Total: {rows} dokumen
+                </Text>
+              </VStack>
+              <HStack gap={3}>
+                <Button
+                  onClick={onTambahOpen}
+                  variant={"primary"}
+                  px={"30px"}
+                  size="md"
+                  leftIcon={<Text fontSize="lg">+</Text>}
+                >
+                  Tambah Dokumen
+                </Button>
+                <Button
+                  variant={"outline"}
+                  onClick={downloadExcel}
+                  leftIcon={<BsDownload />}
+                  size="md"
+                >
+                  Export Excel
+                </Button>
+              </HStack>
+            </Flex>
+
+            <Divider mb={"30px"} />
+
+            {/* Filter Section */}
+            <Box mb={"30px"}>
+              <Heading size="md" mb={"20px"} color="gray.700">
+                Filter Pencarian
+              </Heading>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
+                <FormControl>
+                  <FormLabel fontSize={"16px"} fontWeight="medium">
+                    Unit Kerja
+                  </FormLabel>
+                  <AsyncSelect
+                    loadOptions={async (inputValue) => {
+                      if (!inputValue) return [];
+                      try {
+                        const res = await axios.get(
+                          `${
+                            import.meta.env.VITE_REACT_APP_API_BASE_URL
+                          }/admin/search/unit-kerja?q=${inputValue}`
+                        );
+
+                        const filtered = res.data.result;
+
+                        return filtered.map((val) => ({
+                          value: val.id,
+                          label: val.unitKerja,
+                        }));
+                      } catch (err) {
+                        console.error("Failed to load options:", err.message);
+                        return [];
+                      }
+                    }}
+                    placeholder="Ketik Nama Unit Kerja"
+                    onChange={(selectedOption) => {
+                      setUnitKerjaFilterId(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: { borderColor: "yellow.700" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "aset" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize={"16px"} fontWeight="medium">
+                    Sub Kegiatan
+                  </FormLabel>
+                  <AsyncSelect
+                    loadOptions={async (inputValue) => {
+                      if (!inputValue) return [];
+                      try {
+                        const res = await axios.get(
+                          `${
+                            import.meta.env.VITE_REACT_APP_API_BASE_URL
+                          }/barjas/get/sub-kegiatan/search?q=${inputValue}&indukUnitKerjaId=${
+                            user[0]?.unitKerja_profile?.id
+                          }`
+                        );
+
+                        const filtered = res.data.result;
+
+                        return filtered.map((val) => ({
+                          value: val.id,
+                          label: val.nama,
+                        }));
+                      } catch (err) {
+                        console.error("Failed to load options:", err.message);
+                        return [];
+                      }
+                    }}
+                    placeholder="Ketik Nama Sub Kegiatan"
+                    onChange={(selectedOption) => {
+                      setSubKegPerFilterId(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: { borderColor: "yellow.700" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "aset" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+              </SimpleGrid>
+              {(unitKerjaFilterId || subKegPerFilterId) && (
+                <Button
+                  mt={4}
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="red"
+                  onClick={() => {
+                    setUnitKerjaFilterId(0);
+                    setSubKegPerFilterId(null);
+                  }}
+                >
+                  Reset Filter
+                </Button>
+              )}
+            </Box>
+
+            <Divider mb={"30px"} />
+
+            {/* Table Section */}
+            <Box
+              borderRadius="8px"
+              overflow="hidden"
+              border="1px solid"
+              borderColor="gray.200"
+            >
+              <Table variant="simple" size="md">
+                <Thead bg={colorMode === "dark" ? "gray.700" : "gray.50"}>
+                  <Tr>
+                    <Th fontWeight="bold" textTransform="capitalize">
+                      Nomor SP
+                    </Th>
+                    <Th fontWeight="bold" textTransform="capitalize">
+                      Tanggal
+                    </Th>
+                    <Th fontWeight="bold" textTransform="capitalize">
+                      Bidang
+                    </Th>
+                    <Th fontWeight="bold" textTransform="capitalize">
+                      Sub Kegiatan
+                    </Th>
+                    <Th fontWeight="bold" textTransform="capitalize">
+                      Akun Belanja
+                    </Th>
+                    <Th fontWeight="bold" textTransform="capitalize">
+                      Rekanan
+                    </Th>
+                    <Th fontWeight="bold" textTransform="capitalize" isNumeric>
+                      Nominal
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      textTransform="capitalize"
+                      textAlign="center"
+                    >
+                      Aksi
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {isLoading ? (
+                    // Loading skeleton
+                    Array.from({ length: 5 }).map((_, index) => (
+                      <Tr key={index}>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                        <Td>
+                          <Skeleton height="20px" />
+                        </Td>
+                      </Tr>
+                    ))
+                  ) : DataDokumen?.length > 0 ? (
+                    DataDokumen?.map((item, index) => (
+                      <Tr
+                        key={item.id}
+                        _hover={{
+                          bg: colorMode === "dark" ? "gray.700" : "gray.50",
+                        }}
+                        transition="all 0.2s"
+                      >
+                        <Td>
+                          <Text fontWeight="medium">{item?.nomor || "-"}</Text>
+                        </Td>
+                        <Td>
+                          {item?.tanggal
+                            ? new Date(item?.tanggal).toLocaleDateString(
+                                "id-ID",
+                                {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                }
+                              )
+                            : "-"}
+                        </Td>
+                        <Td>
+                          <Text fontSize="sm">
+                            {item?.subKegPer?.daftarUnitKerja?.unitKerja || "-"}
+                          </Text>
+                        </Td>
+                        <Td>
+                          <Text fontSize="sm" noOfLines={2}>
+                            {item?.subKegPer?.nama || "-"}
+                          </Text>
+                        </Td>
+                        <Td>
+                          <Text fontSize="sm" noOfLines={2}>
+                            {item?.akunBelanja?.akun || "-"}
+                          </Text>
+                        </Td>
+                        <Td>
+                          <Badge colorScheme="blue" variant="subtle">
+                            {item?.rekanan?.nama || "-"}
+                          </Badge>
+                        </Td>
+                        <Td isNumeric>
+                          <Text fontWeight="bold" color="green.600">
+                            Rp{" "}
+                            {item?.barjas && item.barjas.length > 0
+                              ? item.barjas
+                                  .reduce(
+                                    (total, barja) =>
+                                      total +
+                                      (barja.harga || 0) * (barja.jumlah || 0),
+                                    0
+                                  )
+                                  .toLocaleString("id-ID")
+                              : "0"}
+                          </Text>
+                        </Td>
+                        <Td textAlign="center">
+                          <Button
+                            size="sm"
+                            colorScheme="blue"
+                            variant="outline"
+                            onClick={() =>
+                              history.push(`/barjas/detail-sp/${item.id}`)
+                            }
+                          >
+                            Detail
+                          </Button>
+                        </Td>
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={8} textAlign="center" py={10}>
+                        <VStack spacing={2}>
+                          <Text fontSize="lg" color="gray.500">
+                            Tidak ada data dokumen
+                          </Text>
+                          <Text fontSize="sm" color="gray.400">
+                            Klik tombol "Tambah Dokumen" untuk menambahkan data
+                            baru
+                          </Text>
+                        </VStack>
+                      </Td>
+                    </Tr>
+                  )}
+                </Tbody>
+              </Table>
+            </Box>
+            {/* Pagination */}
+            {pages > 1 && (
+              <Box mt={6} display="flex" justifyContent="center">
+                <ReactPaginate
+                  previousLabel={"←"}
+                  nextLabel={"→"}
+                  pageCount={pages}
+                  onPageChange={changePage}
+                  activeClassName={"item active "}
+                  breakClassName={"item break-me "}
+                  breakLabel={"..."}
+                  containerClassName={"pagination"}
+                  disabledClassName={"disabled-page"}
+                  marginPagesDisplayed={1}
+                  nextClassName={"item next "}
+                  pageClassName={"item pagination-page "}
+                  pageRangeDisplayed={2}
+                  previousClassName={"item previous"}
+                />
+              </Box>
+            )}
           </Box>
 
           <Modal
             closeOnOverlayClick={false}
             isOpen={isTambahOpen}
-            onClose={onTambahClose}
+            onClose={handleCloseModal}
           >
             <ModalOverlay />
             <ModalContent borderRadius={0} maxWidth="1200px">
@@ -463,15 +660,27 @@ function DaftarDokumen() {
 
               <ModalBody>
                 <Box>
-                  <HStack>
-                    <Box bgColor={"aset"} width={"30px"} height={"30px"}></Box>
-                    <Heading color={"aset"}>Buat Nomor Surat Pesanan</Heading>
+                  <HStack mb={6} spacing={3}>
+                    <Box
+                      bgColor={"aset"}
+                      width={"4px"}
+                      height={"30px"}
+                      borderRadius="2px"
+                    ></Box>
+                    <Heading size="lg" color={"aset"}>
+                      Buat Nomor Surat Pesanan
+                    </Heading>
                   </HStack>
 
-                  <SimpleGrid columns={2} spacing={10} p={"30px"}>
-                    {" "}
-                    <FormControl border={0} bgColor={"white"} flex="1">
-                      <FormLabel fontSize={"24px"}>Nomor SP</FormLabel>
+                  <SimpleGrid
+                    columns={{ base: 1, md: 2 }}
+                    spacing={6}
+                    p={"20px"}
+                  >
+                    <FormControl>
+                      <FormLabel fontSize={"16px"} fontWeight="medium">
+                        Nomor SP
+                      </FormLabel>
                       <Select2
                         options={dataSeed?.resultNomorSP?.map((val) => ({
                           value: val.id,
@@ -480,8 +689,13 @@ function DaftarDokumen() {
                         placeholder="Contoh: Roda Dua"
                         focusBorderColor="red"
                         onChange={(selectedOption) => {
-                          setNomorSPId(selectedOption.value);
+                          setNomorSPId(selectedOption?.value || null);
+                          if (selectedOption) {
+                            setNomorSPManual("");
+                            setIsTulisManualSP(false);
+                          }
                         }}
+                        isDisabled={isTulisManualSP}
                         components={{
                           DropdownIndicator: () => null, // Hilangkan tombol panah
                           IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
@@ -513,39 +727,41 @@ function DaftarDokumen() {
                         size="sm"
                         variant="outline"
                         colorScheme="blue"
-                        onClick={() =>
-                          setIsTambahRekananBaru((prevState) => !prevState)
-                        }
+                        onClick={() => {
+                          if (isTulisManualSP) {
+                            // Jika sedang mode tulis manual, batalkan dan reset
+                            setIsTulisManualSP(false);
+                            setNomorSPManual("");
+                            setNomorSPId(null);
+                          } else {
+                            // Jika tidak, aktifkan mode tulis manual
+                            setIsTulisManualSP(true);
+                            setNomorSPId(null);
+                          }
+                        }}
                       >
-                        {isTambahRekananBaru ? "Batalkan" : "Tambah Rekanan"}
+                        {isTulisManualSP ? "Batalkan" : "Tulis Manual"}
                       </Button>
-                      {isTambahRekananBaru && (
+                      {isTulisManualSP && (
                         <>
-                          <Flex>
-                            <Input
-                              height={"50px"}
-                              bgColor={"terang"}
-                              me={"10px"}
-                              placeholder="Nama Rekanan Baru"
-                              value={namaRekananBaru}
-                              onChange={(e) =>
-                                setNamaRekananBaru(e.target.value)
-                              }
-                            />{" "}
-                            <Button
-                              variant="outline"
-                              colorScheme="blue"
-                              height={"50px"}
-                              onClick={tambahRekanan}
-                            >
-                              +
-                            </Button>
-                          </Flex>
+                          <Input
+                            mt={4}
+                            height={"50px"}
+                            bgColor={"terang"}
+                            placeholder="Masukkan Nomor SP Manual"
+                            value={nomorSPManual}
+                            onChange={(e) => {
+                              setNomorSPManual(e.target.value);
+                              setNomorSPId(null);
+                            }}
+                          />
                         </>
                       )}
                     </FormControl>
                     <FormControl>
-                      <FormLabel fontSize={"24px"}>Rekanan</FormLabel>
+                      <FormLabel fontSize={"16px"} fontWeight="medium">
+                        Rekanan
+                      </FormLabel>
                       <AsyncSelect
                         loadOptions={async (inputValue) => {
                           if (!inputValue) return [];
@@ -570,7 +786,7 @@ function DaftarDokumen() {
                             return [];
                           }
                         }}
-                        placeholder="Ketik Nama Pegawai"
+                        placeholder="Ketik Nama Rekanan"
                         onChange={(selectedOption) => {
                           setRekananId(selectedOption.value);
                         }}
@@ -633,9 +849,11 @@ function DaftarDokumen() {
                           </Flex>
                         </>
                       )}
-                    </FormControl>{" "}
-                    <FormControl my={"30px"}>
-                      <FormLabel fontSize={"24px"}>SubKegiatan</FormLabel>
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize={"16px"} fontWeight="medium">
+                        Sub Kegiatan
+                      </FormLabel>
                       <AsyncSelect
                         loadOptions={async (inputValue) => {
                           if (!inputValue) return [];
@@ -662,7 +880,7 @@ function DaftarDokumen() {
                             return [];
                           }
                         }}
-                        placeholder="Ketik Nama Pegawai"
+                        placeholder="Ketik Nama Sub Kegiatan"
                         onChange={(selectedOption) => {
                           setSubKegPerId(selectedOption.value);
                         }}
@@ -691,19 +909,16 @@ function DaftarDokumen() {
                         }}
                       />
                     </FormControl>
-                    <FormControl
-                      my={"30px"}
-                      border={0}
-                      bgColor={"white"}
-                      flex="1"
-                    >
-                      <FormLabel fontSize={"24px"}>Akun Belanja</FormLabel>
+                    <FormControl>
+                      <FormLabel fontSize={"16px"} fontWeight="medium">
+                        Akun Belanja
+                      </FormLabel>
                       <Select2
                         options={dataSeed?.resultAkunBelanja?.map((val) => ({
                           value: val.id,
                           label: `${val.akun}`,
                         }))}
-                        placeholder="Contoh: Roda Dua"
+                        placeholder="Pilih Akun Belanja"
                         focusBorderColor="red"
                         onChange={(selectedOption) => {
                           setAkunBelanjaId(selectedOption.value);
@@ -734,20 +949,23 @@ function DaftarDokumen() {
                           }),
                         }}
                       />
-                    </FormControl>{" "}
+                    </FormControl>
                     <FormControl>
-                      <FormLabel fontSize={"24px"}>Tanggal</FormLabel>
+                      <FormLabel fontSize={"16px"} fontWeight="medium">
+                        Tanggal
+                      </FormLabel>
                       <Input
-                        minWidth={"200px"}
                         bgColor={"terang"}
-                        height={"60px"}
+                        height={"50px"}
                         type="date"
-                        value={tanggalAwal}
+                        value={tanggal}
                         onChange={(e) => setTanggal(e.target.value)}
                       />
-                    </FormControl>{" "}
-                    <FormControl my={"30px"}>
-                      <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel fontSize={"16px"} fontWeight="medium">
+                        Unit Kerja
+                      </FormLabel>
                       <AsyncSelect
                         loadOptions={async (inputValue) => {
                           if (!inputValue) return [];
@@ -805,10 +1023,19 @@ function DaftarDokumen() {
                 </Box>
               </ModalBody>
 
-              <ModalFooter pe={"60px"} pb={"30px"}>
-                <Button onClick={tambahSP} variant={"primary"}>
-                  Tambah Surat Pesanan
-                </Button>
+              <ModalFooter pe={"30px"} pb={"30px"} pt={"20px"}>
+                <HStack spacing={3}>
+                  <Button
+                    onClick={handleCloseModal}
+                    variant="ghost"
+                    colorScheme="gray"
+                  >
+                    Batal
+                  </Button>
+                  <Button onClick={tambahSP} variant={"primary"} size="md">
+                    Simpan Surat Pesanan
+                  </Button>
+                </HStack>
               </ModalFooter>
             </ModalContent>
           </Modal>

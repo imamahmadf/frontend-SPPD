@@ -42,8 +42,14 @@ import {
   MenuList,
   MenuItem,
   IconButton,
+  Heading,
+  VStack,
+  Divider,
+  SimpleGrid,
+  Spinner,
+  Skeleton,
 } from "@chakra-ui/react";
-import { BsEyeFill, BsThreeDotsVertical } from "react-icons/bs";
+import { BsEyeFill, BsThreeDotsVertical, BsX } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
 import Loading from "../Componets/Loading";
@@ -73,12 +79,21 @@ function stringToColor(str) {
 function KalenderPerjalanan({ events, colorMode, formats, localizer }) {
   return (
     <Box
-      bgColor={"white"}
-      p={"30px"}
-      borderRadius={"5px"}
-      mb={"30px"}
       bg={colorMode === "dark" ? "gray.800" : "white"}
+      p={{ base: "20px", md: "30px" }}
+      borderRadius={"10px"}
+      mb={"30px"}
+      boxShadow="sm"
+      border="1px solid"
+      borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
     >
+      <Heading
+        size="md"
+        mb={4}
+        color={colorMode === "dark" ? "white" : "gray.700"}
+      >
+        Kalender Perjalanan Dinas
+      </Heading>
       <Calendar
         localizer={localizer}
         events={events}
@@ -108,6 +123,14 @@ function KalenderPerjalanan({ events, colorMode, formats, localizer }) {
         .rbc-event {
           font-size: 12px;
           padding: 2px 4px;
+          cursor: pointer;
+        }
+        .rbc-header {
+          padding: 10px 3px;
+          font-weight: 600;
+        }
+        .rbc-today {
+          background-color: rgba(55, 176, 134, 0.1) !important;
         }
       `}</style>
     </Box>
@@ -122,6 +145,7 @@ function Daftar() {
   const [rows, setRows] = useState(0);
   const [time, setTime] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
   const user = useSelector(userRedux);
@@ -130,6 +154,11 @@ function Daftar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
+
+  const resetFilter = () => {
+    setTanggalAwal("");
+    setTanggalAkhir("");
+  };
 
   const changePage = ({ selected }) => {
     setPage(selected);
@@ -455,28 +484,37 @@ function Daftar() {
   };
 
   async function fetchDataPerjalanan() {
-    await axios
-      .get(
+    setIsLoadingData(true);
+    try {
+      const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/get/all-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${
           user[0]?.unitKerja_profile?.id || ""
         }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`
-      )
-      .then((res) => {
-        setDataPerjalanan(res?.data?.result || []);
-        setPage(res?.data?.page || 0);
-        setPages(res?.data?.totalPage || 0);
-        setRows(res?.data?.totalRows || 0);
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.error(err);
-        setDataPerjalanan([]);
-        setPage(0);
-        setPages(0);
-        setRows(0);
+      );
+      setDataPerjalanan(res?.data?.result || []);
+      setPage(res?.data?.page || 0);
+      setPages(res?.data?.totalPage || 0);
+      setRows(res?.data?.totalRows || 0);
+      console.log(res.data);
+    } catch (err) {
+      console.error(err);
+      setDataPerjalanan([]);
+      setPage(0);
+      setPages(0);
+      setRows(0);
+      toast({
+        title: "Error",
+        description: "Gagal memuat data perjalanan dinas",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
       });
+    } finally {
+      setIsLoadingData(false);
+    }
   }
 
   useEffect(() => {
@@ -518,12 +556,82 @@ function Daftar() {
     <>
       {isLoading && <Loading />}
       <Layout>
-        {/* Kalender Perjalanan */}
+        {isLoadingData ? (
+          <Box
+            bg={colorMode === "dark" ? "gray.900" : "secondary.light"}
+            pb={{ base: "30px", md: "40px" }}
+            px={{ base: "15px", md: "30px" }}
+            minH="100vh"
+          >
+            {/* Loading Skeleton untuk Kalender */}
+            <Box
+              bg={colorMode === "dark" ? "gray.800" : "white"}
+              p={{ base: "20px", md: "30px" }}
+              borderRadius="10px"
+              boxShadow="sm"
+              border="1px solid"
+              borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+              mb={{ base: "20px", md: "30px" }}
+            >
+              <Skeleton height="40px" width="300px" mb={4} />
+              <Skeleton height="400px" borderRadius="8px" />
+            </Box>
 
-        {dataPerjalanan[0] ? (
-          <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-            {" "}
-            <Box bgColor={"secondary"} pb={"20px"} px={"30px"}>
+            {/* Loading Skeleton untuk Tabel */}
+            <Box
+              bg={colorMode === "dark" ? "gray.800" : "white"}
+              p={{ base: "20px", md: "30px" }}
+              borderRadius="10px"
+              boxShadow="sm"
+              border="1px solid"
+              borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+            >
+              <Skeleton height="40px" width="250px" mb={6} />
+              <Divider mb={6} />
+
+              {/* Filter Skeleton */}
+              <Box
+                mb={6}
+                p={4}
+                bg={colorMode === "dark" ? "gray.700" : "gray.50"}
+                borderRadius="8px"
+              >
+                <Skeleton height="20px" width="150px" mb={4} />
+                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+                  <Skeleton height="60px" />
+                  <Skeleton height="60px" />
+                  <Skeleton height="60px" />
+                </SimpleGrid>
+              </Box>
+
+              {/* Table Skeleton */}
+              <Box overflowX="auto">
+                <Skeleton height="50px" mb={2} />
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} height="80px" mb={2} />
+                ))}
+              </Box>
+
+              {/* Pagination Skeleton */}
+              <Center mt={6}>
+                <Skeleton height="40px" width="300px" />
+              </Center>
+            </Box>
+          </Box>
+        ) : dataPerjalanan[0] ? (
+          <Box
+            bg={colorMode === "dark" ? "gray.900" : "secondary.light"}
+            pb={{ base: "30px", md: "40px" }}
+            px={{ base: "15px", md: "30px" }}
+            minH="100vh"
+          >
+            {/* Kalender Perjalanan */}
+            <Box
+              bg={colorMode === "dark" ? "gray.900" : "secondary.light"}
+              pb={{ base: "20px", md: "30px" }}
+              px={{ base: "15px", md: "30px" }}
+              pt={{ base: "20px", md: "30px" }}
+            >
               <KalenderPerjalanan
                 events={events}
                 colorMode={colorMode}
@@ -531,281 +639,544 @@ function Daftar() {
                 localizer={localizer}
               />
             </Box>
-            <Box
-              mt={"50px"}
-              style={{ overflowX: "auto" }}
-              bgColor={"white"}
-              p={"30px"}
-              borderRadius={"5px"}
-              bg={colorMode === "dark" ? "gray.800" : "white"}
-            >
-              <Flex gap={4} mb={4}>
-                <FormControl>
-                  <FormLabel>Tanggal Berangkat (Awal)</FormLabel>
-                  <Input
-                    type="date"
-                    value={tanggalAwal}
-                    onChange={(e) => setTanggalAwal(e.target.value)}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Tanggal Pulang (Akhir)</FormLabel>
-                  <Input
-                    type="date"
-                    value={tanggalAkhir}
-                    onChange={(e) => setTanggalAkhir(e.target.value)}
-                  />
-                </FormControl>
-              </Flex>
-              <Table variant={"primary"}>
-                <Thead>
-                  <Tr>
-                    <Th>no.</Th>
-                    <Th maxWidth={"120px"}>Unit Kerja Surtug</Th>
-                    <Th>No Surat/Nota/Telaahan</Th>
-                    <Th>Tanggal Berangkat</Th>
-                    <Th>tanggal Pulang</Th>
-                    <Th>Jenis & Tujuan</Th>
-                    <Th>Personil 1</Th>
-                    <Th>Personil 2</Th>
-                    <Th>Personil 3</Th>
-                    <Th>Personil 4</Th>
-                    <Th>Personil 5</Th>
 
-                    <Th>Aksi</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {dataPerjalanan?.map((item, index) => (
-                    <Tr key={item?.id || index}>
-                      <Td maxWidth={"20px"}>{index + 1}</Td>
-                      <Td>
-                        {item?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas
-                          ?.kodeInduk || "-"}
-                      </Td>
-                      <Td>
-                        <Box>
-                          {item?.noSuratTugas && (
-                            <Box mb={item?.suratKeluar?.nomor ? "8px" : "0"}>
-                              <Text fontSize={"xs"} color={"gray.600"}>
-                                Surat Tugas:
-                              </Text>
-                              <Text fontWeight={"medium"}>
-                                {item?.noSuratTugas || "-"}
-                              </Text>
-                            </Box>
-                          )}
-                          {item?.suratKeluar?.nomor ? (
-                            <Box>
-                              <Text fontSize={"xs"} color={"gray.600"}>
-                                {item?.isNotaDinas === 0
-                                  ? "Telaahan Staf:"
-                                  : "Nota Dinas:"}
-                              </Text>
-                              <Text fontWeight={"medium"}>
-                                {item?.suratKeluar?.nomor || "-"}
-                              </Text>
-                            </Box>
-                          ) : (
-                            !item?.noSuratTugas && <Text>-</Text>
-                          )}
-                        </Box>
-                      </Td>
-                      <Td>
-                        {item?.tempats?.[0]?.tanggalBerangkat
-                          ? new Date(
-                              item?.tempats?.[0]?.tanggalBerangkat
-                            ).toLocaleDateString("id-ID", {
-                              weekday: "long",
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })
-                          : "-"}
-                      </Td>
-                      <Td>
-                        {item?.tempats?.[item?.tempats?.length - 1]
-                          ?.tanggalPulang
-                          ? new Date(
-                              item?.tempats?.[
-                                item?.tempats?.length - 1
-                              ]?.tanggalPulang
-                            ).toLocaleDateString("id-ID", {
-                              weekday: "long",
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })
-                          : "-"}
-                      </Td>
-                      <Td>
-                        <Box>
-                          <Box mb={item?.tempats?.length > 0 ? "8px" : "0"}>
-                            <Text fontSize={"xs"} color={"gray.600"}>
-                              Jenis:
-                            </Text>
-                            <Text fontWeight={"medium"}>
-                              {item?.jenisPerjalanan?.jenis || "-"}
-                            </Text>
-                          </Box>
-                          {item?.tempats?.length > 0 && (
-                            <Box>
-                              <Text fontSize={"xs"} color={"gray.600"}>
-                                Tujuan:
-                              </Text>
-                              {item?.jenisPerjalanan?.tipePerjalanan?.id === 1
-                                ? item?.tempats?.map((val) => (
-                                    <Text
-                                      key={val?.id || Math.random()}
-                                      fontWeight={"medium"}
-                                    >
-                                      {val?.dalamKota?.nama || "-"}
-                                    </Text>
-                                  ))
-                                : item?.tempats?.map((val) => (
-                                    <Text
-                                      key={val?.id || Math.random()}
-                                      fontWeight={"medium"}
-                                    >
-                                      {val?.tempat || "-"}
-                                    </Text>
-                                  ))}
-                            </Box>
-                          )}
-                        </Box>
-                      </Td>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Td key={i}>
-                          <Tooltip
-                            label={
-                              item?.personils?.[i]?.status?.statusKuitansi ||
-                              "-"
-                            }
-                            aria-label="A tooltip"
-                            bgColor={
-                              item?.personils?.[i]?.statusId === 1
-                                ? "gelap"
-                                : item?.personils?.[i]?.statusId === 2
-                                ? "ungu"
-                                : item?.personils?.[i]?.statusId === 3
-                                ? "primary"
-                                : item?.personils?.[i]?.statusId === 4
-                                ? "danger"
-                                : null
+            {/* Tabel Data Perjalanan */}
+            <Box
+              mt={{ base: "30px", md: "40px" }}
+              bg={colorMode === "dark" ? "gray.800" : "white"}
+              p={{ base: "20px", md: "30px" }}
+              borderRadius={"10px"}
+              boxShadow="sm"
+              border="1px solid"
+              borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+            >
+              {/* Header Section */}
+              <Flex
+                direction={{ base: "column", md: "row" }}
+                justify="space-between"
+                align={{ base: "stretch", md: "center" }}
+                mb={6}
+                gap={4}
+              >
+                <Heading
+                  size="lg"
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                >
+                  Daftar Perjalanan Dinas
+                </Heading>
+                <Text
+                  fontSize="sm"
+                  color={colorMode === "dark" ? "gray.400" : "gray.600"}
+                >
+                  Total: {rows} data
+                </Text>
+              </Flex>
+
+              <Divider mb={6} />
+
+              {/* Filter Section */}
+              <Box
+                mb={6}
+                p={4}
+                bg={colorMode === "dark" ? "gray.700" : "gray.50"}
+                borderRadius="8px"
+              >
+                <Heading
+                  size="sm"
+                  mb={4}
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                >
+                  Filter Data
+                </Heading>
+                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+                  <FormControl>
+                    <FormLabel fontSize="sm" fontWeight="medium">
+                      Tanggal Berangkat (Awal)
+                    </FormLabel>
+                    <Input
+                      type="date"
+                      value={tanggalAwal}
+                      onChange={(e) => setTanggalAwal(e.target.value)}
+                      bg={colorMode === "dark" ? "gray.800" : "white"}
+                      borderColor={
+                        colorMode === "dark" ? "gray.600" : "gray.300"
+                      }
+                      _hover={{
+                        borderColor: "primary",
+                      }}
+                      _focus={{
+                        borderColor: "primary",
+                        boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                      }}
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel fontSize="sm" fontWeight="medium">
+                      Tanggal Pulang (Akhir)
+                    </FormLabel>
+                    <Input
+                      type="date"
+                      value={tanggalAkhir}
+                      onChange={(e) => setTanggalAkhir(e.target.value)}
+                      bg={colorMode === "dark" ? "gray.800" : "white"}
+                      borderColor={
+                        colorMode === "dark" ? "gray.600" : "gray.300"
+                      }
+                      _hover={{
+                        borderColor: "primary",
+                      }}
+                      _focus={{
+                        borderColor: "primary",
+                        boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                      }}
+                    />
+                  </FormControl>
+                  <FormControl display="flex" alignItems="flex-end">
+                    <Button
+                      leftIcon={<BsX />}
+                      onClick={resetFilter}
+                      variant="outline"
+                      colorScheme="gray"
+                      width="100%"
+                      isDisabled={!tanggalAwal && !tanggalAkhir}
+                    >
+                      Reset Filter
+                    </Button>
+                  </FormControl>
+                </SimpleGrid>
+              </Box>
+
+              {/* Table Section */}
+              <Box
+                style={{ overflowX: "auto" }}
+                borderRadius="8px"
+                border="1px solid"
+                borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+              >
+                <Table variant={"primary"} size={{ base: "sm", md: "md" }}>
+                  <Thead>
+                    <Tr>
+                      <Th
+                        position="sticky"
+                        left={0}
+                        bg={colorMode === "dark" ? "gray.800" : "white"}
+                        zIndex={1}
+                        minW="50px"
+                      >
+                        No.
+                      </Th>
+                      <Th minW="120px">Unit Kerja Surtug</Th>
+                      <Th minW="200px">No Surat/Nota/Telaahan</Th>
+                      <Th minW="180px">Tanggal Berangkat</Th>
+                      <Th minW="180px">Tanggal Pulang</Th>
+                      <Th minW="200px">Jenis & Tujuan</Th>
+                      <Th minW="150px">Personil 1</Th>
+                      <Th minW="150px">Personil 2</Th>
+                      <Th minW="150px">Personil 3</Th>
+                      <Th minW="150px">Personil 4</Th>
+                      <Th minW="150px">Personil 5</Th>
+                      <Th
+                        position="sticky"
+                        right={0}
+                        bg={colorMode === "dark" ? "gray.800" : "white"}
+                        zIndex={1}
+                        minW="80px"
+                      >
+                        Aksi
+                      </Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {dataPerjalanan?.map((item, index) => (
+                      <Tr
+                        key={item?.id || index}
+                        _hover={{
+                          bg: colorMode === "dark" ? "gray.750" : "gray.50",
+                        }}
+                        transition="background-color 0.2s"
+                      >
+                        <Td
+                          position="sticky"
+                          left={0}
+                          bg={colorMode === "dark" ? "gray.800" : "white"}
+                          zIndex={1}
+                          fontWeight="medium"
+                        >
+                          {index + 1 + page * limit}
+                        </Td>
+                        <Td>
+                          <Text
+                            fontSize="sm"
+                            color={
+                              colorMode === "dark" ? "gray.300" : "gray.700"
                             }
                           >
-                            <Badge
-                              display={"flex"}
-                              alignItems={"center"}
-                              gap={"1px"}
-                              px={"8px"}
-                              py={"3px"}
-                              maxW={"250px"}
-                              overflow={"hidden"}
-                              textOverflow={"ellipsis"}
-                              whiteSpace={"nowrap"}
-                              borderRadius={"md"}
-                              textTransform={"none"}
-                              bgColor={
-                                item?.personils?.[i]?.statusId === 1
-                                  ? "gelap"
-                                  : item?.personils?.[i]?.statusId === 2
-                                  ? "ungu"
-                                  : item?.personils?.[i]?.statusId === 3
-                                  ? "primary"
-                                  : item?.personils?.[i]?.statusId === 4
-                                  ? "danger"
-                                  : "gray.200"
-                              }
-                              color={
-                                item?.personils?.[i]?.statusId === 1 ||
-                                item?.personils?.[i]?.statusId === 2 ||
-                                item?.personils?.[i]?.statusId === 3 ||
-                                item?.personils?.[i]?.statusId === 4
-                                  ? "white"
-                                  : "gray.700"
-                              }
-                            >
-                              {item?.personils?.[i]?.pegawai?.nama || "-"}
-                            </Badge>
-                          </Tooltip>
+                            {item?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas
+                              ?.kodeInduk || "-"}
+                          </Text>
                         </Td>
-                      ))}
-                      <Td>
-                        <Menu>
-                          <MenuButton
-                            as={IconButton}
-                            icon={<BsThreeDotsVertical />}
-                            variant="ghost"
-                            size="sm"
-                            aria-label="Menu aksi"
-                          />
-                          <MenuList>
+                        <Td>
+                          <VStack align="start" spacing={2}>
                             {item?.noSuratTugas && (
-                              <MenuItem
-                                icon={<BsEyeFill />}
-                                onClick={() =>
-                                  history.push(
-                                    `/detail-perjalanan/${item?.id || ""}`
-                                  )
+                              <Box>
+                                <Text
+                                  fontSize="xs"
+                                  color={
+                                    colorMode === "dark"
+                                      ? "gray.400"
+                                      : "gray.600"
+                                  }
+                                  mb={1}
+                                >
+                                  Surat Tugas:
+                                </Text>
+                                <Text
+                                  fontWeight="medium"
+                                  fontSize="sm"
+                                  color={
+                                    colorMode === "dark" ? "white" : "gray.700"
+                                  }
+                                >
+                                  {item?.noSuratTugas || "-"}
+                                </Text>
+                              </Box>
+                            )}
+                            {item?.suratKeluar?.nomor && (
+                              <Box>
+                                <Text
+                                  fontSize="xs"
+                                  color={
+                                    colorMode === "dark"
+                                      ? "gray.400"
+                                      : "gray.600"
+                                  }
+                                  mb={1}
+                                >
+                                  {item?.isNotaDinas === 0
+                                    ? "Telaahan Staf:"
+                                    : "Nota Dinas:"}
+                                </Text>
+                                <Text
+                                  fontWeight="medium"
+                                  fontSize="sm"
+                                  color={
+                                    colorMode === "dark" ? "white" : "gray.700"
+                                  }
+                                >
+                                  {item?.suratKeluar?.nomor || "-"}
+                                </Text>
+                              </Box>
+                            )}
+                            {!item?.noSuratTugas &&
+                              !item?.suratKeluar?.nomor && (
+                                <Text
+                                  fontSize="sm"
+                                  color={
+                                    colorMode === "dark"
+                                      ? "gray.400"
+                                      : "gray.500"
+                                  }
+                                >
+                                  -
+                                </Text>
+                              )}
+                          </VStack>
+                        </Td>
+                        <Td>
+                          <Text
+                            fontSize="sm"
+                            color={
+                              colorMode === "dark" ? "gray.300" : "gray.700"
+                            }
+                          >
+                            {item?.tempats?.[0]?.tanggalBerangkat
+                              ? new Date(
+                                  item?.tempats?.[0]?.tanggalBerangkat
+                                ).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "-"}
+                          </Text>
+                        </Td>
+                        <Td>
+                          <Text
+                            fontSize="sm"
+                            color={
+                              colorMode === "dark" ? "gray.300" : "gray.700"
+                            }
+                          >
+                            {item?.tempats?.[item?.tempats?.length - 1]
+                              ?.tanggalPulang
+                              ? new Date(
+                                  item?.tempats?.[
+                                    item?.tempats?.length - 1
+                                  ]?.tanggalPulang
+                                ).toLocaleDateString("id-ID", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "-"}
+                          </Text>
+                        </Td>
+                        <Td>
+                          <VStack align="start" spacing={2}>
+                            <Box>
+                              <Text
+                                fontSize="xs"
+                                color={
+                                  colorMode === "dark" ? "gray.400" : "gray.600"
                                 }
+                                mb={1}
                               >
-                                Lihat Detail
-                              </MenuItem>
+                                Jenis:
+                              </Text>
+                              <Badge
+                                colorScheme="primary"
+                                fontSize="xs"
+                                px={2}
+                                py={1}
+                                borderRadius="md"
+                              >
+                                {item?.jenisPerjalanan?.jenis || "-"}
+                              </Badge>
+                            </Box>
+                            {item?.tempats?.length > 0 && (
+                              <Box>
+                                <Text
+                                  fontSize="xs"
+                                  color={
+                                    colorMode === "dark"
+                                      ? "gray.400"
+                                      : "gray.600"
+                                  }
+                                  mb={1}
+                                >
+                                  Tujuan:
+                                </Text>
+                                {item?.jenisPerjalanan?.tipePerjalanan?.id === 1
+                                  ? item?.tempats?.map((val) => (
+                                      <Text
+                                        key={val?.id || Math.random()}
+                                        fontWeight="medium"
+                                        fontSize="sm"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "white"
+                                            : "gray.700"
+                                        }
+                                      >
+                                        {val?.dalamKota?.nama || "-"}
+                                      </Text>
+                                    ))
+                                  : item?.tempats?.map((val) => (
+                                      <Text
+                                        key={val?.id || Math.random()}
+                                        fontWeight="medium"
+                                        fontSize="sm"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "white"
+                                            : "gray.700"
+                                        }
+                                      >
+                                        {val?.tempat || "-"}
+                                      </Text>
+                                    ))}
+                              </Box>
                             )}
-                            <MenuItem
-                              icon={<BsFileEarmarkArrowDown />}
-                              onClick={() => postSuratTugas(item)}
+                          </VStack>
+                        </Td>
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Td key={i}>
+                            {item?.personils?.[i] ? (
+                              <Tooltip
+                                label={
+                                  item?.personils?.[i]?.status
+                                    ?.statusKuitansi || "-"
+                                }
+                                aria-label="Status tooltip"
+                                bg={
+                                  item?.personils?.[i]?.statusId === 1
+                                    ? "gelap"
+                                    : item?.personils?.[i]?.statusId === 2
+                                    ? "ungu"
+                                    : item?.personils?.[i]?.statusId === 3
+                                    ? "primary"
+                                    : item?.personils?.[i]?.statusId === 4
+                                    ? "danger"
+                                    : "gray.600"
+                                }
+                                hasArrow
+                                placement="top"
+                              >
+                                <Badge
+                                  display="flex"
+                                  alignItems="center"
+                                  justifyContent="center"
+                                  px={3}
+                                  py={1.5}
+                                  maxW="200px"
+                                  overflow="hidden"
+                                  textOverflow="ellipsis"
+                                  whiteSpace="nowrap"
+                                  borderRadius="md"
+                                  textTransform="none"
+                                  fontSize="xs"
+                                  fontWeight="medium"
+                                  bgColor={
+                                    item?.personils?.[i]?.statusId === 1
+                                      ? "gelap"
+                                      : item?.personils?.[i]?.statusId === 2
+                                      ? "ungu"
+                                      : item?.personils?.[i]?.statusId === 3
+                                      ? "primary"
+                                      : item?.personils?.[i]?.statusId === 4
+                                      ? "danger"
+                                      : "gray.200"
+                                  }
+                                  color={
+                                    item?.personils?.[i]?.statusId === 1 ||
+                                    item?.personils?.[i]?.statusId === 2 ||
+                                    item?.personils?.[i]?.statusId === 3 ||
+                                    item?.personils?.[i]?.statusId === 4
+                                      ? "white"
+                                      : "gray.700"
+                                  }
+                                  cursor="help"
+                                >
+                                  {item?.personils?.[i]?.pegawai?.nama || "-"}
+                                </Badge>
+                              </Tooltip>
+                            ) : (
+                              <Text
+                                fontSize="sm"
+                                color={
+                                  colorMode === "dark" ? "gray.500" : "gray.400"
+                                }
+                                fontStyle="italic"
+                              >
+                                -
+                              </Text>
+                            )}
+                          </Td>
+                        ))}
+                        <Td
+                          position="sticky"
+                          right={0}
+                          bg={colorMode === "dark" ? "gray.800" : "white"}
+                          zIndex={1}
+                        >
+                          <Menu>
+                            <MenuButton
+                              as={IconButton}
+                              icon={<BsThreeDotsVertical />}
+                              variant="ghost"
+                              size="sm"
+                              aria-label="Menu aksi"
+                              _hover={{
+                                bg:
+                                  colorMode === "dark"
+                                    ? "gray.700"
+                                    : "gray.100",
+                              }}
+                            />
+                            <MenuList
+                              bg={colorMode === "dark" ? "gray.800" : "white"}
+                              borderColor={
+                                colorMode === "dark" ? "gray.700" : "gray.200"
+                              }
                             >
-                              Cetak Surat Tugas
-                            </MenuItem>
-
-                            <MenuItem
-                              icon={<BsFileEarmarkArrowDown />}
-                              onClick={() => postSPD(item)}
-                            >
-                              Cetak Surat Perjalanan Dinas
-                            </MenuItem>
-                            <MenuItem
-                              icon={<BsFileEarmarkArrowDown />}
-                              onClick={() => postNotaDinas(item)}
-                            >
-                              Cetak Nota Dinas
-                            </MenuItem>
-                            {!item?.personils?.some(
-                              (p) => p?.statusId === 2 || p?.statusId === 3
-                            ) && (
+                              {item?.noSuratTugas && (
+                                <MenuItem
+                                  icon={<BsEyeFill />}
+                                  onClick={() =>
+                                    history.push(
+                                      `/detail-perjalanan/${item?.id || ""}`
+                                    )
+                                  }
+                                  _hover={{
+                                    bg:
+                                      colorMode === "dark"
+                                        ? "gray.700"
+                                        : "gray.100",
+                                  }}
+                                >
+                                  Lihat Detail
+                                </MenuItem>
+                              )}
                               <MenuItem
-                                onClick={() => {
-                                  setSelectedPerjalanan(item?.id || 0);
-                                  onOpen();
+                                icon={<BsFileEarmarkArrowDown />}
+                                onClick={() => postSuratTugas(item)}
+                                _hover={{
+                                  bg:
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100",
                                 }}
-                                color="red.500"
                               >
-                                Hapus
+                                Cetak Surat Tugas
                               </MenuItem>
-                            )}
-                          </MenuList>
-                        </Menu>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-
-                  boxSizing: "border-box",
-                  width: "100%",
-                  height: "100%",
-                }}
+                              <MenuItem
+                                icon={<BsFileEarmarkArrowDown />}
+                                onClick={() => postSPD(item)}
+                                _hover={{
+                                  bg:
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100",
+                                }}
+                              >
+                                Cetak Surat Perjalanan Dinas
+                              </MenuItem>
+                              <MenuItem
+                                icon={<BsFileEarmarkArrowDown />}
+                                onClick={() => postNotaDinas(item)}
+                                _hover={{
+                                  bg:
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100",
+                                }}
+                              >
+                                Cetak Nota Dinas
+                              </MenuItem>
+                              {!item?.personils?.some(
+                                (p) => p?.statusId === 2 || p?.statusId === 3
+                              ) && (
+                                <MenuItem
+                                  onClick={() => {
+                                    setSelectedPerjalanan(item?.id || 0);
+                                    onOpen();
+                                  }}
+                                  color="red.500"
+                                  _hover={{
+                                    bg: "red.50",
+                                  }}
+                                >
+                                  Hapus
+                                </MenuItem>
+                              )}
+                            </MenuList>
+                          </Menu>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Box>
+              {/* Pagination */}
+              <Box
+                mt={6}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
               >
                 <ReactPaginate
-                  previousLabel={"+"}
-                  nextLabel={"-"}
+                  previousLabel={"←"}
+                  nextLabel={"→"}
                   pageCount={pages}
                   onPageChange={changePage}
                   activeClassName={"item active "}
@@ -819,31 +1190,53 @@ function Daftar() {
                   pageRangeDisplayed={2}
                   previousClassName={"item previous"}
                 />
-              </div>{" "}
-              <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                  <ModalHeader>Konfirmasi Hapus</ModalHeader>
-                  <ModalCloseButton />
-
-                  <ModalBody>
-                    Apakah Anda yakin ingin menghapus data ini?
-                  </ModalBody>
-                  <ModalFooter>
-                    <Button
-                      colorScheme="red"
-                      mr={3}
-                      onClick={() => hapusPerjalanan(selectedPerjalanan)}
-                    >
-                      Ya, Hapus
-                    </Button>
-                    <Button variant="ghost" onClick={onClose}>
-                      Batal
-                    </Button>
-                  </ModalFooter>
-                </ModalContent>
-              </Modal>
+              </Box>
             </Box>
+
+            {/* Modal Konfirmasi Hapus */}
+            <Modal isOpen={isOpen} onClose={onClose} isCentered>
+              <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(2px)" />
+              <ModalContent
+                bg={colorMode === "dark" ? "gray.800" : "white"}
+                borderRadius="10px"
+              >
+                <ModalHeader
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                  borderBottom="1px solid"
+                  borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+                  pb={4}
+                >
+                  Konfirmasi Hapus
+                </ModalHeader>
+                <ModalCloseButton
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                />
+                <ModalBody py={6}>
+                  <Text color={colorMode === "dark" ? "gray.300" : "gray.600"}>
+                    Apakah Anda yakin ingin menghapus data perjalanan dinas ini?
+                    Tindakan ini tidak dapat dibatalkan.
+                  </Text>
+                </ModalBody>
+                <ModalFooter
+                  borderTop="1px solid"
+                  borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+                  pt={4}
+                >
+                  <Button variant="ghost" mr={3} onClick={onClose}>
+                    Batal
+                  </Button>
+                  <Button
+                    colorScheme="red"
+                    onClick={() => hapusPerjalanan(selectedPerjalanan)}
+                    _hover={{
+                      bg: "red.600",
+                    }}
+                  >
+                    Ya, Hapus
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
           </Box>
         ) : (
           <DataKosong />

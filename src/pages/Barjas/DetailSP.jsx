@@ -67,6 +67,7 @@ import {
   FaList,
   FaTag,
   FaCheckCircle,
+  FaTrash,
 } from "react-icons/fa";
 import { MdDescription, MdAttachMoney, MdInventory2 } from "react-icons/md";
 import { useSelector } from "react-redux";
@@ -102,7 +103,13 @@ function DetailSP(props) {
     onOpen: onPilihBarjasOpen,
     onClose: onPilihBarjasClose,
   } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
   const [selectedBarjas, setSelectedBarjas] = useState([]);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   async function fetchDataDokumen() {
     await axios
@@ -324,6 +331,45 @@ function DetailSP(props) {
   const removeBarjasRow = (index) => {
     setDaftarBarjas((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const handleDeleteBarjas = (item) => {
+    setItemToDelete(item);
+    onDeleteOpen();
+  };
+
+  const confirmDeleteBarjas = () => {
+    if (!itemToDelete) return;
+
+    axios
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/delete/barjas`,
+        {
+          id: itemToDelete.id,
+        }
+      )
+      .then((res) => {
+        toast({
+          title: "Berhasil!",
+          description: "Item berhasil dihapus.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        fetchDataDokumen();
+        onDeleteClose();
+        setItemToDelete(null);
+      })
+      .catch((err) => {
+        console.error(err.message);
+        toast({
+          title: "Error!",
+          description: err.response?.data?.message || "Gagal menghapus item",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      });
+  };
   const formatRupiah = (value) => {
     if (value === null || value === undefined || isNaN(value)) return "";
     return new Intl.NumberFormat("id-ID", {
@@ -371,7 +417,7 @@ function DetailSP(props) {
   return (
     <>
       <LayoutAset>
-        {/* Bagian 1: Informasi Surat Perintah */}
+        {/* Bagian 1: Informasi Surat Pesanan */}
         <Box pb={{ base: 8, md: 12 }} position="relative">
           <Container
             bgColor={colorMode === "dark" ? "gray.900" : "white"}
@@ -404,10 +450,10 @@ function DetailSP(props) {
                     color={colorMode === "dark" ? "white" : "gray.800"}
                     mb={2}
                   >
-                    Informasi Surat Perintah
+                    Informasi Surat Pesanan
                   </Heading>
                   <Text color="gray.500" fontSize="md">
-                    Ringkasan dan statistik surat perintah
+                    Ringkasan dan statistik surat Pesanan
                   </Text>
                 </Box>
               </Flex>
@@ -525,7 +571,7 @@ function DetailSP(props) {
               <Flex align="center" mb={4}>
                 <Icon as={FaInfoCircle} color="aset" mr={2} boxSize={5} />
                 <Heading size="md" color="aset">
-                  Informasi Surat Perintah
+                  Informasi Surat Pesanan
                 </Heading>
               </Flex>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
@@ -1307,6 +1353,7 @@ function DetailSP(props) {
                     <Th isNumeric>Jumlah</Th>
                     <Th isNumeric>Harga Satuan</Th>
                     <Th isNumeric>Subtotal</Th>
+                    <Th>Aksi</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
@@ -1327,11 +1374,22 @@ function DetailSP(props) {
                             Number(item?.harga || 0) * Number(item?.jumlah || 0)
                           )}
                         </Td>
+                        <Td>
+                          <Button
+                            size="sm"
+                            colorScheme="red"
+                            variant="ghost"
+                            onClick={() => handleDeleteBarjas(item)}
+                            leftIcon={<Icon as={FaTrash} />}
+                          >
+                            Hapus
+                          </Button>
+                        </Td>
                       </Tr>
                     ))
                   ) : (
                     <Tr>
-                      <Td colSpan={6} textAlign="center" py={8}>
+                      <Td colSpan={7} textAlign="center" py={8}>
                         <VStack spacing={2}>
                           <Icon
                             as={MdInventory2}
@@ -1356,7 +1414,7 @@ function DetailSP(props) {
                 <Tfoot>
                   <Tr>
                     <Td
-                      colSpan={5}
+                      colSpan={6}
                       textAlign="right"
                       fontWeight="bold"
                       fontSize="md"
@@ -1617,6 +1675,89 @@ function DetailSP(props) {
               leftIcon={<Icon as={FaPlus} />}
             >
               Simpan ({selectedBarjas.length})
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Konfirmasi Hapus Barjas */}
+      <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} isCentered>
+        <ModalOverlay />
+        <ModalContent
+          bgColor={colorMode === "dark" ? "gray.800" : "white"}
+          borderRadius="12px"
+        >
+          <ModalHeader>
+            <Flex align="center">
+              <Icon as={FaTrash} color="red.500" mr={2} boxSize={5} />
+              <Heading size="md">Konfirmasi Hapus</Heading>
+            </Flex>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Text mb={4}>Apakah Anda yakin ingin menghapus item berikut?</Text>
+            {itemToDelete && (
+              <Box
+                p={4}
+                bgColor={colorMode === "dark" ? "gray.700" : "gray.50"}
+                borderRadius="8px"
+                mb={4}
+              >
+                <VStack align="stretch" spacing={2}>
+                  <Box>
+                    <Text fontSize="xs" color="gray.600" mb={1}>
+                      Nama Barang/Jasa
+                    </Text>
+                    <Text fontSize="md" fontWeight="semibold">
+                      {itemToDelete?.nama || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.600" mb={1}>
+                      Jenis
+                    </Text>
+                    <Text fontSize="sm">
+                      {itemToDelete?.jenisBarja?.jenis || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.600" mb={1}>
+                      Jumlah
+                    </Text>
+                    <Text fontSize="sm">
+                      {Number(itemToDelete?.jumlah || 0).toLocaleString(
+                        "id-ID"
+                      )}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.600" mb={1}>
+                      Subtotal
+                    </Text>
+                    <Text fontSize="sm" fontWeight="semibold" color="aset">
+                      {formatRupiah(
+                        Number(itemToDelete?.harga || 0) *
+                          Number(itemToDelete?.jumlah || 0)
+                      )}
+                    </Text>
+                  </Box>
+                </VStack>
+              </Box>
+            )}
+            <Text fontSize="sm" color="red.500" fontWeight="medium">
+              Tindakan ini tidak dapat dibatalkan.
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onDeleteClose}>
+              Batal
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={confirmDeleteBarjas}
+              leftIcon={<Icon as={FaTrash} />}
+            >
+              Hapus
             </Button>
           </ModalFooter>
         </ModalContent>
