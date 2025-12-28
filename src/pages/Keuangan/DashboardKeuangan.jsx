@@ -303,545 +303,595 @@ export default function DashboardKeuangan() {
                         <AccordionItem key={unitKerja.id || index}>
                           <AccordionButton>
                             <Box flex="1" textAlign="left">
-                              <HStack>
-                                <Text fontWeight="bold">
-                                  {unitKerja.unitKerja}
-                                </Text>
-                                <Badge colorScheme="blue">
-                                  {unitKerja.totalPersonilStatus1 || 0} SPD
-                                  Sudah dibuat
-                                </Badge>
-                                <Badge colorScheme="green">
-                                  {unitKerja.totalPersonilStatus2 || 0}{" "}
-                                  Pengajuan Kwitansi
-                                </Badge>
-                                <Badge colorScheme="yellow">
-                                  {unitKerja.totalPersonilStatus3 || 0} Kwitansi
-                                  Terverivikasi
-                                </Badge>
-                                <Badge colorScheme="red">
-                                  {unitKerja.totalPersonilStatus4 || 0} Kwitansi
-                                  ditolak
-                                </Badge>
-                              </HStack>
+                              <VStack align="stretch" spacing={2} w="full">
+                                <Flex
+                                  justify="space-between"
+                                  align="center"
+                                  wrap="wrap"
+                                  gap={2}
+                                >
+                                  <Text fontWeight="bold" fontSize="md">
+                                    {unitKerja.unitKerja}
+                                  </Text>
+                                  <HStack spacing={2}>
+                                    <Text fontSize="sm" color="gray.600">
+                                      Total Personil:
+                                    </Text>
+                                    <Badge colorScheme="orange" fontSize="sm">
+                                      {unitKerja.totalPersonilUnitKerja || 0}
+                                    </Badge>
+                                    <Text fontSize="sm" color="gray.600">
+                                      Sub Kegiatan:
+                                    </Text>
+                                    <Badge colorScheme="purple" fontSize="sm">
+                                      {unitKerja.daftarSubKegiatans?.length ||
+                                        0}
+                                    </Badge>
+                                  </HStack>
+                                </Flex>
+                                <HStack spacing={3} flexWrap="wrap">
+                                  <HStack spacing={1}>
+                                    <Badge
+                                      colorScheme="blue"
+                                      fontSize="xs"
+                                      px={2}
+                                      py={1}
+                                    >
+                                      {unitKerja.totalPersonilStatus1 || 0}
+                                    </Badge>
+                                    <Text fontSize="xs" color="gray.600">
+                                      SPD Sudah dibuat
+                                    </Text>
+                                  </HStack>
+                                  <HStack spacing={1}>
+                                    <Badge
+                                      colorScheme="green"
+                                      fontSize="xs"
+                                      px={2}
+                                      py={1}
+                                    >
+                                      {unitKerja.totalPersonilStatus2 || 0}
+                                    </Badge>
+                                    <Text fontSize="xs" color="gray.600">
+                                      Pengajuan Kwitansi
+                                    </Text>
+                                  </HStack>
+                                  <HStack spacing={1}>
+                                    <Badge
+                                      colorScheme="yellow"
+                                      fontSize="xs"
+                                      px={2}
+                                      py={1}
+                                    >
+                                      {unitKerja.totalPersonilStatus3 || 0}
+                                    </Badge>
+                                    <Text fontSize="xs" color="gray.600">
+                                      Kwitansi Terverivikasi
+                                    </Text>
+                                  </HStack>
+                                  <HStack spacing={1}>
+                                    <Badge
+                                      colorScheme="red"
+                                      fontSize="xs"
+                                      px={2}
+                                      py={1}
+                                    >
+                                      {unitKerja.totalPersonilStatus4 || 0}
+                                    </Badge>
+                                    <Text fontSize="xs" color="gray.600">
+                                      Kwitansi ditolak
+                                    </Text>
+                                  </HStack>
+                                </HStack>
+                              </VStack>
                             </Box>
                             <AccordionIcon />
                           </AccordionButton>
                           <AccordionPanel pb={4}>
                             <VStack spacing={4} align="stretch">
-                              {/* Statistik Unit Kerja */}
-                              <SimpleGrid
-                                columns={{ base: 2, md: 4 }}
-                                spacing={4}
-                              >
-                                <Box>
-                                  <Text fontSize="sm" color="gray.600">
-                                    Total Personil
-                                  </Text>
-                                  <Text fontSize="lg" fontWeight="bold">
-                                    {unitKerja.totalPersonilUnitKerja || 0}
-                                  </Text>
-                                </Box>
-                                <Box>
-                                  <Text fontSize="sm" color="gray.600">
-                                    SPD Sudah dibuat
-                                  </Text>
-                                  <Text
-                                    fontSize="lg"
-                                    fontWeight="bold"
-                                    color="blue.600"
-                                  >
-                                    {unitKerja.totalPersonilStatus1 || 0}
-                                  </Text>
-                                </Box>
-                                <Box>
-                                  <Text fontSize="sm" color="gray.600">
-                                    Pengajuan kwitansi
-                                  </Text>
-                                  <Text
-                                    fontSize="lg"
-                                    fontWeight="bold"
-                                    color="green.600"
-                                  >
-                                    {unitKerja.totalPersonilStatus2 || 0}
-                                  </Text>
-                                </Box>
-                                <Box>
-                                  <Text fontSize="sm" color="gray.600">
-                                    Kwitansi Terverivikasi
-                                  </Text>
-                                  <Text
-                                    fontSize="lg"
-                                    fontWeight="bold"
-                                    color="yellow.600"
-                                  >
-                                    {unitKerja.totalPersonilStatus3 || 0}
-                                  </Text>
-                                </Box>
-                                <Box>
-                                  <Text fontSize="sm" color="gray.600">
-                                    Kwitansi ditolak
-                                  </Text>
-                                  <Text
-                                    fontSize="lg"
-                                    fontWeight="bold"
-                                    color="red.600"
-                                  >
-                                    {unitKerja.totalPersonilStatus4 || 0}
-                                  </Text>
-                                </Box>
-                              </SimpleGrid>
-
                               {/* Sub Kegiatan */}
                               {unitKerja.daftarSubKegiatans &&
                                 unitKerja.daftarSubKegiatans.length > 0 && (
-                                  <Accordion allowMultiple>
-                                    {unitKerja.daftarSubKegiatans.map(
-                                      (subKegiatan, subIndex) => (
-                                        <AccordionItem
-                                          key={subKegiatan.id || subIndex}
-                                        >
-                                          <AccordionButton>
-                                            <Box flex="1" textAlign="left">
-                                              <HStack>
+                                  <Box>
+                                    <Heading size="sm" mb={3}>
+                                      Sub Kegiatan
+                                    </Heading>
+                                    <Accordion allowMultiple>
+                                      {unitKerja.daftarSubKegiatans.map(
+                                        (subKegiatan, subIndex) => (
+                                          <AccordionItem
+                                            key={subKegiatan.id || subIndex}
+                                            mb={2}
+                                          >
+                                            <AccordionButton>
+                                              <Box flex="1" textAlign="left">
                                                 <VStack
-                                                  align="start"
-                                                  spacing={0}
+                                                  align="stretch"
+                                                  spacing={2}
+                                                  w="full"
                                                 >
-                                                  <Text fontWeight="semibold">
-                                                    {subKegiatan.subKegiatan}
-                                                  </Text>
-                                                  <Text
-                                                    fontSize="sm"
-                                                    color="gray.500"
+                                                  <Flex
+                                                    justify="space-between"
+                                                    align="center"
+                                                    wrap="wrap"
+                                                    gap={2}
                                                   >
-                                                    {subKegiatan.kodeRekening}
-                                                  </Text>
-                                                </VStack>
-                                                <Badge colorScheme="purple">
-                                                  {subKegiatan.perjalanans
-                                                    ?.length || 0}{" "}
-                                                  Perjalanan
-                                                </Badge>
-                                                <Badge colorScheme="orange">
-                                                  {subKegiatan.totalPersonilSubKegiatan ||
-                                                    0}{" "}
-                                                  Personil
-                                                </Badge>
-                                              </HStack>
-                                            </Box>
-                                            <AccordionIcon />
-                                          </AccordionButton>
-                                          <AccordionPanel pb={4}>
-                                            <VStack spacing={4} align="stretch">
-                                              {/* Statistik Sub Kegiatan */}
-                                              <SimpleGrid
-                                                columns={{ base: 2, md: 5 }}
-                                                spacing={4}
-                                              >
-                                                <Box>
-                                                  <Text
-                                                    fontSize="sm"
-                                                    color="gray.600"
-                                                  >
-                                                    Total Personil
-                                                  </Text>
-                                                  <Text
-                                                    fontSize="lg"
-                                                    fontWeight="bold"
-                                                  >
-                                                    {subKegiatan.totalPersonilSubKegiatan ||
-                                                      0}
-                                                  </Text>
-                                                </Box>
-                                                <Box>
-                                                  <Text
-                                                    fontSize="sm"
-                                                    color="gray.600"
-                                                  >
-                                                    SPD Sudah dibuat
-                                                  </Text>
-                                                  <Text
-                                                    fontSize="lg"
-                                                    fontWeight="bold"
-                                                    color="blue.600"
-                                                  >
-                                                    {subKegiatan.totalPersonilStatus1 ||
-                                                      0}
-                                                  </Text>
-                                                </Box>
-                                                <Box>
-                                                  <Text
-                                                    fontSize="sm"
-                                                    color="gray.600"
-                                                  >
-                                                    Pengajuan kwitansi
-                                                  </Text>
-                                                  <Text
-                                                    fontSize="lg"
-                                                    fontWeight="bold"
-                                                    color="green.600"
-                                                  >
-                                                    {subKegiatan.totalPersonilStatus2 ||
-                                                      0}
-                                                  </Text>
-                                                </Box>
-                                                <Box>
-                                                  <Text
-                                                    fontSize="sm"
-                                                    color="gray.600"
-                                                  >
-                                                    Kwitansi Terverivikasi
-                                                  </Text>
-                                                  <Text
-                                                    fontSize="lg"
-                                                    fontWeight="bold"
-                                                    color="yellow.600"
-                                                  >
-                                                    {subKegiatan.totalPersonilStatus3 ||
-                                                      0}
-                                                  </Text>
-                                                </Box>
-                                                <Box>
-                                                  <Text
-                                                    fontSize="sm"
-                                                    color="gray.600"
-                                                  >
-                                                    Kwitansi ditolak
-                                                  </Text>
-                                                  <Text
-                                                    fontSize="lg"
-                                                    fontWeight="bold"
-                                                    color="red.600"
-                                                  >
-                                                    {subKegiatan.totalPersonilStatus4 ||
-                                                      0}
-                                                  </Text>
-                                                </Box>
-                                              </SimpleGrid>
-
-                                              {/* Informasi Tipe Perjalanan */}
-                                              {subKegiatan.tipePerjalanan
-                                                ?.length > 0 && (
-                                                <Card>
-                                                  <CardHeader>
-                                                    <Heading size="sm">
-                                                      Tipe Perjalanan
-                                                    </Heading>
-                                                  </CardHeader>
-                                                  <CardBody>
                                                     <VStack
-                                                      align="stretch"
-                                                      spacing={2}
+                                                      align="start"
+                                                      spacing={1}
                                                     >
-                                                      {subKegiatan.tipePerjalanan.map(
-                                                        (tipe, idx) => (
-                                                          <Badge
-                                                            key={idx}
-                                                            colorScheme="purple"
-                                                            p={2}
-                                                            fontSize="sm"
-                                                          >
-                                                            {tipe}
-                                                          </Badge>
-                                                        )
-                                                      )}
-                                                    </VStack>
-                                                  </CardBody>
-                                                </Card>
-                                              )}
-
-                                              {/* Anggaran dan Realisasi */}
-                                              {subKegiatan.anggaranByTipe &&
-                                                subKegiatan.anggaranByTipe
-                                                  .length > 0 && (
-                                                  <Card>
-                                                    <CardHeader>
-                                                      <Heading size="sm">
-                                                        Anggaran dan Realisasi
-                                                      </Heading>
-                                                    </CardHeader>
-                                                    <CardBody>
-                                                      <Box overflowX="auto">
-                                                        <Table
-                                                          variant="simple"
-                                                          size="sm"
-                                                        >
-                                                          <Thead>
-                                                            <Tr>
-                                                              <Th>Tahun</Th>
-                                                              <Th>
-                                                                Tipe Perjalanan
-                                                              </Th>
-                                                              <Th>Anggaran</Th>
-                                                              <Th>Realisasi</Th>
-                                                              <Th>Sisa</Th>
-                                                              <Th>
-                                                                Persentase
-                                                              </Th>
-                                                            </Tr>
-                                                          </Thead>
-                                                          <Tbody>
-                                                            {subKegiatan.anggaranByTipe.map(
-                                                              (
-                                                                anggaran,
-                                                                idx
-                                                              ) => {
-                                                                const sisa =
-                                                                  anggaran.anggaran -
-                                                                  anggaran.totalRealisasi;
-                                                                const persentase =
-                                                                  anggaran.anggaran >
-                                                                  0
-                                                                    ? (
-                                                                        (anggaran.totalRealisasi /
-                                                                          anggaran.anggaran) *
-                                                                        100
-                                                                      ).toFixed(
-                                                                        2
-                                                                      )
-                                                                    : 0;
-                                                                return (
-                                                                  <Tr key={idx}>
-                                                                    <Td>
-                                                                      {
-                                                                        anggaran.tahun
-                                                                      }
-                                                                    </Td>
-                                                                    <Td>
-                                                                      <Badge colorScheme="blue">
-                                                                        {anggaran.tipePerjalanan ||
-                                                                          "-"}
-                                                                      </Badge>
-                                                                    </Td>
-                                                                    <Td>
-                                                                      <Text fontWeight="semibold">
-                                                                        {formatRupiah(
-                                                                          anggaran.anggaran
-                                                                        )}
-                                                                      </Text>
-                                                                    </Td>
-                                                                    <Td>
-                                                                      <Text
-                                                                        fontWeight="semibold"
-                                                                        color="green.600"
-                                                                      >
-                                                                        {formatRupiah(
-                                                                          anggaran.totalRealisasi
-                                                                        )}
-                                                                      </Text>
-                                                                    </Td>
-                                                                    <Td>
-                                                                      <Text
-                                                                        fontWeight="semibold"
-                                                                        color={
-                                                                          sisa >=
-                                                                          0
-                                                                            ? "gray.600"
-                                                                            : "red.600"
-                                                                        }
-                                                                      >
-                                                                        {formatRupiah(
-                                                                          sisa
-                                                                        )}
-                                                                      </Text>
-                                                                    </Td>
-                                                                    <Td>
-                                                                      <Badge
-                                                                        colorScheme={
-                                                                          parseFloat(
-                                                                            persentase
-                                                                          ) <=
-                                                                          100
-                                                                            ? "green"
-                                                                            : "red"
-                                                                        }
-                                                                      >
-                                                                        {
-                                                                          persentase
-                                                                        }
-                                                                        %
-                                                                      </Badge>
-                                                                    </Td>
-                                                                  </Tr>
-                                                                );
-                                                              }
-                                                            )}
-                                                          </Tbody>
-                                                        </Table>
-                                                      </Box>
-                                                    </CardBody>
-                                                  </Card>
-                                                )}
-
-                                              <Divider />
-
-                                              {/* Tabel Perjalanan */}
-                                              {subKegiatan.perjalanans &&
-                                                subKegiatan.perjalanans.length >
-                                                  0 && (
-                                                  <Box>
-                                                    <Heading size="sm" mb={4}>
-                                                      Detail Perjalanan
-                                                    </Heading>
-                                                    <Box overflowX="auto">
-                                                      <Table
-                                                        variant="simple"
-                                                        size="sm"
+                                                      <Text
+                                                        fontWeight="semibold"
+                                                        fontSize="sm"
                                                       >
-                                                        <Thead>
-                                                          <Tr>
-                                                            <Th>
-                                                              ID Perjalanan
-                                                            </Th>
-                                                            <Th>
-                                                              Tempat Tujuan
-                                                            </Th>
-                                                            <Th>
-                                                              Total Personil
-                                                            </Th>
-                                                            <Th>
-                                                              SPD Sudah dibuat
-                                                            </Th>
-                                                            <Th>
-                                                              Pengajuan kwitansi
-                                                            </Th>
-                                                            <Th>
-                                                              Kwitansi
-                                                              Terverivikasi
-                                                            </Th>
-                                                            <Th>
-                                                              Kwitansi ditolak
-                                                            </Th>
-                                                          </Tr>
-                                                        </Thead>
-                                                        <Tbody>
-                                                          {subKegiatan.perjalanans.map(
-                                                            (
-                                                              perjalanan,
-                                                              perjalananIndex
-                                                            ) => {
-                                                              // Mengambil tempat tujuan dari perjalanan.tempats
-                                                              const tempatTujuan =
-                                                                perjalanan.tempats
-                                                                  ?.map(
-                                                                    (t) =>
-                                                                      t.tempat
-                                                                  )
-                                                                  .filter(
-                                                                    (t) => t
-                                                                  ) || [];
-
-                                                              return (
-                                                                <Tr
-                                                                  key={
-                                                                    perjalanan.id ||
-                                                                    perjalananIndex
-                                                                  }
-                                                                >
-                                                                  <Td>
-                                                                    <Button
-                                                                      onClick={() =>
-                                                                        history.push(
-                                                                          `/admin/rampung/${
-                                                                            perjalanan.id ||
-                                                                            ""
-                                                                          }`
+                                                        {
+                                                          subKegiatan.subKegiatan
+                                                        }
+                                                      </Text>
+                                                      <Text
+                                                        fontSize="xs"
+                                                        color="gray.500"
+                                                      >
+                                                        {
+                                                          subKegiatan.kodeRekening
+                                                        }
+                                                      </Text>
+                                                    </VStack>
+                                                    <HStack spacing={2}>
+                                                      <Badge
+                                                        colorScheme="purple"
+                                                        fontSize="xs"
+                                                      >
+                                                        {subKegiatan.perjalanans
+                                                          ?.length || 0}{" "}
+                                                        Perjalanan
+                                                      </Badge>
+                                                      <Badge
+                                                        colorScheme="orange"
+                                                        fontSize="xs"
+                                                      >
+                                                        {subKegiatan.totalPersonilSubKegiatan ||
+                                                          0}{" "}
+                                                        Personil
+                                                      </Badge>
+                                                    </HStack>
+                                                  </Flex>
+                                                  <HStack
+                                                    spacing={2}
+                                                    flexWrap="wrap"
+                                                  >
+                                                    <HStack spacing={1}>
+                                                      <Badge
+                                                        colorScheme="blue"
+                                                        fontSize="xs"
+                                                        px={2}
+                                                        py={0.5}
+                                                      >
+                                                        {subKegiatan.totalPersonilStatus1 ||
+                                                          0}
+                                                      </Badge>
+                                                      <Text
+                                                        fontSize="xs"
+                                                        color="gray.600"
+                                                      >
+                                                        SPD
+                                                      </Text>
+                                                    </HStack>
+                                                    <HStack spacing={1}>
+                                                      <Badge
+                                                        colorScheme="green"
+                                                        fontSize="xs"
+                                                        px={2}
+                                                        py={0.5}
+                                                      >
+                                                        {subKegiatan.totalPersonilStatus2 ||
+                                                          0}
+                                                      </Badge>
+                                                      <Text
+                                                        fontSize="xs"
+                                                        color="gray.600"
+                                                      >
+                                                        Pengajuan
+                                                      </Text>
+                                                    </HStack>
+                                                    <HStack spacing={1}>
+                                                      <Badge
+                                                        colorScheme="yellow"
+                                                        fontSize="xs"
+                                                        px={2}
+                                                        py={0.5}
+                                                      >
+                                                        {subKegiatan.totalPersonilStatus3 ||
+                                                          0}
+                                                      </Badge>
+                                                      <Text
+                                                        fontSize="xs"
+                                                        color="gray.600"
+                                                      >
+                                                        Terverivikasi
+                                                      </Text>
+                                                    </HStack>
+                                                    <HStack spacing={1}>
+                                                      <Badge
+                                                        colorScheme="red"
+                                                        fontSize="xs"
+                                                        px={2}
+                                                        py={0.5}
+                                                      >
+                                                        {subKegiatan.totalPersonilStatus4 ||
+                                                          0}
+                                                      </Badge>
+                                                      <Text
+                                                        fontSize="xs"
+                                                        color="gray.600"
+                                                      >
+                                                        Ditolak
+                                                      </Text>
+                                                    </HStack>
+                                                  </HStack>
+                                                </VStack>
+                                              </Box>
+                                              <AccordionIcon />
+                                            </AccordionButton>
+                                            <AccordionPanel pb={4}>
+                                              <VStack
+                                                spacing={4}
+                                                align="stretch"
+                                              >
+                                                {/* Anggaran dan Realisasi */}
+                                                {subKegiatan.anggaranByTipe &&
+                                                  subKegiatan.anggaranByTipe
+                                                    .length > 0 && (
+                                                    <Card>
+                                                      <CardHeader>
+                                                        <Heading size="sm">
+                                                          Anggaran dan Realisasi
+                                                        </Heading>
+                                                      </CardHeader>
+                                                      <CardBody>
+                                                        <Box overflowX="auto">
+                                                          <Table
+                                                            variant="simple"
+                                                            size="sm"
+                                                          >
+                                                            <Thead>
+                                                              <Tr>
+                                                                <Th>Tahun</Th>
+                                                                <Th>
+                                                                  Tipe
+                                                                  Perjalanan
+                                                                </Th>
+                                                                <Th>
+                                                                  Anggaran
+                                                                </Th>
+                                                                <Th>
+                                                                  Realisasi
+                                                                </Th>
+                                                                <Th>Sisa</Th>
+                                                                <Th>
+                                                                  Persentase
+                                                                </Th>
+                                                              </Tr>
+                                                            </Thead>
+                                                            <Tbody>
+                                                              {subKegiatan.anggaranByTipe.map(
+                                                                (
+                                                                  anggaran,
+                                                                  idx
+                                                                ) => {
+                                                                  const sisa =
+                                                                    anggaran.anggaran -
+                                                                    anggaran.totalRealisasi;
+                                                                  const persentase =
+                                                                    anggaran.anggaran >
+                                                                    0
+                                                                      ? (
+                                                                          (anggaran.totalRealisasi /
+                                                                            anggaran.anggaran) *
+                                                                          100
+                                                                        ).toFixed(
+                                                                          2
                                                                         )
-                                                                      }
+                                                                      : 0;
+                                                                  return (
+                                                                    <Tr
+                                                                      key={idx}
                                                                     >
-                                                                      {" "}
-                                                                      Lihat
-                                                                      Detail
-                                                                    </Button>
-                                                                  </Td>
-                                                                  <Td>
-                                                                    {tempatTujuan.length >
-                                                                    0 ? (
+                                                                      <Td>
+                                                                        {
+                                                                          anggaran.tahun
+                                                                        }
+                                                                      </Td>
+                                                                      <Td>
+                                                                        <Badge colorScheme="blue">
+                                                                          {anggaran.tipePerjalanan ||
+                                                                            "-"}
+                                                                        </Badge>
+                                                                      </Td>
+                                                                      <Td>
+                                                                        <Text fontWeight="semibold">
+                                                                          {formatRupiah(
+                                                                            anggaran.anggaran
+                                                                          )}
+                                                                        </Text>
+                                                                      </Td>
+                                                                      <Td>
+                                                                        <Text
+                                                                          fontWeight="semibold"
+                                                                          color="green.600"
+                                                                        >
+                                                                          {formatRupiah(
+                                                                            anggaran.totalRealisasi
+                                                                          )}
+                                                                        </Text>
+                                                                      </Td>
+                                                                      <Td>
+                                                                        <Text
+                                                                          fontWeight="semibold"
+                                                                          color={
+                                                                            sisa >=
+                                                                            0
+                                                                              ? "gray.600"
+                                                                              : "red.600"
+                                                                          }
+                                                                        >
+                                                                          {formatRupiah(
+                                                                            sisa
+                                                                          )}
+                                                                        </Text>
+                                                                      </Td>
+                                                                      <Td>
+                                                                        <Badge
+                                                                          colorScheme={
+                                                                            parseFloat(
+                                                                              persentase
+                                                                            ) <=
+                                                                            100
+                                                                              ? "green"
+                                                                              : "red"
+                                                                          }
+                                                                        >
+                                                                          {
+                                                                            persentase
+                                                                          }
+                                                                          %
+                                                                        </Badge>
+                                                                      </Td>
+                                                                    </Tr>
+                                                                  );
+                                                                }
+                                                              )}
+                                                            </Tbody>
+                                                          </Table>
+                                                        </Box>
+                                                      </CardBody>
+                                                    </Card>
+                                                  )}
+
+                                                <Divider />
+
+                                                {/* Detail Perjalanan */}
+                                                {subKegiatan.perjalanans &&
+                                                  subKegiatan.perjalanans
+                                                    .length > 0 && (
+                                                    <Box>
+                                                      <Heading size="sm" mb={4}>
+                                                        Detail Perjalanan
+                                                      </Heading>
+                                                      <SimpleGrid
+                                                        columns={{
+                                                          base: 1,
+                                                          md: 2,
+                                                        }}
+                                                        spacing={4}
+                                                      >
+                                                        {subKegiatan.perjalanans.map(
+                                                          (
+                                                            perjalanan,
+                                                            perjalananIndex
+                                                          ) => {
+                                                            // Mengambil tempat tujuan dari perjalanan.tempats
+                                                            const tempatTujuan =
+                                                              perjalanan.tempats
+                                                                ?.map(
+                                                                  (t) =>
+                                                                    t.tempat
+                                                                )
+                                                                .filter(
+                                                                  (t) => t
+                                                                ) || [];
+
+                                                            return (
+                                                              <Card
+                                                                key={
+                                                                  perjalanan.id ||
+                                                                  perjalananIndex
+                                                                }
+                                                                variant="outline"
+                                                              >
+                                                                <CardBody>
+                                                                  <VStack
+                                                                    align="stretch"
+                                                                    spacing={3}
+                                                                  >
+                                                                    <Flex
+                                                                      justify="space-between"
+                                                                      align="start"
+                                                                    >
                                                                       <VStack
                                                                         align="start"
                                                                         spacing={
                                                                           1
                                                                         }
                                                                       >
-                                                                        {tempatTujuan.map(
-                                                                          (
-                                                                            tempat,
-                                                                            idx
-                                                                          ) => (
-                                                                            <Badge
-                                                                              key={
+                                                                        <Text
+                                                                          fontSize="sm"
+                                                                          color="gray.600"
+                                                                        >
+                                                                          Tempat
+                                                                          Tujuan
+                                                                        </Text>
+                                                                        {tempatTujuan.length >
+                                                                        0 ? (
+                                                                          <HStack
+                                                                            spacing={
+                                                                              1
+                                                                            }
+                                                                            flexWrap="wrap"
+                                                                          >
+                                                                            {tempatTujuan.map(
+                                                                              (
+                                                                                tempat,
                                                                                 idx
-                                                                              }
-                                                                              colorScheme="teal"
-                                                                              fontSize="xs"
-                                                                            >
-                                                                              {
-                                                                                tempat
-                                                                              }
-                                                                            </Badge>
-                                                                          )
+                                                                              ) => (
+                                                                                <Badge
+                                                                                  key={
+                                                                                    idx
+                                                                                  }
+                                                                                  colorScheme="teal"
+                                                                                  fontSize="xs"
+                                                                                >
+                                                                                  {
+                                                                                    tempat
+                                                                                  }
+                                                                                </Badge>
+                                                                              )
+                                                                            )}
+                                                                          </HStack>
+                                                                        ) : (
+                                                                          <Text
+                                                                            fontSize="sm"
+                                                                            color="gray.400"
+                                                                          >
+                                                                            -
+                                                                          </Text>
                                                                         )}
                                                                       </VStack>
-                                                                    ) : (
+                                                                      <Button
+                                                                        size="sm"
+                                                                        colorScheme="blue"
+                                                                        onClick={() =>
+                                                                          history.push(
+                                                                            `/admin/rampung/${
+                                                                              perjalanan.id ||
+                                                                              ""
+                                                                            }`
+                                                                          )
+                                                                        }
+                                                                      >
+                                                                        Lihat
+                                                                        Detail
+                                                                      </Button>
+                                                                    </Flex>
+
+                                                                    <Divider />
+
+                                                                    <Box>
                                                                       <Text
                                                                         fontSize="sm"
-                                                                        color="gray.400"
+                                                                        color="gray.600"
+                                                                        mb={2}
                                                                       >
-                                                                        -
+                                                                        Status
+                                                                        Personil
                                                                       </Text>
-                                                                    )}
-                                                                  </Td>
-                                                                  <Td>
-                                                                    <Badge colorScheme="blue">
-                                                                      {
-                                                                        perjalanan.totalPersonilPerjalanan
-                                                                      }
-                                                                    </Badge>
-                                                                  </Td>
-                                                                  <Td>
-                                                                    <Badge colorScheme="blue">
-                                                                      {
-                                                                        perjalanan.totalPersonilStatus1
-                                                                      }
-                                                                    </Badge>
-                                                                  </Td>
-                                                                  <Td>
-                                                                    <Badge colorScheme="green">
-                                                                      {
-                                                                        perjalanan.totalPersonilStatus2
-                                                                      }
-                                                                    </Badge>
-                                                                  </Td>
-                                                                  <Td>
-                                                                    <Badge colorScheme="yellow">
-                                                                      {
-                                                                        perjalanan.totalPersonilStatus3
-                                                                      }
-                                                                    </Badge>
-                                                                  </Td>
-                                                                  <Td>
-                                                                    <Badge colorScheme="red">
-                                                                      {
-                                                                        perjalanan.totalPersonilStatus4
-                                                                      }
-                                                                    </Badge>
-                                                                  </Td>
-                                                                </Tr>
-                                                              );
-                                                            }
-                                                          )}
-                                                        </Tbody>
-                                                      </Table>
+                                                                      <SimpleGrid
+                                                                        columns={
+                                                                          2
+                                                                        }
+                                                                        spacing={
+                                                                          3
+                                                                        }
+                                                                      >
+                                                                        <HStack justify="space-between">
+                                                                          <Text
+                                                                            fontSize="sm"
+                                                                            color="gray.600"
+                                                                          >
+                                                                            Total
+                                                                            Personil
+                                                                          </Text>
+                                                                          <Badge colorScheme="blue">
+                                                                            {
+                                                                              perjalanan.totalPersonilPerjalanan
+                                                                            }
+                                                                          </Badge>
+                                                                        </HStack>
+                                                                        <HStack justify="space-between">
+                                                                          <Text
+                                                                            fontSize="sm"
+                                                                            color="gray.600"
+                                                                          >
+                                                                            SPD
+                                                                            Sudah
+                                                                            dibuat
+                                                                          </Text>
+                                                                          <Badge colorScheme="blue">
+                                                                            {
+                                                                              perjalanan.totalPersonilStatus1
+                                                                            }
+                                                                          </Badge>
+                                                                        </HStack>
+                                                                        <HStack justify="space-between">
+                                                                          <Text
+                                                                            fontSize="sm"
+                                                                            color="gray.600"
+                                                                          >
+                                                                            Pengajuan
+                                                                            kwitansi
+                                                                          </Text>
+                                                                          <Badge colorScheme="green">
+                                                                            {
+                                                                              perjalanan.totalPersonilStatus2
+                                                                            }
+                                                                          </Badge>
+                                                                        </HStack>
+                                                                        <HStack justify="space-between">
+                                                                          <Text
+                                                                            fontSize="sm"
+                                                                            color="gray.600"
+                                                                          >
+                                                                            Kwitansi
+                                                                            Terverivikasi
+                                                                          </Text>
+                                                                          <Badge colorScheme="yellow">
+                                                                            {
+                                                                              perjalanan.totalPersonilStatus3
+                                                                            }
+                                                                          </Badge>
+                                                                        </HStack>
+                                                                        <HStack justify="space-between">
+                                                                          <Text
+                                                                            fontSize="sm"
+                                                                            color="gray.600"
+                                                                          >
+                                                                            Kwitansi
+                                                                            ditolak
+                                                                          </Text>
+                                                                          <Badge colorScheme="red">
+                                                                            {
+                                                                              perjalanan.totalPersonilStatus4
+                                                                            }
+                                                                          </Badge>
+                                                                        </HStack>
+                                                                      </SimpleGrid>
+                                                                    </Box>
+                                                                  </VStack>
+                                                                </CardBody>
+                                                              </Card>
+                                                            );
+                                                          }
+                                                        )}
+                                                      </SimpleGrid>
                                                     </Box>
-                                                  </Box>
-                                                )}
-                                            </VStack>
-                                          </AccordionPanel>
-                                        </AccordionItem>
-                                      )
-                                    )}
-                                  </Accordion>
+                                                  )}
+                                              </VStack>
+                                            </AccordionPanel>
+                                          </AccordionItem>
+                                        )
+                                      )}
+                                    </Accordion>
+                                  </Box>
                                 )}
                             </VStack>
                           </AccordionPanel>

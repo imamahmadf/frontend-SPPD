@@ -43,6 +43,9 @@ import {
   useToast,
   useColorMode,
   Checkbox,
+  Badge,
+  VStack,
+  Divider,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -54,6 +57,7 @@ import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
 import { BsCartPlus } from "react-icons/bs";
+import { BsPencil } from "react-icons/bs";
 function DetailKwitansiGlobal(props) {
   const [dataKwitGlobal, setDataKwitGlobal] = useState([]);
   const history = useHistory();
@@ -77,6 +81,19 @@ function DetailKwitansiGlobal(props) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [subKegiatanList, setSubKegiatanList] = useState([]);
   const [selectedSubKegiatanId, setSelectedSubKegiatanId] = useState(null);
+  const [selectedJenisPerjalananId, setSelectedJenisPerjalananId] =
+    useState(null);
+
+  // State untuk edit kwitansi global
+  const [editPegawaiId, setEditPegawaiId] = useState(0);
+  const [editBendaharaId, setEditBendaharaId] = useState(null);
+  const [editKPAId, setEditKPAId] = useState(null);
+  const [editJenisPerjalananId, setEditJenisPerjalananId] = useState(null);
+  const [editTemplateId, setEditTemplateId] = useState(null);
+  const [dataKPA, setDataKPA] = useState(null);
+  const [dataJenisPerjalanan, setDataJenisPerjalanan] = useState(null);
+  const [dataTemplate, setDataTemplate] = useState(null);
+  const [selectedPegawai, setSelectedPegawai] = useState(null);
 
   // Sinkronkan selectedIds dengan selectedPerjalanan
   useEffect(() => {
@@ -101,6 +118,11 @@ function DetailKwitansiGlobal(props) {
     onOpen: onModalBaruOpen,
     onClose: onModalBaruClose,
   } = useDisclosure();
+  const {
+    isOpen: isEditKwitansiOpen,
+    onOpen: onEditKwitansiOpen,
+    onClose: onEditKwitansiClose,
+  } = useDisclosure();
 
   async function fetchKwitansiGlobal() {
     await axios
@@ -115,6 +137,10 @@ function DetailKwitansiGlobal(props) {
         // Set subKegiatanId yang aktif dari dataKwitGlobal
         if (res.data.result && res.data.result[0]?.subKegiatanId) {
           setSelectedSubKegiatanId(res.data.result[0].subKegiatanId);
+        }
+        // Set jenisPerjalananId yang aktif dari dataKwitGlobal
+        if (res.data.result && res.data.result[0]?.jenisPerjalananId) {
+          setSelectedJenisPerjalananId(res.data.result[0].jenisPerjalananId);
         }
         console.log(res.data);
       })
@@ -433,12 +459,13 @@ function DetailKwitansiGlobal(props) {
         {
           id: props.match.params.id,
           subKegiatanId: selectedSubKegiatanId,
+          jenisPerjalananId: selectedJenisPerjalananId,
         }
       )
       .then((res) => {
         toast({
           title: "Berhasil!",
-          description: "Sub Kegiatan berhasil diupdate.",
+          description: "Sub Kegiatan dan Jenis Perjalanan berhasil diupdate.",
           status: "success",
           duration: 3000,
           isClosable: true,
@@ -450,12 +477,103 @@ function DetailKwitansiGlobal(props) {
       .catch((err) => {
         toast({
           title: "Error!",
-          description: "Gagal update Sub Kegiatan.",
+          description: "Gagal update Sub Kegiatan dan Jenis Perjalanan.",
           status: "error",
           duration: 3000,
           isClosable: true,
         });
         onModalBaruClose();
+      });
+  };
+
+  // Function untuk fetch data dropdown options untuk edit
+  const fetchDropdownOptions = async () => {
+    try {
+      const res = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi-global/get?page=0&limit=1&unitKerjaId=${
+          user[0]?.unitKerja_profile?.id
+        }&indukUnitKerjaId=${user[0]?.unitKerja_profile?.indukUnitKerja?.id}`
+      );
+      setDataKPA(res?.data?.resultKPA);
+      setDataBendahara(res?.data?.resultBendahara);
+      setDataJenisPerjalanan(res?.data?.resultJenisPerjalanan);
+      setDataTemplate(res.data?.resultTemplate);
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error!",
+        description: "Gagal memuat data dropdown.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  // Function untuk load data existing ke form edit
+  const loadDataToEdit = () => {
+    const kg = Array.isArray(dataKwitGlobal)
+      ? dataKwitGlobal[0]
+      : dataKwitGlobal;
+    if (kg) {
+      setEditPegawaiId(kg.pegawaiId || 0);
+      setEditKPAId(kg.KPAId || null);
+      setEditBendaharaId(kg.bendaharaId || null);
+      setEditTemplateId(kg.templateKwitGlobalId || null);
+
+      // Set selected pegawai untuk AsyncSelect
+      if (kg.pegawai) {
+        setSelectedPegawai({
+          value: kg.pegawai.id,
+          label: kg.pegawai.nama,
+        });
+      }
+    }
+  };
+
+  // Function untuk membuka modal edit
+  const handleOpenEdit = () => {
+    fetchDropdownOptions();
+    loadDataToEdit();
+    onEditKwitansiOpen();
+  };
+
+  // Function untuk update kwitansi global
+  const updateKwitansiGlobal = () => {
+    axios
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kwitansi-global/update`,
+        {
+          id: props.match.params.id,
+          pegawaiId: editPegawaiId,
+          KPAId: editKPAId,
+          bendaharaId: editBendaharaId,
+          templateKwitGlobalId: editTemplateId,
+        }
+      )
+      .then((res) => {
+        toast({
+          title: "Berhasil!",
+          description: "Kwitansi Global berhasil diupdate.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        fetchKwitansiGlobal();
+        onEditKwitansiClose();
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({
+          title: "Error!",
+          description:
+            err.response?.data?.message || "Gagal update Kwitansi Global.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       });
   };
 
@@ -478,156 +596,211 @@ function DetailKwitansiGlobal(props) {
             bg={colorMode === "dark" ? "gray.800" : "white"}
           >
             {/* Header Section */}
-            <Box mb={"30px"}>
-              <Heading size="lg" color="gray.700" mb={4}>
-                Detail Kwitansi Global
-              </Heading>
-              <Text color="gray.600" fontSize="sm">
-                Kelola dan lihat detail kwitansi global perjalanan dinas
-              </Text>
-              {/* Hapus form edit sub kegiatan di sini */}
-            </Box>
-            <Box mb={6} mt={2}>
-              <Table size="sm" variant="simple">
-                <Tbody>
-                  <Tr>
-                    <Td fontWeight="bold">Penerima</Td>
-                    <Td>{dataKwitGlobal[0]?.pegawai?.nama}</Td>
-                  </Tr>
-
-                  <Tr>
-                    <Td fontWeight="bold">Sub Kegiatan</Td>
-                    <Td>{dataKwitGlobal[0]?.subKegiatan?.subKegiatan}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold">Jenis Perjalanan</Td>
-                    <Td>{dataKwitGlobal[0]?.jenisPerjalanan?.jenis}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold">Kode Rekening</Td>
-                    <Td>
-                      {" "}
-                      {dataKwitGlobal[0]?.subKegiatan?.kodeRekening}
-                      {dataKwitGlobal[0]?.jenisPerjalanan?.kodeRekening}
-                    </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold">{dataKwitGlobal[0]?.KPA?.jabatan}</Td>
-                    <Td>{dataKwitGlobal[0]?.KPA?.pegawai_KPA?.nama} </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold">
-                      {" "}
-                      {dataKwitGlobal[0]?.PPTK?.jabatan}
-                    </Td>
-                    <Td>{dataKwitGlobal[0]?.PPTK?.pegawai_PPTK?.nama} </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold">
-                      {" "}
-                      {dataKwitGlobal[0]?.bendahara?.jabatan}
-                    </Td>
-                    <Td>
-                      {dataKwitGlobal[0]?.bendahara?.pegawai_bendahara?.nama}
-                    </Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold">Jenis Kwitansi</Td>
-                    <Td>{dataKwitGlobal[0]?.templateKwitGlobal?.nama}</Td>
-                  </Tr>
-                  <Tr>
-                    <Td fontWeight="bold">Tanggal Dibuat</Td>
-                    <Td>
-                      {dataKwitGlobal[0]?.createdAt &&
-                        new Date(dataKwitGlobal[0].createdAt).toLocaleString(
-                          "id-ID"
-                        )}
-                    </Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-            </Box>
-            {/* {JSON.stringify(dataKwitGlobal[0]?.perjalanans[0]?.personils)} */}
-            {/* Action Buttons */}
-            <Flex gap={4} mb={"30px"} wrap="wrap" align="center">
-              {dataKwitGlobal[0]?.status === "diterima" ? (
-                <Button
-                  onClick={kirimDataTabel}
-                  variant={"solid"}
-                  px={"30px"}
-                  colorScheme="blue"
-                  isLoading={isPrinting}
-                  loadingText="Mengunduh..."
-                  disabled={isPrinting}
-                  leftIcon={<BsFileEarmarkArrowDown />}
-                  size="md"
-                >
-                  {isPrinting ? "Mengunduh..." : "Download Word"}
-                </Button>
-              ) : null}
-
-              {dataKwitGlobal[0]?.status === "dibuat" ||
-              dataKwitGlobal[0]?.status === "ditolak" ? (
-                <Button
-                  onClick={onDetailOpen}
-                  variant={"outline"}
-                  px={"30px"}
-                  colorScheme="green"
-                  leftIcon={<BsEyeFill />}
-                  size="md"
-                >
-                  Tambah Perjalanan
-                </Button>
-              ) : null}
-
-              {Array.isArray(dataKwitGlobal[0]?.perjalanans) &&
-              dataKwitGlobal[0]?.perjalanans.length === 0 ? (
-                <Button
-                  onClick={onModalBaruOpen}
-                  colorScheme="purple"
-                  variant="solid"
-                  px={6}
-                  leftIcon={<BsEyeFill />}
-                  size="md"
-                >
-                  edit Sub Kegiatan
-                </Button>
-              ) : null}
-
-              <Spacer />
-
-              {/* Status Badge */}
+            <Flex
+              justify="space-between"
+              align={{ base: "flex-start", md: "center" }}
+              mb={6}
+              direction={{ base: "column", md: "row" }}
+              gap={4}
+            >
+              <Box>
+                <Heading size="lg" color="gray.700" mb={2}>
+                  Detail Kwitansi Global
+                </Heading>
+                <Text color="gray.600" fontSize="sm">
+                  Kelola dan lihat detail kwitansi global perjalanan dinas
+                </Text>
+              </Box>
               {dataKwitGlobal[0]?.status && (
-                <Box
-                  px={3}
-                  py={1}
+                <Badge
+                  px={4}
+                  py={2}
                   borderRadius="full"
-                  bg={
-                    dataKwitGlobal[0]?.status === "diterima"
-                      ? "green.100"
-                      : dataKwitGlobal[0]?.status === "dibuat"
-                      ? "blue.100"
-                      : dataKwitGlobal[0]?.status === "ditolak"
-                      ? "red.100"
-                      : "gray.100"
-                  }
-                  color={
-                    dataKwitGlobal[0]?.status === "diterima"
-                      ? "green.700"
-                      : dataKwitGlobal[0]?.status === "dibuat"
-                      ? "blue.700"
-                      : dataKwitGlobal[0]?.status === "ditolak"
-                      ? "red.700"
-                      : "gray.700"
-                  }
                   fontSize="sm"
-                  fontWeight="medium"
+                  fontWeight="semibold"
                   textTransform="capitalize"
+                  colorScheme={
+                    dataKwitGlobal[0]?.status === "diterima"
+                      ? "green"
+                      : dataKwitGlobal[0]?.status === "dibuat"
+                      ? "blue"
+                      : dataKwitGlobal[0]?.status === "ditolak"
+                      ? "red"
+                      : "gray"
+                  }
                 >
                   Status: {dataKwitGlobal[0]?.status}
-                </Box>
+                </Badge>
               )}
             </Flex>
+
+            {/* Informasi Detail Kwitansi */}
+            <Box
+              mb={6}
+              p={6}
+              bg={colorMode === "dark" ? "gray.700" : "gray.50"}
+              borderRadius="lg"
+              border="1px"
+              borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+            >
+              <Heading size="md" color="gray.700" mb={4}>
+                Informasi Kwitansi
+              </Heading>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                <VStack align="stretch" spacing={3}>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      Penerima
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.pegawai?.nama || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      Sub Kegiatan
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.subKegiatan?.subKegiatan || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      Jenis Perjalanan
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.jenisPerjalanan?.jenis || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      Kode Rekening
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.subKegiatan?.kodeRekening || ""}
+                      {dataKwitGlobal[0]?.jenisPerjalanan?.kodeRekening || ""}
+                      {!dataKwitGlobal[0]?.subKegiatan?.kodeRekening &&
+                        !dataKwitGlobal[0]?.jenisPerjalanan?.kodeRekening &&
+                        "-"}
+                    </Text>
+                  </Box>
+                </VStack>
+                <VStack align="stretch" spacing={3}>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      {dataKwitGlobal[0]?.KPA?.jabatan || "Pengguna Anggaran"}
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.KPA?.pegawai_KPA?.nama || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      {dataKwitGlobal[0]?.PPTK?.jabatan || "PPTK"}
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.PPTK?.pegawai_PPTK?.nama || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      {dataKwitGlobal[0]?.bendahara?.jabatan || "Bendahara"}
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.bendahara?.pegawai_bendahara?.nama ||
+                        "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      Jenis Kwitansi
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.templateKwitGlobal?.nama || "-"}
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Text fontSize="xs" color="gray.500" mb={1}>
+                      Tanggal Dibuat
+                    </Text>
+                    <Text fontWeight="semibold" color="gray.700">
+                      {dataKwitGlobal[0]?.createdAt
+                        ? new Date(dataKwitGlobal[0].createdAt).toLocaleString(
+                            "id-ID",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
+                        : "-"}
+                    </Text>
+                  </Box>
+                </VStack>
+              </SimpleGrid>
+            </Box>
+            {/* Action Buttons */}
+            <Box mb={6}>
+              <Divider mb={4} />
+              <Flex gap={3} wrap="wrap" align="center">
+                {dataKwitGlobal[0]?.status === "diterima" ? (
+                  <Button
+                    onClick={kirimDataTabel}
+                    variant={"solid"}
+                    colorScheme="blue"
+                    isLoading={isPrinting}
+                    loadingText="Mengunduh..."
+                    disabled={isPrinting}
+                    leftIcon={<BsFileEarmarkArrowDown />}
+                    size="md"
+                  >
+                    {isPrinting ? "Mengunduh..." : "Download Word"}
+                  </Button>
+                ) : null}
+
+                {dataKwitGlobal[0]?.status === "dibuat" ||
+                dataKwitGlobal[0]?.status === "ditolak" ? (
+                  <>
+                    <Button
+                      onClick={handleOpenEdit}
+                      variant={"outline"}
+                      colorScheme="orange"
+                      leftIcon={<BsPencil />}
+                      size="md"
+                    >
+                      Edit Kwitansi Global
+                    </Button>
+                    <Button
+                      onClick={onDetailOpen}
+                      variant={"solid"}
+                      colorScheme="green"
+                      leftIcon={<BsEyeFill />}
+                      size="md"
+                    >
+                      Tambah Perjalanan
+                    </Button>
+                  </>
+                ) : null}
+
+                {Array.isArray(dataKwitGlobal[0]?.perjalanans) &&
+                dataKwitGlobal[0]?.perjalanans.length === 0 ? (
+                  <Button
+                    onClick={() => {
+                      fetchDropdownOptions();
+                      onModalBaruOpen();
+                    }}
+                    colorScheme="purple"
+                    variant="solid"
+                    leftIcon={<BsEyeFill />}
+                    size="md"
+                  >
+                    Edit Sub Kegiatan
+                  </Button>
+                ) : null}
+              </Flex>
+            </Box>
             {(() => {
               const kg = Array.isArray(dataKwitGlobal)
                 ? dataKwitGlobal[0]
@@ -706,58 +879,126 @@ function DetailKwitansiGlobal(props) {
               const totalAll = rows.reduce((a, r) => a + (r.total || 0), 0);
               return (
                 <Box>
-                  <Heading size="md" color="gray.700" mb={4}>
-                    Data Perjalanan Dinas
-                  </Heading>
+                  <Flex justify="space-between" align="center" mb={4}>
+                    <Heading size="md" color="gray.700">
+                      Data Perjalanan Dinas
+                    </Heading>
+                    <Badge
+                      colorScheme="blue"
+                      fontSize="sm"
+                      px={3}
+                      py={1}
+                      borderRadius="full"
+                    >
+                      {rows.length} Perjalanan
+                    </Badge>
+                  </Flex>
                   <Box
                     overflowX="auto"
                     borderRadius="lg"
                     border="1px"
-                    borderColor="gray.200"
+                    borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                    bg={colorMode === "dark" ? "gray.800" : "white"}
                   >
                     <Table variant="simple" size="md">
-                      <Thead bg="gray.50">
+                      <Thead bg={colorMode === "dark" ? "gray.700" : "gray.50"}>
                         <Tr>
-                          <Th color="gray.600" fontWeight="semibold">
-                            Detail
+                          <Th
+                            color="gray.600"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                          >
+                            Aksi
                           </Th>
-                          <Th color="gray.600" fontWeight="semibold">
+                          <Th
+                            color="gray.600"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                          >
                             No Surat Tugas
                           </Th>
-                          <Th color="gray.600" fontWeight="semibold">
+                          <Th
+                            color="gray.600"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                          >
                             Nama Pegawai
                           </Th>
-                          <Th color="gray.600" fontWeight="semibold">
+                          <Th
+                            color="gray.600"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                          >
                             Tanggal Berangkat
                           </Th>
-                          <Th color="gray.600" fontWeight="semibold">
+                          <Th
+                            color="gray.600"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                          >
                             Tempat
                           </Th>
-                          <Th color="gray.600" fontWeight="semibold">
+                          <Th
+                            color="gray.600"
+                            fontWeight="semibold"
+                            fontSize="sm"
+                          >
                             Status
                           </Th>
-                          <Th color="gray.600" fontWeight="semibold" isNumeric>
+                          <Th
+                            color="gray.600"
+                            fontWeight="semibold"
+                            isNumeric
+                            fontSize="sm"
+                          >
                             BPD
                           </Th>
                         </Tr>
                       </Thead>
                       <Tbody>
                         {rows.map((r, idx) => (
-                          <Tr key={idx} _hover={{ bg: "gray.50" }}>
-                            <Td fontWeight="medium">
+                          <Tr
+                            key={idx}
+                            _hover={{
+                              bg: colorMode === "dark" ? "gray.700" : "gray.50",
+                            }}
+                          >
+                            <Td>
                               <Button
+                                size="sm"
+                                colorScheme="blue"
+                                variant="ghost"
                                 onClick={() => {
                                   history.push(`/rampung/${r.id}`);
                                 }}
                               >
-                                detail
+                                Detail
                               </Button>
                             </Td>
-                            <Td fontWeight="medium">{r.noSuratTugas}</Td>
-                            <Td>{r.nama}</Td>
-                            <Td color="gray.600">{r.tanggalBerangkat}</Td>
-                            <Td color="gray.600">{r.tempat}</Td>
-                            <Td color="gray.600">{r.status.statusKuitansi}</Td>
+                            <Td fontWeight="medium" color="gray.700">
+                              {r.noSuratTugas}
+                            </Td>
+                            <Td color="gray.700">{r.nama}</Td>
+                            <Td color="gray.600" fontSize="sm">
+                              {r.tanggalBerangkat}
+                            </Td>
+                            <Td color="gray.600" fontSize="sm">
+                              {r.tempat}
+                            </Td>
+                            <Td>
+                              <Badge
+                                colorScheme={
+                                  r.status?.statusKuitansi === "selesai"
+                                    ? "green"
+                                    : r.status?.statusKuitansi === "ditolak"
+                                    ? "red"
+                                    : "yellow"
+                                }
+                                fontSize="xs"
+                              >
+                                {r.status?.statusKuitansi || "-"}
+                              </Badge>
+                            </Td>
                             <Td
                               isNumeric
                               fontWeight="semibold"
@@ -768,9 +1009,9 @@ function DetailKwitansiGlobal(props) {
                           </Tr>
                         ))}
                         <Tr
-                          bg="green.50"
+                          bg={colorMode === "dark" ? "green.900" : "green.50"}
                           borderTop="2px"
-                          borderColor="green.200"
+                          borderColor="green.300"
                         >
                           <Td colSpan={6} fontWeight="bold" color="green.700">
                             TOTAL
@@ -794,38 +1035,40 @@ function DetailKwitansiGlobal(props) {
               dataKwitGlobal[0]?.status === "ditolak") &&
             dataKwitGlobal[0]?.perjalanans &&
             dataKwitGlobal[0]?.perjalanans[0] ? (
-              <Flex justify="center" mt={"30px"} gap={4}>
-                <Button
-                  variant={"solid"}
-                  colorScheme="green"
-                  onClick={ajukan}
-                  size="lg"
-                  px={8}
-                  leftIcon={<BsCartPlus />}
-                  isDisabled={
-                    Array.isArray(dataKwitGlobal[0]?.perjalanans) &&
-                    dataKwitGlobal[0]?.perjalanans.some(
-                      (perj) =>
-                        Array.isArray(perj.personils) &&
-                        perj.personils.some(
-                          (p) => p?.statusId === 4 || p?.status?.statusId === 4
-                        )
-                    )
-                  }
-                >
-                  Ajukan Kwitansi Global
-                </Button>
-                <Button
-                  variant={"outline"}
-                  colorScheme="red"
-                  onClick={hapusSemuaPerjalanan}
-                  size="lg"
-                  px={8}
-                  ml={2}
-                >
-                  Hapus Semua Perjalanan
-                </Button>
-              </Flex>
+              <Box mt={6} pt={6} borderTop="1px" borderColor="gray.200">
+                <Flex justify="center" gap={4} wrap="wrap">
+                  <Button
+                    variant={"solid"}
+                    colorScheme="green"
+                    onClick={ajukan}
+                    size="lg"
+                    px={8}
+                    leftIcon={<BsCartPlus />}
+                    isDisabled={
+                      Array.isArray(dataKwitGlobal[0]?.perjalanans) &&
+                      dataKwitGlobal[0]?.perjalanans.some(
+                        (perj) =>
+                          Array.isArray(perj.personils) &&
+                          perj.personils.some(
+                            (p) =>
+                              p?.statusId === 4 || p?.status?.statusId === 4
+                          )
+                      )
+                    }
+                  >
+                    Ajukan Kwitansi Global
+                  </Button>
+                  <Button
+                    variant={"outline"}
+                    colorScheme="red"
+                    onClick={hapusSemuaPerjalanan}
+                    size="lg"
+                    px={8}
+                  >
+                    Hapus Semua Perjalanan
+                  </Button>
+                </Flex>
+              </Box>
             ) : null}
             {/* {JSON.stringify(dataKwitGlobal[0].perjalanans[0])} */}
           </Container>
@@ -1251,7 +1494,7 @@ function DetailKwitansiGlobal(props) {
             <ModalCloseButton />
             <ModalBody>
               <Box mb={8}>
-                <FormControl>
+                <FormControl mb={4}>
                   <FormLabel fontWeight="bold">Sub Kegiatan</FormLabel>
                   <Select2
                     options={subKegiatanList.map((sk) => ({
@@ -1277,6 +1520,61 @@ function DetailKwitansiGlobal(props) {
                     }
                   />
                 </FormControl>
+                <FormControl>
+                  <FormLabel fontWeight="bold">Jenis Perjalanan</FormLabel>
+                  <Select2
+                    options={dataJenisPerjalanan?.map((val) => ({
+                      value: val?.id,
+                      label: `${val?.jenis}`,
+                    }))}
+                    placeholder="Pilih Jenis Perjalanan"
+                    focusBorderColor="red"
+                    value={
+                      dataJenisPerjalanan
+                        ?.map((val) => ({
+                          value: val?.id,
+                          label: `${val?.jenis}`,
+                        }))
+                        .find(
+                          (opt) => opt.value === selectedJenisPerjalananId
+                        ) || null
+                    }
+                    onChange={(selectedOption) => {
+                      setSelectedJenisPerjalananId(
+                        selectedOption?.value || null
+                      );
+                    }}
+                    isClearable
+                    isDisabled={
+                      !["dibuat", "ditolak"].includes(dataKwitGlobal[0]?.status)
+                    }
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "50px",
+                        _hover: {
+                          borderColor: "yellow.700",
+                        },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "aset" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
               </Box>
             </ModalBody>
             <ModalFooter>
@@ -1294,6 +1592,257 @@ function DetailKwitansiGlobal(props) {
               <Button
                 variant={"outline"}
                 onClick={onModalBaruClose}
+                colorScheme="gray"
+              >
+                Batal
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {/* Modal Edit Kwitansi Global */}
+        <Modal
+          closeOnOverlayClick={false}
+          isOpen={isEditKwitansiOpen}
+          onClose={onEditKwitansiClose}
+        >
+          <ModalOverlay />
+          <ModalContent borderRadius={0} maxWidth="1200px">
+            <ModalHeader></ModalHeader>
+            <ModalCloseButton />
+
+            <ModalBody>
+              <Box>
+                <HStack mb={6}>
+                  <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
+                  <Heading color={"primary"} size="md">
+                    Edit Kwitansi Global
+                  </Heading>
+                </HStack>
+
+                <SimpleGrid columns={2} spacing={6} p={"30px"}>
+                  <FormControl>
+                    <FormLabel fontSize={"18px"} fontWeight="medium">
+                      Nama Pegawai
+                    </FormLabel>
+                    <AsyncSelect
+                      loadOptions={async (inputValue) => {
+                        if (!inputValue) return [];
+                        try {
+                          const res = await axios.get(
+                            `${
+                              import.meta.env.VITE_REACT_APP_API_BASE_URL
+                            }/pegawai/search?q=${inputValue}`
+                          );
+
+                          const filtered = res?.data?.result;
+
+                          return filtered.map((val) => ({
+                            value: val?.id,
+                            label: val?.nama,
+                          }));
+                        } catch (err) {
+                          console.error("Failed to load options:", err.message);
+                          return [];
+                        }
+                      }}
+                      placeholder="Ketik Nama Pegawai"
+                      value={selectedPegawai}
+                      onChange={(selectedOption) => {
+                        if (selectedOption) {
+                          setEditPegawaiId(selectedOption.value);
+                          setSelectedPegawai(selectedOption);
+                        } else {
+                          setEditPegawaiId(0);
+                          setSelectedPegawai(null);
+                        }
+                      }}
+                      components={{
+                        DropdownIndicator: () => null,
+                        IndicatorSeparator: () => null,
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "50px",
+                          _hover: { borderColor: "yellow.700" },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontSize={"18px"} fontWeight="medium">
+                      Pengguna Anggaran
+                    </FormLabel>
+                    <Select2
+                      options={dataKPA?.map((val) => ({
+                        value: val?.id,
+                        label: `${val?.pegawai_KPA?.nama}`,
+                      }))}
+                      placeholder="Pilih Pengguna Anggaran"
+                      focusBorderColor="red"
+                      value={
+                        dataKPA
+                          ?.map((val) => ({
+                            value: val?.id,
+                            label: `${val?.pegawai_KPA?.nama}`,
+                          }))
+                          .find((opt) => opt.value === editKPAId) || null
+                      }
+                      onChange={(selectedOption) => {
+                        setEditKPAId(selectedOption?.value || null);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null,
+                        IndicatorSeparator: () => null,
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "50px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontSize={"18px"} fontWeight="medium">
+                      Bendahara
+                    </FormLabel>
+                    <Select2
+                      options={dataBendahara?.map((val) => ({
+                        value: val?.id,
+                        label: `${val?.pegawai_bendahara?.nama}`,
+                      }))}
+                      placeholder="Pilih Bendahara"
+                      focusBorderColor="red"
+                      value={
+                        dataBendahara
+                          ?.map((val) => ({
+                            value: val?.id,
+                            label: `${val?.pegawai_bendahara?.nama}`,
+                          }))
+                          .find((opt) => opt.value === editBendaharaId) || null
+                      }
+                      onChange={(selectedOption) => {
+                        setEditBendaharaId(selectedOption?.value || null);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null,
+                        IndicatorSeparator: () => null,
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "50px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>
+
+                  <FormControl>
+                    <FormLabel fontSize={"18px"} fontWeight="medium">
+                      Jenis Kwitansi
+                    </FormLabel>
+                    <Select2
+                      options={dataTemplate?.map((val) => ({
+                        value: val?.id,
+                        label: `${val?.nama}`,
+                      }))}
+                      placeholder="Pilih Jenis Kwitansi"
+                      focusBorderColor="red"
+                      value={
+                        dataTemplate
+                          ?.map((val) => ({
+                            value: val?.id,
+                            label: `${val?.nama}`,
+                          }))
+                          .find((opt) => opt.value === editTemplateId) || null
+                      }
+                      onChange={(selectedOption) => {
+                        setEditTemplateId(selectedOption?.value || null);
+                      }}
+                      components={{
+                        DropdownIndicator: () => null,
+                        IndicatorSeparator: () => null,
+                      }}
+                      chakraStyles={{
+                        container: (provided) => ({
+                          ...provided,
+                          borderRadius: "6px",
+                        }),
+                        control: (provided) => ({
+                          ...provided,
+                          backgroundColor: "terang",
+                          border: "0px",
+                          height: "50px",
+                          _hover: {
+                            borderColor: "yellow.700",
+                          },
+                          minHeight: "40px",
+                        }),
+                        option: (provided, state) => ({
+                          ...provided,
+                          bg: state.isFocused ? "aset" : "white",
+                          color: state.isFocused ? "white" : "black",
+                        }),
+                      }}
+                    />
+                  </FormControl>
+                </SimpleGrid>
+              </Box>
+            </ModalBody>
+
+            <ModalFooter pe={"60px"} pb={"30px"} gap={3}>
+              <Button onClick={updateKwitansiGlobal} variant={"primary"}>
+                Simpan Perubahan
+              </Button>
+              <Button
+                variant={"outline"}
+                onClick={onEditKwitansiClose}
                 colorScheme="gray"
               >
                 Batal

@@ -82,7 +82,7 @@ function NomorSPBarjas(props) {
       const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/barjas/get/nomor-sp/${indukUnitKerjaId}`
+        }/barjas/get/nomor-sp/?&id=${indukUnitKerjaId}`
       );
       setDataNomorSP(res.data.result || []);
       console.log(res.data.result);

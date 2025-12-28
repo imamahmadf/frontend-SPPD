@@ -97,6 +97,10 @@ const menuData = [
     pathPrefix: "/keuangan",
     items: [
       {
+        label: "Dashboard Keuangan",
+        path: "/keuangan/dashboard",
+      },
+      {
         label: "Daftar Kwitansi Global",
         path: "/keuangan/daftar-kwitansi-global",
       },

@@ -618,7 +618,7 @@ function DetailKinerjaPJPL(props) {
                           : null
                         : null
                     }
-                    placeholder="Contoh: Laboratorium kesehatan daerah"
+                    placeholder="Catatan: Sesuaikan dengan SIMANDIRI"
                     focusBorderColor="red"
                     onChange={(selectedOption) => {
                       setIndikatorPejabatId(
@@ -659,7 +659,7 @@ function DetailKinerjaPJPL(props) {
                     bgColor={"terang"}
                     value={rencanaHasilKerja}
                     onChange={(e) => setRencanaHasilKerja(e.target.value)}
-                    placeholder="Contoh: E"
+                    placeholder="Catatan: isi dengan rinci"
                   />
                 </FormControl>{" "}
                 <FormControl my={"30px"}>
@@ -1025,8 +1025,8 @@ function DetailKinerjaPJPL(props) {
                   <Select2
                     options={[
                       { value: "diajukan", label: "Diajukan" },
-                      { value: "disetujui", label: "Disetujui" },
-                      { value: "ditolak", label: "Ditolak" },
+                      // { value: "disetujui", label: "Disetujui" },
+                      // { value: "ditolak", label: "Ditolak" },
                     ]}
                     value={
                       statusRealisasi

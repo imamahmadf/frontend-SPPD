@@ -3,7 +3,6 @@ import axios from "axios";
 import LayoutPerencanaan from "../../Componets/perencanaan/LayoutPerencanaan";
 import {
   Box,
-  Container,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -25,10 +24,18 @@ import {
   Td,
   Badge,
   HStack,
+  Icon,
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux } from "../../Redux/Reducers/auth";
 import { Link, useHistory } from "react-router-dom";
+import {
+  FaExternalLinkAlt,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaClock,
+} from "react-icons/fa";
+
 function DaftarCapaian() {
   const [dataCapaian, setDataCapaian] = useState([]);
   const { colorMode } = useColorMode();
@@ -36,6 +43,35 @@ function DaftarCapaian() {
   const user = useSelector(userRedux);
   const toast = useToast();
   const [loadingRowId, setLoadingRowId] = useState(null);
+
+  // Fungsi untuk format rupiah
+  const formatRupiah = (value) => {
+    if (!value && value !== 0) return "-";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  // Fungsi untuk mendapatkan nama bulan
+  const getNamaBulan = (bulan) => {
+    const bulanList = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return bulanList[bulan - 1] || bulan;
+  };
   async function fetchCapaian() {
     try {
       const res = await axios.get(
@@ -97,16 +133,37 @@ function DaftarCapaian() {
 
   return (
     <LayoutPerencanaan>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
-        <Container
-          style={{ overflowX: "auto" }}
-          maxW={"1280px"}
-          p={"30px"}
-          borderRadius={"5px"}
-          bg={colorMode === "dark" ? "gray.800" : "white"}
-        >
+      <Box
+        bgGradient={
+          colorMode === "dark"
+            ? "linear(to-b, gray.800, gray.900)"
+            : "linear(to-b, blue.50, gray.50)"
+        }
+        minH="100vh"
+        py={{ base: 6, md: 8 }}
+        px={{ base: 4, md: 6, lg: 8 }}
+        w="100%"
+      >
+        <Box w="100%" maxW="1280px" mx="auto">
+          <Heading
+            size="lg"
+            mb={6}
+            color={colorMode === "dark" ? "white" : "gray.800"}
+          >
+            Daftar Capaian
+          </Heading>
           {dataCapaian?.length === 0 ? (
-            <Text>Tidak ada data capaian.</Text>
+            <Box
+              bg={colorMode === "dark" ? "gray.800" : "white"}
+              borderRadius="xl"
+              p={8}
+              textAlign="center"
+              boxShadow="lg"
+            >
+              <Text color={colorMode === "dark" ? "gray.400" : "gray.500"}>
+                Tidak ada data capaian.
+              </Text>
+            </Box>
           ) : (
             <Accordion allowMultiple>
               {dataCapaian.map((item) => {
@@ -127,28 +184,58 @@ function DaftarCapaian() {
                   <AccordionItem
                     key={item.id}
                     border="1px solid"
-                    borderColor="gray.200"
-                    borderRadius="md"
+                    borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+                    borderRadius="xl"
                     mb={4}
+                    bg={colorMode === "dark" ? "gray.800" : "white"}
+                    boxShadow="md"
+                    overflow="hidden"
+                    _hover={{
+                      boxShadow: "lg",
+                    }}
+                    transition="all 0.2s"
                   >
                     <h2>
-                      <AccordionButton>
+                      <AccordionButton
+                        _hover={{
+                          bg: colorMode === "dark" ? "gray.750" : "gray.50",
+                        }}
+                        py={4}
+                        px={6}
+                      >
                         <Flex
                           w="100%"
                           alignItems="center"
                           gap={4}
                           textAlign="left"
                         >
-                          <Heading as="h3" size="sm">
+                          <Heading
+                            as="h3"
+                            size="md"
+                            color={colorMode === "dark" ? "white" : "gray.800"}
+                            fontWeight="semibold"
+                          >
                             {indikatorNama}
                           </Heading>
                           {hasPengajuan && (
-                            <Badge colorScheme="orange" variant="subtle">
+                            <Badge
+                              colorScheme="orange"
+                              variant="solid"
+                              borderRadius="full"
+                              px={3}
+                              py={1}
+                            >
                               Pengajuan
                             </Badge>
                           )}
                           <Spacer />
-                          <Text fontSize="sm" color="gray.500">
+                          <Text
+                            fontSize="sm"
+                            color={
+                              colorMode === "dark" ? "gray.400" : "gray.600"
+                            }
+                            fontWeight="medium"
+                          >
                             {tahunAnggaran ? `TA ${tahunAnggaran}` : ""}
                             {jenisAnggaran ? ` • ${jenisAnggaran}` : ""}
                           </Text>
@@ -156,149 +243,425 @@ function DaftarCapaian() {
                         <AccordionIcon />
                       </AccordionButton>
                     </h2>
-                    <AccordionPanel pb={4}>
-                      <VStack align="stretch" spacing={3}>
+                    <AccordionPanel pb={6} px={6}>
+                      <VStack align="stretch" spacing={4}>
                         <Box>
-                          <Text fontWeight="bold" mb={2}>
+                          <Text
+                            fontWeight="bold"
+                            mb={3}
+                            fontSize="md"
+                            color={colorMode === "dark" ? "white" : "gray.800"}
+                          >
                             Capaian per Bulan
                           </Text>
-                          <Table
-                            size="sm"
-                            variant="striped"
-                            colorScheme={
-                              colorMode === "dark" ? "gray" : "blackAlpha"
+                          <Box
+                            overflowX="auto"
+                            borderRadius="lg"
+                            border="1px"
+                            borderColor={
+                              colorMode === "dark" ? "gray.600" : "gray.200"
                             }
                           >
-                            <Thead>
-                              <Tr>
-                                <Th>Bulan</Th>
-                                <Th isNumeric>Nilai</Th>
-                                <Th isNumeric>Anggaran</Th>
-                                <Th>Status</Th>
-                                <Th>Bukti Dukung</Th>
-                              </Tr>
-                            </Thead>
-                            <Tbody>
-                              {capaians.length === 0 ? (
-                                <Tr>
-                                  <Td colSpan={4}>
-                                    <Text fontSize="sm" color="gray.500">
-                                      Belum ada capaian.
-                                    </Text>
-                                  </Td>
+                            <Table
+                              size="sm"
+                              variant="simple"
+                              colorScheme={
+                                colorMode === "dark" ? "gray" : "blue"
+                              }
+                            >
+                              <Thead>
+                                <Tr
+                                  bg={
+                                    colorMode === "dark"
+                                      ? "blue.800"
+                                      : "blue.50"
+                                  }
+                                >
+                                  <Th
+                                    borderColor={
+                                      colorMode === "dark"
+                                        ? "gray.600"
+                                        : "gray.200"
+                                    }
+                                    color={
+                                      colorMode === "dark"
+                                        ? "white"
+                                        : "gray.700"
+                                    }
+                                    fontWeight="bold"
+                                  >
+                                    Bulan
+                                  </Th>
+                                  <Th
+                                    isNumeric
+                                    borderColor={
+                                      colorMode === "dark"
+                                        ? "gray.600"
+                                        : "gray.200"
+                                    }
+                                    color={
+                                      colorMode === "dark"
+                                        ? "white"
+                                        : "gray.700"
+                                    }
+                                    fontWeight="bold"
+                                  >
+                                    Nilai
+                                  </Th>
+                                  <Th
+                                    isNumeric
+                                    borderColor={
+                                      colorMode === "dark"
+                                        ? "gray.600"
+                                        : "gray.200"
+                                    }
+                                    color={
+                                      colorMode === "dark"
+                                        ? "white"
+                                        : "gray.700"
+                                    }
+                                    fontWeight="bold"
+                                  >
+                                    Anggaran
+                                  </Th>
+                                  <Th
+                                    borderColor={
+                                      colorMode === "dark"
+                                        ? "gray.600"
+                                        : "gray.200"
+                                    }
+                                    color={
+                                      colorMode === "dark"
+                                        ? "white"
+                                        : "gray.700"
+                                    }
+                                    fontWeight="bold"
+                                  >
+                                    Status
+                                  </Th>
+                                  <Th
+                                    borderColor={
+                                      colorMode === "dark"
+                                        ? "gray.600"
+                                        : "gray.200"
+                                    }
+                                    color={
+                                      colorMode === "dark"
+                                        ? "white"
+                                        : "gray.700"
+                                    }
+                                    fontWeight="bold"
+                                  >
+                                    Bukti Dukung
+                                  </Th>
                                 </Tr>
-                              ) : (
-                                capaians.map((c) => (
-                                  <Tr key={c.id}>
-                                    <Td>{c?.bulan}</Td>
-                                    <Td isNumeric>{c?.nilai ?? "-"}</Td>
-                                    <Td isNumeric>
-                                      {c?.anggaran?.toLocaleString("id-ID") ??
-                                        "-"}
+                              </Thead>
+                              <Tbody>
+                                {capaians.length === 0 ? (
+                                  <Tr>
+                                    <Td
+                                      colSpan={5}
+                                      textAlign="center"
+                                      borderColor={
+                                        colorMode === "dark"
+                                          ? "gray.600"
+                                          : "gray.200"
+                                      }
+                                    >
+                                      <Text
+                                        fontSize="sm"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "gray.400"
+                                            : "gray.500"
+                                        }
+                                        py={4}
+                                      >
+                                        Belum ada capaian.
+                                      </Text>
                                     </Td>
-                                    <Td textTransform="capitalize">
-                                      {c?.status || "-"}
-                                      {(c?.status || "").toLowerCase() ===
-                                        "pengajuan" && (
-                                        <Badge
-                                          ml={2}
-                                          colorScheme="orange"
-                                          variant="solid"
-                                        >
-                                          Butuh verifikasi
-                                        </Badge>
-                                      )}
-                                      <HStack spacing={2} mt={2}>
-                                        {(c?.status || "").toLowerCase() ===
-                                        "pengajuan" ? (
-                                          <>
-                                            <Button
-                                              size="xs"
-                                              colorScheme="green"
-                                              isLoading={loadingRowId === c.id}
-                                              onClick={() =>
-                                                updateCapaianStatus(
-                                                  c,
-                                                  "diterima"
-                                                )
-                                              }
-                                            >
-                                              Setujui
-                                            </Button>
-                                            <Button
-                                              size="xs"
-                                              colorScheme="red"
-                                              variant="outline"
-                                              isLoading={loadingRowId === c.id}
-                                              onClick={() =>
-                                                updateCapaianStatus(
-                                                  c,
-                                                  "ditolak"
-                                                )
-                                              }
-                                            >
-                                              Tolak
-                                            </Button>
-                                          </>
-                                        ) : (
-                                          <Button
-                                            size="xs"
-                                            colorScheme="orange"
-                                            variant="ghost"
-                                            isLoading={loadingRowId === c.id}
-                                            onClick={() =>
-                                              updateCapaianStatus(
-                                                c,
-                                                "pengajuan"
-                                              )
-                                            }
-                                          >
-                                            Ajukan
-                                          </Button>
-                                        )}
-                                      </HStack>
-                                    </Td>{" "}
-                                    <Td>{c?.bukti}</Td>
                                   </Tr>
-                                ))
-                              )}
-                            </Tbody>
-                          </Table>
+                                ) : (
+                                  capaians.map((c) => (
+                                    <Tr
+                                      key={c.id}
+                                      _hover={{
+                                        bg:
+                                          colorMode === "dark"
+                                            ? "gray.700"
+                                            : "gray.50",
+                                      }}
+                                      transition="all 0.2s"
+                                    >
+                                      <Td
+                                        borderColor={
+                                          colorMode === "dark"
+                                            ? "gray.600"
+                                            : "gray.200"
+                                        }
+                                        fontWeight="medium"
+                                      >
+                                        {getNamaBulan(c?.bulan)}
+                                      </Td>
+                                      <Td
+                                        isNumeric
+                                        borderColor={
+                                          colorMode === "dark"
+                                            ? "gray.600"
+                                            : "gray.200"
+                                        }
+                                        fontWeight="semibold"
+                                      >
+                                        {c?.nilai ?? "-"}
+                                      </Td>
+                                      <Td
+                                        isNumeric
+                                        borderColor={
+                                          colorMode === "dark"
+                                            ? "gray.600"
+                                            : "gray.200"
+                                        }
+                                        fontWeight="medium"
+                                      >
+                                        {formatRupiah(c?.anggaran)}
+                                      </Td>
+                                      <Td
+                                        borderColor={
+                                          colorMode === "dark"
+                                            ? "gray.600"
+                                            : "gray.200"
+                                        }
+                                      >
+                                        <VStack align="start" spacing={2}>
+                                          <Badge
+                                            colorScheme={
+                                              (
+                                                c?.status || ""
+                                              ).toLowerCase() === "diterima"
+                                                ? "green"
+                                                : (
+                                                    c?.status || ""
+                                                  ).toLowerCase() === "ditolak"
+                                                ? "red"
+                                                : (
+                                                    c?.status || ""
+                                                  ).toLowerCase() ===
+                                                  "pengajuan"
+                                                ? "orange"
+                                                : "gray"
+                                            }
+                                            variant="subtle"
+                                            borderRadius="md"
+                                            px={2}
+                                            py={1}
+                                            textTransform="capitalize"
+                                            display="flex"
+                                            alignItems="center"
+                                            gap={1.5}
+                                          >
+                                            {(c?.status || "").toLowerCase() ===
+                                              "diterima" && (
+                                              <Icon
+                                                as={FaCheckCircle}
+                                                boxSize={2.5}
+                                              />
+                                            )}
+                                            {(c?.status || "").toLowerCase() ===
+                                              "ditolak" && (
+                                              <Icon
+                                                as={FaTimesCircle}
+                                                boxSize={2.5}
+                                              />
+                                            )}
+                                            {(c?.status || "").toLowerCase() ===
+                                              "pengajuan" && (
+                                              <Icon
+                                                as={FaClock}
+                                                boxSize={2.5}
+                                              />
+                                            )}
+                                            {c?.status || "-"}
+                                          </Badge>
+                                          <HStack spacing={2}>
+                                            {(c?.status || "").toLowerCase() ===
+                                            "pengajuan" ? (
+                                              <>
+                                                <Button
+                                                  size="xs"
+                                                  colorScheme="green"
+                                                  isLoading={
+                                                    loadingRowId === c.id
+                                                  }
+                                                  onClick={() =>
+                                                    updateCapaianStatus(
+                                                      c,
+                                                      "diterima"
+                                                    )
+                                                  }
+                                                >
+                                                  Setujui
+                                                </Button>
+                                                <Button
+                                                  size="xs"
+                                                  colorScheme="red"
+                                                  variant="outline"
+                                                  isLoading={
+                                                    loadingRowId === c.id
+                                                  }
+                                                  onClick={() =>
+                                                    updateCapaianStatus(
+                                                      c,
+                                                      "ditolak"
+                                                    )
+                                                  }
+                                                >
+                                                  Tolak
+                                                </Button>
+                                              </>
+                                            ) : (
+                                              <Button
+                                                size="xs"
+                                                colorScheme="orange"
+                                                variant="outline"
+                                                isLoading={
+                                                  loadingRowId === c.id
+                                                }
+                                                onClick={() =>
+                                                  updateCapaianStatus(
+                                                    c,
+                                                    "pengajuan"
+                                                  )
+                                                }
+                                              >
+                                                Ajukan
+                                              </Button>
+                                            )}
+                                          </HStack>
+                                        </VStack>
+                                      </Td>
+                                      <Td
+                                        borderColor={
+                                          colorMode === "dark"
+                                            ? "gray.600"
+                                            : "gray.200"
+                                        }
+                                      >
+                                        {c?.bukti ? (
+                                          <Button
+                                            as="a"
+                                            href={c.bukti}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            size="xs"
+                                            colorScheme="blue"
+                                            variant="outline"
+                                            leftIcon={
+                                              <Icon as={FaExternalLinkAlt} />
+                                            }
+                                            _hover={{
+                                              bg: "blue.50",
+                                              borderColor: "blue.400",
+                                            }}
+                                          >
+                                            Lihat Bukti
+                                          </Button>
+                                        ) : (
+                                          <Text
+                                            fontSize="sm"
+                                            color={
+                                              colorMode === "dark"
+                                                ? "gray.400"
+                                                : "gray.500"
+                                            }
+                                            fontStyle="italic"
+                                          >
+                                            -
+                                          </Text>
+                                        )}
+                                      </Td>
+                                    </Tr>
+                                  ))
+                                )}
+                              </Tbody>
+                            </Table>
+                          </Box>
                         </Box>
 
                         {Array.isArray(item?.targetTriwulans) &&
-                          item.targetTriwulans.length > 0 && (
-                            <Box>
-                              <Text fontWeight="bold" mb={2}>
-                                Target Triwulan
-                              </Text>
-                              <Flex wrap="wrap" gap={3}>
-                                {item.targetTriwulans
-                                  .slice()
-                                  .sort((a, b) =>
-                                    (a?.namaTarget?.nama || "").localeCompare(
-                                      b?.namaTarget?.nama || ""
-                                    )
+                        item.targetTriwulans.length > 0 ? (
+                          <Box>
+                            <Text
+                              fontWeight="bold"
+                              mb={3}
+                              fontSize="md"
+                              color={
+                                colorMode === "dark" ? "white" : "gray.800"
+                              }
+                            >
+                              Target Triwulan
+                            </Text>
+                            <Flex wrap="wrap" gap={3}>
+                              {item.targetTriwulans
+                                .slice()
+                                .sort((a, b) =>
+                                  (a?.namaTarget?.nama || "").localeCompare(
+                                    b?.namaTarget?.nama || ""
                                   )
-                                  .map((tw) => (
-                                    <Box
-                                      key={tw.id}
-                                      borderWidth="1px"
-                                      borderRadius="md"
-                                      p={3}
-                                      minW="140px"
+                                )
+                                .map((tw) => (
+                                  <Box
+                                    key={tw.id}
+                                    borderWidth="1px"
+                                    borderColor={
+                                      colorMode === "dark"
+                                        ? "gray.600"
+                                        : "blue.200"
+                                    }
+                                    borderRadius="lg"
+                                    p={4}
+                                    minW="140px"
+                                    bg={
+                                      colorMode === "dark"
+                                        ? "gray.700"
+                                        : "blue.50"
+                                    }
+                                    _hover={{
+                                      boxShadow: "md",
+                                      borderColor:
+                                        colorMode === "dark"
+                                          ? "blue.500"
+                                          : "blue.400",
+                                    }}
+                                    transition="all 0.2s"
+                                  >
+                                    <Text
+                                      fontSize="sm"
+                                      color={
+                                        colorMode === "dark"
+                                          ? "gray.400"
+                                          : "gray.600"
+                                      }
+                                      mb={1}
+                                      fontWeight="medium"
                                     >
-                                      <Text fontSize="sm" color="gray.600">
-                                        {tw?.namaTarget?.nama?.toUpperCase()}
-                                      </Text>
-                                      <Text fontWeight="bold">
-                                        {tw?.nilai ?? "-"}
-                                      </Text>
-                                    </Box>
-                                  ))}
-                              </Flex>
-                            </Box>
-                          )}
+                                      {tw?.namaTarget?.nama?.toUpperCase()}
+                                    </Text>
+                                    <Text
+                                      fontWeight="bold"
+                                      fontSize="lg"
+                                      color={
+                                        colorMode === "dark"
+                                          ? "white"
+                                          : "gray.800"
+                                      }
+                                    >
+                                      {tw?.nilai ?? "-"}
+                                    </Text>
+                                  </Box>
+                                ))}
+                            </Flex>
+                          </Box>
+                        ) : null}
                       </VStack>
                     </AccordionPanel>
                   </AccordionItem>
@@ -306,7 +669,7 @@ function DaftarCapaian() {
               })}
             </Accordion>
           )}
-        </Container>
+        </Box>
       </Box>
     </LayoutPerencanaan>
   );

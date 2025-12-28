@@ -358,919 +358,1099 @@ function DaftarIndikator() {
             </CardBody>
           </Card>
 
-          {/* List indikator Sub Kegiatan */}
-          <Box mb={8}>
-            <HStack mb={4}>
-              <Icon as={FiTarget} color="blue.500" boxSize={6} />
-              <Heading
-                size="lg"
-                color={colorMode === "dark" ? "white" : "gray.800"}
-              >
-                Indikator Sub Kegiatan
-              </Heading>
-              <Badge
-                colorScheme="blue"
-                fontSize="sm"
-                px={3}
-                py={1}
-                borderRadius="full"
-              >
-                {DataIndikator.length} indikator
-              </Badge>
-            </HStack>
-
-            <Accordion allowToggle>
-              {DataIndikator.map((indikator) => (
-                <AccordionItem
-                  key={indikator.id}
-                  mb={4}
-                  border="none"
-                  borderRadius="lg"
-                  overflow="hidden"
-                  shadow="sm"
-                >
-                  <h2>
-                    <AccordionButton
-                      bg={colorMode === "dark" ? "gray.800" : "white"}
-                      _hover={{
-                        bg: colorMode === "dark" ? "gray.700" : "gray.50",
-                      }}
-                      py={6}
-                      px={6}
-                    >
-                      <Box flex="1" textAlign="left">
-                        <Text fontWeight="bold" fontSize="lg" mb={1}>
-                          {indikator.indikator}
-                        </Text>
-                        <HStack>
-                          <Badge
-                            colorScheme="purple"
-                            variant="subtle"
-                            fontSize="xs"
-                          >
-                            Sub Kegiatan
-                          </Badge>
-                          <Text fontSize="sm" color="gray.500">
-                            {indikator.subKegPer?.nama}
-                          </Text>
-                        </HStack>
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                  </h2>
-                  <AccordionPanel
-                    pb={6}
-                    bg={colorMode === "dark" ? "gray.900" : "gray.50"}
-                    px={6}
-                  >
-                    <VStack align="start" spacing={4}>
-                      {indikator.targets && indikator.targets.length > 0 ? (
-                        indikator.targets.map((t) => (
-                          <Card
-                            key={t.id}
-                            w="100%"
-                            shadow="sm"
-                            border="1px solid"
-                            borderColor="gray.200"
-                          >
-                            <CardBody>
-                              <HStack mb={4}>
-                                <Icon
-                                  as={FiTarget}
-                                  color="green.500"
-                                  boxSize={5}
-                                />
-                                <Text fontWeight="semibold" fontSize="lg">
-                                  Target: {t.nilai}
-                                </Text>
-                                <Spacer />
-                                <Badge colorScheme="green" variant="subtle">
-                                  Aktif
-                                </Badge>
-                              </HStack>
-
-                              {t.tahunAnggarans &&
-                                t.tahunAnggarans.length > 0 && (
-                                  <>
-                                    <Divider mb={4} />
-                                    <VStack align="start" spacing={3}>
-                                      {t.tahunAnggarans.map((th) => (
-                                        <Box
-                                          key={th.id}
-                                          p={4}
-                                          bg={
-                                            colorMode === "dark"
-                                              ? "gray.800"
-                                              : "white"
-                                          }
-                                          borderRadius="md"
-                                          border="1px solid"
-                                          borderColor="gray.200"
-                                          w="100%"
-                                          position="relative"
-                                          _before={{
-                                            content: '""',
-                                            position: "absolute",
-                                            left: 0,
-                                            top: 0,
-                                            bottom: 0,
-                                            width: "4px",
-                                            bg: "blue.500",
-                                            borderRadius: "0 2px 2px 0",
-                                          }}
-                                        >
-                                          <VStack align="start" spacing={2}>
-                                            <HStack>
-                                              <Icon
-                                                as={FiCalendar}
-                                                color="blue.500"
-                                                boxSize={4}
-                                              />
-                                              <Text
-                                                fontSize="sm"
-                                                fontWeight="semibold"
-                                              >
-                                                Tahun: {th.tahun}
-                                              </Text>
-                                            </HStack>
-                                            <HStack>
-                                              <Icon
-                                                as={FiDollarSign}
-                                                color="green.500"
-                                                boxSize={4}
-                                              />
-                                              <Text fontSize="sm">
-                                                Anggaran:{" "}
-                                                <Text
-                                                  as="span"
-                                                  fontWeight="bold"
-                                                  color="green.600"
-                                                >
-                                                  Rp{" "}
-                                                  {th.anggaran.toLocaleString()}
-                                                </Text>
-                                              </Text>
-                                            </HStack>
-                                            <Text fontSize="sm">
-                                              Jenis Anggaran:{" "}
-                                              <Badge
-                                                colorScheme="blue"
-                                                variant="outline"
-                                                fontSize="xs"
-                                              >
-                                                {
-                                                  dataJenisAnggaran.find(
-                                                    (ja) =>
-                                                      ja.id ===
-                                                      th.jenisAnggaranId
-                                                  )?.jenis
-                                                }
-                                              </Badge>
-                                            </Text>
-                                            <Flex justify="end" w="100%" mt={2}>
-                                              <Button
-                                                id={String(t.id)}
-                                                size="xs"
-                                                colorScheme="teal"
-                                                variant="outline"
-                                                leftIcon={<Icon as={FiEdit} />}
-                                                onClick={(e) => {
-                                                  const id = parseInt(
-                                                    e.currentTarget.id
-                                                  );
-                                                  openApModal(id, th.tahun);
-                                                }}
-                                              >
-                                                Tambah Anggaran Perubahan (Tahun{" "}
-                                                {th.tahun})
-                                              </Button>
-                                            </Flex>
-                                          </VStack>
-                                        </Box>
-                                      ))}
-                                    </VStack>
-                                  </>
-                                )}
-
-                              {/* Target Triwulan */}
-                              {t.targetTriwulans &&
-                                t.targetTriwulans.length > 0 && (
-                                  <>
-                                    <Divider my={4} />
-                                    <VStack align="start" spacing={3}>
-                                      <HStack>
-                                        <Icon
-                                          as={FiTarget}
-                                          color="orange.500"
-                                          boxSize={4}
-                                        />
-                                        <Text
-                                          fontSize="md"
-                                          fontWeight="semibold"
-                                          color="orange.600"
-                                        >
-                                          Target Triwulan
-                                        </Text>
-                                      </HStack>
-                                      <Box
-                                        w="100%"
-                                        p={3}
-                                        bg={
-                                          colorMode === "dark"
-                                            ? "gray.800"
-                                            : "orange.50"
-                                        }
-                                        borderRadius="md"
-                                        border="1px solid"
-                                        borderColor="orange.200"
-                                      >
-                                        <VStack spacing={2}>
-                                          {t.targetTriwulans.map((triwulan) => (
-                                            <HStack
-                                              key={triwulan.id}
-                                              w="100%"
-                                              justify="space-between"
-                                            >
-                                              <Text
-                                                fontSize="sm"
-                                                fontWeight="medium"
-                                              >
-                                                {triwulan.namaTarget.nama}:
-                                              </Text>
-                                              <Badge
-                                                colorScheme="orange"
-                                                variant="solid"
-                                                fontSize="sm"
-                                                px={3}
-                                                py={1}
-                                              >
-                                                {triwulan.nilai}
-                                              </Badge>
-                                            </HStack>
-                                          ))}
-                                        </VStack>
-                                      </Box>
-                                    </VStack>
-                                  </>
-                                )}
-
-                              <Divider my={4} />
-                              <Flex gap={2} justify="end">
-                                <Button
-                                  size="sm"
-                                  colorScheme="teal"
-                                  variant="outline"
-                                  leftIcon={<Icon as={FiEdit} />}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  colorScheme="red"
-                                  variant="outline"
-                                  leftIcon={<Icon as={FiTrash2} />}
-                                >
-                                  Hapus
-                                </Button>{" "}
-                              </Flex>
-                            </CardBody>
-                          </Card>
-                        ))
-                      ) : (
-                        <Box
-                          textAlign="center"
-                          py={8}
-                          w="100%"
-                          bg={colorMode === "dark" ? "gray.800" : "white"}
-                          borderRadius="md"
-                          border="2px dashed"
-                          borderColor="gray.300"
-                        >
-                          <Icon
-                            as={FiTarget}
-                            boxSize={8}
-                            color="gray.400"
-                            mb={2}
-                          />
-                          <Text fontSize="sm" color="gray.400">
-                            Belum ada target yang ditambahkan
-                          </Text>
-                        </Box>
-                      )}
-                    </VStack>
-
-                    <Flex mt={6} justify="end">
-                      <Button
-                        size="md"
-                        colorScheme="blue"
-                        leftIcon={<Icon as={FiPlus} />}
-                        onClick={() =>
-                          handleOpenModal(indikator, "subKegiatan")
-                        }
-                        borderRadius="lg"
-                      >
-                        Tambah Target
-                      </Button>
-                    </Flex>
-                  </AccordionPanel>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </Box>
-
           {/* List indikator Program */}
-          <Box mb={8}>
-            <HStack mb={4}>
-              <Icon as={FiTarget} color="purple.500" boxSize={6} />
-              <Heading
-                size="lg"
-                color={colorMode === "dark" ? "white" : "gray.800"}
-              >
-                Indikator Program
-              </Heading>
-              <Badge
-                colorScheme="purple"
-                fontSize="sm"
-                px={3}
-                py={1}
-                borderRadius="full"
-              >
-                {DataIndikatorProgram.length} indikator
-              </Badge>
-            </HStack>
+          <Box mb={10}>
+            <Card
+              mb={6}
+              bgGradient={
+                colorMode === "dark"
+                  ? "linear(to-r, purple.900, purple.800)"
+                  : "linear(to-r, purple.50, purple.100)"
+              }
+              border="2px solid"
+              borderColor="purple.300"
+              shadow="lg"
+            >
+              <CardBody>
+                <HStack mb={2}>
+                  <Box
+                    p={3}
+                    bg="purple.500"
+                    borderRadius="full"
+                    color="white"
+                    boxShadow="md"
+                  >
+                    <Icon as={FiTarget} boxSize={6} />
+                  </Box>
+                  <Box flex={1}>
+                    <Heading
+                      size="lg"
+                      color={colorMode === "dark" ? "white" : "purple.800"}
+                      mb={1}
+                    >
+                      Indikator Program
+                    </Heading>
+                    <Text
+                      fontSize="sm"
+                      color={colorMode === "dark" ? "purple.200" : "purple.600"}
+                    >
+                      Level 1 - Indikator kinerja pada tingkat program
+                    </Text>
+                  </Box>
+                  <Badge
+                    colorScheme="purple"
+                    fontSize="lg"
+                    px={4}
+                    py={2}
+                    borderRadius="full"
+                    variant="solid"
+                  >
+                    {DataIndikatorProgram.length} Indikator
+                  </Badge>
+                </HStack>
+              </CardBody>
+            </Card>
 
-            <Accordion allowToggle>
-              {DataIndikatorProgram.map((indikator) => (
-                <AccordionItem
-                  key={indikator.id}
-                  mb={4}
-                  border="none"
-                  borderRadius="lg"
-                  overflow="hidden"
-                  shadow="sm"
-                >
-                  <h2>
-                    <AccordionButton
-                      bg={colorMode === "dark" ? "gray.800" : "white"}
-                      _hover={{
-                        bg: colorMode === "dark" ? "gray.700" : "gray.50",
-                      }}
-                      py={6}
+            {DataIndikatorProgram.length > 0 ? (
+              <Accordion allowToggle>
+                {DataIndikatorProgram.map((indikator) => (
+                  <AccordionItem
+                    key={indikator.id}
+                    mb={4}
+                    border="none"
+                    borderRadius="lg"
+                    overflow="hidden"
+                    shadow="md"
+                    borderLeft="4px solid"
+                    borderLeftColor="purple.500"
+                  >
+                    <h2>
+                      <AccordionButton
+                        bg={colorMode === "dark" ? "gray.800" : "white"}
+                        _hover={{
+                          bg: colorMode === "dark" ? "gray.700" : "purple.50",
+                        }}
+                        py={6}
+                        px={6}
+                      >
+                        <Box flex="1" textAlign="left">
+                          <HStack mb={2}>
+                            <Badge
+                              colorScheme="purple"
+                              variant="solid"
+                              fontSize="xs"
+                              px={2}
+                              py={1}
+                            >
+                              PROGRAM
+                            </Badge>
+                          </HStack>
+                          <Text fontWeight="bold" fontSize="lg" mb={2}>
+                            {indikator.indikator}
+                          </Text>
+                          <HStack>
+                            <Text fontSize="sm" color="gray.500">
+                              {indikator.program?.nama}
+                            </Text>
+                          </HStack>
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel
+                      pb={6}
+                      bg={colorMode === "dark" ? "gray.900" : "gray.50"}
                       px={6}
                     >
-                      <Box flex="1" textAlign="left">
-                        <Text fontWeight="bold" fontSize="lg" mb={1}>
-                          {indikator.indikator}
-                        </Text>
-                        <HStack>
-                          <Badge
-                            colorScheme="purple"
-                            variant="subtle"
-                            fontSize="xs"
-                          >
-                            Program
-                          </Badge>{" "}
-                          <Text fontSize="sm" color="gray.500">
-                            {indikator.program?.nama}
-                          </Text>
-                        </HStack>
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                  </h2>
-                  <AccordionPanel
-                    pb={6}
-                    bg={colorMode === "dark" ? "gray.900" : "gray.50"}
-                    px={6}
-                  >
-                    <VStack align="start" spacing={4}>
-                      {indikator.targets && indikator.targets.length > 0 ? (
-                        indikator.targets.map((t) => (
-                          <Card
-                            key={t.id}
-                            w="100%"
-                            shadow="sm"
-                            border="1px solid"
-                            borderColor="gray.200"
-                          >
-                            <CardBody>
-                              <HStack mb={4}>
-                                <Icon
-                                  as={FiTarget}
-                                  color="green.500"
-                                  boxSize={5}
-                                />
-                                <Text fontWeight="semibold" fontSize="lg">
-                                  Target: {t.nilai}
-                                </Text>
-                                <Spacer />
-                                <Badge colorScheme="green" variant="subtle">
-                                  Aktif
-                                </Badge>
-                              </HStack>
+                      <VStack align="start" spacing={4}>
+                        {indikator.targets && indikator.targets.length > 0 ? (
+                          indikator.targets.map((t) => (
+                            <Card
+                              key={t.id}
+                              w="100%"
+                              shadow="sm"
+                              border="1px solid"
+                              borderColor="purple.200"
+                              bg={colorMode === "dark" ? "gray.800" : "white"}
+                            >
+                              <CardBody>
+                                <HStack mb={4}>
+                                  <Icon
+                                    as={FiTarget}
+                                    color="green.500"
+                                    boxSize={5}
+                                  />
+                                  <Text fontWeight="semibold" fontSize="lg">
+                                    Target: {t.nilai}
+                                  </Text>
+                                  <Spacer />
+                                  <Badge colorScheme="green" variant="subtle">
+                                    Aktif
+                                  </Badge>
+                                </HStack>
 
-                              {t.tahunAnggarans &&
-                                t.tahunAnggarans.length > 0 && (
-                                  <>
-                                    <Divider mb={4} />
-                                    <VStack align="start" spacing={3}>
-                                      {t.tahunAnggarans.map((th) => (
+                                {t.tahunAnggarans &&
+                                  t.tahunAnggarans.length > 0 && (
+                                    <>
+                                      <Divider mb={4} />
+                                      <VStack align="start" spacing={3}>
+                                        {t.tahunAnggarans.map((th) => (
+                                          <Box
+                                            key={th.id}
+                                            p={4}
+                                            bg={
+                                              colorMode === "dark"
+                                                ? "gray.800"
+                                                : "white"
+                                            }
+                                            borderRadius="md"
+                                            border="1px solid"
+                                            borderColor="purple.200"
+                                            w="100%"
+                                            position="relative"
+                                            _before={{
+                                              content: '""',
+                                              position: "absolute",
+                                              left: 0,
+                                              top: 0,
+                                              bottom: 0,
+                                              width: "4px",
+                                              bg: "purple.500",
+                                              borderRadius: "0 2px 2px 0",
+                                            }}
+                                          >
+                                            <VStack align="start" spacing={2}>
+                                              <HStack>
+                                                <Icon
+                                                  as={FiCalendar}
+                                                  color="purple.500"
+                                                  boxSize={4}
+                                                />
+                                                <Text
+                                                  fontSize="sm"
+                                                  fontWeight="semibold"
+                                                >
+                                                  Tahun: {th.tahun}
+                                                </Text>
+                                              </HStack>
+                                              <HStack>
+                                                <Icon
+                                                  as={FiDollarSign}
+                                                  color="green.500"
+                                                  boxSize={4}
+                                                />
+                                                <Text fontSize="sm">
+                                                  Anggaran:{" "}
+                                                  <Text
+                                                    as="span"
+                                                    fontWeight="bold"
+                                                    color="green.600"
+                                                  >
+                                                    Rp{" "}
+                                                    {th.anggaran.toLocaleString()}
+                                                  </Text>
+                                                </Text>
+                                              </HStack>
+                                              <Text fontSize="sm">
+                                                Jenis Anggaran:{" "}
+                                                <Badge
+                                                  colorScheme="purple"
+                                                  variant="outline"
+                                                  fontSize="xs"
+                                                >
+                                                  {
+                                                    dataJenisAnggaran.find(
+                                                      (ja) =>
+                                                        ja.id ===
+                                                        th.jenisAnggaranId
+                                                    )?.jenis
+                                                  }
+                                                </Badge>
+                                              </Text>
+                                            </VStack>
+                                          </Box>
+                                        ))}
+                                      </VStack>
+                                    </>
+                                  )}
+
+                                {/* Target Triwulan */}
+                                {t.targetTriwulans &&
+                                  t.targetTriwulans.length > 0 && (
+                                    <>
+                                      <Divider my={4} />
+                                      <VStack align="start" spacing={3}>
+                                        <HStack>
+                                          <Icon
+                                            as={FiTarget}
+                                            color="orange.500"
+                                            boxSize={4}
+                                          />
+                                          <Text
+                                            fontSize="md"
+                                            fontWeight="semibold"
+                                            color="orange.600"
+                                          >
+                                            Target Triwulan
+                                          </Text>
+                                        </HStack>
                                         <Box
-                                          key={th.id}
-                                          p={4}
+                                          w="100%"
+                                          p={3}
                                           bg={
                                             colorMode === "dark"
                                               ? "gray.800"
-                                              : "white"
+                                              : "orange.50"
                                           }
                                           borderRadius="md"
                                           border="1px solid"
-                                          borderColor="gray.200"
-                                          w="100%"
-                                          position="relative"
-                                          _before={{
-                                            content: '""',
-                                            position: "absolute",
-                                            left: 0,
-                                            top: 0,
-                                            bottom: 0,
-                                            width: "4px",
-                                            bg: "purple.500",
-                                            borderRadius: "0 2px 2px 0",
-                                          }}
+                                          borderColor="orange.200"
                                         >
-                                          <VStack align="start" spacing={2}>
-                                            <HStack>
-                                              <Icon
-                                                as={FiCalendar}
-                                                color="purple.500"
-                                                boxSize={4}
-                                              />
-                                              <Text
-                                                fontSize="sm"
-                                                fontWeight="semibold"
-                                              >
-                                                Tahun: {th.tahun}
-                                              </Text>
-                                            </HStack>
-                                            <HStack>
-                                              <Icon
-                                                as={FiDollarSign}
-                                                color="green.500"
-                                                boxSize={4}
-                                              />
-                                              <Text fontSize="sm">
-                                                Anggaran:{" "}
-                                                <Text
-                                                  as="span"
-                                                  fontWeight="bold"
-                                                  color="green.600"
+                                          <VStack spacing={2}>
+                                            {t.targetTriwulans.map(
+                                              (triwulan) => (
+                                                <HStack
+                                                  key={triwulan.id}
+                                                  w="100%"
+                                                  justify="space-between"
                                                 >
-                                                  Rp{" "}
-                                                  {th.anggaran.toLocaleString()}
-                                                </Text>
-                                              </Text>
-                                            </HStack>
-                                            <Text fontSize="sm">
-                                              Jenis Anggaran:{" "}
-                                              <Badge
-                                                colorScheme="purple"
-                                                variant="outline"
-                                                fontSize="xs"
-                                              >
-                                                {
-                                                  dataJenisAnggaran.find(
-                                                    (ja) =>
-                                                      ja.id ===
-                                                      th.jenisAnggaranId
-                                                  )?.jenis
-                                                }
-                                              </Badge>
-                                            </Text>
+                                                  <Text
+                                                    fontSize="sm"
+                                                    fontWeight="medium"
+                                                  >
+                                                    {triwulan.namaTarget.nama}:
+                                                  </Text>
+                                                  <Badge
+                                                    colorScheme="orange"
+                                                    variant="solid"
+                                                    fontSize="sm"
+                                                    px={3}
+                                                    py={1}
+                                                  >
+                                                    {triwulan.nilai}
+                                                  </Badge>
+                                                </HStack>
+                                              )
+                                            )}
                                           </VStack>
                                         </Box>
-                                      ))}
-                                    </VStack>
-                                  </>
-                                )}
+                                      </VStack>
+                                    </>
+                                  )}
 
-                              {/* Target Triwulan */}
-                              {t.targetTriwulans &&
-                                t.targetTriwulans.length > 0 && (
-                                  <>
-                                    <Divider my={4} />
-                                    <VStack align="start" spacing={3}>
-                                      <HStack>
-                                        <Icon
-                                          as={FiTarget}
-                                          color="orange.500"
-                                          boxSize={4}
-                                        />
-                                        <Text
-                                          fontSize="md"
-                                          fontWeight="semibold"
-                                          color="orange.600"
-                                        >
-                                          Target Triwulan
-                                        </Text>
-                                      </HStack>
-                                      <Box
-                                        w="100%"
-                                        p={3}
-                                        bg={
-                                          colorMode === "dark"
-                                            ? "gray.800"
-                                            : "orange.50"
-                                        }
-                                        borderRadius="md"
-                                        border="1px solid"
-                                        borderColor="orange.200"
-                                      >
-                                        <VStack spacing={2}>
-                                          {t.targetTriwulans.map((triwulan) => (
-                                            <HStack
-                                              key={triwulan.id}
-                                              w="100%"
-                                              justify="space-between"
-                                            >
-                                              <Text
-                                                fontSize="sm"
-                                                fontWeight="medium"
-                                              >
-                                                {triwulan.namaTarget.nama}:
-                                              </Text>
-                                              <Badge
-                                                colorScheme="orange"
-                                                variant="solid"
-                                                fontSize="sm"
-                                                px={3}
-                                                py={1}
-                                              >
-                                                {triwulan.nilai}
-                                              </Badge>
-                                            </HStack>
-                                          ))}
-                                        </VStack>
-                                      </Box>
-                                    </VStack>
-                                  </>
-                                )}
+                                <Divider my={4} />
+                                <Flex gap={2} justify="end">
+                                  <Button
+                                    size="sm"
+                                    colorScheme="teal"
+                                    variant="outline"
+                                    leftIcon={<Icon as={FiEdit} />}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    colorScheme="red"
+                                    variant="outline"
+                                    leftIcon={<Icon as={FiTrash2} />}
+                                  >
+                                    Hapus
+                                  </Button>
+                                </Flex>
+                              </CardBody>
+                            </Card>
+                          ))
+                        ) : (
+                          <Box
+                            textAlign="center"
+                            py={8}
+                            w="100%"
+                            bg={colorMode === "dark" ? "gray.800" : "white"}
+                            borderRadius="md"
+                            border="2px dashed"
+                            borderColor="purple.300"
+                          >
+                            <Icon
+                              as={FiTarget}
+                              boxSize={8}
+                              color="purple.400"
+                              mb={2}
+                            />
+                            <Text fontSize="sm" color="gray.400">
+                              Belum ada target yang ditambahkan
+                            </Text>
+                          </Box>
+                        )}
+                      </VStack>
 
-                              <Divider my={4} />
-                              <Flex gap={2} justify="end">
-                                <Button
-                                  size="sm"
-                                  colorScheme="teal"
-                                  variant="outline"
-                                  leftIcon={<Icon as={FiEdit} />}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  colorScheme="red"
-                                  variant="outline"
-                                  leftIcon={<Icon as={FiTrash2} />}
-                                >
-                                  Hapus
-                                </Button>
-                              </Flex>
-                            </CardBody>
-                          </Card>
-                        ))
-                      ) : (
-                        <Box
-                          textAlign="center"
-                          py={8}
-                          w="100%"
-                          bg={colorMode === "dark" ? "gray.800" : "white"}
-                          borderRadius="md"
-                          border="2px dashed"
-                          borderColor="gray.300"
+                      <Flex mt={6} justify="end">
+                        <Button
+                          size="md"
+                          colorScheme="purple"
+                          leftIcon={<Icon as={FiPlus} />}
+                          onClick={() => handleOpenModal(indikator, "program")}
+                          borderRadius="lg"
+                          shadow="md"
                         >
-                          <Icon
-                            as={FiTarget}
-                            boxSize={8}
-                            color="gray.400"
-                            mb={2}
-                          />
-                          <Text fontSize="sm" color="gray.400">
-                            Belum ada target yang ditambahkan
-                          </Text>
-                        </Box>
-                      )}
-                    </VStack>
-
-                    <Flex mt={6} justify="end">
-                      <Button
-                        size="md"
-                        colorScheme="purple"
-                        leftIcon={<Icon as={FiPlus} />}
-                        onClick={() => handleOpenModal(indikator, "program")}
-                        borderRadius="lg"
-                      >
-                        Tambah Target
-                      </Button>
-                    </Flex>
-                  </AccordionPanel>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                          Tambah Target
+                        </Button>
+                      </Flex>
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <Card
+                border="2px dashed"
+                borderColor="purple.300"
+                bg={colorMode === "dark" ? "gray.800" : "purple.50"}
+              >
+                <CardBody textAlign="center" py={10}>
+                  <Icon as={FiTarget} boxSize={12} color="purple.400" mb={4} />
+                  <Text fontSize="lg" color="gray.500" fontWeight="medium">
+                    Belum ada indikator program
+                  </Text>
+                </CardBody>
+              </Card>
+            )}
           </Box>
 
           {/* List indikator Kegiatan */}
-          <Box mb={8}>
-            <HStack mb={4}>
-              <Icon as={FiTarget} color="orange.500" boxSize={6} />
-              <Heading
-                size="lg"
-                color={colorMode === "dark" ? "white" : "gray.800"}
-              >
-                Indikator Kegiatan
-              </Heading>
-              <Badge
-                colorScheme="orange"
-                fontSize="sm"
-                px={3}
-                py={1}
-                borderRadius="full"
-              >
-                {DataIndikatorKegiatan.length} indikator
-              </Badge>
-            </HStack>
+          <Box mb={10}>
+            <Card
+              mb={6}
+              bgGradient={
+                colorMode === "dark"
+                  ? "linear(to-r, orange.900, orange.800)"
+                  : "linear(to-r, orange.50, orange.100)"
+              }
+              border="2px solid"
+              borderColor="orange.300"
+              shadow="lg"
+            >
+              <CardBody>
+                <HStack mb={2}>
+                  <Box
+                    p={3}
+                    bg="orange.500"
+                    borderRadius="full"
+                    color="white"
+                    boxShadow="md"
+                  >
+                    <Icon as={FiTarget} boxSize={6} />
+                  </Box>
+                  <Box flex={1}>
+                    <Heading
+                      size="lg"
+                      color={colorMode === "dark" ? "white" : "orange.800"}
+                      mb={1}
+                    >
+                      Indikator Kegiatan
+                    </Heading>
+                    <Text
+                      fontSize="sm"
+                      color={colorMode === "dark" ? "orange.200" : "orange.600"}
+                    >
+                      Level 2 - Indikator kinerja pada tingkat kegiatan
+                    </Text>
+                  </Box>
+                  <Badge
+                    colorScheme="orange"
+                    fontSize="lg"
+                    px={4}
+                    py={2}
+                    borderRadius="full"
+                    variant="solid"
+                  >
+                    {DataIndikatorKegiatan.length} Indikator
+                  </Badge>
+                </HStack>
+              </CardBody>
+            </Card>
 
-            <Accordion allowToggle>
-              {DataIndikatorKegiatan.map((indikator) => (
-                <AccordionItem
-                  key={indikator.id}
-                  mb={4}
-                  border="none"
-                  borderRadius="lg"
-                  overflow="hidden"
-                  shadow="sm"
-                >
-                  <h2>
-                    <AccordionButton
-                      bg={colorMode === "dark" ? "gray.800" : "white"}
-                      _hover={{
-                        bg: colorMode === "dark" ? "gray.700" : "gray.50",
-                      }}
-                      py={6}
+            {DataIndikatorKegiatan.length > 0 ? (
+              <Accordion allowToggle>
+                {DataIndikatorKegiatan.map((indikator) => (
+                  <AccordionItem
+                    key={indikator.id}
+                    mb={4}
+                    border="none"
+                    borderRadius="lg"
+                    overflow="hidden"
+                    shadow="md"
+                    borderLeft="4px solid"
+                    borderLeftColor="orange.500"
+                  >
+                    <h2>
+                      <AccordionButton
+                        bg={colorMode === "dark" ? "gray.800" : "white"}
+                        _hover={{
+                          bg: colorMode === "dark" ? "gray.700" : "orange.50",
+                        }}
+                        py={6}
+                        px={6}
+                      >
+                        <Box flex="1" textAlign="left">
+                          <HStack mb={2}>
+                            <Badge
+                              colorScheme="orange"
+                              variant="solid"
+                              fontSize="xs"
+                              px={2}
+                              py={1}
+                            >
+                              KEGIATAN
+                            </Badge>
+                          </HStack>
+                          <Text fontWeight="bold" fontSize="lg" mb={2}>
+                            {indikator.indikator}
+                          </Text>
+                          {indikator.kegiatan?.nama && (
+                            <Text fontSize="sm" color="gray.500">
+                              {indikator.kegiatan.nama}
+                            </Text>
+                          )}
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel
+                      pb={6}
+                      bg={colorMode === "dark" ? "gray.900" : "gray.50"}
                       px={6}
                     >
-                      <Box flex="1" textAlign="left">
-                        <Text fontWeight="bold" fontSize="lg" mb={1}>
-                          {indikator.indikator}
-                        </Text>
-                        <Badge
-                          colorScheme="orange"
-                          variant="subtle"
-                          fontSize="xs"
-                        >
-                          Kegiatan
-                        </Badge>
-                      </Box>
-                      <AccordionIcon />
-                    </AccordionButton>
-                  </h2>
-                  <AccordionPanel
-                    pb={6}
-                    bg={colorMode === "dark" ? "gray.900" : "gray.50"}
-                    px={6}
-                  >
-                    <VStack align="start" spacing={4}>
-                      {indikator.targets && indikator.targets.length > 0 ? (
-                        indikator.targets.map((t) => (
-                          <Card
-                            key={t.id}
-                            w="100%"
-                            shadow="sm"
-                            border="1px solid"
-                            borderColor="gray.200"
-                          >
-                            <CardBody>
-                              <HStack mb={4}>
-                                <Icon
-                                  as={FiTarget}
-                                  color="green.500"
-                                  boxSize={5}
-                                />
-                                <Text fontWeight="semibold" fontSize="lg">
-                                  Target: {t.nilai}
-                                </Text>
-                                <Spacer />
-                                <Badge colorScheme="green" variant="subtle">
-                                  Aktif
-                                </Badge>
-                              </HStack>
+                      <VStack align="start" spacing={4}>
+                        {indikator.targets && indikator.targets.length > 0 ? (
+                          indikator.targets.map((t) => (
+                            <Card
+                              key={t.id}
+                              w="100%"
+                              shadow="sm"
+                              border="1px solid"
+                              borderColor="orange.200"
+                              bg={colorMode === "dark" ? "gray.800" : "white"}
+                            >
+                              <CardBody>
+                                <HStack mb={4}>
+                                  <Icon
+                                    as={FiTarget}
+                                    color="green.500"
+                                    boxSize={5}
+                                  />
+                                  <Text fontWeight="semibold" fontSize="lg">
+                                    Target: {t.nilai}
+                                  </Text>
+                                  <Spacer />
+                                  <Badge colorScheme="green" variant="subtle">
+                                    Aktif
+                                  </Badge>
+                                </HStack>
 
-                              {t.tahunAnggarans &&
-                                t.tahunAnggarans.length > 0 && (
-                                  <>
-                                    <Divider mb={4} />
-                                    <VStack align="start" spacing={3}>
-                                      {t.tahunAnggarans.map((th) => (
+                                {t.tahunAnggarans &&
+                                  t.tahunAnggarans.length > 0 && (
+                                    <>
+                                      <Divider mb={4} />
+                                      <VStack align="start" spacing={3}>
+                                        {t.tahunAnggarans.map((th) => (
+                                          <Box
+                                            key={th.id}
+                                            p={4}
+                                            bg={
+                                              colorMode === "dark"
+                                                ? "gray.800"
+                                                : "white"
+                                            }
+                                            borderRadius="md"
+                                            border="1px solid"
+                                            borderColor="orange.200"
+                                            w="100%"
+                                            position="relative"
+                                            _before={{
+                                              content: '""',
+                                              position: "absolute",
+                                              left: 0,
+                                              top: 0,
+                                              bottom: 0,
+                                              width: "4px",
+                                              bg: "orange.500",
+                                              borderRadius: "0 2px 2px 0",
+                                            }}
+                                          >
+                                            <VStack align="start" spacing={2}>
+                                              <HStack>
+                                                <Icon
+                                                  as={FiCalendar}
+                                                  color="orange.500"
+                                                  boxSize={4}
+                                                />
+                                                <Text
+                                                  fontSize="sm"
+                                                  fontWeight="semibold"
+                                                >
+                                                  Tahun: {th.tahun}
+                                                </Text>
+                                              </HStack>
+                                              <HStack>
+                                                <Icon
+                                                  as={FiDollarSign}
+                                                  color="green.500"
+                                                  boxSize={4}
+                                                />
+                                                <Text fontSize="sm">
+                                                  Anggaran:{" "}
+                                                  <Text
+                                                    as="span"
+                                                    fontWeight="bold"
+                                                    color="green.600"
+                                                  >
+                                                    Rp{" "}
+                                                    {th.anggaran.toLocaleString()}
+                                                  </Text>
+                                                </Text>
+                                              </HStack>
+                                              <Text fontSize="sm">
+                                                Jenis Anggaran:{" "}
+                                                <Badge
+                                                  colorScheme="orange"
+                                                  variant="outline"
+                                                  fontSize="xs"
+                                                >
+                                                  {
+                                                    dataJenisAnggaran.find(
+                                                      (ja) =>
+                                                        ja.id ===
+                                                        th.jenisAnggaranId
+                                                    )?.jenis
+                                                  }
+                                                </Badge>
+                                              </Text>
+                                            </VStack>
+                                          </Box>
+                                        ))}
+                                      </VStack>
+                                    </>
+                                  )}
+
+                                {/* Target Triwulan */}
+                                {t.targetTriwulans &&
+                                  t.targetTriwulans.length > 0 && (
+                                    <>
+                                      <Divider my={4} />
+                                      <VStack align="start" spacing={3}>
+                                        <HStack>
+                                          <Icon
+                                            as={FiTarget}
+                                            color="orange.500"
+                                            boxSize={4}
+                                          />
+                                          <Text
+                                            fontSize="md"
+                                            fontWeight="semibold"
+                                            color="orange.600"
+                                          >
+                                            Target Triwulan
+                                          </Text>
+                                        </HStack>
                                         <Box
-                                          key={th.id}
-                                          p={4}
+                                          w="100%"
+                                          p={3}
                                           bg={
                                             colorMode === "dark"
                                               ? "gray.800"
-                                              : "white"
+                                              : "orange.50"
                                           }
                                           borderRadius="md"
                                           border="1px solid"
-                                          borderColor="gray.200"
-                                          w="100%"
-                                          position="relative"
-                                          _before={{
-                                            content: '""',
-                                            position: "absolute",
-                                            left: 0,
-                                            top: 0,
-                                            bottom: 0,
-                                            width: "4px",
-                                            bg: "orange.500",
-                                            borderRadius: "0 2px 2px 0",
-                                          }}
+                                          borderColor="orange.200"
                                         >
-                                          <VStack align="start" spacing={2}>
-                                            <HStack>
-                                              <Icon
-                                                as={FiCalendar}
-                                                color="orange.500"
-                                                boxSize={4}
-                                              />
-                                              <Text
-                                                fontSize="sm"
-                                                fontWeight="semibold"
-                                              >
-                                                Tahun: {th.tahun}
-                                              </Text>
-                                            </HStack>
-                                            <HStack>
-                                              <Icon
-                                                as={FiDollarSign}
-                                                color="green.500"
-                                                boxSize={4}
-                                              />
-                                              <Text fontSize="sm">
-                                                Anggaran:{" "}
-                                                <Text
-                                                  as="span"
-                                                  fontWeight="bold"
-                                                  color="green.600"
+                                          <VStack spacing={2}>
+                                            {t.targetTriwulans.map(
+                                              (triwulan) => (
+                                                <HStack
+                                                  key={triwulan.id}
+                                                  w="100%"
+                                                  justify="space-between"
                                                 >
-                                                  Rp{" "}
-                                                  {th.anggaran.toLocaleString()}
-                                                </Text>
-                                              </Text>
-                                            </HStack>
-                                            <Text fontSize="sm">
-                                              Jenis Anggaran:{" "}
-                                              <Badge
-                                                colorScheme="orange"
-                                                variant="outline"
-                                                fontSize="xs"
-                                              >
-                                                {
-                                                  dataJenisAnggaran.find(
-                                                    (ja) =>
-                                                      ja.id ===
-                                                      th.jenisAnggaranId
-                                                  )?.jenis
-                                                }
-                                              </Badge>
-                                            </Text>
+                                                  <Text
+                                                    fontSize="sm"
+                                                    fontWeight="medium"
+                                                  >
+                                                    {triwulan.namaTarget.nama}:
+                                                  </Text>
+                                                  <Badge
+                                                    colorScheme="orange"
+                                                    variant="solid"
+                                                    fontSize="sm"
+                                                    px={3}
+                                                    py={1}
+                                                  >
+                                                    {triwulan.nilai}
+                                                  </Badge>
+                                                </HStack>
+                                              )
+                                            )}
                                           </VStack>
                                         </Box>
-                                      ))}
-                                    </VStack>
-                                  </>
-                                )}
+                                      </VStack>
+                                    </>
+                                  )}
 
-                              {/* Target Triwulan */}
-                              {t.targetTriwulans &&
-                                t.targetTriwulans.length > 0 && (
-                                  <>
-                                    <Divider my={4} />
-                                    <VStack align="start" spacing={3}>
-                                      <HStack>
-                                        <Icon
-                                          as={FiTarget}
-                                          color="orange.500"
-                                          boxSize={4}
-                                        />
-                                        <Text
-                                          fontSize="md"
-                                          fontWeight="semibold"
-                                          color="orange.600"
-                                        >
-                                          Target Triwulan
-                                        </Text>
-                                      </HStack>
-                                      <Box
-                                        w="100%"
-                                        p={3}
-                                        bg={
-                                          colorMode === "dark"
-                                            ? "gray.800"
-                                            : "orange.50"
-                                        }
-                                        borderRadius="md"
-                                        border="1px solid"
-                                        borderColor="orange.200"
-                                      >
-                                        <VStack spacing={2}>
-                                          {t.targetTriwulans.map((triwulan) => (
-                                            <HStack
-                                              key={triwulan.id}
-                                              w="100%"
-                                              justify="space-between"
-                                            >
-                                              <Text
-                                                fontSize="sm"
-                                                fontWeight="medium"
-                                              >
-                                                {triwulan.namaTarget.nama}:
-                                              </Text>
-                                              <Badge
-                                                colorScheme="orange"
-                                                variant="solid"
-                                                fontSize="sm"
-                                                px={3}
-                                                py={1}
-                                              >
-                                                {triwulan.nilai}
-                                              </Badge>
-                                            </HStack>
-                                          ))}
-                                        </VStack>
-                                      </Box>
-                                    </VStack>
-                                  </>
-                                )}
+                                <Divider my={4} />
+                                <Flex gap={2} justify="end">
+                                  <Button
+                                    size="sm"
+                                    colorScheme="teal"
+                                    variant="outline"
+                                    leftIcon={<Icon as={FiEdit} />}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    colorScheme="red"
+                                    variant="outline"
+                                    leftIcon={<Icon as={FiTrash2} />}
+                                  >
+                                    Hapus
+                                  </Button>
+                                </Flex>
+                              </CardBody>
+                            </Card>
+                          ))
+                        ) : (
+                          <Box
+                            textAlign="center"
+                            py={8}
+                            w="100%"
+                            bg={colorMode === "dark" ? "gray.800" : "white"}
+                            borderRadius="md"
+                            border="2px dashed"
+                            borderColor="orange.300"
+                          >
+                            <Icon
+                              as={FiTarget}
+                              boxSize={8}
+                              color="orange.400"
+                              mb={2}
+                            />
+                            <Text fontSize="sm" color="gray.400">
+                              Belum ada target yang ditambahkan
+                            </Text>
+                          </Box>
+                        )}
+                      </VStack>
 
-                              <Divider my={4} />
-                              <Flex gap={2} justify="end">
-                                <Button
-                                  size="sm"
-                                  colorScheme="teal"
-                                  variant="outline"
-                                  leftIcon={<Icon as={FiEdit} />}
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  colorScheme="red"
-                                  variant="outline"
-                                  leftIcon={<Icon as={FiTrash2} />}
-                                >
-                                  Hapus
-                                </Button>
-                              </Flex>
-                            </CardBody>
-                          </Card>
-                        ))
-                      ) : (
-                        <Box
-                          textAlign="center"
-                          py={8}
-                          w="100%"
-                          bg={colorMode === "dark" ? "gray.800" : "white"}
-                          borderRadius="md"
-                          border="2px dashed"
-                          borderColor="gray.300"
+                      <Flex mt={6} justify="end">
+                        <Button
+                          size="md"
+                          colorScheme="orange"
+                          leftIcon={<Icon as={FiPlus} />}
+                          onClick={() => handleOpenModal(indikator, "kegiatan")}
+                          borderRadius="lg"
+                          shadow="md"
                         >
-                          <Icon
-                            as={FiTarget}
-                            boxSize={8}
-                            color="gray.400"
-                            mb={2}
-                          />
-                          <Text fontSize="sm" color="gray.400">
-                            Belum ada target yang ditambahkan
+                          Tambah Target
+                        </Button>
+                      </Flex>
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <Card
+                border="2px dashed"
+                borderColor="orange.300"
+                bg={colorMode === "dark" ? "gray.800" : "orange.50"}
+              >
+                <CardBody textAlign="center" py={10}>
+                  <Icon as={FiTarget} boxSize={12} color="orange.400" mb={4} />
+                  <Text fontSize="lg" color="gray.500" fontWeight="medium">
+                    Belum ada indikator kegiatan
+                  </Text>
+                </CardBody>
+              </Card>
+            )}
+          </Box>
+
+          {/* List indikator Sub Kegiatan */}
+          <Box mb={8}>
+            <Card
+              mb={6}
+              bgGradient={
+                colorMode === "dark"
+                  ? "linear(to-r, blue.900, blue.800)"
+                  : "linear(to-r, blue.50, blue.100)"
+              }
+              border="2px solid"
+              borderColor="blue.300"
+              shadow="lg"
+            >
+              <CardBody>
+                <HStack mb={2}>
+                  <Box
+                    p={3}
+                    bg="blue.500"
+                    borderRadius="full"
+                    color="white"
+                    boxShadow="md"
+                  >
+                    <Icon as={FiTarget} boxSize={6} />
+                  </Box>
+                  <Box flex={1}>
+                    <Heading
+                      size="lg"
+                      color={colorMode === "dark" ? "white" : "blue.800"}
+                      mb={1}
+                    >
+                      Indikator Sub Kegiatan
+                    </Heading>
+                    <Text
+                      fontSize="sm"
+                      color={colorMode === "dark" ? "blue.200" : "blue.600"}
+                    >
+                      Level 3 - Indikator kinerja pada tingkat sub kegiatan
+                    </Text>
+                  </Box>
+                  <Badge
+                    colorScheme="blue"
+                    fontSize="lg"
+                    px={4}
+                    py={2}
+                    borderRadius="full"
+                    variant="solid"
+                  >
+                    {DataIndikator.length} Indikator
+                  </Badge>
+                </HStack>
+              </CardBody>
+            </Card>
+
+            {DataIndikator.length > 0 ? (
+              <Accordion allowToggle>
+                {DataIndikator.map((indikator) => (
+                  <AccordionItem
+                    key={indikator.id}
+                    mb={4}
+                    border="none"
+                    borderRadius="lg"
+                    overflow="hidden"
+                    shadow="md"
+                    borderLeft="4px solid"
+                    borderLeftColor="blue.500"
+                  >
+                    <h2>
+                      <AccordionButton
+                        bg={colorMode === "dark" ? "gray.800" : "white"}
+                        _hover={{
+                          bg: colorMode === "dark" ? "gray.700" : "blue.50",
+                        }}
+                        py={6}
+                        px={6}
+                      >
+                        <Box flex="1" textAlign="left">
+                          <HStack mb={2}>
+                            <Badge
+                              colorScheme="blue"
+                              variant="solid"
+                              fontSize="xs"
+                              px={2}
+                              py={1}
+                            >
+                              SUB KEGIATAN
+                            </Badge>
+                          </HStack>
+                          <Text fontWeight="bold" fontSize="lg" mb={2}>
+                            {indikator.indikator}
+                          </Text>
+                          <Text fontSize="sm" color="gray.500">
+                            {indikator.subKegPer?.nama}
                           </Text>
                         </Box>
-                      )}
-                    </VStack>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel
+                      pb={6}
+                      bg={colorMode === "dark" ? "gray.900" : "gray.50"}
+                      px={6}
+                    >
+                      <VStack align="start" spacing={4}>
+                        {indikator.targets && indikator.targets.length > 0 ? (
+                          indikator.targets.map((t) => (
+                            <Card
+                              key={t.id}
+                              w="100%"
+                              shadow="sm"
+                              border="1px solid"
+                              borderColor="blue.200"
+                              bg={colorMode === "dark" ? "gray.800" : "white"}
+                            >
+                              <CardBody>
+                                <HStack mb={4}>
+                                  <Icon
+                                    as={FiTarget}
+                                    color="green.500"
+                                    boxSize={5}
+                                  />
+                                  <Text fontWeight="semibold" fontSize="lg">
+                                    Target: {t.nilai}
+                                  </Text>
+                                  <Spacer />
+                                  <Badge colorScheme="green" variant="subtle">
+                                    Aktif
+                                  </Badge>
+                                </HStack>
 
-                    <Flex mt={6} justify="end">
-                      <Button
-                        size="md"
-                        colorScheme="orange"
-                        leftIcon={<Icon as={FiPlus} />}
-                        onClick={() => handleOpenModal(indikator, "kegiatan")}
-                        borderRadius="lg"
-                      >
-                        Tambah Target
-                      </Button>
-                    </Flex>
-                  </AccordionPanel>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                                {t.tahunAnggarans &&
+                                  t.tahunAnggarans.length > 0 && (
+                                    <>
+                                      <Divider mb={4} />
+                                      <VStack align="start" spacing={3}>
+                                        {t.tahunAnggarans.map((th) => (
+                                          <Box
+                                            key={th.id}
+                                            p={4}
+                                            bg={
+                                              colorMode === "dark"
+                                                ? "gray.800"
+                                                : "white"
+                                            }
+                                            borderRadius="md"
+                                            border="1px solid"
+                                            borderColor="blue.200"
+                                            w="100%"
+                                            position="relative"
+                                            _before={{
+                                              content: '""',
+                                              position: "absolute",
+                                              left: 0,
+                                              top: 0,
+                                              bottom: 0,
+                                              width: "4px",
+                                              bg: "blue.500",
+                                              borderRadius: "0 2px 2px 0",
+                                            }}
+                                          >
+                                            <VStack align="start" spacing={2}>
+                                              <HStack>
+                                                <Icon
+                                                  as={FiCalendar}
+                                                  color="blue.500"
+                                                  boxSize={4}
+                                                />
+                                                <Text
+                                                  fontSize="sm"
+                                                  fontWeight="semibold"
+                                                >
+                                                  Tahun: {th.tahun}
+                                                </Text>
+                                              </HStack>
+                                              <HStack>
+                                                <Icon
+                                                  as={FiDollarSign}
+                                                  color="green.500"
+                                                  boxSize={4}
+                                                />
+                                                <Text fontSize="sm">
+                                                  Anggaran:{" "}
+                                                  <Text
+                                                    as="span"
+                                                    fontWeight="bold"
+                                                    color="green.600"
+                                                  >
+                                                    Rp{" "}
+                                                    {th.anggaran.toLocaleString()}
+                                                  </Text>
+                                                </Text>
+                                              </HStack>
+                                              <Text fontSize="sm">
+                                                Jenis Anggaran:{" "}
+                                                <Badge
+                                                  colorScheme="blue"
+                                                  variant="outline"
+                                                  fontSize="xs"
+                                                >
+                                                  {
+                                                    dataJenisAnggaran.find(
+                                                      (ja) =>
+                                                        ja.id ===
+                                                        th.jenisAnggaranId
+                                                    )?.jenis
+                                                  }
+                                                </Badge>
+                                              </Text>
+                                              <Flex
+                                                justify="end"
+                                                w="100%"
+                                                mt={2}
+                                              >
+                                                <Button
+                                                  id={String(t.id)}
+                                                  size="xs"
+                                                  colorScheme="teal"
+                                                  variant="outline"
+                                                  leftIcon={
+                                                    <Icon as={FiEdit} />
+                                                  }
+                                                  onClick={(e) => {
+                                                    const id = parseInt(
+                                                      e.currentTarget.id
+                                                    );
+                                                    openApModal(id, th.tahun);
+                                                  }}
+                                                >
+                                                  Tambah Anggaran Perubahan
+                                                  (Tahun {th.tahun})
+                                                </Button>
+                                              </Flex>
+                                            </VStack>
+                                          </Box>
+                                        ))}
+                                      </VStack>
+                                    </>
+                                  )}
+
+                                {/* Target Triwulan */}
+                                {t.targetTriwulans &&
+                                  t.targetTriwulans.length > 0 && (
+                                    <>
+                                      <Divider my={4} />
+                                      <VStack align="start" spacing={3}>
+                                        <HStack>
+                                          <Icon
+                                            as={FiTarget}
+                                            color="orange.500"
+                                            boxSize={4}
+                                          />
+                                          <Text
+                                            fontSize="md"
+                                            fontWeight="semibold"
+                                            color="orange.600"
+                                          >
+                                            Target Triwulan
+                                          </Text>
+                                        </HStack>
+                                        <Box
+                                          w="100%"
+                                          p={3}
+                                          bg={
+                                            colorMode === "dark"
+                                              ? "gray.800"
+                                              : "orange.50"
+                                          }
+                                          borderRadius="md"
+                                          border="1px solid"
+                                          borderColor="orange.200"
+                                        >
+                                          <VStack spacing={2}>
+                                            {t.targetTriwulans.map(
+                                              (triwulan) => (
+                                                <HStack
+                                                  key={triwulan.id}
+                                                  w="100%"
+                                                  justify="space-between"
+                                                >
+                                                  <Text
+                                                    fontSize="sm"
+                                                    fontWeight="medium"
+                                                  >
+                                                    {triwulan.namaTarget.nama}:
+                                                  </Text>
+                                                  <Badge
+                                                    colorScheme="orange"
+                                                    variant="solid"
+                                                    fontSize="sm"
+                                                    px={3}
+                                                    py={1}
+                                                  >
+                                                    {triwulan.nilai}
+                                                  </Badge>
+                                                </HStack>
+                                              )
+                                            )}
+                                          </VStack>
+                                        </Box>
+                                      </VStack>
+                                    </>
+                                  )}
+
+                                <Divider my={4} />
+                                <Flex gap={2} justify="end">
+                                  <Button
+                                    size="sm"
+                                    colorScheme="teal"
+                                    variant="outline"
+                                    leftIcon={<Icon as={FiEdit} />}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    colorScheme="red"
+                                    variant="outline"
+                                    leftIcon={<Icon as={FiTrash2} />}
+                                  >
+                                    Hapus
+                                  </Button>
+                                </Flex>
+                              </CardBody>
+                            </Card>
+                          ))
+                        ) : (
+                          <Box
+                            textAlign="center"
+                            py={8}
+                            w="100%"
+                            bg={colorMode === "dark" ? "gray.800" : "white"}
+                            borderRadius="md"
+                            border="2px dashed"
+                            borderColor="blue.300"
+                          >
+                            <Icon
+                              as={FiTarget}
+                              boxSize={8}
+                              color="blue.400"
+                              mb={2}
+                            />
+                            <Text fontSize="sm" color="gray.400">
+                              Belum ada target yang ditambahkan
+                            </Text>
+                          </Box>
+                        )}
+                      </VStack>
+
+                      <Flex mt={6} justify="end">
+                        <Button
+                          size="md"
+                          colorScheme="blue"
+                          leftIcon={<Icon as={FiPlus} />}
+                          onClick={() =>
+                            handleOpenModal(indikator, "subKegiatan")
+                          }
+                          borderRadius="lg"
+                          shadow="md"
+                        >
+                          Tambah Target
+                        </Button>
+                      </Flex>
+                    </AccordionPanel>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <Card
+                border="2px dashed"
+                borderColor="blue.300"
+                bg={colorMode === "dark" ? "gray.800" : "blue.50"}
+              >
+                <CardBody textAlign="center" py={10}>
+                  <Icon as={FiTarget} boxSize={12} color="blue.400" mb={4} />
+                  <Text fontSize="lg" color="gray.500" fontWeight="medium">
+                    Belum ada indikator sub kegiatan
+                  </Text>
+                </CardBody>
+              </Card>
+            )}
           </Box>
         </Container>
       </Box>

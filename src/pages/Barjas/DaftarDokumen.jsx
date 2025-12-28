@@ -174,7 +174,6 @@ function DaftarDokumen() {
         akunBelanjaId,
         tanggal,
         indukUnitKerjaId: user[0]?.unitKerja_profile?.indukUnitKerja?.id,
-        unitKerjaId,
       })
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -222,7 +221,9 @@ function DaftarDokumen() {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/barjas/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&startDate=${tanggalAwal}&endDate=${tanggalAkhir}&subKegPerId=${subKegPerFilterId}`
+        }/barjas/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&startDate=${tanggalAwal}&endDate=${tanggalAkhir}&subKegPerId=${subKegPerFilterId}&indukUnitKerjaId=${
+          user[0]?.unitKerja_profile?.indukUnitKerja?.id
+        }`
       )
       .then((res) => {
         setDataDokumen(res.data.result);
@@ -885,7 +886,7 @@ function DaftarDokumen() {
 
                             return filtered.map((val) => ({
                               value: val.id,
-                              label: val.nama,
+                              label: `${val.nama} - ${val.daftarUnitKerja.unitKerja}`,
                             }));
                           } catch (err) {
                             console.error(
@@ -975,63 +976,6 @@ function DaftarDokumen() {
                         type="date"
                         value={tanggal}
                         onChange={(e) => setTanggal(e.target.value)}
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"16px"} fontWeight="medium">
-                        Unit Kerja
-                      </FormLabel>
-                      <AsyncSelect
-                        loadOptions={async (inputValue) => {
-                          if (!inputValue) return [];
-                          try {
-                            const res = await axios.get(
-                              `${
-                                import.meta.env.VITE_REACT_APP_API_BASE_URL
-                              }/admin/search/unit-kerja?q=${inputValue}`
-                            );
-
-                            const filtered = res.data.result;
-
-                            return filtered.map((val) => ({
-                              value: val.id,
-                              label: val.unitKerja,
-                            }));
-                          } catch (err) {
-                            console.error(
-                              "Failed to load options:",
-                              err.message
-                            );
-                            return [];
-                          }
-                        }}
-                        placeholder="Ketik Nama Unit Kerja"
-                        onChange={(selectedOption) => {
-                          setUnitKerjaId(selectedOption.value);
-                        }}
-                        components={{
-                          DropdownIndicator: () => null,
-                          IndicatorSeparator: () => null,
-                        }}
-                        chakraStyles={{
-                          container: (provided) => ({
-                            ...provided,
-                            borderRadius: "6px",
-                          }),
-                          control: (provided) => ({
-                            ...provided,
-                            backgroundColor: "terang",
-                            border: "0px",
-                            height: "60px",
-                            _hover: { borderColor: "yellow.700" },
-                            minHeight: "40px",
-                          }),
-                          option: (provided, state) => ({
-                            ...provided,
-                            bg: state.isFocused ? "aset" : "white",
-                            color: state.isFocused ? "white" : "black",
-                          }),
-                        }}
                       />
                     </FormControl>
                   </SimpleGrid>

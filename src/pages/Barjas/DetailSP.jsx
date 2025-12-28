@@ -1491,7 +1491,7 @@ function DetailSP(props) {
                       dataDokumen.barjas.length > 0
                     }
                     onChange={handleSelectAllBarjas}
-                    colorScheme="aset"
+                    colorScheme="green"
                     size="lg"
                   >
                     Pilih Semua
@@ -1514,7 +1514,7 @@ function DetailSP(props) {
                               dataDokumen.barjas.length > 0
                             }
                             onChange={handleSelectAllBarjas}
-                            colorScheme="aset"
+                            colorScheme="green"
                           />
                         </Th>
                         <Th>No</Th>
@@ -1558,7 +1558,7 @@ function DetailSP(props) {
                                   Number(item?.jumlah || 1)
                                 )
                               }
-                              colorScheme="aset"
+                              colorScheme="green"
                             />
                           </Td>
                           <Td>{index + 1}</Td>
@@ -1669,7 +1669,7 @@ function DetailSP(props) {
               Batal
             </Button>
             <Button
-              variant="aset"
+              variant="primary"
               onClick={tambahDokumen}
               isDisabled={selectedBarjas.length === 0}
               leftIcon={<Icon as={FaPlus} />}

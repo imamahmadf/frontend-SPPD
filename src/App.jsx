@@ -85,6 +85,9 @@ import DetailProgram from "./pages/Perencanaan/DetailProgram.jsx";
 import DetailKegiatan from "./pages/Perencanaan/DetailKegiatan.jsx";
 import DaftarIndikator from "./pages/Perencanaan/DaftarIndikator.jsx";
 import DaftarCapaian from "./pages/Perencanaan/DaftarCapaian.jsx";
+import AdminSubKegiatan from "./pages/Perencanaan/AdminSubKegiatan.jsx";
+import AdminKegiatan from "./pages/Perencanaan/AdminKegiatan.jsx";
+import AdminProgram from "./pages/Perencanaan/AdminProgram.jsx";
 // ////////PENA///////////////////
 import DaftarKendaraanDinas from "./pages/KendaraanDinas/DaftarKendaraanDinas.jsx";
 import KendaraanSaya from "./pages/KendaraanDinas/KendaraanSaya.jsx";
@@ -577,6 +580,24 @@ function App() {
           <ProtectedRoute
             component={DaftarCapaian}
             path="/perencanaan/daftar-capaian"
+            exact
+            roleRoute={[5, 11]}
+          />
+          <ProtectedRoute
+            component={AdminSubKegiatan}
+            path="/admin-perencanaan/sub-kegiatan"
+            exact
+            roleRoute={[5, 11]}
+          />
+          <ProtectedRoute
+            component={AdminKegiatan}
+            path="/admin-perencanaan/kegiatan"
+            exact
+            roleRoute={[5, 11]}
+          />
+          <ProtectedRoute
+            component={AdminProgram}
+            path="/admin-perencanaan/program"
             exact
             roleRoute={[5, 11]}
           />

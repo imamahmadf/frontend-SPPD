@@ -71,6 +71,17 @@ const menuData = [
       { label: "capaian", path: "/perencanaan/daftar-capaian" },
     ],
   },
+
+  {
+    title: "Administrator",
+    icon: HiOutlineUsers,
+    pathPrefix: "/admin-perencanaan",
+    items: [
+      { label: "Program", path: "/admin-perencanaan/program" },
+      { label: "Kegiatan", path: "/admin-perencanaan/kegiatan" },
+      { label: "Sub Kegiatan", path: "/admin-perencanaan/sub-kegiatan" },
+    ],
+  },
 ];
 
 function NavbarPerencanaan() {
