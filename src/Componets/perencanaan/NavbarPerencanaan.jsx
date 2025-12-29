@@ -55,10 +55,6 @@ import { HiOutlineUsers } from "react-icons/hi2";
 import { io } from "socket.io-client";
 import { useColorModeValues } from "../../Style/colorModeValues";
 
-const socket = io("http://localhost:8000", {
-  transports: ["websocket"],
-});
-
 // Data menu untuk mapping
 const menuData = [
   {
@@ -117,32 +113,61 @@ function NavbarPerencanaan() {
     setIsDrawerOpen(false);
   };
 
+  // Inisialisasi Socket.io dan listener notifikasi
   useEffect(() => {
-    socket.on("notifikasi:terbaru", (data) => {
+    if (!isAuthenticated) return;
+
+    // Gunakan environment variable untuk URL socket.io
+    const socketUrl = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+
+    // Validasi: Pastikan environment variable sudah diset (penting untuk produksi)
+    if (!socketUrl) {
+      console.error(
+        "⚠️ VITE_REACT_APP_API_BASE_URL tidak diset! Socket.io tidak dapat terhubung."
+      );
+      return; // Jangan inisialisasi socket jika URL tidak ada
+    }
+
+    // Peringatan jika masih menggunakan localhost di produksi
+    if (socketUrl.includes("localhost") && import.meta.env.PROD) {
+      console.warn(
+        "⚠️ PERINGATAN: Menggunakan localhost di produksi! Pastikan environment variable sudah diset dengan benar."
+      );
+    }
+
+    const socket = io(socketUrl, {
+      transports: ["websocket"],
+    });
+
+    // Listener untuk notifikasi baru
+    const handleNotifikasi = (data) => {
       console.log("📡 Notifikasi baru diterima di React:", data);
       if (data.count !== undefined) {
         console.log("🧠 Update state jumlahNotifikasi ke:", data.count);
         setJumlahNotifikasi(data.count);
       }
+    };
+
+    socket.on("notifikasi:terbaru", handleNotifikasi);
+
+    // Connect event
+    socket.on("connect", () => {
+      console.log("✅ Socket.io connected:", socket.id);
     });
 
-    return () => {
-      socket.off("notifikasi:terbaru");
-    };
-  }, []);
-
-  useEffect(() => {
-    socket.on("notifikasi:terbaru", (data) => {
-      console.log("📡 Notifikasi baru:", data);
-      if (data.count !== undefined) {
-        setJumlahNotifikasi(data.count);
-      }
+    // Disconnect event
+    socket.on("disconnect", () => {
+      console.log("❌ Socket.io disconnected");
     });
 
+    // Cleanup
     return () => {
-      socket.off("notifikasi:terbaru");
+      socket.off("notifikasi:terbaru", handleNotifikasi);
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.disconnect();
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // Fungsi untuk mengecek apakah menu sedang aktif
   const isMenuActive = (menu) => {
