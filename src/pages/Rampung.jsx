@@ -306,7 +306,7 @@ function Rampung(props) {
           KPANama: dataRampung.result.perjalanan.KPA.pegawai_KPA.nama,
           KPANip: dataRampung.result.perjalanan.KPA.pegawai_KPA.nip,
           KPAJabatan: dataRampung.result.perjalanan.KPA.jabatan,
-          foto: dataRampung?.result?.perjalanan?.pic,
+          foto: dataRampung?.result?.perjalanan?.fotoPerjalanans || [],
           templateId,
           subKegiatan:
             dataRampung.result.perjalanan.daftarSubKegiatan.subKegiatan,
@@ -767,7 +767,9 @@ function Rampung(props) {
                   </CardHeader>
                   <CardBody p={0}>
                     <TambahBuktiKegiatan
-                      pic={dataRampung?.result?.perjalanan?.pic}
+                      fotoPerjalanan={
+                        dataRampung?.result?.perjalanan?.fotoPerjalanans || []
+                      }
                       id={dataRampung?.result?.perjalanan?.id}
                       status={dataRampung?.result?.status?.id}
                       randomNumber={setRandomNumber}

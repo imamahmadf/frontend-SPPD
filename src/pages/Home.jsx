@@ -344,6 +344,61 @@ function Home() {
 
   const barChartOptions = {
     ...chartOptions,
+    indexAxis: "y", // Horizontal bar chart
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          callback: function (value) {
+            // Format angka menjadi format yang lebih mudah dibaca (dalam jutaan)
+            if (value >= 1000000000) {
+              return (value / 1000000000).toFixed(1) + "M";
+            } else if (value >= 1000000) {
+              return (value / 1000000).toFixed(1) + "Jt";
+            } else if (value >= 1000) {
+              return (value / 1000).toFixed(1) + "K";
+            }
+            return value;
+          },
+        },
+      },
+      y: {
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0,
+          autoSkip: false,
+          font: {
+            size: 11,
+          },
+        },
+      },
+    },
+    plugins: {
+      ...chartOptions.plugins,
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.x !== null) {
+              label += new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                maximumFractionDigits: 0,
+              }).format(context.parsed.x);
+            }
+            return label;
+          },
+        },
+      },
+    },
+  };
+
+  // Options untuk grafik vertikal (untuk grafik yang tidak perlu horizontal)
+  const verticalBarChartOptions = {
+    ...chartOptions,
     scales: {
       y: {
         beginAtZero: true,
@@ -358,6 +413,16 @@ function Home() {
               return (value / 1000).toFixed(1) + "K";
             }
             return value;
+          },
+        },
+      },
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 45,
+          autoSkip: false,
+          font: {
+            size: 10,
           },
         },
       },
@@ -692,10 +757,40 @@ function Home() {
                           </Heading>
                         </CardHeader>
                         <CardBody>
-                          <Box height="400px">
+                          <Box height="500px">
                             <Bar
                               data={anggaranRealisasiData}
-                              options={barChartOptions}
+                              options={{
+                                ...barChartOptions,
+                                plugins: {
+                                  ...barChartOptions.plugins,
+                                  tooltip: {
+                                    callbacks: {
+                                      title: function (context) {
+                                        // Tampilkan nama lengkap sub kegiatan di tooltip
+                                        return context[0].label || "";
+                                      },
+                                      label: function (context) {
+                                        let label = context.dataset.label || "";
+                                        if (label) {
+                                          label += ": ";
+                                        }
+                                        if (context.parsed.x !== null) {
+                                          label += new Intl.NumberFormat(
+                                            "id-ID",
+                                            {
+                                              style: "currency",
+                                              currency: "IDR",
+                                              maximumFractionDigits: 0,
+                                            }
+                                          ).format(context.parsed.x);
+                                        }
+                                        return label;
+                                      },
+                                    },
+                                  },
+                                },
+                              }}
                             />
                           </Box>
                         </CardBody>
@@ -711,13 +806,13 @@ function Home() {
                           </Heading>
                         </CardHeader>
                         <CardBody>
-                          <Box height="400px">
+                          <Box height="500px">
                             <Bar
                               data={persentaseRealisasiData}
                               options={{
                                 ...barChartOptions,
                                 scales: {
-                                  y: {
+                                  x: {
                                     beginAtZero: true,
                                     max: 100,
                                     ticks: {
@@ -726,20 +821,34 @@ function Home() {
                                       },
                                     },
                                   },
+                                  y: {
+                                    ticks: {
+                                      maxRotation: 0,
+                                      minRotation: 0,
+                                      autoSkip: false,
+                                      font: {
+                                        size: 11,
+                                      },
+                                    },
+                                  },
                                 },
                                 plugins: {
                                   ...barChartOptions.plugins,
                                   tooltip: {
                                     callbacks: {
+                                      title: function (context) {
+                                        // Tampilkan nama lengkap sub kegiatan di tooltip
+                                        return context[0].label || "";
+                                      },
                                       label: function (context) {
                                         let label = context.dataset.label || "";
                                         if (label) {
                                           label += ": ";
                                         }
-                                        if (context.parsed.y !== null) {
+                                        if (context.parsed.x !== null) {
                                           label +=
                                             parseFloat(
-                                              context.parsed.y
+                                              context.parsed.x
                                             ).toFixed(2) + "%";
                                         }
                                         return label;
@@ -772,7 +881,7 @@ function Home() {
                             <Box height="300px">
                               <Bar
                                 data={tipePerjalananData}
-                                options={barChartOptions}
+                                options={verticalBarChartOptions}
                               />
                             </Box>
                           </CardBody>

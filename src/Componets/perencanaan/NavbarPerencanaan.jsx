@@ -76,6 +76,14 @@ const menuData = [
       { label: "Program", path: "/admin-perencanaan/program" },
       { label: "Kegiatan", path: "/admin-perencanaan/kegiatan" },
       { label: "Sub Kegiatan", path: "/admin-perencanaan/sub-kegiatan" },
+      {
+        label: "Satuan Indikator",
+        path: "/admin-perencanaan/satuan-indikator",
+      },
+      {
+        label: "Indikator",
+        path: "/admin-perencanaan/indikator",
+      },
     ],
   },
 ];

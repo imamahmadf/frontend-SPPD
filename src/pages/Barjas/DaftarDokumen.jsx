@@ -63,6 +63,8 @@ import {
   BsEyeFill,
   BsFileEarmarkArrowDown,
 } from "react-icons/bs";
+import { FaTrash } from "react-icons/fa";
+import { Icon } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
@@ -106,6 +108,12 @@ function DaftarDokumen() {
     onOpen: onTambahOpen,
     onClose: onTambahClose,
   } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
+  const [spToDelete, setSpToDelete] = useState(null);
 
   const changePage = ({ selected }) => {
     setPage(selected);
@@ -197,6 +205,43 @@ function DaftarDokumen() {
           isClosable: true,
         });
         handleCloseModal();
+      });
+  };
+
+  const handleDeleteSP = (item) => {
+    setSpToDelete(item);
+    onDeleteOpen();
+  };
+
+  const confirmDeleteSP = () => {
+    if (!spToDelete) return;
+
+    axios
+      .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/delete/sp`, {
+        id: spToDelete.id,
+      })
+      .then((res) => {
+        toast({
+          title: "Berhasil!",
+          description: "Surat Pesanan berhasil dihapus.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        fetchDataDokumen();
+        onDeleteClose();
+        setSpToDelete(null);
+      })
+      .catch((err) => {
+        console.error(err.message);
+        toast({
+          title: "Error!",
+          description:
+            err.response?.data?.message || "Gagal menghapus Surat Pesanan",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       });
   };
   async function fetchSeed() {
@@ -607,16 +652,27 @@ function DaftarDokumen() {
                           </Text>
                         </Td>
                         <Td textAlign="center">
-                          <Button
-                            size="sm"
-                            colorScheme="blue"
-                            variant="outline"
-                            onClick={() =>
-                              history.push(`/barjas/detail-sp/${item.id}`)
-                            }
-                          >
-                            Detail
-                          </Button>
+                          <HStack spacing={2} justify="center">
+                            <Button
+                              size="sm"
+                              colorScheme="blue"
+                              variant="outline"
+                              onClick={() =>
+                                history.push(`/barjas/detail-sp/${item.id}`)
+                              }
+                            >
+                              Detail
+                            </Button>
+                            <Button
+                              size="sm"
+                              colorScheme="red"
+                              variant="ghost"
+                              onClick={() => handleDeleteSP(item)}
+                              leftIcon={<Icon as={FaTrash} />}
+                            >
+                              Hapus
+                            </Button>
+                          </HStack>
                         </Td>
                       </Tr>
                     ))
@@ -995,6 +1051,118 @@ function DaftarDokumen() {
                     Simpan Surat Pesanan
                   </Button>
                 </HStack>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          {/* Modal Konfirmasi Hapus SP */}
+          <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} isCentered>
+            <ModalOverlay />
+            <ModalContent
+              bgColor={colorMode === "dark" ? "gray.800" : "white"}
+              borderRadius="12px"
+            >
+              <ModalHeader>
+                <Flex align="center">
+                  <Icon as={FaTrash} color="red.500" mr={2} boxSize={5} />
+                  <Heading size="md">Konfirmasi Hapus Surat Pesanan</Heading>
+                </Flex>
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody pb={6}>
+                <Text mb={4}>
+                  Apakah Anda yakin ingin menghapus Surat Pesanan berikut?
+                </Text>
+                {spToDelete && (
+                  <Box
+                    p={4}
+                    bgColor={colorMode === "dark" ? "gray.700" : "gray.50"}
+                    borderRadius="8px"
+                    mb={4}
+                  >
+                    <VStack align="stretch" spacing={3}>
+                      <Box>
+                        <Text fontSize="xs" color="gray.600" mb={1}>
+                          Nomor SP
+                        </Text>
+                        <Text fontSize="md" fontWeight="semibold">
+                          {spToDelete?.nomor || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="gray.600" mb={1}>
+                          Tanggal
+                        </Text>
+                        <Text fontSize="sm">
+                          {spToDelete?.tanggal
+                            ? new Date(spToDelete?.tanggal).toLocaleDateString(
+                                "id-ID",
+                                {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                }
+                              )
+                            : "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="gray.600" mb={1}>
+                          Sub Kegiatan
+                        </Text>
+                        <Text fontSize="sm" noOfLines={2}>
+                          {spToDelete?.subKegPer?.nama || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="gray.600" mb={1}>
+                          Rekanan
+                        </Text>
+                        <Text fontSize="sm">
+                          {spToDelete?.rekanan?.nama || "-"}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Text fontSize="xs" color="gray.600" mb={1}>
+                          Total Nominal
+                        </Text>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="green.600"
+                        >
+                          Rp{" "}
+                          {spToDelete?.barjas && spToDelete.barjas.length > 0
+                            ? spToDelete.barjas
+                                .reduce(
+                                  (total, barja) =>
+                                    total +
+                                    (barja.harga || 0) * (barja.jumlah || 0),
+                                  0
+                                )
+                                .toLocaleString("id-ID")
+                            : "0"}
+                        </Text>
+                      </Box>
+                    </VStack>
+                  </Box>
+                )}
+                <Text fontSize="sm" color="red.500" fontWeight="medium">
+                  ⚠️ Tindakan ini tidak dapat dibatalkan. Semua data terkait
+                  Surat Pesanan ini akan ikut terhapus.
+                </Text>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="ghost" mr={3} onClick={onDeleteClose}>
+                  Batal
+                </Button>
+                <Button
+                  colorScheme="red"
+                  onClick={confirmDeleteSP}
+                  leftIcon={<Icon as={FaTrash} />}
+                >
+                  Hapus
+                </Button>
               </ModalFooter>
             </ModalContent>
           </Modal>

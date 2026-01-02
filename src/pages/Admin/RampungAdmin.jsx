@@ -49,7 +49,9 @@ import {
   StatLabel,
   StatNumber,
   StatHelpText,
+  SimpleGrid,
 } from "@chakra-ui/react";
+import { BsImage, BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import Loading from "../../Componets/Loading";
 import { useSelector } from "react-redux";
 import {
@@ -60,8 +62,19 @@ import {
 
 function RampungAdmin(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isGalleryOpen,
+    onOpen: onGalleryOpen,
+    onClose: onGalleryClose,
+  } = useDisclosure();
+  const {
+    isOpen: isUndanganOpen,
+    onOpen: onUndanganOpen,
+    onClose: onUndanganClose,
+  } = useDisclosure();
   const toast = useToast();
   const [selectedImage, setSelectedImage] = useState("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
   const [isModalBatalOpen, setIsModalBatalOpen] = useState(false);
   const [alasanBatal, setAlasanBatal] = useState("");
@@ -258,6 +271,7 @@ function RampungAdmin(props) {
           KPANama: detailPerjalanan?.KPA?.pegawai_KPA?.nama,
           KPANip: detailPerjalanan?.KPA?.pegawai_KPA?.nip,
           KPAJabatan: detailPerjalanan?.KPA?.jabatan,
+          foto: detailPerjalanan?.fotoPerjalanans || [],
           templateId,
           subKegiatan: detailPerjalanan?.daftarSubKegiatan?.subKegiatan,
           kodeRekening: `${
@@ -399,35 +413,227 @@ function RampungAdmin(props) {
             <GridItem>
               <Card shadow="lg" borderRadius="xl" overflow="hidden">
                 <CardHeader bg="primary" color="white" py={6}>
-                  <Heading size="md">Foto Bukti Kegiatan</Heading>
+                  <Flex justify="space-between" align="center">
+                    <Heading size="md">Foto Bukti Kegiatan</Heading>
+                    {detailPerjalanan?.fotoPerjalanans?.length > 0 && (
+                      <Badge
+                        colorScheme="whiteAlpha"
+                        fontSize="md"
+                        px={3}
+                        py={1}
+                      >
+                        {detailPerjalanan.fotoPerjalanans.length} Foto
+                      </Badge>
+                    )}
+                  </Flex>
                 </CardHeader>
                 <CardBody p={0}>
-                  <Image
-                    src={
-                      detailPerjalanan?.pic
-                        ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
-                          detailPerjalanan?.pic
-                        : Foto
-                    }
-                    alt="Bukti Kegiatan"
-                    w="100%"
-                    h="1000px"
-                    objectFit="cover"
-                    cursor="pointer"
-                    onClick={() => {
-                      if (detailPerjalanan?.pic) {
-                        setSelectedImage(
-                          import.meta.env.VITE_REACT_APP_API_BASE_URL +
-                            detailPerjalanan?.pic
-                        );
-                        onOpen();
-                      }
-                    }}
-                    _hover={{ opacity: 0.9 }}
-                    transition="opacity 0.2s"
-                  />
+                  {detailPerjalanan?.fotoPerjalanans?.length > 0 ? (
+                    <Box>
+                      {/* Foto utama (foto pertama) */}
+                      <Box
+                        cursor="pointer"
+                        onClick={() => {
+                          setSelectedImageIndex(0);
+                          onGalleryOpen();
+                        }}
+                        position="relative"
+                        overflow="hidden"
+                      >
+                        <Image
+                          borderRadius="lg"
+                          alt="foto kegiatan"
+                          width="100%"
+                          height="500px"
+                          objectFit="cover"
+                          src={
+                            import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                            detailPerjalanan.fotoPerjalanans[0].foto
+                          }
+                          transition="transform 0.3s ease"
+                          _hover={{ transform: "scale(1.02)" }}
+                        />
+                        {/* Overlay untuk hover effect */}
+                        <Box
+                          position="absolute"
+                          top={0}
+                          left={0}
+                          right={0}
+                          bottom={0}
+                          bg="blackAlpha.400"
+                          opacity={0}
+                          _hover={{ opacity: 1 }}
+                          transition="opacity 0.3s"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Text
+                            color="white"
+                            fontWeight="semibold"
+                            fontSize="lg"
+                          >
+                            Klik untuk melihat semua foto
+                          </Text>
+                        </Box>
+                      </Box>
+
+                      {/* Grid foto tambahan di bawah */}
+                      {detailPerjalanan.fotoPerjalanans.length > 1 && (
+                        <SimpleGrid
+                          columns={{ base: 2, md: 4 }}
+                          spacing={3}
+                          p={3}
+                        >
+                          {detailPerjalanan.fotoPerjalanans
+                            .slice(1, 5)
+                            .map((foto, index) => (
+                              <Box
+                                key={foto.id}
+                                cursor="pointer"
+                                onClick={() => {
+                                  // Index + 1 karena ini adalah foto ke-2, 3, 4, atau 5 (index 0 adalah foto pertama)
+                                  setSelectedImageIndex(index + 1);
+                                  onGalleryOpen();
+                                }}
+                                position="relative"
+                                overflow="hidden"
+                                borderRadius="md"
+                                shadow="sm"
+                                _hover={{
+                                  shadow: "md",
+                                  transform: "translateY(-2px)",
+                                }}
+                                transition="all 0.2s"
+                              >
+                                <Image
+                                  borderRadius="md"
+                                  alt={`foto kegiatan ${index + 2}`}
+                                  width="100%"
+                                  height="120px"
+                                  objectFit="cover"
+                                  src={
+                                    import.meta.env
+                                      .VITE_REACT_APP_API_BASE_URL + foto.foto
+                                  }
+                                />
+                              </Box>
+                            ))}
+                        </SimpleGrid>
+                      )}
+
+                      {/* Indicator jika ada lebih dari 5 foto */}
+                      {detailPerjalanan.fotoPerjalanans.length > 5 && (
+                        <Center pb={3}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedImageIndex(0);
+                              onGalleryOpen();
+                            }}
+                            colorScheme="blue"
+                          >
+                            Lihat {detailPerjalanan.fotoPerjalanans.length - 5}{" "}
+                            foto lainnya →
+                          </Button>
+                        </Center>
+                      )}
+                    </Box>
+                  ) : (
+                    <Box position="relative">
+                      <Image
+                        borderRadius="lg"
+                        alt="foto kegiatan"
+                        width="100%"
+                        height="500px"
+                        objectFit="cover"
+                        src={Foto}
+                        opacity={0.7}
+                      />
+                      <Center
+                        position="absolute"
+                        top="50%"
+                        left="50%"
+                        transform="translate(-50%, -50%)"
+                        flexDirection="column"
+                        gap={2}
+                      >
+                        <BsImage size={48} color="gray" />
+                        <Text color="gray.500" fontWeight="medium">
+                          Belum ada foto
+                        </Text>
+                      </Center>
+                    </Box>
+                  )}
                 </CardBody>
               </Card>
+
+              <Flex gap={"20px"}>
+                {/* Template Selection - Dipindahkan ke bawah foto */}
+                <Card shadow="md" borderRadius="lg" mt={6} width={"50%"}>
+                  <CardHeader bg="orange.50" py={4}>
+                    <Heading size="sm" color="orange.700">
+                      Pilih Template
+                    </Heading>
+                  </CardHeader>
+                  <CardBody>
+                    <FormControl>
+                      <Select
+                        size="lg"
+                        bg="white"
+                        borderRadius="md"
+                        borderColor="gray.300"
+                        value={templateId || ""}
+                        onChange={(e) => setTemplateId(e.target.value)}
+                        _focus={{
+                          borderColor: "blue.500",
+                          boxShadow: "outline",
+                        }}
+                      >
+                        <option value="">Pilih Template</option>
+                        {renderTemplate()}
+                      </Select>
+                    </FormControl>
+                  </CardBody>
+                </Card>
+
+                {/* Undangan Download - Dipindahkan ke bawah foto */}
+                {detailPerjalanan?.undangan && (
+                  <Card width={"50%"} shadow="md" borderRadius="lg" mt={6}>
+                    <CardHeader bg="teal.50" py={4}>
+                      <Heading size="sm" color="teal.700">
+                        File Undangan
+                      </Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <VStack spacing={3}>
+                        <Button
+                          colorScheme="teal"
+                          size="md"
+                          w="100%"
+                          onClick={onUndanganOpen}
+                          leftIcon={<Box as="span">👁️</Box>}
+                        >
+                          Lihat Undangan
+                        </Button>
+                        <Button
+                          variant="outline"
+                          colorScheme="teal"
+                          size="md"
+                          w="100%"
+                          onClick={() =>
+                            handleDownload(detailPerjalanan?.undangan)
+                          }
+                          leftIcon={<Box as="span">📥</Box>}
+                        >
+                          Download Undangan
+                        </Button>
+                      </VStack>
+                    </CardBody>
+                  </Card>
+                )}
+              </Flex>
             </GridItem>
 
             {/* Right Column - Information */}
@@ -652,58 +858,6 @@ function RampungAdmin(props) {
                     </VStack>
                   </CardBody>
                 </Card>
-
-                {/* Template Selection */}
-                <Card shadow="md" borderRadius="lg">
-                  <CardHeader bg="orange.50" py={4}>
-                    <Heading size="sm" color="orange.700">
-                      Pilih Template
-                    </Heading>
-                  </CardHeader>
-                  <CardBody>
-                    <FormControl>
-                      <Select
-                        size="lg"
-                        bg="white"
-                        borderRadius="md"
-                        borderColor="gray.300"
-                        value={templateId || ""}
-                        onChange={(e) => setTemplateId(e.target.value)}
-                        _focus={{
-                          borderColor: "blue.500",
-                          boxShadow: "outline",
-                        }}
-                      >
-                        <option value="">Pilih Template</option>
-                        {renderTemplate()}
-                      </Select>
-                    </FormControl>
-                  </CardBody>
-                </Card>
-
-                {/* Undangan Download */}
-                {detailPerjalanan?.undangan && (
-                  <Card shadow="md" borderRadius="lg">
-                    <CardHeader bg="teal.50" py={4}>
-                      <Heading size="sm" color="teal.700">
-                        File Undangan
-                      </Heading>
-                    </CardHeader>
-                    <CardBody>
-                      <Button
-                        colorScheme="teal"
-                        size="md"
-                        w="100%"
-                        onClick={() =>
-                          handleDownload(detailPerjalanan?.undangan)
-                        }
-                        leftIcon={<Box as="span">📄</Box>}
-                      >
-                        Download Undangan
-                      </Button>
-                    </CardBody>
-                  </Card>
-                )}
               </VStack>
             </GridItem>
           </Grid>
@@ -992,7 +1146,7 @@ function RampungAdmin(props) {
           </Card>
         </Container>
 
-        {/* Image Modal - Simplified Version */}
+        {/* Image Modal - Untuk bukti di tabel */}
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
           <ModalContent maxW="90vw" maxH="90vh">
@@ -1017,6 +1171,250 @@ function RampungAdmin(props) {
             </ModalFooter>
           </ModalContent>
         </Modal>
+
+        {/* Gallery Modal untuk melihat semua foto perjalanan */}
+        {detailPerjalanan?.fotoPerjalanans?.length > 0 && (
+          <Modal
+            isOpen={isGalleryOpen}
+            onClose={onGalleryClose}
+            size="full"
+            isCentered
+          >
+            <ModalOverlay bg="blackAlpha.900" backdropFilter="blur(4px)" />
+            <ModalContent bg="blackAlpha.950" borderRadius={0} m={0} h="100vh">
+              <ModalHeader
+                color="white"
+                borderBottom="1px solid"
+                borderColor="whiteAlpha.200"
+                py={4}
+              >
+                <HStack>
+                  <BsImage />
+                  <Text>Foto Bukti Kegiatan</Text>
+                  <Badge colorScheme="blue" ml={2}>
+                    {detailPerjalanan.fotoPerjalanans.length} Foto
+                  </Badge>
+                </HStack>
+              </ModalHeader>
+              <ModalCloseButton color="white" size="lg" />
+              <ModalBody pb={6} pt={4}>
+                <Flex direction="column" align="center" h="calc(100vh - 180px)">
+                  {/* Foto utama yang dipilih */}
+                  <Box
+                    flex="1"
+                    w="100%"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    position="relative"
+                  >
+                    <Image
+                      src={
+                        import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                        detailPerjalanan.fotoPerjalanans[selectedImageIndex]
+                          ?.foto
+                      }
+                      alt={`Foto ${selectedImageIndex + 1}`}
+                      maxH="75vh"
+                      maxW="100%"
+                      objectFit="contain"
+                      borderRadius="lg"
+                      shadow="2xl"
+                    />
+                    {/* Navigasi dengan icon di kiri kanan foto */}
+                    {detailPerjalanan.fotoPerjalanans.length > 1 && (
+                      <>
+                        <IconButton
+                          aria-label="Foto sebelumnya"
+                          icon={<BsChevronLeft />}
+                          position="absolute"
+                          left="20px"
+                          size="lg"
+                          colorScheme="blue"
+                          borderRadius="full"
+                          onClick={() =>
+                            setSelectedImageIndex(
+                              selectedImageIndex > 0
+                                ? selectedImageIndex - 1
+                                : detailPerjalanan.fotoPerjalanans.length - 1
+                            )
+                          }
+                          shadow="lg"
+                        />
+                        <IconButton
+                          aria-label="Foto selanjutnya"
+                          icon={<BsChevronRight />}
+                          position="absolute"
+                          right="20px"
+                          size="lg"
+                          colorScheme="blue"
+                          borderRadius="full"
+                          onClick={() =>
+                            setSelectedImageIndex(
+                              selectedImageIndex <
+                                detailPerjalanan.fotoPerjalanans.length - 1
+                                ? selectedImageIndex + 1
+                                : 0
+                            )
+                          }
+                          shadow="lg"
+                        />
+                      </>
+                    )}
+                  </Box>
+
+                  {/* Counter dan navigasi */}
+                  <Flex justify="center" align="center" w="100%" mt={4} gap={4}>
+                    <Text
+                      color="white"
+                      fontWeight="semibold"
+                      fontSize="lg"
+                      bg="blackAlpha.500"
+                      px={4}
+                      py={2}
+                      borderRadius="full"
+                    >
+                      {selectedImageIndex + 1} /{" "}
+                      {detailPerjalanan.fotoPerjalanans.length}
+                    </Text>
+                  </Flex>
+
+                  {/* Thumbnail grid di bawah */}
+                  {detailPerjalanan.fotoPerjalanans.length > 1 && (
+                    <Box
+                      mt={4}
+                      w="100%"
+                      maxH="140px"
+                      overflowX="auto"
+                      overflowY="hidden"
+                      css={{
+                        "&::-webkit-scrollbar": {
+                          height: "8px",
+                        },
+                        "&::-webkit-scrollbar-track": {
+                          background: "rgba(255,255,255,0.1)",
+                          borderRadius: "4px",
+                        },
+                        "&::-webkit-scrollbar-thumb": {
+                          background: "rgba(255,255,255,0.3)",
+                          borderRadius: "4px",
+                        },
+                      }}
+                    >
+                      <HStack spacing={3} align="flex-start">
+                        {detailPerjalanan.fotoPerjalanans.map((foto, index) => (
+                          <Box
+                            key={foto.id}
+                            cursor="pointer"
+                            border={
+                              selectedImageIndex === index
+                                ? "3px solid"
+                                : "2px solid"
+                            }
+                            borderColor={
+                              selectedImageIndex === index
+                                ? "blue.400"
+                                : "whiteAlpha.300"
+                            }
+                            borderRadius="lg"
+                            overflow="hidden"
+                            onClick={() => setSelectedImageIndex(index)}
+                            _hover={{
+                              borderColor: "blue.300",
+                              transform: "scale(1.05)",
+                            }}
+                            transition="all 0.2s"
+                            flexShrink={0}
+                            shadow={selectedImageIndex === index ? "lg" : "md"}
+                          >
+                            <Image
+                              src={
+                                import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                                foto.foto
+                              }
+                              alt={`Thumbnail ${index + 1}`}
+                              width="120px"
+                              height="120px"
+                              objectFit="cover"
+                            />
+                          </Box>
+                        ))}
+                      </HStack>
+                    </Box>
+                  )}
+                </Flex>
+              </ModalBody>
+            </ModalContent>
+          </Modal>
+        )}
+
+        {/* Modal Preview Undangan PDF */}
+        {detailPerjalanan?.undangan && (
+          <Modal
+            isOpen={isUndanganOpen}
+            onClose={onUndanganClose}
+            size="6xl"
+            isCentered
+          >
+            <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+            <ModalContent maxW="90vw" h="90vh" borderRadius="xl">
+              <ModalHeader
+                bg="teal.50"
+                borderTopRadius="xl"
+                py={4}
+                borderBottom="1px solid"
+                borderColor="gray.200"
+              >
+                <HStack>
+                  <Box as="span">📄</Box>
+                  <Text>Preview Undangan</Text>
+                </HStack>
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody p={0} position="relative">
+                <Box
+                  w="100%"
+                  h="calc(90vh - 80px)"
+                  position="relative"
+                  bg="gray.100"
+                >
+                  <iframe
+                    src={
+                      import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                      detailPerjalanan.undangan +
+                      "#toolbar=0"
+                    }
+                    width="100%"
+                    height="100%"
+                    style={{
+                      border: "none",
+                      borderRadius: "0 0 12px 12px",
+                    }}
+                    title="Preview Undangan PDF"
+                  />
+                </Box>
+              </ModalBody>
+              <ModalFooter
+                borderTop="1px solid"
+                borderColor="gray.200"
+                bg="gray.50"
+              >
+                <HStack spacing={3}>
+                  <Button variant="outline" onClick={onUndanganClose}>
+                    Tutup
+                  </Button>
+                  <Button
+                    colorScheme="teal"
+                    onClick={() => handleDownload(detailPerjalanan?.undangan)}
+                    leftIcon={<Box as="span">📥</Box>}
+                  >
+                    Download PDF
+                  </Button>
+                </HStack>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+        )}
 
         {/* Debug Info */}
         {process.env.NODE_ENV === "development" && (
