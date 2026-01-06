@@ -34,6 +34,9 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaClock,
+  FaBuilding,
+  FaTag,
+  FaUser,
 } from "react-icons/fa";
 
 function DaftarCapaian() {
@@ -79,10 +82,19 @@ function DaftarCapaian() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/capaian/get/all-capaian/${user[0]?.unitKerja_profile?.id}`
       );
-      setDataCapaian(res.data.result || []);
-      console.log(res.data.result);
+      // Pastikan data selalu berupa array
+      const data = res.data;
+      if (Array.isArray(data)) {
+        setDataCapaian(data);
+      } else if (data && Array.isArray(data.result)) {
+        setDataCapaian(data.result);
+      } else {
+        setDataCapaian([]);
+      }
+      console.log(res.data);
     } catch (err) {
       console.error(err);
+      setDataCapaian([]); // Set ke array kosong jika error
     }
   }
 
@@ -152,7 +164,7 @@ function DaftarCapaian() {
           >
             Daftar Capaian
           </Heading>
-          {dataCapaian?.length === 0 ? (
+          {!Array.isArray(dataCapaian) || dataCapaian.length === 0 ? (
             <Box
               bg={colorMode === "dark" ? "gray.800" : "white"}
               borderRadius="xl"
@@ -173,9 +185,19 @@ function DaftarCapaian() {
                       (a, b) => (a?.bulan || 0) - (b?.bulan || 0)
                     )
                   : [];
-                const tahunAnggaran = item?.tahunAnggarans?.[0]?.tahun;
-                const jenisAnggaran =
-                  item?.tahunAnggarans?.[0]?.jenisAnggaran?.jenis;
+
+                // Ambil tahun anggaran dengan prioritas: perubahan > murni
+                const anggaranMurni = item?.tahunAnggarans?.find(
+                  (ta) => ta.jenisAnggaranId === 1
+                );
+                const anggaranPerubahan = item?.tahunAnggarans?.find(
+                  (ta) => ta.jenisAnggaranId === 2
+                );
+                const tahunAnggaranAktif = anggaranPerubahan || anggaranMurni;
+                const tahunAnggaran = tahunAnggaranAktif?.tahun;
+                const jenisAnggaran = tahunAnggaranAktif?.jenisAnggaran?.jenis;
+                const anggaran = tahunAnggaranAktif?.anggaran;
+
                 const hasPengajuan = capaians.some(
                   (c) => (c?.status || "").toLowerCase() === "pengajuan"
                 );
@@ -203,43 +225,122 @@ function DaftarCapaian() {
                         py={4}
                         px={6}
                       >
-                        <Flex
-                          w="100%"
-                          alignItems="center"
-                          gap={4}
-                          textAlign="left"
-                        >
-                          <Heading
-                            as="h3"
-                            size="md"
-                            color={colorMode === "dark" ? "white" : "gray.800"}
-                            fontWeight="semibold"
-                          >
-                            {indikatorNama}
-                          </Heading>
-                          {hasPengajuan && (
-                            <Badge
-                              colorScheme="orange"
-                              variant="solid"
-                              borderRadius="full"
-                              px={3}
-                              py={1}
-                            >
-                              Pengajuan
-                            </Badge>
-                          )}
-                          <Spacer />
-                          <Text
-                            fontSize="sm"
-                            color={
-                              colorMode === "dark" ? "gray.400" : "gray.600"
-                            }
-                            fontWeight="medium"
-                          >
-                            {tahunAnggaran ? `TA ${tahunAnggaran}` : ""}
-                            {jenisAnggaran ? ` • ${jenisAnggaran}` : ""}
-                          </Text>
-                        </Flex>
+                        <Box flex="1" textAlign="left">
+                          <VStack align="start" spacing={2}>
+                            <Flex w="100%" alignItems="center" gap={4}>
+                              <Heading
+                                as="h3"
+                                size="md"
+                                color={
+                                  colorMode === "dark" ? "white" : "gray.800"
+                                }
+                                fontWeight="semibold"
+                              >
+                                {indikatorNama}
+                              </Heading>
+                              {hasPengajuan && (
+                                <Badge
+                                  colorScheme="orange"
+                                  variant="solid"
+                                  borderRadius="full"
+                                  px={3}
+                                  py={1}
+                                >
+                                  Pengajuan
+                                </Badge>
+                              )}
+                              <Spacer />
+                              <VStack align="end" spacing={1}>
+                                <Text
+                                  fontSize="sm"
+                                  color={
+                                    colorMode === "dark"
+                                      ? "gray.400"
+                                      : "gray.600"
+                                  }
+                                  fontWeight="medium"
+                                >
+                                  {tahunAnggaran ? `TA ${tahunAnggaran}` : ""}
+                                  {jenisAnggaran ? ` • ${jenisAnggaran}` : ""}
+                                </Text>
+                                {anggaran && (
+                                  <Text
+                                    fontSize="xs"
+                                    color={
+                                      colorMode === "dark"
+                                        ? "gray.500"
+                                        : "gray.700"
+                                    }
+                                    fontWeight="semibold"
+                                  >
+                                    {formatRupiah(anggaran)}
+                                  </Text>
+                                )}
+                              </VStack>
+                            </Flex>
+                            {/* Info Unit Kerja, Satuan, dan Pegawai */}
+                            {item?.indikator && (
+                              <HStack
+                                spacing={4}
+                                flexWrap="wrap"
+                                fontSize="xs"
+                                color={
+                                  colorMode === "dark" ? "gray.400" : "gray.500"
+                                }
+                              >
+                                {/* Satuan Indikator */}
+                                {item.indikator.satuanIndikator && (
+                                  <HStack spacing={1}>
+                                    <Icon
+                                      as={FaTag}
+                                      color="blue.400"
+                                      boxSize={3}
+                                    />
+                                    <Text>
+                                      <Text as="span" fontWeight="semibold">
+                                        Satuan:
+                                      </Text>{" "}
+                                      {item.indikator.satuanIndikator.satuan}
+                                    </Text>
+                                  </HStack>
+                                )}
+                                {/* Unit Kerja */}
+                                {item.indikator.daftarUnitKerja && (
+                                  <HStack spacing={1}>
+                                    <Icon
+                                      as={FaBuilding}
+                                      color="green.400"
+                                      boxSize={3}
+                                    />
+                                    <Text>
+                                      <Text as="span" fontWeight="semibold">
+                                        Unit:
+                                      </Text>{" "}
+                                      {item.indikator.daftarUnitKerja.unitKerja}
+                                    </Text>
+                                  </HStack>
+                                )}
+                                {/* Pegawai */}
+                                {item.indikator.pegawai && (
+                                  <HStack spacing={1}>
+                                    <Icon
+                                      as={FaUser}
+                                      color="purple.400"
+                                      boxSize={3}
+                                    />
+                                    <Text>
+                                      <Text as="span" fontWeight="semibold">
+                                        PIC:
+                                      </Text>{" "}
+                                      {item.indikator.pegawai.nama} (
+                                      {item.indikator.pegawai.nip})
+                                    </Text>
+                                  </HStack>
+                                )}
+                              </HStack>
+                            )}
+                          </VStack>
+                        </Box>
                         <AccordionIcon />
                       </AccordionButton>
                     </h2>
@@ -412,7 +513,9 @@ function DaftarCapaian() {
                                         }
                                         fontWeight="semibold"
                                       >
-                                        {c?.nilai ?? "-"}
+                                        {c?.nilai ?? "-"}{" "}
+                                        {item?.indikator?.satuanIndikator
+                                          ?.satuan || ""}
                                       </Td>
                                       <Td
                                         isNumeric
@@ -655,7 +758,9 @@ function DaftarCapaian() {
                                           : "gray.800"
                                       }
                                     >
-                                      {tw?.nilai ?? "-"}
+                                      {tw?.nilai ?? "-"}{" "}
+                                      {item?.indikator?.satuanIndikator
+                                        ?.satuan || ""}
                                     </Text>
                                   </Box>
                                 ))}

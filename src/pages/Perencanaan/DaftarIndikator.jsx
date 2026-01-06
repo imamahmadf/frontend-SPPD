@@ -76,6 +76,18 @@ function DaftarIndikator() {
     onOpen: onApOpen,
     onClose: onApClose,
   } = useDisclosure();
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
+
+  // state untuk edit target
+  const [selectedTarget, setSelectedTarget] = useState(null);
+  const [editTargets, setEditTargets] = useState({});
+  const [editAnggaran, setEditAnggaran] = useState(null);
+  const [editTahun, setEditTahun] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   async function fetchIndikator() {
     try {
@@ -86,9 +98,23 @@ function DaftarIndikator() {
           filterTahun || ""
         }&jenisAnggaranId=${filterJenisAnggaranId || ""}`
       );
-      setDataIndikator(res.data.result || []);
-      setDataIndikatorProgram(res.data.resultProgram || []);
-      setDataIndikatorKegiatan(res.data.resultKegiatan || []);
+
+      const allIndikators = res.data.result || [];
+
+      // Memisahkan indikator berdasarkan tipenya
+      const indikatorProgram = allIndikators.filter(
+        (ind) => ind.programId && !ind.kegiatanId && !ind.subKegPerId
+      );
+      const indikatorKegiatan = allIndikators.filter(
+        (ind) => ind.kegiatanId && !ind.subKegPerId && !ind.programId
+      );
+      const indikatorSubKegiatan = allIndikators.filter(
+        (ind) => ind.subKegPerId && !ind.kegiatanId && !ind.programId
+      );
+
+      setDataIndikator(indikatorSubKegiatan);
+      setDataIndikatorProgram(indikatorProgram);
+      setDataIndikatorKegiatan(indikatorKegiatan);
       setDataJenisAnggaran(res.data.resultJenisAnggaran || []);
       setDataNamaTarget(res.data.resultNamaTarget || []);
       console.log(res.data);
@@ -104,6 +130,7 @@ function DaftarIndikator() {
   const handleOpenModal = (indikator, type) => {
     setSelectedIndikator(indikator);
     setSelectedIndikatorType(type);
+    setIsEditMode(false);
 
     // Inisialisasi newTargets dengan struktur kosong untuk setiap namaTarget
     const initialTargets = {};
@@ -113,6 +140,41 @@ function DaftarIndikator() {
     setNewTargets(initialTargets);
 
     onOpen();
+  };
+
+  const handleOpenEditModal = (target, indikator, type) => {
+    setSelectedTarget(target);
+    setSelectedIndikator(indikator);
+    setSelectedIndikatorType(type);
+    setIsEditMode(true);
+
+    // Inisialisasi editTargets dengan nilai dari target triwulan yang ada
+    const initialTargets = {};
+    if (target.targetTriwulans && target.targetTriwulans.length > 0) {
+      target.targetTriwulans.forEach((triwulan) => {
+        initialTargets[triwulan.namaTargetId] =
+          triwulan.nilai?.toString() || "";
+      });
+    }
+    // Pastikan semua namaTarget ada di initialTargets
+    dataNamatarget.forEach((namaTarget) => {
+      if (!initialTargets[namaTarget.id]) {
+        initialTargets[namaTarget.id] = "";
+      }
+    });
+    setEditTargets(initialTargets);
+
+    // Set anggaran dan tahun dari tahun anggaran murni (prioritas) atau yang pertama
+    if (target.tahunAnggarans && target.tahunAnggarans.length > 0) {
+      const anggaranMurni = target.tahunAnggarans.find(
+        (ta) => ta.jenisAnggaranId === 1
+      );
+      const tahunAnggaran = anggaranMurni || target.tahunAnggarans[0];
+      setEditAnggaran(tahunAnggaran.anggaran?.toString() || "");
+      setEditTahun(tahunAnggaran.tahun?.toString() || "");
+    }
+
+    onEditOpen();
   };
 
   const handleAddTarget = async () => {
@@ -182,6 +244,75 @@ function DaftarIndikator() {
     }
   };
 
+  const handleUpdateTarget = async () => {
+    if (!selectedTarget) return;
+
+    // Validasi apakah semua target telah diisi
+    const targetValues = Object.values(editTargets);
+    const hasEmptyTarget = targetValues.some((value) => !value || value === "");
+
+    if (hasEmptyTarget || !editAnggaran || !editTahun) {
+      toast({
+        title: "Peringatan",
+        description: "Semua field wajib diisi",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      // Membuat array of object untuk target triwulan
+      const targetData = dataNamatarget.map((namaTarget) => {
+        const targetValue = editTargets[namaTarget.id];
+        return {
+          namaTargetId: namaTarget.id,
+          nilai: parseInt(targetValue),
+        };
+      });
+
+      // Update target
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perencanaan/update/target`,
+        {
+          targetId: selectedTarget.id,
+          targets: targetData,
+          anggaran: parseInt(editAnggaran),
+          tahun: parseInt(editTahun),
+        }
+      );
+
+      toast({
+        title: "Berhasil",
+        description: "Target berhasil diperbarui",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      onEditClose();
+      setSelectedTarget(null);
+      setEditTargets({});
+      setEditAnggaran(null);
+      setEditTahun(null);
+      setIsEditMode(false);
+
+      fetchIndikator();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Gagal memperbarui target",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   const handleTambahAnggaranPerubahan = async (targetId) => {
     try {
       await axios.post(
@@ -216,11 +347,28 @@ function DaftarIndikator() {
   const [apAmount, setApAmount] = useState(0);
   const [apYear, setApYear] = useState(null);
 
+  // state untuk edit anggaran perubahan
+  const {
+    isOpen: isEditApOpen,
+    onOpen: onEditApOpen,
+    onClose: onEditApClose,
+  } = useDisclosure();
+  const [selectedTahunAnggaran, setSelectedTahunAnggaran] = useState(null);
+  const [editApAmount, setEditApAmount] = useState(0);
+  const [editApYear, setEditApYear] = useState(null);
+
   const openApModal = (targetId, tahun) => {
     setApTargetId(targetId);
     setApAmount(0);
     setApYear(tahun || filterTahun || new Date().getFullYear());
     onApOpen();
+  };
+
+  const openEditApModal = (tahunAnggaran) => {
+    setSelectedTahunAnggaran(tahunAnggaran);
+    setEditApAmount(tahunAnggaran.anggaran?.toString() || "");
+    setEditApYear(tahunAnggaran.tahun?.toString() || "");
+    onEditApOpen();
   };
 
   const submitAnggaranPerubahan = async () => {
@@ -270,6 +418,59 @@ function DaftarIndikator() {
     }
   };
 
+  const handleUpdateAnggaranPerubahan = async () => {
+    if (
+      !selectedTahunAnggaran ||
+      !editApAmount ||
+      editApAmount <= 0 ||
+      !editApYear
+    ) {
+      toast({
+        title: "Peringatan",
+        description: "Isi nominal anggaran dengan benar",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/perencanaan/update/anggaran-perubahan`,
+        {
+          tahunAnggaranId: selectedTahunAnggaran.id,
+          anggaran: parseInt(editApAmount),
+          tahun: parseInt(editApYear),
+        }
+      );
+      toast({
+        title: "Berhasil",
+        description: "Anggaran perubahan berhasil diperbarui",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onEditApClose();
+      setSelectedTahunAnggaran(null);
+      setEditApAmount(0);
+      setEditApYear(null);
+      fetchIndikator();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description:
+          err.response?.data?.message || "Gagal memperbarui anggaran perubahan",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   return (
     <LayoutPerencanaan>
       <Box
@@ -286,10 +487,10 @@ function DaftarIndikator() {
               mb={2}
               color={colorMode === "dark" ? "white" : "gray.800"}
             >
-              📊 Daftar Indikator
+              📊 Target Indikator
             </Heading>
             <Text color="gray.500" fontSize="md">
-              Kelola indikator kinerja untuk sub kegiatan, program, dan kegiatan
+              Kelola target, anggaran pada Indikator
             </Text>
           </Box>
 
@@ -448,11 +649,105 @@ function DaftarIndikator() {
                           <Text fontWeight="bold" fontSize="lg" mb={2}>
                             {indikator.indikator}
                           </Text>
-                          <HStack>
+                          <HStack mb={2}>
                             <Text fontSize="sm" color="gray.500">
                               {indikator.program?.nama}
                             </Text>
                           </HStack>
+                          {/* Tahun Anggaran, Anggaran, dan Jenis Anggaran */}
+                          {indikator.targets &&
+                            indikator.targets.length > 0 &&
+                            (() => {
+                              // Mengumpulkan semua tahun anggaran dari semua targets
+                              const allTahunAnggarans = [];
+                              indikator.targets.forEach((t) => {
+                                if (
+                                  t.tahunAnggarans &&
+                                  t.tahunAnggarans.length > 0
+                                ) {
+                                  allTahunAnggarans.push(...t.tahunAnggarans);
+                                }
+                              });
+
+                              if (allTahunAnggarans.length > 0) {
+                                // Mengelompokkan berdasarkan tahun
+                                const tahunMap = {};
+                                allTahunAnggarans.forEach((th) => {
+                                  if (!tahunMap[th.tahun]) {
+                                    tahunMap[th.tahun] = [];
+                                  }
+                                  tahunMap[th.tahun].push(th);
+                                });
+
+                                return (
+                                  <VStack align="start" spacing={2} mt={2}>
+                                    {Object.keys(tahunMap)
+                                      .sort((a, b) => b - a)
+                                      .map((tahun) => {
+                                        const anggarans = tahunMap[tahun];
+                                        const anggaranMurni = anggarans.find(
+                                          (a) => a.jenisAnggaranId === 1
+                                        );
+                                        const anggaranPerubahan =
+                                          anggarans.find(
+                                            (a) => a.jenisAnggaranId === 2
+                                          );
+                                        const anggaranAktif =
+                                          anggaranPerubahan || anggaranMurni;
+
+                                        return (
+                                          <HStack
+                                            key={tahun}
+                                            spacing={3}
+                                            flexWrap="wrap"
+                                            fontSize="xs"
+                                          >
+                                            <HStack spacing={1}>
+                                              <Icon
+                                                as={FiCalendar}
+                                                color="purple.500"
+                                                boxSize={3}
+                                              />
+                                              <Text fontWeight="semibold">
+                                                {tahun}:
+                                              </Text>
+                                            </HStack>
+                                            <HStack spacing={1}>
+                                              <Icon
+                                                as={FiDollarSign}
+                                                color="green.500"
+                                                boxSize={3}
+                                              />
+                                              <Text>
+                                                Rp{" "}
+                                                {(
+                                                  anggaranAktif?.anggaran || 0
+                                                ).toLocaleString()}
+                                              </Text>
+                                            </HStack>
+                                            {anggaranAktif && (
+                                              <Badge
+                                                colorScheme="purple"
+                                                variant="subtle"
+                                                fontSize="xs"
+                                              >
+                                                {
+                                                  dataJenisAnggaran.find(
+                                                    (ja) =>
+                                                      ja.id ===
+                                                      anggaranAktif.jenisAnggaranId
+                                                  )?.jenis
+                                                }
+                                              </Badge>
+                                            )}
+                                          </HStack>
+                                        );
+                                      })}
+                                  </VStack>
+                                );
+                              }
+                              return null;
+                            })()}
                         </Box>
                         <AccordionIcon />
                       </AccordionButton>
@@ -567,6 +862,87 @@ function DaftarIndikator() {
                                                   }
                                                 </Badge>
                                               </Text>
+                                              <Flex
+                                                justify="end"
+                                                w="100%"
+                                                mt={2}
+                                                gap={2}
+                                              >
+                                                {(() => {
+                                                  // Cek apakah sudah ada anggaran murni dan anggaran perubahan untuk tahun yang sama
+                                                  const hasAnggaranMurni =
+                                                    t.tahunAnggarans?.some(
+                                                      (ta) =>
+                                                        ta.tahun === th.tahun &&
+                                                        ta.jenisAnggaranId === 1
+                                                    );
+                                                  const anggaranPerubahan =
+                                                    t.tahunAnggarans?.find(
+                                                      (ta) =>
+                                                        ta.tahun === th.tahun &&
+                                                        ta.jenisAnggaranId === 2
+                                                    );
+                                                  const hasAnggaranPerubahan =
+                                                    !!anggaranPerubahan;
+                                                  const canAddAnggaranPerubahan =
+                                                    hasAnggaranMurni &&
+                                                    !hasAnggaranPerubahan;
+
+                                                  // Jika ada anggaran perubahan, tampilkan tombol edit
+                                                  if (
+                                                    hasAnggaranPerubahan &&
+                                                    anggaranPerubahan
+                                                  ) {
+                                                    return (
+                                                      <Button
+                                                        size="xs"
+                                                        colorScheme="orange"
+                                                        variant="solid"
+                                                        leftIcon={
+                                                          <Icon as={FiEdit} />
+                                                        }
+                                                        onClick={() => {
+                                                          openEditApModal(
+                                                            anggaranPerubahan
+                                                          );
+                                                        }}
+                                                      >
+                                                        Edit Anggaran Perubahan
+                                                      </Button>
+                                                    );
+                                                  }
+
+                                                  // Jika belum ada anggaran perubahan, tampilkan tombol tambah
+                                                  if (canAddAnggaranPerubahan) {
+                                                    return (
+                                                      <Button
+                                                        id={String(t.id)}
+                                                        size="xs"
+                                                        colorScheme="teal"
+                                                        variant="outline"
+                                                        leftIcon={
+                                                          <Icon as={FiEdit} />
+                                                        }
+                                                        onClick={(e) => {
+                                                          const id = parseInt(
+                                                            e.currentTarget.id
+                                                          );
+                                                          openApModal(
+                                                            id,
+                                                            th.tahun
+                                                          );
+                                                        }}
+                                                      >
+                                                        Tambah Anggaran
+                                                        Perubahan (Tahun{" "}
+                                                        {th.tahun})
+                                                      </Button>
+                                                    );
+                                                  }
+
+                                                  return null;
+                                                })()}
+                                              </Flex>
                                             </VStack>
                                           </Box>
                                         ))}
@@ -627,7 +1003,9 @@ function DaftarIndikator() {
                                                     px={3}
                                                     py={1}
                                                   >
-                                                    {triwulan.nilai}
+                                                    {triwulan.nilai}{" "}
+                                                    {indikator.satuanIndikator
+                                                      ?.satuan || ""}
                                                   </Badge>
                                                 </HStack>
                                               )
@@ -645,6 +1023,13 @@ function DaftarIndikator() {
                                     colorScheme="teal"
                                     variant="outline"
                                     leftIcon={<Icon as={FiEdit} />}
+                                    onClick={() =>
+                                      handleOpenEditModal(
+                                        t,
+                                        indikator,
+                                        "program"
+                                      )
+                                    }
                                   >
                                     Edit
                                   </Button>
@@ -806,10 +1191,104 @@ function DaftarIndikator() {
                             {indikator.indikator}
                           </Text>
                           {indikator.kegiatan?.nama && (
-                            <Text fontSize="sm" color="gray.500">
+                            <Text fontSize="sm" color="gray.500" mb={2}>
                               {indikator.kegiatan.nama}
                             </Text>
                           )}
+                          {/* Tahun Anggaran, Anggaran, dan Jenis Anggaran */}
+                          {indikator.targets &&
+                            indikator.targets.length > 0 &&
+                            (() => {
+                              // Mengumpulkan semua tahun anggaran dari semua targets
+                              const allTahunAnggarans = [];
+                              indikator.targets.forEach((t) => {
+                                if (
+                                  t.tahunAnggarans &&
+                                  t.tahunAnggarans.length > 0
+                                ) {
+                                  allTahunAnggarans.push(...t.tahunAnggarans);
+                                }
+                              });
+
+                              if (allTahunAnggarans.length > 0) {
+                                // Mengelompokkan berdasarkan tahun
+                                const tahunMap = {};
+                                allTahunAnggarans.forEach((th) => {
+                                  if (!tahunMap[th.tahun]) {
+                                    tahunMap[th.tahun] = [];
+                                  }
+                                  tahunMap[th.tahun].push(th);
+                                });
+
+                                return (
+                                  <VStack align="start" spacing={2} mt={2}>
+                                    {Object.keys(tahunMap)
+                                      .sort((a, b) => b - a)
+                                      .map((tahun) => {
+                                        const anggarans = tahunMap[tahun];
+                                        const anggaranMurni = anggarans.find(
+                                          (a) => a.jenisAnggaranId === 1
+                                        );
+                                        const anggaranPerubahan =
+                                          anggarans.find(
+                                            (a) => a.jenisAnggaranId === 2
+                                          );
+                                        const anggaranAktif =
+                                          anggaranPerubahan || anggaranMurni;
+
+                                        return (
+                                          <HStack
+                                            key={tahun}
+                                            spacing={3}
+                                            flexWrap="wrap"
+                                            fontSize="xs"
+                                          >
+                                            <HStack spacing={1}>
+                                              <Icon
+                                                as={FiCalendar}
+                                                color="orange.500"
+                                                boxSize={3}
+                                              />
+                                              <Text fontWeight="semibold">
+                                                {tahun}:
+                                              </Text>
+                                            </HStack>
+                                            <HStack spacing={1}>
+                                              <Icon
+                                                as={FiDollarSign}
+                                                color="green.500"
+                                                boxSize={3}
+                                              />
+                                              <Text>
+                                                Rp{" "}
+                                                {(
+                                                  anggaranAktif?.anggaran || 0
+                                                ).toLocaleString()}
+                                              </Text>
+                                            </HStack>
+                                            {anggaranAktif && (
+                                              <Badge
+                                                colorScheme="orange"
+                                                variant="subtle"
+                                                fontSize="xs"
+                                              >
+                                                {
+                                                  dataJenisAnggaran.find(
+                                                    (ja) =>
+                                                      ja.id ===
+                                                      anggaranAktif.jenisAnggaranId
+                                                  )?.jenis
+                                                }
+                                              </Badge>
+                                            )}
+                                          </HStack>
+                                        );
+                                      })}
+                                  </VStack>
+                                );
+                              }
+                              return null;
+                            })()}
                         </Box>
                         <AccordionIcon />
                       </AccordionButton>
@@ -924,6 +1403,87 @@ function DaftarIndikator() {
                                                   }
                                                 </Badge>
                                               </Text>
+                                              <Flex
+                                                justify="end"
+                                                w="100%"
+                                                mt={2}
+                                                gap={2}
+                                              >
+                                                {(() => {
+                                                  // Cek apakah sudah ada anggaran murni dan anggaran perubahan untuk tahun yang sama
+                                                  const hasAnggaranMurni =
+                                                    t.tahunAnggarans?.some(
+                                                      (ta) =>
+                                                        ta.tahun === th.tahun &&
+                                                        ta.jenisAnggaranId === 1
+                                                    );
+                                                  const anggaranPerubahan =
+                                                    t.tahunAnggarans?.find(
+                                                      (ta) =>
+                                                        ta.tahun === th.tahun &&
+                                                        ta.jenisAnggaranId === 2
+                                                    );
+                                                  const hasAnggaranPerubahan =
+                                                    !!anggaranPerubahan;
+                                                  const canAddAnggaranPerubahan =
+                                                    hasAnggaranMurni &&
+                                                    !hasAnggaranPerubahan;
+
+                                                  // Jika ada anggaran perubahan, tampilkan tombol edit
+                                                  if (
+                                                    hasAnggaranPerubahan &&
+                                                    anggaranPerubahan
+                                                  ) {
+                                                    return (
+                                                      <Button
+                                                        size="xs"
+                                                        colorScheme="orange"
+                                                        variant="solid"
+                                                        leftIcon={
+                                                          <Icon as={FiEdit} />
+                                                        }
+                                                        onClick={() => {
+                                                          openEditApModal(
+                                                            anggaranPerubahan
+                                                          );
+                                                        }}
+                                                      >
+                                                        Edit Anggaran Perubahan
+                                                      </Button>
+                                                    );
+                                                  }
+
+                                                  // Jika belum ada anggaran perubahan, tampilkan tombol tambah
+                                                  if (canAddAnggaranPerubahan) {
+                                                    return (
+                                                      <Button
+                                                        id={String(t.id)}
+                                                        size="xs"
+                                                        colorScheme="teal"
+                                                        variant="outline"
+                                                        leftIcon={
+                                                          <Icon as={FiEdit} />
+                                                        }
+                                                        onClick={(e) => {
+                                                          const id = parseInt(
+                                                            e.currentTarget.id
+                                                          );
+                                                          openApModal(
+                                                            id,
+                                                            th.tahun
+                                                          );
+                                                        }}
+                                                      >
+                                                        Tambah Anggaran
+                                                        Perubahan (Tahun{" "}
+                                                        {th.tahun})
+                                                      </Button>
+                                                    );
+                                                  }
+
+                                                  return null;
+                                                })()}
+                                              </Flex>
                                             </VStack>
                                           </Box>
                                         ))}
@@ -984,7 +1544,9 @@ function DaftarIndikator() {
                                                     px={3}
                                                     py={1}
                                                   >
-                                                    {triwulan.nilai}
+                                                    {triwulan.nilai}{" "}
+                                                    {indikator.satuanIndikator
+                                                      ?.satuan || ""}
                                                   </Badge>
                                                 </HStack>
                                               )
@@ -1002,6 +1564,13 @@ function DaftarIndikator() {
                                     colorScheme="teal"
                                     variant="outline"
                                     leftIcon={<Icon as={FiEdit} />}
+                                    onClick={() =>
+                                      handleOpenEditModal(
+                                        t,
+                                        indikator,
+                                        "kegiatan"
+                                      )
+                                    }
                                   >
                                     Edit
                                   </Button>
@@ -1162,9 +1731,103 @@ function DaftarIndikator() {
                           <Text fontWeight="bold" fontSize="lg" mb={2}>
                             {indikator.indikator}
                           </Text>
-                          <Text fontSize="sm" color="gray.500">
+                          <Text fontSize="sm" color="gray.500" mb={2}>
                             {indikator.subKegPer?.nama}
                           </Text>
+                          {/* Tahun Anggaran, Anggaran, dan Jenis Anggaran */}
+                          {indikator.targets &&
+                            indikator.targets.length > 0 &&
+                            (() => {
+                              // Mengumpulkan semua tahun anggaran dari semua targets
+                              const allTahunAnggarans = [];
+                              indikator.targets.forEach((t) => {
+                                if (
+                                  t.tahunAnggarans &&
+                                  t.tahunAnggarans.length > 0
+                                ) {
+                                  allTahunAnggarans.push(...t.tahunAnggarans);
+                                }
+                              });
+
+                              if (allTahunAnggarans.length > 0) {
+                                // Mengelompokkan berdasarkan tahun
+                                const tahunMap = {};
+                                allTahunAnggarans.forEach((th) => {
+                                  if (!tahunMap[th.tahun]) {
+                                    tahunMap[th.tahun] = [];
+                                  }
+                                  tahunMap[th.tahun].push(th);
+                                });
+
+                                return (
+                                  <VStack align="start" spacing={2} mt={2}>
+                                    {Object.keys(tahunMap)
+                                      .sort((a, b) => b - a)
+                                      .map((tahun) => {
+                                        const anggarans = tahunMap[tahun];
+                                        const anggaranMurni = anggarans.find(
+                                          (a) => a.jenisAnggaranId === 1
+                                        );
+                                        const anggaranPerubahan =
+                                          anggarans.find(
+                                            (a) => a.jenisAnggaranId === 2
+                                          );
+                                        const anggaranAktif =
+                                          anggaranPerubahan || anggaranMurni;
+
+                                        return (
+                                          <HStack
+                                            key={tahun}
+                                            spacing={3}
+                                            flexWrap="wrap"
+                                            fontSize="xs"
+                                          >
+                                            <HStack spacing={1}>
+                                              <Icon
+                                                as={FiCalendar}
+                                                color="blue.500"
+                                                boxSize={3}
+                                              />
+                                              <Text fontWeight="semibold">
+                                                {tahun}:
+                                              </Text>
+                                            </HStack>
+                                            <HStack spacing={1}>
+                                              <Icon
+                                                as={FiDollarSign}
+                                                color="green.500"
+                                                boxSize={3}
+                                              />
+                                              <Text>
+                                                Rp{" "}
+                                                {(
+                                                  anggaranAktif?.anggaran || 0
+                                                ).toLocaleString()}
+                                              </Text>
+                                            </HStack>
+                                            {anggaranAktif && (
+                                              <Badge
+                                                colorScheme="blue"
+                                                variant="subtle"
+                                                fontSize="xs"
+                                              >
+                                                {
+                                                  dataJenisAnggaran.find(
+                                                    (ja) =>
+                                                      ja.id ===
+                                                      anggaranAktif.jenisAnggaranId
+                                                  )?.jenis
+                                                }
+                                              </Badge>
+                                            )}
+                                          </HStack>
+                                        );
+                                      })}
+                                  </VStack>
+                                );
+                              }
+                              return null;
+                            })()}
                         </Box>
                         <AccordionIcon />
                       </AccordionButton>
@@ -1283,25 +1946,82 @@ function DaftarIndikator() {
                                                 justify="end"
                                                 w="100%"
                                                 mt={2}
+                                                gap={2}
                                               >
-                                                <Button
-                                                  id={String(t.id)}
-                                                  size="xs"
-                                                  colorScheme="teal"
-                                                  variant="outline"
-                                                  leftIcon={
-                                                    <Icon as={FiEdit} />
-                                                  }
-                                                  onClick={(e) => {
-                                                    const id = parseInt(
-                                                      e.currentTarget.id
+                                                {(() => {
+                                                  // Cek apakah sudah ada anggaran murni dan anggaran perubahan untuk tahun yang sama
+                                                  const hasAnggaranMurni =
+                                                    t.tahunAnggarans?.some(
+                                                      (ta) =>
+                                                        ta.tahun === th.tahun &&
+                                                        ta.jenisAnggaranId === 1
                                                     );
-                                                    openApModal(id, th.tahun);
-                                                  }}
-                                                >
-                                                  Tambah Anggaran Perubahan
-                                                  (Tahun {th.tahun})
-                                                </Button>
+                                                  const anggaranPerubahan =
+                                                    t.tahunAnggarans?.find(
+                                                      (ta) =>
+                                                        ta.tahun === th.tahun &&
+                                                        ta.jenisAnggaranId === 2
+                                                    );
+                                                  const hasAnggaranPerubahan =
+                                                    !!anggaranPerubahan;
+                                                  const canAddAnggaranPerubahan =
+                                                    hasAnggaranMurni &&
+                                                    !hasAnggaranPerubahan;
+
+                                                  // Jika ada anggaran perubahan, tampilkan tombol edit
+                                                  if (
+                                                    hasAnggaranPerubahan &&
+                                                    anggaranPerubahan
+                                                  ) {
+                                                    return (
+                                                      <Button
+                                                        size="xs"
+                                                        colorScheme="orange"
+                                                        variant="solid"
+                                                        leftIcon={
+                                                          <Icon as={FiEdit} />
+                                                        }
+                                                        onClick={() => {
+                                                          openEditApModal(
+                                                            anggaranPerubahan
+                                                          );
+                                                        }}
+                                                      >
+                                                        Edit Anggaran Perubahan
+                                                      </Button>
+                                                    );
+                                                  }
+
+                                                  // Jika belum ada anggaran perubahan, tampilkan tombol tambah
+                                                  if (canAddAnggaranPerubahan) {
+                                                    return (
+                                                      <Button
+                                                        id={String(t.id)}
+                                                        size="xs"
+                                                        colorScheme="teal"
+                                                        variant="outline"
+                                                        leftIcon={
+                                                          <Icon as={FiEdit} />
+                                                        }
+                                                        onClick={(e) => {
+                                                          const id = parseInt(
+                                                            e.currentTarget.id
+                                                          );
+                                                          openApModal(
+                                                            id,
+                                                            th.tahun
+                                                          );
+                                                        }}
+                                                      >
+                                                        Tambah Anggaran
+                                                        Perubahan (Tahun{" "}
+                                                        {th.tahun})
+                                                      </Button>
+                                                    );
+                                                  }
+
+                                                  return null;
+                                                })()}
                                               </Flex>
                                             </VStack>
                                           </Box>
@@ -1363,7 +2083,9 @@ function DaftarIndikator() {
                                                     px={3}
                                                     py={1}
                                                   >
-                                                    {triwulan.nilai}
+                                                    {triwulan.nilai}{" "}
+                                                    {indikator.satuanIndikator
+                                                      ?.satuan || ""}
                                                   </Badge>
                                                 </HStack>
                                               )
@@ -1381,6 +2103,13 @@ function DaftarIndikator() {
                                     colorScheme="teal"
                                     variant="outline"
                                     leftIcon={<Icon as={FiEdit} />}
+                                    onClick={() =>
+                                      handleOpenEditModal(
+                                        t,
+                                        indikator,
+                                        "subKegiatan"
+                                      )
+                                    }
                                   >
                                     Edit
                                   </Button>
@@ -1683,6 +2412,262 @@ function DaftarIndikator() {
               </Button>
               <Button colorScheme="green" onClick={submitAnggaranPerubahan}>
                 Simpan
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Edit Target */}
+      <Modal isOpen={isEditOpen} onClose={onEditClose} size="xl">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(10px)" />
+        <ModalContent borderRadius="xl" shadow="2xl">
+          <ModalHeader
+            bg={colorMode === "dark" ? "gray.800" : "teal.50"}
+            borderTopRadius="xl"
+            py={6}
+          >
+            <HStack>
+              <Icon as={FiEdit} color="teal.500" boxSize={6} />
+              <Heading
+                size="lg"
+                color={colorMode === "dark" ? "white" : "gray.800"}
+              >
+                Edit Target
+              </Heading>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody py={6}>
+            <VStack spacing={6} align="stretch">
+              {/* Info Indikator */}
+              <Card
+                bg={colorMode === "dark" ? "gray.800" : "teal.50"}
+                border="1px solid"
+                borderColor="teal.200"
+              >
+                <CardBody>
+                  <VStack align="start" spacing={3}>
+                    <HStack>
+                      <Icon as={FiTarget} color="teal.500" boxSize={5} />
+                      <Text fontWeight="semibold" fontSize="lg">
+                        {selectedIndikator ? selectedIndikator.indikator : ""}
+                      </Text>
+                    </HStack>
+                    <HStack>
+                      <Badge colorScheme="teal" variant="subtle">
+                        Satuan:{" "}
+                        {selectedIndikator && selectedIndikator.satuanIndikator
+                          ? selectedIndikator.satuanIndikator.satuan
+                          : "Tidak ada"}
+                      </Badge>
+                    </HStack>
+                  </VStack>
+                </CardBody>
+              </Card>
+
+              {/* Dynamic Target Fields berdasarkan dataNamaTarget */}
+              <VStack spacing={4} align="stretch">
+                <Heading
+                  size="md"
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                >
+                  Target yang akan diubah:
+                </Heading>
+                {dataNamatarget.map((namaTarget) => (
+                  <FormControl key={namaTarget.id}>
+                    <FormLabel fontWeight="semibold" color="gray.600">
+                      Target {namaTarget.nama}
+                    </FormLabel>
+                    <Input
+                      placeholder={`Masukkan target ${namaTarget.nama}`}
+                      type="number"
+                      value={editTargets[namaTarget.id] || ""}
+                      onChange={(e) =>
+                        setEditTargets((prev) => ({
+                          ...prev,
+                          [namaTarget.id]: e.target.value,
+                        }))
+                      }
+                      size="lg"
+                      borderRadius="lg"
+                      borderColor="gray.300"
+                      _focus={{
+                        borderColor: "teal.400",
+                        boxShadow: "0 0 0 1px #319795",
+                      }}
+                    />
+                  </FormControl>
+                ))}
+              </VStack>
+
+              {/* Anggaran dan Tahun */}
+              <HStack spacing={4}>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="semibold" color="gray.600">
+                    <Icon as={FiDollarSign} mr={2} />
+                    Anggaran (Rp)
+                  </FormLabel>
+                  <Input
+                    placeholder="Masukkan anggaran"
+                    type="number"
+                    value={editAnggaran || ""}
+                    onChange={(e) => setEditAnggaran(e.target.value)}
+                    size="lg"
+                    borderRadius="lg"
+                    borderColor="gray.300"
+                    _focus={{
+                      borderColor: "teal.400",
+                      boxShadow: "0 0 0 1px #319795",
+                    }}
+                  />
+                </FormControl>
+                <FormControl flex={1}>
+                  <FormLabel fontWeight="semibold" color="gray.600">
+                    <Icon as={FiCalendar} mr={2} />
+                    Tahun
+                  </FormLabel>
+                  <Input
+                    placeholder="Masukkan tahun"
+                    type="number"
+                    value={editTahun || ""}
+                    onChange={(e) => setEditTahun(e.target.value)}
+                    size="lg"
+                    borderRadius="lg"
+                    borderColor="gray.300"
+                    _focus={{
+                      borderColor: "teal.400",
+                      boxShadow: "0 0 0 1px #319795",
+                    }}
+                  />
+                </FormControl>
+              </HStack>
+            </VStack>
+          </ModalBody>
+          <ModalFooter
+            bg={colorMode === "dark" ? "gray.800" : "gray.50"}
+            borderBottomRadius="xl"
+            py={4}
+          >
+            <HStack spacing={3}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  onEditClose();
+                  setSelectedTarget(null);
+                  setEditTargets({});
+                  setEditAnggaran(null);
+                  setEditTahun(null);
+                  setIsEditMode(false);
+                }}
+                size="lg"
+                borderRadius="lg"
+              >
+                Batal
+              </Button>
+              <Button
+                colorScheme="teal"
+                onClick={handleUpdateTarget}
+                size="lg"
+                borderRadius="lg"
+                leftIcon={<Icon as={FiEdit} />}
+              >
+                Perbarui Target
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Edit Anggaran Perubahan */}
+      <Modal isOpen={isEditApOpen} onClose={onEditApClose} size="md">
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(6px)" />
+        <ModalContent borderRadius="xl" shadow="xl">
+          <ModalHeader
+            bg={colorMode === "dark" ? "gray.800" : "orange.50"}
+            borderTopRadius="xl"
+            py={4}
+          >
+            <HStack>
+              <Icon as={FiEdit} color="orange.500" boxSize={6} />
+              <Heading
+                size="md"
+                color={colorMode === "dark" ? "white" : "gray.800"}
+              >
+                Edit Anggaran Perubahan
+              </Heading>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <ModalBody py={6}>
+            <VStack spacing={4} align="stretch">
+              <FormControl>
+                <FormLabel fontWeight="semibold" color="gray.600">
+                  Tahun Anggaran ID
+                </FormLabel>
+                <Input
+                  value={selectedTahunAnggaran?.id || ""}
+                  isDisabled
+                  bg={colorMode === "dark" ? "gray.700" : "gray.100"}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontWeight="semibold" color="gray.600">
+                  Anggaran Perubahan (Rp)
+                </FormLabel>
+                <Input
+                  placeholder="Masukkan nominal anggaran"
+                  type="number"
+                  value={editApAmount || ""}
+                  onChange={(e) => setEditApAmount(e.target.value)}
+                  size="lg"
+                  borderRadius="lg"
+                  borderColor="gray.300"
+                  _focus={{
+                    borderColor: "orange.400",
+                    boxShadow: "0 0 0 1px #DD6B20",
+                  }}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontWeight="semibold" color="gray.600">
+                  Tahun
+                </FormLabel>
+                <Input
+                  placeholder="Tahun anggaran"
+                  type="number"
+                  value={editApYear || ""}
+                  onChange={(e) => setEditApYear(e.target.value)}
+                  size="lg"
+                  borderRadius="lg"
+                  borderColor="gray.300"
+                  _focus={{
+                    borderColor: "orange.400",
+                    boxShadow: "0 0 0 1px #DD6B20",
+                  }}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter bg={colorMode === "dark" ? "gray.800" : "gray.50"}>
+            <HStack spacing={3}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  onEditApClose();
+                  setSelectedTahunAnggaran(null);
+                  setEditApAmount(0);
+                  setEditApYear(null);
+                }}
+              >
+                Batal
+              </Button>
+              <Button
+                colorScheme="orange"
+                onClick={handleUpdateAnggaranPerubahan}
+                leftIcon={<Icon as={FiEdit} />}
+              >
+                Perbarui
               </Button>
             </HStack>
           </ModalFooter>

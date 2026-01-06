@@ -337,6 +337,7 @@ function Daftar() {
   };
 
   const postSPD = (val) => {
+    console.log(val?.personils);
     setIsLoading(true);
     axios
       .post(
@@ -485,6 +486,7 @@ function Daftar() {
 
   async function fetchDataPerjalanan() {
     setIsLoadingData(true);
+
     try {
       const res = await axios.get(
         `${

@@ -63,7 +63,7 @@ const menuData = [
     pathPrefix: "/perencanaan",
     items: [
       { label: "Program", path: "/perencanaan/daftar-program" },
-      { label: "Indikator", path: "/perencanaan/daftar-indikator" },
+      { label: "Target", path: "/perencanaan/daftar-indikator" },
       { label: "capaian", path: "/perencanaan/daftar-capaian" },
     ],
   },

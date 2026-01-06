@@ -46,6 +46,7 @@ import {
   FaPlus,
   FaTrash,
 } from "react-icons/fa";
+import { Select as Select2, AsyncSelect } from "chakra-react-select";
 
 function AdminProgram(props) {
   const { colorMode } = useColorMode();
@@ -77,8 +78,13 @@ function AdminProgram(props) {
   const [indikatorForm, setIndikatorForm] = useState({
     indikator: "",
     satuanIndikatorId: "",
+    unitKerjaId: null,
+    pegawaiId: null,
   });
   const [indikatorErrors, setIndikatorErrors] = useState({});
+  const [selectedIndikatorPegawai, setSelectedIndikatorPegawai] =
+    useState(null);
+  const token = localStorage.getItem("token");
   const [editForm, setEditForm] = useState({
     kode: "",
     nama: "",
@@ -151,7 +157,7 @@ function AdminProgram(props) {
     setEditForm({
       kode: item.kode || "",
       nama: item.nama || "",
-      unitKerjaId: item.daftarUnitKerja?.id || item.daftarUnitKerka?.id || "",
+      unitKerjaId: item.daftarUnitKerja?.id || "",
     });
     setErrors({});
     fetchSeed(); // Fetch data unit kerja saat edit dibuka
@@ -328,7 +334,13 @@ function AdminProgram(props) {
 
   const handleTambahIndikatorOpen = (item) => {
     setSelectedProgramForIndikator(item);
-    setIndikatorForm({ indikator: "", satuanIndikatorId: "" });
+    setIndikatorForm({
+      indikator: "",
+      satuanIndikatorId: "",
+      unitKerjaId: item.daftarUnitKerja?.id || null,
+      pegawaiId: null,
+    });
+    setSelectedIndikatorPegawai(null);
     setIndikatorErrors({});
     fetchSeed(); // Fetch data satuan saat modal dibuka
     onTambahIndikatorOpen();
@@ -337,7 +349,13 @@ function AdminProgram(props) {
   const handleTambahIndikatorClose = () => {
     onTambahIndikatorClose();
     setSelectedProgramForIndikator(null);
-    setIndikatorForm({ indikator: "", satuanIndikatorId: "" });
+    setIndikatorForm({
+      indikator: "",
+      satuanIndikatorId: "",
+      unitKerjaId: null,
+      pegawaiId: null,
+    });
+    setSelectedIndikatorPegawai(null);
     setIndikatorErrors({});
   };
 
@@ -366,6 +384,8 @@ function AdminProgram(props) {
           indikatorFE: indikatorForm.indikator.trim(),
           programId: selectedProgramForIndikator.id,
           satuanIndikatorId: indikatorForm.satuanIndikatorId,
+          unitKerjaId: indikatorForm.unitKerjaId || null,
+          pegawaiId: indikatorForm.pegawaiId || null,
         }
       );
 
@@ -498,12 +518,11 @@ function AdminProgram(props) {
                   <CardBody pt={1}>
                     <VStack align="start" spacing={2} fontSize="sm">
                       {/* Unit Kerja */}
-                      {item.daftarUnitKerka || item.daftarUnitKerja ? (
+                      {item.daftarUnitKerja ? (
                         <HStack spacing={2}>
                           <Icon as={FaBuilding} color="gray.400" />
                           <Text color="gray.600">
-                            {(item.daftarUnitKerja || item.daftarUnitKerka)
-                              ?.unitKerja || "-"}
+                            {item.daftarUnitKerja?.unitKerja || "-"}
                           </Text>
                         </HStack>
                       ) : null}
@@ -697,9 +716,7 @@ function AdminProgram(props) {
                               fontSize="sm"
                             >
                               Indikator (
-                              {(item.indikator && item.indikator.length) ||
-                                (item.indikators && item.indikators.length) ||
-                                0}
+                              {(item.indikators && item.indikators.length) || 0}
                               ):
                             </Text>
                           </HStack>
@@ -713,50 +730,7 @@ function AdminProgram(props) {
                             Tambah
                           </Button>
                         </HStack>
-                        {item.indikator && item.indikator.length > 0 ? (
-                          <VStack
-                            align="start"
-                            spacing={1.5}
-                            pl={6}
-                            maxH="150px"
-                            overflowY="auto"
-                            w="100%"
-                          >
-                            {item.indikator.map((indikator) => (
-                              <Box
-                                key={indikator.id}
-                                w="100%"
-                                p={2}
-                                borderRadius="md"
-                                bg={
-                                  colorMode === "dark" ? "gray.600" : "gray.50"
-                                }
-                                border="1px"
-                                borderColor={
-                                  colorMode === "dark" ? "gray.500" : "gray.200"
-                                }
-                              >
-                                <HStack spacing={2} align="start">
-                                  <Icon
-                                    as={FaFileAlt}
-                                    color="orange.400"
-                                    size="xs"
-                                  />
-                                  <Text
-                                    fontSize="xs"
-                                    color={
-                                      colorMode === "dark"
-                                        ? "gray.300"
-                                        : "gray.700"
-                                    }
-                                  >
-                                    {indikator.indikator}
-                                  </Text>
-                                </HStack>
-                              </Box>
-                            ))}
-                          </VStack>
-                        ) : item.indikators && item.indikators.length > 0 ? (
+                        {item.indikators && item.indikators.length > 0 ? (
                           <VStack
                             align="start"
                             spacing={1.5}
@@ -779,23 +753,49 @@ function AdminProgram(props) {
                                   colorMode === "dark" ? "gray.500" : "gray.200"
                                 }
                               >
-                                <HStack spacing={2} align="start">
-                                  <Icon
-                                    as={FaFileAlt}
-                                    color="orange.400"
-                                    size="xs"
-                                  />
-                                  <Text
-                                    fontSize="xs"
-                                    color={
-                                      colorMode === "dark"
-                                        ? "gray.300"
-                                        : "gray.700"
-                                    }
-                                  >
-                                    {indikator.indikator}
-                                  </Text>
-                                </HStack>
+                                <VStack align="start" spacing={1} w="100%">
+                                  <HStack spacing={2} align="start" w="100%">
+                                    <Icon
+                                      as={FaFileAlt}
+                                      color="orange.400"
+                                      size="xs"
+                                    />
+                                    <Text
+                                      fontSize="xs"
+                                      color={
+                                        colorMode === "dark"
+                                          ? "gray.300"
+                                          : "gray.700"
+                                      }
+                                      flex={1}
+                                    >
+                                      {indikator.indikator}
+                                    </Text>
+                                  </HStack>
+                                  {/* Info Unit Kerja dan Pegawai jika ada */}
+                                  {(indikator.daftarUnitKerja ||
+                                    indikator.pegawai) && (
+                                    <HStack
+                                      spacing={3}
+                                      pl={5}
+                                      fontSize="2xs"
+                                      color="gray.500"
+                                    >
+                                      {indikator.daftarUnitKerja && (
+                                        <Text>
+                                          Unit:{" "}
+                                          {indikator.daftarUnitKerja.unitKerja}
+                                        </Text>
+                                      )}
+                                      {indikator.pegawai && (
+                                        <Text>
+                                          PIC: {indikator.pegawai.nama} (
+                                          {indikator.pegawai.nip})
+                                        </Text>
+                                      )}
+                                    </HStack>
+                                  )}
+                                </VStack>
                               </Box>
                             ))}
                           </VStack>
@@ -1188,6 +1188,105 @@ function AdminProgram(props) {
                 <FormErrorMessage>
                   {indikatorErrors.satuanIndikatorId}
                 </FormErrorMessage>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Unit Kerja</FormLabel>
+                <Select2
+                  options={dataUnitKerja.map((unit) => ({
+                    value: unit.id,
+                    label: unit.unitKerja,
+                  }))}
+                  placeholder="Pilih unit kerja..."
+                  value={
+                    indikatorForm.unitKerjaId
+                      ? dataUnitKerja
+                          .map((unit) => ({
+                            value: unit.id,
+                            label: unit.unitKerja,
+                          }))
+                          .find(
+                            (opt) =>
+                              opt.value.toString() ===
+                              indikatorForm.unitKerjaId?.toString()
+                          )
+                      : null
+                  }
+                  onChange={(selected) =>
+                    setIndikatorForm({
+                      ...indikatorForm,
+                      unitKerjaId: selected?.value || null,
+                    })
+                  }
+                  isClearable
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Pegawai</FormLabel>
+                <AsyncSelect
+                  loadOptions={async (inputValue) => {
+                    if (!inputValue) return [];
+                    try {
+                      const res = await axios.get(
+                        `${
+                          import.meta.env.VITE_REACT_APP_API_BASE_URL
+                        }/pegawai/search?q=${inputValue}`,
+                        {
+                          headers: { Authorization: `Bearer ${token}` },
+                        }
+                      );
+                      const filtered = res.data?.result || [];
+                      return filtered.map((val) => ({
+                        value: val.id,
+                        label: `${val.nip || ""} - ${val.nama || ""}`,
+                      }));
+                    } catch (err) {
+                      console.error("Failed to load options:", err.message);
+                      return [];
+                    }
+                  }}
+                  placeholder="Ketik nama pegawai..."
+                  value={selectedIndikatorPegawai}
+                  onChange={(selectedOption) => {
+                    setSelectedIndikatorPegawai(selectedOption);
+                    setIndikatorForm({
+                      ...indikatorForm,
+                      pegawaiId: selectedOption?.value || null,
+                    });
+                  }}
+                  components={{
+                    DropdownIndicator: () => null,
+                    IndicatorSeparator: () => null,
+                  }}
+                  isClearable
+                  chakraStyles={{
+                    container: (provided) => ({
+                      ...provided,
+                      borderRadius: "6px",
+                    }),
+                    control: (provided) => ({
+                      ...provided,
+                      backgroundColor:
+                        colorMode === "dark" ? "#2D3748" : "white",
+                      border: `1px solid ${
+                        colorMode === "dark" ? "#4A5568" : "#E2E8F0"
+                      }`,
+                      minHeight: "40px",
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      bg: state.isFocused
+                        ? colorMode === "dark"
+                          ? "blue.600"
+                          : "blue.500"
+                        : colorMode === "dark"
+                        ? "gray.700"
+                        : "white",
+                      color: state.isFocused ? "white" : "inherit",
+                    }),
+                  }}
+                />
               </FormControl>
             </VStack>
           </ModalBody>

@@ -61,6 +61,9 @@ import {
   FaEdit,
   FaDollarSign,
   FaCalendarAlt,
+  FaBuilding,
+  FaTag,
+  FaUser,
 } from "react-icons/fa";
 import Loading from "../../Componets/Loading";
 
@@ -71,7 +74,15 @@ function DetailProgram(props) {
   const history = useHistory();
   const [bulan, setBulan] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
+  } = useDisclosure();
   const [selectedTarget, setSelectedTarget] = useState(null);
+  const [selectedIndikator, setSelectedIndikator] = useState(null);
+  const [selectedCapaian, setSelectedCapaian] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [nilai, setNilai] = useState("");
   const [anggaran, setAnggaran] = useState("");
   const [bukti, setBukti] = useState("");
@@ -89,34 +100,51 @@ function DetailProgram(props) {
     }).format(value);
   };
 
-  // Fungsi untuk memeriksa apakah user memiliki unitKerjaId yang sama dengan program
-  const canInputCapaian = () => {
-    if (!user || !user[0] || !DataSubKegiatan) return false;
+  // Fungsi untuk memeriksa apakah user memiliki unitKerjaId yang sama dengan indikator
+  const canInputCapaian = (indikator) => {
+    if (!user || !user[0] || !indikator) return false;
 
     const userUnitKerjaId =
       user[0]?.unitKerja_profile?.id ||
       user[0]?.unitKerja_profile?.indukUnitKerja?.id;
-    const programUnitKerjaId =
-      DataSubKegiatan?.unitKerjaId ||
-      DataSubKegiatan?.daftarUnitKerja?.unitKerjaId ||
-      DataSubKegiatan?.daftarUnitKerja?.unitKerja?.id;
+    const indikatorUnitKerjaId =
+      indikator?.unitKerjaId || indikator?.daftarUnitKerja?.id;
 
-    // Jika unitKerjaId adalah string, bandingkan dengan nama unit kerja
-    if (typeof DataSubKegiatan?.daftarUnitKerja?.unitKerja === "string") {
-      const userUnitKerjaNama =
-        user[0]?.unitKerja_profile?.nama ||
-        user[0]?.unitKerja_profile?.indukUnitKerja?.nama;
-      return userUnitKerjaNama === DataSubKegiatan.daftarUnitKerja.unitKerja;
+    // Jika ada daftarUnitKerja, bandingkan dengan id atau nama
+    if (indikator?.daftarUnitKerja) {
+      // Bandingkan dengan id jika ada
+      if (indikator.daftarUnitKerja.id) {
+        return (
+          userUnitKerjaId &&
+          indikator.daftarUnitKerja.id &&
+          userUnitKerjaId === indikator.daftarUnitKerja.id
+        );
+      }
+      // Jika tidak ada id, bandingkan dengan nama unit kerja
+      if (typeof indikator.daftarUnitKerja.unitKerja === "string") {
+        const userUnitKerjaNama =
+          user[0]?.unitKerja_profile?.nama ||
+          user[0]?.unitKerja_profile?.indukUnitKerja?.nama;
+        return userUnitKerjaNama === indikator.daftarUnitKerja.unitKerja;
+      }
     }
 
+    // Fallback: bandingkan dengan unitKerjaId langsung
     return (
       userUnitKerjaId &&
-      programUnitKerjaId &&
-      userUnitKerjaId === programUnitKerjaId
+      indikatorUnitKerjaId &&
+      userUnitKerjaId === indikatorUnitKerjaId
     );
   };
 
-  async function fetchSuratPesanan() {
+  // Fungsi untuk memeriksa apakah capaian bisa diedit (status pengajuan atau ditolak)
+  const canEditCapaian = (capaian) => {
+    if (!capaian) return false;
+    const status = (capaian.status || "").toLowerCase();
+    return status === "pengajuan" || status === "ditolak";
+  };
+
+  async function fetchDataProgram() {
     try {
       setIsLoading(true);
       const res = await axios.get(
@@ -124,6 +152,8 @@ function DetailProgram(props) {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perencanaan/get/detail-program/${props.match.params.id}`
       );
+
+      console.log(res.data.result);
       setDataSubKegiatan(res.data.result || null);
     } catch (err) {
       console.error(err);
@@ -145,6 +175,9 @@ function DetailProgram(props) {
     setBulan("");
     setBukti("");
     setErrors({});
+    setSelectedIndikator(null);
+    setSelectedCapaian(null);
+    setIsEditMode(false);
   };
 
   const validateForm = () => {
@@ -169,16 +202,55 @@ function DetailProgram(props) {
     if (!selectedTarget) return;
     if (!validateForm()) return;
 
-    // Validasi: cek apakah user memiliki unitKerjaId yang sama
-    if (!canInputCapaian()) {
+    // Validasi: cek apakah user memiliki unitKerjaId yang sama dengan indikator
+    if (!selectedIndikator || !canInputCapaian(selectedIndikator)) {
       toast({
         title: "Akses Ditolak",
         description:
-          "Anda tidak memiliki akses untuk menginput capaian pada program ini. Hanya user dengan unit kerja yang sama yang dapat menginput capaian.",
+          "Anda tidak memiliki akses untuk menginput capaian pada indikator ini. Hanya user dengan unit kerja yang sama yang dapat menginput capaian.",
         status: "error",
         duration: 4000,
         isClosable: true,
       });
+      return;
+    }
+
+    // Jika mode edit
+    if (isEditMode && selectedCapaian) {
+      try {
+        await axios.post(
+          `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/capaian/edit/${
+            selectedCapaian.id
+          }`,
+          {
+            ...selectedCapaian,
+            nilai: parseInt(nilai),
+            bulan: parseInt(bulan),
+            anggaran: parseInt(anggaran),
+            bukti: bukti.trim(),
+          }
+        );
+        toast({
+          title: "Berhasil",
+          description: "Capaian berhasil diperbarui",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        resetForm();
+        onEditClose();
+        fetchDataProgram(); // refresh data
+      } catch (err) {
+        console.error(err);
+        toast({
+          title: "Gagal",
+          description:
+            err.response?.data?.message || "Terjadi kesalahan saat memperbarui",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
       return;
     }
 
@@ -220,7 +292,7 @@ function DetailProgram(props) {
       });
       resetForm();
       onClose();
-      fetchSuratPesanan(); // refresh data
+      fetchDataProgram(); // refresh data
     } catch (err) {
       console.error(err);
       toast({
@@ -233,6 +305,43 @@ function DetailProgram(props) {
       });
     }
   }
+
+  // Fungsi untuk membuka modal edit
+  const handleEditCapaian = (capaian, target, indikator) => {
+    if (!canEditCapaian(capaian)) {
+      toast({
+        title: "Tidak dapat diedit",
+        description:
+          "Capaian ini tidak dapat diedit karena statusnya sudah disetujui.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (!canInputCapaian(indikator)) {
+      toast({
+        title: "Akses Ditolak",
+        description:
+          "Anda tidak memiliki akses untuk mengedit capaian pada indikator ini.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setSelectedCapaian(capaian);
+    setSelectedTarget(target);
+    setSelectedIndikator(indikator);
+    setNilai(capaian.nilai?.toString() || "");
+    setAnggaran(capaian.anggaran?.toString() || "");
+    setBulan(capaian.bulan?.toString() || "");
+    setBukti(capaian.bukti || "");
+    setIsEditMode(true);
+    onEditOpen();
+  };
 
   const bulanList = [
     { nama: "Januari", angka: 1 },
@@ -250,7 +359,7 @@ function DetailProgram(props) {
   ];
 
   useEffect(() => {
-    fetchSuratPesanan();
+    fetchDataProgram();
   }, []);
 
   if (isLoading) {
@@ -447,22 +556,74 @@ function DetailProgram(props) {
                     py={4}
                     px={6}
                   >
-                    <HStack spacing={3}>
-                      <Box
-                        p={2}
-                        borderRadius="lg"
-                        bg={colorMode === "dark" ? "blue.900" : "blue.100"}
+                    <VStack align="stretch" spacing={3}>
+                      <HStack spacing={3}>
+                        <Box
+                          p={2}
+                          borderRadius="lg"
+                          bg={colorMode === "dark" ? "blue.900" : "blue.100"}
+                        >
+                          <Icon as={FaChartLine} color="blue.500" boxSize={5} />
+                        </Box>
+                        <Heading
+                          size="md"
+                          color={colorMode === "dark" ? "white" : "gray.800"}
+                          fontWeight="semibold"
+                          flex={1}
+                        >
+                          {indikator.indikator}
+                        </Heading>
+                      </HStack>
+                      {/* Info Unit Kerja, Satuan, dan Pegawai */}
+                      <HStack
+                        spacing={4}
+                        flexWrap="wrap"
+                        fontSize="sm"
+                        color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                        pl={12}
                       >
-                        <Icon as={FaChartLine} color="blue.500" boxSize={5} />
-                      </Box>
-                      <Heading
-                        size="md"
-                        color={colorMode === "dark" ? "white" : "gray.800"}
-                        fontWeight="semibold"
-                      >
-                        {indikator.indikator}
-                      </Heading>
-                    </HStack>
+                        {/* Satuan Indikator */}
+                        {indikator.satuanIndikator && (
+                          <HStack spacing={2}>
+                            <Icon as={FaTag} color="blue.400" boxSize={4} />
+                            <Text>
+                              <Text as="span" fontWeight="semibold">
+                                Satuan:
+                              </Text>{" "}
+                              {indikator.satuanIndikator.satuan}
+                            </Text>
+                          </HStack>
+                        )}
+                        {/* Unit Kerja */}
+                        {indikator.daftarUnitKerja && (
+                          <HStack spacing={2}>
+                            <Icon
+                              as={FaBuilding}
+                              color="green.400"
+                              boxSize={4}
+                            />
+                            <Text>
+                              <Text as="span" fontWeight="semibold">
+                                Unit:
+                              </Text>{" "}
+                              {indikator.daftarUnitKerja.unitKerja}
+                            </Text>
+                          </HStack>
+                        )}
+                        {/* Pegawai */}
+                        {indikator.pegawai && (
+                          <HStack spacing={2}>
+                            <Icon as={FaUser} color="purple.400" boxSize={4} />
+                            <Text>
+                              <Text as="span" fontWeight="semibold">
+                                PIC:
+                              </Text>{" "}
+                              {indikator.pegawai.nama} ({indikator.pegawai.nip})
+                            </Text>
+                          </HStack>
+                        )}
+                      </HStack>
+                    </VStack>
                   </CardHeader>
                   <CardBody p={{ base: 4, md: 6 }}>
                     <Box
@@ -803,9 +964,17 @@ function DetailProgram(props) {
                                     }
                                     fontWeight="semibold"
                                   >
-                                    {t.targetTriwulans?.find(
-                                      (tt) => tt.namaTarget?.nama === "tw1"
-                                    )?.nilai || "-"}
+                                    {(() => {
+                                      const nilai = t.targetTriwulans?.find(
+                                        (tt) => tt.namaTarget?.nama === "tw1"
+                                      )?.nilai;
+                                      return nilai
+                                        ? `${nilai} ${
+                                            indikator.satuanIndikator?.satuan ||
+                                            ""
+                                          }`
+                                        : "-";
+                                    })()}
                                   </Td>
                                   <Td
                                     rowSpan={2}
@@ -822,9 +991,17 @@ function DetailProgram(props) {
                                     }
                                     fontWeight="semibold"
                                   >
-                                    {t.targetTriwulans?.find(
-                                      (tt) => tt.namaTarget?.nama === "tw2"
-                                    )?.nilai || "-"}
+                                    {(() => {
+                                      const nilai = t.targetTriwulans?.find(
+                                        (tt) => tt.namaTarget?.nama === "tw2"
+                                      )?.nilai;
+                                      return nilai
+                                        ? `${nilai} ${
+                                            indikator.satuanIndikator?.satuan ||
+                                            ""
+                                          }`
+                                        : "-";
+                                    })()}
                                   </Td>
                                   <Td
                                     rowSpan={2}
@@ -841,9 +1018,17 @@ function DetailProgram(props) {
                                     }
                                     fontWeight="semibold"
                                   >
-                                    {t.targetTriwulans?.find(
-                                      (tt) => tt.namaTarget?.nama === "tw3"
-                                    )?.nilai || "-"}
+                                    {(() => {
+                                      const nilai = t.targetTriwulans?.find(
+                                        (tt) => tt.namaTarget?.nama === "tw3"
+                                      )?.nilai;
+                                      return nilai
+                                        ? `${nilai} ${
+                                            indikator.satuanIndikator?.satuan ||
+                                            ""
+                                          }`
+                                        : "-";
+                                    })()}
                                   </Td>
                                   <Td
                                     rowSpan={2}
@@ -860,9 +1045,17 @@ function DetailProgram(props) {
                                     }
                                     fontWeight="semibold"
                                   >
-                                    {t.targetTriwulans?.find(
-                                      (tt) => tt.namaTarget?.nama === "tw4"
-                                    )?.nilai || "-"}
+                                    {(() => {
+                                      const nilai = t.targetTriwulans?.find(
+                                        (tt) => tt.namaTarget?.nama === "tw4"
+                                      )?.nilai;
+                                      return nilai
+                                        ? `${nilai} ${
+                                            indikator.satuanIndikator?.satuan ||
+                                            ""
+                                          }`
+                                        : "-";
+                                    })()}
                                   </Td>
                                   {[...Array(12)].map((_, i) => {
                                     const bulanKe = i + 1;
@@ -938,7 +1131,9 @@ function DetailProgram(props) {
                                                   fontSize="md"
                                                   color="white"
                                                 >
-                                                  {capaian.nilai}
+                                                  {capaian.nilai}{" "}
+                                                  {indikator.satuanIndikator
+                                                    ?.satuan || ""}
                                                 </Text>
                                               </Box>
 
@@ -1018,6 +1213,31 @@ function DetailProgram(props) {
                                                   {capaian.status}
                                                 </Text>
                                               </Badge>
+
+                                              {canEditCapaian(capaian) &&
+                                                canInputCapaian(indikator) && (
+                                                  <Button
+                                                    size="xs"
+                                                    colorScheme="orange"
+                                                    variant="solid"
+                                                    onClick={() =>
+                                                      handleEditCapaian(
+                                                        capaian,
+                                                        t,
+                                                        indikator
+                                                      )
+                                                    }
+                                                    leftIcon={<FaEdit />}
+                                                    _hover={{
+                                                      bg: "orange.600",
+                                                    }}
+                                                    transition="all 0.2s"
+                                                    width="100%"
+                                                    fontSize="xs"
+                                                  >
+                                                    Edit
+                                                  </Button>
+                                                )}
                                             </VStack>
                                           </Box>
                                         ) : (
@@ -1190,11 +1410,11 @@ function DetailProgram(props) {
                                       colorScheme="blue"
                                       variant="solid"
                                       onClick={() => {
-                                        if (!canInputCapaian()) {
+                                        if (!canInputCapaian(indikator)) {
                                           toast({
                                             title: "Akses Ditolak",
                                             description:
-                                              "Anda tidak memiliki akses untuk menginput capaian pada program ini. Hanya user dengan unit kerja yang sama yang dapat menginput capaian.",
+                                              "Anda tidak memiliki akses untuk menginput capaian pada indikator ini. Hanya user dengan unit kerja yang sama yang dapat menginput capaian.",
                                             status: "error",
                                             duration: 4000,
                                             isClosable: true,
@@ -1202,12 +1422,14 @@ function DetailProgram(props) {
                                           return;
                                         }
                                         setSelectedTarget(t);
+                                        setSelectedIndikator(indikator);
+                                        setIsEditMode(false);
                                         onOpen();
                                       }}
                                       leftIcon={<FaEdit />}
                                       width="100%"
                                       fontSize="xs"
-                                      isDisabled={!canInputCapaian()}
+                                      isDisabled={!canInputCapaian(indikator)}
                                     >
                                       Input Capaian
                                     </Button>
@@ -1310,6 +1532,7 @@ function DetailProgram(props) {
         onClose={() => {
           onClose();
           resetForm();
+          setSelectedTarget(null);
         }}
         size="lg"
         isCentered
@@ -1345,10 +1568,12 @@ function DetailProgram(props) {
                   }}
                   bg={colorMode === "dark" ? "gray.700" : "white"}
                   borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                  isDisabled={isEditMode}
                 >
                   {bulanList
                     .filter((b) => {
-                      // Filter bulan yang belum ada capaiannya
+                      // Filter bulan yang belum ada capaiannya (hanya untuk mode input baru)
+                      if (isEditMode) return true;
                       if (!selectedTarget?.capaians) return true;
                       return !selectedTarget.capaians.find(
                         (c) => c.bulan === b.angka
@@ -1445,6 +1670,141 @@ function DetailProgram(props) {
               leftIcon={<FaCheckCircle />}
             >
               Simpan
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Edit Capaian */}
+      <Modal
+        isOpen={isEditOpen}
+        onClose={() => {
+          onEditClose();
+          resetForm();
+        }}
+        size="lg"
+        isCentered
+      >
+        <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+        <ModalContent
+          bg={colorMode === "dark" ? "gray.800" : "white"}
+          borderRadius="xl"
+        >
+          <ModalHeader>
+            <HStack>
+              <Icon as={FaEdit} color="orange.500" />
+              <Text>Edit Capaian</Text>
+            </HStack>
+          </ModalHeader>
+          <ModalCloseButton />
+          <Divider />
+          <ModalBody py={6}>
+            <VStack spacing={5} align="stretch">
+              <FormControl isInvalid={!!errors.bulan}>
+                <FormLabel>
+                  <HStack>
+                    <Icon as={FaCalendarAlt} color="gray.500" boxSize={4} />
+                    <Text>Bulan</Text>
+                  </HStack>
+                </FormLabel>
+                <Select
+                  value={bulan}
+                  isDisabled
+                  bg={colorMode === "dark" ? "gray.700" : "gray.100"}
+                  borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                  opacity={0.7}
+                >
+                  {bulanList.map((b) => (
+                    <option key={b.angka} value={b.angka}>
+                      {b.nama}
+                    </option>
+                  ))}
+                </Select>
+                <FormErrorMessage>{errors.bulan}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.nilai}>
+                <FormLabel>
+                  <HStack>
+                    <Icon as={FaChartLine} color="gray.500" boxSize={4} />
+                    <Text>Nilai Target</Text>
+                  </HStack>
+                </FormLabel>
+                <Input
+                  type="number"
+                  placeholder="Masukkan nilai target"
+                  value={nilai}
+                  onChange={(e) => {
+                    setNilai(e.target.value);
+                    setErrors({ ...errors, nilai: "" });
+                  }}
+                  bg={colorMode === "dark" ? "gray.700" : "white"}
+                  borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                />
+                <FormErrorMessage>{errors.nilai}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.anggaran}>
+                <FormLabel>
+                  <HStack>
+                    <Icon as={FaDollarSign} color="gray.500" boxSize={4} />
+                    <Text>Anggaran</Text>
+                  </HStack>
+                </FormLabel>
+                <Input
+                  type="number"
+                  placeholder="Masukkan anggaran"
+                  value={anggaran}
+                  onChange={(e) => {
+                    setAnggaran(e.target.value);
+                    setErrors({ ...errors, anggaran: "" });
+                  }}
+                  bg={colorMode === "dark" ? "gray.700" : "white"}
+                  borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                />
+                <FormErrorMessage>{errors.anggaran}</FormErrorMessage>
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.bukti}>
+                <FormLabel>
+                  <HStack>
+                    <Icon as={FaPaperclip} color="gray.500" boxSize={4} />
+                    <Text>Link Bukti</Text>
+                  </HStack>
+                </FormLabel>
+                <Input
+                  type="url"
+                  placeholder="Masukkan link bukti"
+                  value={bukti}
+                  onChange={(e) => {
+                    setBukti(e.target.value);
+                    setErrors({ ...errors, bukti: "" });
+                  }}
+                  bg={colorMode === "dark" ? "gray.700" : "white"}
+                  borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                />
+                <FormErrorMessage>{errors.bukti}</FormErrorMessage>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <Divider />
+          <ModalFooter>
+            <Button
+              mr={3}
+              variant="ghost"
+              onClick={() => {
+                onEditClose();
+                resetForm();
+              }}
+            >
+              Batal
+            </Button>
+            <Button
+              colorScheme="orange"
+              onClick={handleSubmit}
+              leftIcon={<FaCheckCircle />}
+            >
+              Perbarui
             </Button>
           </ModalFooter>
         </ModalContent>

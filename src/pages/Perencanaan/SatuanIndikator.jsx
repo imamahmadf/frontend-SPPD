@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { userRedux } from "../../Redux/Reducers/auth";
 import LayoutPerencanaan from "../../Componets/perencanaan/LayoutPerencanaan";
@@ -94,6 +94,7 @@ function SatuanIndikator(props) {
   // Filter state
   const [filterSatuan, setFilterSatuan] = useState("");
   const [sortTime, setSortTime] = useState("ASC");
+  const timeoutRef = useRef(null);
 
   const token = localStorage.getItem("token");
 
@@ -140,7 +141,15 @@ function SatuanIndikator(props) {
 
   useEffect(() => {
     fetchSatuanIndikator();
-  }, [page, limit, filterSatuan, sortTime]);
+  }, [page, limit, sortTime]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleEdit = (item) => {
     setSelectedSatuan(item);
@@ -323,6 +332,18 @@ function SatuanIndikator(props) {
     setPage(0);
   };
 
+  function inputHandler(event, field) {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    const value = event.target.value;
+    setFilterSatuan(value);
+    timeoutRef.current = setTimeout(() => {
+      setPage(0);
+      fetchSatuanIndikator();
+    }, 2000);
+  }
+
   return (
     <LayoutPerencanaan>
       <Box
@@ -389,9 +410,12 @@ function SatuanIndikator(props) {
                   <Input
                     placeholder="Masukkan nama satuan..."
                     value={filterSatuan}
-                    onChange={(e) => setFilterSatuan(e.target.value)}
+                    onChange={(e) => inputHandler(e, "satuan")}
                     onKeyPress={(e) => {
                       if (e.key === "Enter") {
+                        if (timeoutRef.current) {
+                          clearTimeout(timeoutRef.current);
+                        }
                         handleSearch();
                       }
                     }}

@@ -177,7 +177,11 @@ const Template = () => {
                             setOldFile(dataTemplate.templateSuratTugas);
                           } else if (selectedValue === 2) {
                             setOldFile(dataTemplate.templateNotaDinas);
-                          } else if (selectedFile === 3) {
+                          } else if (selectedValue === 3) {
+                            setOldFile(dataTemplate.templateSuratTugasSingkat);
+                          } else if (selectedValue === 4) {
+                            setOldFile(dataTemplate.telaahan);
+                          } else if (selectedValue === 5) {
                             setOldFile(dataTemplate.templateSPD);
                           }
                         }}
@@ -278,11 +282,11 @@ const Template = () => {
                       )}
                     </Td>
                     <Td>
-                      {dataTemplate.templateSuratTugas ? (
+                      {dataTemplate.templateSPD ? (
                         <Button
                           variant={"primary"}
                           onClick={() =>
-                            handleDownload(dataTemplate.templateSuratTugas)
+                            handleDownload(dataTemplate.templateSPD)
                           }
                         >
                           lihatxx
