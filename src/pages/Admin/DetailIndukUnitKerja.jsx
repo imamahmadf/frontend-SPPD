@@ -34,6 +34,7 @@ import {
   useDisclosure,
   Checkbox,
   Flex,
+  Center,
 } from "@chakra-ui/react";
 import axios from "axios";
 import { Link, useHistory } from "react-router-dom";
@@ -60,6 +61,15 @@ function DetailIndukUnitKerja(props) {
   const user = useSelector(userRedux);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
+  const [unitKerjaIdToDelete, setUnitKerjaIdToDelete] = useState(null);
+  const [tahunHapus, setTahunHapus] = useState(
+    new Date().getFullYear().toString()
+  );
 
   async function fetchDataIndukUnitKerja() {
     try {
@@ -188,6 +198,63 @@ function DetailIndukUnitKerja(props) {
     }
   };
 
+  const handleDeletePerjalanan = (unitKerjaId) => {
+    setUnitKerjaIdToDelete(unitKerjaId);
+    setTahunHapus(new Date().getFullYear().toString());
+    onDeleteOpen();
+  };
+
+  const handleCloseDeleteModal = () => {
+    setTahunHapus(new Date().getFullYear().toString());
+    setUnitKerjaIdToDelete(null);
+    onDeleteClose();
+  };
+
+  const confirmDeletePerjalanan = async () => {
+    if (!tahunHapus || tahunHapus.trim() === "") {
+      toast({
+        title: "Error",
+        description: "Tahun harus diisi",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/admin/delete/perjalanan-by-unitkerja/${unitKerjaIdToDelete}`,
+        {
+          tahun: parseInt(tahunHapus),
+        }
+      );
+
+      toast({
+        title: "Berhasil",
+        description: `Data perjalanan tahun ${tahunHapus} berhasil dihapus`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      handleCloseDeleteModal();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.message || "Gagal menghapus data perjalanan",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Layout>
       {isLoading ? (
@@ -289,7 +356,15 @@ function DetailIndukUnitKerja(props) {
                           </Button>
                         </HStack>
                       ) : (
-                        <Button onClick={() => handleEdit(item)}>Edit</Button>
+                        <HStack spacing={2}>
+                          <Button onClick={() => handleEdit(item)}>Edit</Button>
+                          <Button
+                            colorScheme="red"
+                            onClick={() => handleDeletePerjalanan(item.id)}
+                          >
+                            Hapus Perjalanan
+                          </Button>
+                        </HStack>
                       )}
                     </Td>
                   </Tr>
@@ -334,6 +409,51 @@ function DetailIndukUnitKerja(props) {
                     Simpan
                   </Button>
                   <Button variant={"cancle"} onClick={onClose}>
+                    Batal
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+            <Modal isOpen={isDeleteOpen} onClose={handleCloseDeleteModal}>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Konfirmasi Hapus Perjalanan</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  <Text mb={4}>
+                    Apakah Anda yakin ingin menghapus data perjalanan untuk unit
+                    kerja ini?
+                  </Text>
+                  <FormControl isRequired>
+                    <FormLabel>Tahun</FormLabel>
+                    <Input
+                      type="number"
+                      value={tahunHapus}
+                      onChange={(e) => setTahunHapus(e.target.value)}
+                      placeholder="Masukkan tahun (contoh: 2024)"
+                      min="2000"
+                      max="2100"
+                    />
+                    <Text mt={2} fontSize="sm" color="gray.500">
+                      Hanya perjalanan pada tahun yang dipilih yang akan dihapus
+                    </Text>
+                  </FormControl>
+                  <Text mt={4} color="red.500" fontSize="sm">
+                    Tindakan ini tidak dapat dibatalkan dan akan menghapus semua
+                    data perjalanan pada tahun yang dipilih untuk unit kerja
+                    ini.
+                  </Text>
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    colorScheme="red"
+                    mr={3}
+                    onClick={confirmDeletePerjalanan}
+                    isLoading={isLoading}
+                  >
+                    Hapus
+                  </Button>
+                  <Button variant="ghost" onClick={handleCloseDeleteModal}>
                     Batal
                   </Button>
                 </ModalFooter>

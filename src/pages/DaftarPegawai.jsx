@@ -89,6 +89,7 @@ function DaftarPegawai() {
   const [nama, setNama] = useState("");
   const [pendidikan, setPendidikan] = useState("");
   const [nip, setNip] = useState("");
+  const [nik, setNik] = useState("");
   const [unitKerjaId, setUnitKerjaId] = useState(0);
   const [jabatan, setJabatan] = useState("");
   const [filterUnitKerjaId, setFilterUnitKerjaId] = useState(null);
@@ -159,6 +160,7 @@ function DaftarPegawai() {
         {
           nama,
           nip,
+          nik,
           jabatan,
           pangkatId,
           golonganId,
@@ -179,6 +181,7 @@ function DaftarPegawai() {
       // Reset form
       setNama("");
       setNip("");
+      setNik("");
       setJabatan("");
       setPangkatId(0);
       setGolonganId(0);
@@ -273,6 +276,8 @@ function DaftarPegawai() {
       setJabatan(val);
     } else if (field == "pendidikan") {
       setPendidikan(val);
+    } else if (field == "nip") {
+      setNik(val);
     }
   };
 
@@ -1603,6 +1608,27 @@ function DaftarPegawai() {
                     borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
                     onChange={(e) => handleSubmitChange("nip", e.target.value)}
                     placeholder="Contoh: 19330722 195502 1 003"
+                    _placeholder={{
+                      color: colorMode === "dark" ? "gray.400" : "gray.500",
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl my={"15px"}>
+                  <FormLabel
+                    fontSize={"18px"}
+                    color={colorMode === "dark" ? "white" : "gray.700"}
+                    fontWeight="medium"
+                  >
+                    NIK
+                  </FormLabel>
+                  <Input
+                    height={"50px"}
+                    bg={colorMode === "dark" ? "gray.700" : "gray.50"}
+                    color={colorMode === "dark" ? "white" : "gray.800"}
+                    borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                    onChange={(e) => handleSubmitChange("nik", e.target.value)}
+                    placeholder="Contoh: 640002 195502 1 003"
                     _placeholder={{
                       color: colorMode === "dark" ? "gray.400" : "gray.500",
                     }}

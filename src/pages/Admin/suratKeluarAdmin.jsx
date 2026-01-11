@@ -59,10 +59,12 @@ function suratKeluarAdmin() {
   const [tujuan, setTujuan] = useState("");
   const [perihal, setPerihal] = useState("");
   const [tanggalSurat, setTanggalSurat] = useState("");
+  const [nomorSurat, setNomorSurat] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedSurat, setSelectedSurat] = useState(0);
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
+  const [pegawaiId, setPegawaiId] = useState(null);
 
   const {
     isOpen: isTambahOpen,
@@ -81,6 +83,15 @@ function suratKeluarAdmin() {
       setPerihal(val);
     } else if (field == "tanggalSurat") {
       setTanggalSurat(val);
+    } else if (field == "nomorSurat") {
+      setNomorSurat(val);
+      // Reset klasifikasi jika nomor surat diisi
+      if (val && val.trim() !== "") {
+        setDataKodeKlasifikasi(null);
+        setKlasifikasi(null);
+        setKodeKlasifikasi(null);
+        setDataKlasifikasi([]);
+      }
     }
   };
   const resetForm = () => {
@@ -91,6 +102,8 @@ function suratKeluarAdmin() {
     setTujuan(""); // Reset tujuan
     setPerihal(""); // Reset perihal
     setTanggalSurat(""); // Reset tanggal surat
+    setNomorSurat(""); // Reset nomor surat
+    setPegawaiId(null); // Reset pegawai ID
     // Jika perlu, fetch kembali data klasifikasi awal
     fetchKlasifikasi();
   };
@@ -106,7 +119,9 @@ function suratKeluarAdmin() {
           perihal,
           tujuan,
           tanggalSurat,
+          nomorSurat: nomorSurat || null,
           indukUnitKerja: user[0]?.unitKerja_profile?.indukUnitKerja,
+          pegawaiId: pegawaiId || null,
         }
       )
       .then((res) => {
@@ -223,6 +238,7 @@ function suratKeluarAdmin() {
                 <Tr>
                   <Th>no.</Th>
                   <Th>Nomor Surat</Th> <Th>Jenis Surat</Th>
+                  <Th>Nama Pegawai</Th>
                   <Th>Tujuan</Th>
                   <Th>Perihal</Th>
                   <Th>Tanggal</Th>
@@ -242,6 +258,7 @@ function suratKeluarAdmin() {
                           ? "Telaahan Staff"
                           : "Nota Dinas"}
                       </Td>
+                      <Td>{item.pegawai?.nama || "-"}</Td>
                       <Td>{item.tujuan}</Td> <Td>{item.perihal}</Td>
                       <Td>
                         {item.tanggalSurat
@@ -331,9 +348,14 @@ function suratKeluarAdmin() {
                     })}
                     placeholder="Cari Nama Pegawai"
                     focusBorderColor="red"
+                    isDisabled={nomorSurat && nomorSurat.trim() !== ""}
                     onChange={(selectedOption) => {
                       //   setKlasifikasi(selectedOption);
                       fetchDataKodeKlasifikasi(selectedOption.value.id);
+                      // Reset nomor surat jika klasifikasi dipilih
+                      if (selectedOption && selectedOption.value) {
+                        setNomorSurat("");
+                      }
                     }}
                     components={{
                       DropdownIndicator: () => null, // Hilangkan tombol panah
@@ -372,8 +394,13 @@ function suratKeluarAdmin() {
                       }))}
                       placeholder="Pilih kode Klasifikasi"
                       focusBorderColor="red"
+                      isDisabled={nomorSurat && nomorSurat.trim() !== ""}
                       onChange={(selectedOption) => {
                         setDataKodeKlasifikasi(selectedOption.value);
+                        // Reset nomor surat jika kode klasifikasi dipilih
+                        if (selectedOption && selectedOption.value) {
+                          setNomorSurat("");
+                        }
                       }}
                       components={{
                         DropdownIndicator: () => null, // Hilangkan tombol panah
@@ -477,6 +504,77 @@ function suratKeluarAdmin() {
                       handleSubmitChange("tanggalSurat", e.target.value)
                     }
                     placeholder="Perihal"
+                  />
+                </FormControl>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>
+                    Nomor Surat (Opsional)
+                  </FormLabel>
+                  <Input
+                    value={nomorSurat}
+                    height={"60px"}
+                    bgColor={"terang"}
+                    isDisabled={
+                      (dataKodeKlasifikasi !== null &&
+                        dataKodeKlasifikasi !== undefined) ||
+                      (dataKlasifikasi && dataKlasifikasi.length > 0)
+                    }
+                    onChange={(e) =>
+                      handleSubmitChange("nomorSurat", e.target.value)
+                    }
+                    placeholder="Masukkan nomor surat manual (opsional)"
+                  />
+                </FormControl>
+                <FormControl my={"30px"}>
+                  <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                  <AsyncSelect
+                    loadOptions={async (inputValue) => {
+                      if (!inputValue) return [];
+                      try {
+                        const res = await axios.get(
+                          `${
+                            import.meta.env.VITE_REACT_APP_API_BASE_URL
+                          }/pegawai/search?q=${inputValue}`
+                        );
+
+                        const filtered = res.data.result;
+
+                        return filtered.map((val) => ({
+                          value: val.id,
+                          label: val.nama,
+                        }));
+                      } catch (err) {
+                        console.error("Failed to load options:", err.message);
+                        return [];
+                      }
+                    }}
+                    placeholder="Ketik Nama Pegawai"
+                    onChange={(selectedOption) => {
+                      setPegawaiId(selectedOption?.value || null);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        height: "60px",
+                        _hover: { borderColor: "yellow.700" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
                   />
                 </FormControl>
               </Box>
