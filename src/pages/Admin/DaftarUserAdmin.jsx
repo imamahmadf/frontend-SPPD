@@ -7,6 +7,7 @@ import { Link, useHistory } from "react-router-dom";
 import { BsXCircle } from "react-icons/bs";
 import { BsPlusCircle } from "react-icons/bs";
 import { BsTrash } from "react-icons/bs";
+import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDisclosure } from "@chakra-ui/react";
 import {
   Box,
@@ -36,6 +37,13 @@ import {
   Input,
   Spacer,
   Select,
+  InputGroup,
+  InputRightElement,
+  IconButton,
+  Icon,
+  FormHelperText,
+  VStack,
+  useToast,
 } from "@chakra-ui/react";
 import Loading from "../../Componets/Logout";
 import { useSelector } from "react-redux";
@@ -74,7 +82,66 @@ function DaftarUserAdmin() {
     onClose: onDeleteUserClose,
   } = useDisclosure();
 
+  const {
+    isOpen: isEditPasswordOpen,
+    onOpen: onEditPasswordOpen,
+    onClose: onEditPasswordClose,
+  } = useDisclosure();
+
   const [userToDelete, setUserToDelete] = useState(null);
+  const [userToEditPassword, setUserToEditPassword] = useState(null);
+  const [passwordBaru, setPasswordBaru] = useState("");
+  const [konfirmasiPassword, setKonfirmasiPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showKonfirmasiPassword, setShowKonfirmasiPassword] = useState(false);
+  const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
+  const [mathQuestion, setMathQuestion] = useState({
+    angka1: 0,
+    angka2: 0,
+    jawaban: 0,
+  });
+  const [jawabanUser, setJawabanUser] = useState("");
+  const [mathQuestionDelete, setMathQuestionDelete] = useState({
+    angka1: 0,
+    angka2: 0,
+    jawaban: 0,
+  });
+  const [jawabanUserDelete, setJawabanUserDelete] = useState("");
+  const toast = useToast();
+
+  // Fungsi untuk generate pertanyaan matematika random (untuk edit password)
+  const generateMathQuestion = () => {
+    const angka1 = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    const angka2 = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    const jawaban = angka1 + angka2;
+    setMathQuestion({ angka1, angka2, jawaban });
+    setJawabanUser(""); // Reset jawaban user
+  };
+
+  // Fungsi untuk generate pertanyaan matematika random (untuk hapus user)
+  const generateMathQuestionDelete = () => {
+    const angka1 = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    const angka2 = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+    const jawaban = angka1 + angka2;
+    setMathQuestionDelete({ angka1, angka2, jawaban });
+    setJawabanUserDelete(""); // Reset jawaban user
+  };
+
+  // Handler untuk menutup modal edit password dan reset state
+  const handleCloseEditPassword = () => {
+    setPasswordBaru("");
+    setKonfirmasiPassword("");
+    setJawabanUser("");
+    setUserToEditPassword(null);
+    onEditPasswordClose();
+  };
+
+  // Handler untuk menutup modal hapus user dan reset state
+  const handleCloseDeleteUser = () => {
+    setJawabanUserDelete("");
+    setUserToDelete(null);
+    onDeleteUserClose();
+  };
   const deleteRole = async () => {
     await axios
       .post(
@@ -101,6 +168,22 @@ function DaftarUserAdmin() {
     }, 2000);
   }
   const deleteUser = async (val) => {
+    // Validasi jawaban matematika sebelum menghapus
+    if (
+      !jawabanUserDelete ||
+      parseInt(jawabanUserDelete) !== mathQuestionDelete.jawaban
+    ) {
+      toast({
+        title: "Error",
+        description: "Jawaban matematika salah. User tidak dapat dihapus.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      generateMathQuestionDelete(); // Generate pertanyaan baru
+      return;
+    }
+
     await axios
       .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/delete/${val}`)
       .then((res) => {
@@ -108,9 +191,26 @@ function DaftarUserAdmin() {
         fetchDataUser();
         setSelectedRole("");
         setAvailableRoles([]);
+        toast({
+          title: "Berhasil",
+          description: "User berhasil dihapus",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        // Reset state setelah berhasil
+        generateMathQuestionDelete(); // Generate pertanyaan baru untuk next time
+        handleCloseDeleteUser();
       })
       .catch((err) => {
         console.error(err);
+        toast({
+          title: "Error",
+          description: err.response?.data?.message || "Gagal menghapus user",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       });
   };
 
@@ -131,6 +231,92 @@ function DaftarUserAdmin() {
       .catch((err) => {
         console.error(err);
       });
+  };
+
+  const handleEditPassword = async () => {
+    // Validasi
+    if (!passwordBaru || !konfirmasiPassword) {
+      toast({
+        title: "Error",
+        description: "Password baru dan konfirmasi password harus diisi",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (passwordBaru.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password baru minimal 6 karakter",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (passwordBaru !== konfirmasiPassword) {
+      toast({
+        title: "Error",
+        description: "Password baru dan konfirmasi password tidak sama",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Validasi jawaban matematika
+    if (!jawabanUser || parseInt(jawabanUser) !== mathQuestion.jawaban) {
+      toast({
+        title: "Error",
+        description: "Jawaban matematika salah. Silakan coba lagi.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      generateMathQuestion(); // Generate pertanyaan baru
+      return;
+    }
+
+    setIsSubmittingPassword(true);
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/update-password/${
+          userToEditPassword?.id
+        }`,
+        {
+          passwordBaru,
+        }
+      );
+
+      toast({
+        title: "Berhasil",
+        description: res.data.message || "Password berhasil diubah",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      // Reset form dan tutup modal
+      generateMathQuestion(); // Generate pertanyaan baru untuk next time
+      handleCloseEditPassword();
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message ||
+        "Gagal mengubah password. Silakan coba lagi.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmittingPassword(false);
+    }
   };
 
   async function fetchRole() {
@@ -200,9 +386,9 @@ function DaftarUserAdmin() {
                 {dataUser?.map((user, index) => (
                   <Tr>
                     <Td>{page * limit + index + 1}</Td>
-                    <Td>{user.nama}</Td>
-                    <Td>{user.namaPengguna}</Td>
-                    <Td>{user.profiles[0].unitKerja_profile.unitKerja}</Td>
+                    <Td>{user?.nama}</Td>
+                    <Td>{user?.namaPengguna}</Td>
+                    <Td>{user?.profiles[0]?.unitKerja_profile?.unitKerja}</Td>
                     <Td>
                       <Text>
                         {user?.userRoles?.map((val) => (
@@ -255,7 +441,33 @@ function DaftarUserAdmin() {
                         </Center>{" "}
                         <Center
                           onClick={() => {
+                            setUserToEditPassword(user);
+                            setPasswordBaru("");
+                            setKonfirmasiPassword("");
+                            setJawabanUser("");
+                            generateMathQuestion(); // Generate pertanyaan baru saat modal dibuka
+                            onEditPasswordOpen();
+                          }}
+                          borderRadius={"5px"}
+                          as="button"
+                          h="35px"
+                          w="35px"
+                          fontSize="14px"
+                          transition="all 0.2s cubic-bezier(.08,.52,.52,1)"
+                          color="white"
+                          _hover={{
+                            bg: "black",
+                          }}
+                          bg="blue.500"
+                          title="Edit Password"
+                        >
+                          <Icon as={FaLock} />
+                        </Center>{" "}
+                        <Center
+                          onClick={() => {
                             setUserToDelete(user);
+                            setJawabanUserDelete("");
+                            generateMathQuestionDelete(); // Generate pertanyaan baru saat modal dibuka
                             onDeleteUserOpen();
                           }}
                           borderRadius={"5px"}
@@ -371,7 +583,7 @@ function DaftarUserAdmin() {
       </Modal>
 
       {/* Modal Konfirmasi Hapus User */}
-      <Modal isOpen={isDeleteUserOpen} onClose={onDeleteUserClose}>
+      <Modal isOpen={isDeleteUserOpen} onClose={handleCloseDeleteUser}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Konfirmasi Hapus User</ModalHeader>
@@ -386,6 +598,36 @@ function DaftarUserAdmin() {
               Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data
               user terkait.
             </Text>
+
+            {/* Pertanyaan Matematika */}
+            <FormControl isRequired mt={4}>
+              <FormLabel fontSize="md" fontWeight="bold">
+                Verifikasi Matematika
+              </FormLabel>
+              <Box
+                p={4}
+                bg="red.50"
+                borderRadius="md"
+                border="1px"
+                borderColor="red.200"
+                mb={2}
+              >
+                <Text fontSize="lg" textAlign="center" fontWeight="bold">
+                  {mathQuestionDelete.angka1} + {mathQuestionDelete.angka2} = ?
+                </Text>
+              </Box>
+              <Input
+                type="number"
+                placeholder="Masukkan jawaban"
+                value={jawabanUserDelete}
+                onChange={(e) => setJawabanUserDelete(e.target.value)}
+                size="lg"
+              />
+              <FormHelperText>
+                Jawab pertanyaan matematika di atas untuk melanjutkan
+                penghapusan
+              </FormHelperText>
+            </FormControl>
           </ModalBody>
           <ModalFooter>
             <Button
@@ -393,14 +635,145 @@ function DaftarUserAdmin() {
               mr={3}
               onClick={() => {
                 deleteUser(userToDelete?.id);
-                onDeleteUserClose();
-                setUserToDelete(null);
               }}
             >
               Hapus
             </Button>
-            <Button variant="ghost" onClick={onDeleteUserClose}>
+            <Button variant="ghost" onClick={handleCloseDeleteUser}>
               Batal
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Edit Password */}
+      <Modal
+        isOpen={isEditPasswordOpen}
+        onClose={handleCloseEditPassword}
+        size="md"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Edit Password</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4}>
+              <Text fontSize="sm" color="gray.600" mb={2}>
+                Mengubah password untuk user:{" "}
+                <strong>{userToEditPassword?.nama}</strong> (
+                {userToEditPassword?.namaPengguna})
+              </Text>
+
+              {/* Pertanyaan Matematika */}
+              <FormControl isRequired>
+                <FormLabel fontSize="md" fontWeight="bold">
+                  Verifikasi Matematika
+                </FormLabel>
+                <Box
+                  p={4}
+                  bg="blue.50"
+                  borderRadius="md"
+                  border="1px"
+                  borderColor="blue.200"
+                  mb={2}
+                >
+                  <Text fontSize="lg" textAlign="center" fontWeight="bold">
+                    {mathQuestion.angka1} + {mathQuestion.angka2} = ?
+                  </Text>
+                </Box>
+                <Input
+                  type="number"
+                  placeholder="Masukkan jawaban"
+                  value={jawabanUser}
+                  onChange={(e) => setJawabanUser(e.target.value)}
+                  size="lg"
+                />
+                <FormHelperText>
+                  Jawab pertanyaan matematika di atas untuk melanjutkan
+                </FormHelperText>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel display="flex" alignItems="center" gap={2}>
+                  <Icon as={FaLock} />
+                  Password Baru
+                </FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Masukkan password baru (min. 6 karakter)"
+                    value={passwordBaru}
+                    onChange={(e) => setPasswordBaru(e.target.value)}
+                    pr="50px"
+                  />
+                  <InputRightElement width="50px">
+                    <IconButton
+                      aria-label={
+                        showPassword
+                          ? "Sembunyikan password"
+                          : "Tampilkan password"
+                      }
+                      icon={showPassword ? <FaEyeSlash /> : <FaEye />}
+                      onClick={() => setShowPassword(!showPassword)}
+                      variant="ghost"
+                      size="sm"
+                    />
+                  </InputRightElement>
+                </InputGroup>
+                <FormHelperText>
+                  Password baru minimal 6 karakter
+                </FormHelperText>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel display="flex" alignItems="center" gap={2}>
+                  <Icon as={FaLock} />
+                  Konfirmasi Password
+                </FormLabel>
+                <InputGroup>
+                  <Input
+                    type={showKonfirmasiPassword ? "text" : "password"}
+                    placeholder="Konfirmasi password baru"
+                    value={konfirmasiPassword}
+                    onChange={(e) => setKonfirmasiPassword(e.target.value)}
+                    pr="50px"
+                  />
+                  <InputRightElement width="50px">
+                    <IconButton
+                      aria-label={
+                        showKonfirmasiPassword
+                          ? "Sembunyikan password"
+                          : "Tampilkan password"
+                      }
+                      icon={showKonfirmasiPassword ? <FaEyeSlash /> : <FaEye />}
+                      onClick={() =>
+                        setShowKonfirmasiPassword(!showKonfirmasiPassword)
+                      }
+                      variant="ghost"
+                      size="sm"
+                    />
+                  </InputRightElement>
+                </InputGroup>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleCloseEditPassword}
+              isDisabled={isSubmittingPassword}
+            >
+              Batal
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={handleEditPassword}
+              isLoading={isSubmittingPassword}
+              loadingText="Mengubah..."
+            >
+              Ubah Password
             </Button>
           </ModalFooter>
         </ModalContent>

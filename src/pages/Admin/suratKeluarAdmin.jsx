@@ -39,7 +39,10 @@ import {
   Heading,
   HStack,
   Spacer,
+  useToast,
+  Icon,
 } from "@chakra-ui/react";
+import { BsDownload } from "react-icons/bs";
 function suratKeluarAdmin() {
   const [dataSuratKeluar, setDataSuratKeluar] = useState([]);
   const history = useHistory();
@@ -65,6 +68,7 @@ function suratKeluarAdmin() {
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
   const [pegawaiId, setPegawaiId] = useState(null);
+  const toast = useToast();
 
   const {
     isOpen: isTambahOpen,
@@ -73,6 +77,46 @@ function suratKeluarAdmin() {
   } = useDisclosure();
   const changePage = ({ selected }) => {
     setPage(selected);
+  };
+
+  const downloadExcel = async () => {
+    try {
+      const response = await axios.get(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/admin/get/surat-keluar/download?indukUnitKerjaId=${
+          user[0]?.unitKerja_profile?.indukUnitKerja.id
+        }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`,
+        {
+          responseType: "blob", // agar respons dibaca sebagai file
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "data-surat-keluar.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast({
+        title: "Berhasil",
+        description: "File Excel berhasil diunduh",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Gagal mengunduh file Excel:", error);
+      toast({
+        title: "Error",
+        description: "Gagal mengunduh file Excel",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleSubmitChange = (field, val) => {
@@ -229,9 +273,22 @@ function suratKeluarAdmin() {
               />
             </FormControl>
           </Flex>{" "}
-          <Button onClick={onTambahOpen} ms={"30px"} variant={"primary"}>
-            Tambah +
-          </Button>{" "}
+          <Flex gap={4} ms={"30px"} mb={4} align="center">
+            <Button onClick={onTambahOpen} variant={"primary"}>
+              Tambah +
+            </Button>
+            <Button
+              variant={"primary"}
+              fontWeight={900}
+              onClick={downloadExcel}
+              leftIcon={<Icon as={BsDownload} />}
+            >
+              Download Excel
+            </Button>
+            <Text fontSize="sm" color="gray.600">
+              Total: {rows} data
+            </Text>
+          </Flex>{" "}
           <Box p={"30px"}>
             <Table variant="primary">
               <Thead>

@@ -80,6 +80,15 @@ function DaftarKwitansiGlobalKeuangan() {
     onClose: onTambahClose,
   } = useDisclosure();
 
+  const formatRupiah = (value) => {
+    if (value === null || value === undefined || isNaN(value)) return "-";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
   const changePage = ({ selected }) => {
     setPage(selected);
   };
@@ -147,6 +156,7 @@ function DaftarKwitansiGlobalKeuangan() {
                   <Th>Pengguna Anggaran</Th>
                   <Th>Bendahara</Th>
                   <Th>Sumber Dana</Th>
+                  <Th>Total Nilai</Th>
                   <Th>Status</Th>
                   <Th>Aksi</Th>
                 </Tr>
@@ -173,6 +183,11 @@ function DaftarKwitansiGlobalKeuangan() {
                     <Td>{item?.KPA?.pegawai_KPA?.nama || "-"}</Td>
                     <Td>{item?.bendahara?.pegawai_bendahara?.nama || "-"}</Td>
                     <Td>{item?.bendahara?.sumberDana?.sumber || "-"}</Td>
+                    <Td>
+                      <Text fontWeight="medium">
+                        {formatRupiah(item?.total)}
+                      </Text>
+                    </Td>
                     <Td>
                       <Badge
                         colorScheme={

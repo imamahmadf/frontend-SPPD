@@ -43,6 +43,7 @@ function EditPegawai(props) {
     nama: "",
     jabatan: "",
     nip: "",
+    nik: "",
     daftarGolongan: { id: "", golongan: "" },
     daftarPangkat: { id: "", golongan: "" },
     daftarTingaktan: { id: "", tingkatan: "" },
@@ -97,6 +98,7 @@ function EditPegawai(props) {
           nama: res.data.result.nama,
           jabatan: res.data.result.jabatan,
           nip: res.data.result.nip,
+          nik: res.data.result.nik,
           pendidikan: res.data.result.pendidikan,
           profesi: {
             id: res.data.result.profesi.id,
@@ -187,6 +189,30 @@ function EditPegawai(props) {
                       ) : (
                         <>
                           <Text as="span">{dataPegawai.nip}</Text>
+                        </>
+                      )}
+                    </Flex>
+                  </Td>
+                </Tr>
+                <Tr>
+                  <Th minWidth={"100px"}>NIK</Th>
+                  <Td>
+                    <Flex>
+                      {isEditing ? (
+                        <>
+                          <Input
+                            value={dataPegawai.nik}
+                            onChange={(e) =>
+                              setDataPegawai({
+                                ...dataPegawai,
+                                nik: e.target.value,
+                              })
+                            }
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Text as="span">{dataPegawai.nik}</Text>
                         </>
                       )}
                     </Flex>

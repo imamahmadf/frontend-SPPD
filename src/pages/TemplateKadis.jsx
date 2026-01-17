@@ -31,6 +31,8 @@ const TemplateKadis = () => {
   const [dataTemplate, setDataTemplate] = useState([]);
   const [oldFile, setOldFile] = useState("");
   const [templateId, setTemplateId] = useState(null);
+  const [templateData, setTemplateData] = useState({});
+  const [selectedJenis, setSelectedJenis] = useState(null);
   const toast = useToast();
 
   const handleDownload = async (fileName) => {
@@ -69,8 +71,10 @@ const TemplateKadis = () => {
         console.log(res.data.result);
         setDataTemplate(res.data.result);
         if (res.data.result && res.data.result.length > 0) {
-          setOldFile(res.data.result[0].template);
-          setTemplateId(res.data.result[0].id);
+          const firstTemplate = res.data.result[0];
+          setTemplateData(firstTemplate);
+          setOldFile(firstTemplate.template);
+          setTemplateId(firstTemplate.id);
         }
       })
       .catch((err) => {
@@ -111,13 +115,14 @@ const TemplateKadis = () => {
             </Text>
 
             <Formik
-              initialValues={{ file: null, nomorSurat: null }}
+              initialValues={{ file: null, nomorSurat: null, jenis: null }}
               validationSchema={validationSchema}
               onSubmit={async (values, { setSubmitting, resetForm }) => {
                 console.log("Nilai yang dikirim:", values.jenis);
                 const formData = new FormData();
                 formData.append("file", values.file);
                 formData.append("nomorSurat", values.nomorSurat);
+                formData.append("jenis", values.jenis);
                 formData.append("oldFile", oldFile || "");
                 formData.append("id", templateId || "");
 
@@ -140,6 +145,7 @@ const TemplateKadis = () => {
 
                   resetForm();
                   setSelectedFile(null);
+                  setSelectedJenis(null);
                   fetchTemplate();
                 } catch (error) {
                   toast({
@@ -165,6 +171,31 @@ const TemplateKadis = () => {
                           setFieldValue("nomorSurat", event.target.value);
                         }}
                       />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Jenis Template</FormLabel>
+                      <Select
+                        mt="10px"
+                        placeholder="Template"
+                        border="1px"
+                        borderRadius={"8px"}
+                        borderColor={"rgba(229, 231, 235, 1)"}
+                        onChange={(e) => {
+                          const selectedValue = parseInt(e.target.value);
+                          console.log("Nilai yang dipilih:", selectedValue);
+                          setFieldValue("jenis", selectedValue);
+                          setSelectedJenis(selectedValue);
+
+                          if (selectedValue === 1) {
+                            setOldFile(templateData.template || "");
+                          } else if (selectedValue === 5) {
+                            setOldFile(templateData.templateSPD || "");
+                          }
+                        }}
+                      >
+                        <option value="1">Surat Tugas </option>
+                        <option value="2">SPD </option>
+                      </Select>
                       <FormErrorMessage>{errors.jenis}</FormErrorMessage>
                     </FormControl>
                     <FormControl isInvalid={errors.file && touched.file}>
@@ -190,7 +221,7 @@ const TemplateKadis = () => {
                       type="submit"
                       variant={"primary"}
                       isLoading={isSubmitting}
-                      isDisabled={!selectedFile}
+                      isDisabled={!selectedFile || !selectedJenis}
                     >
                       Upload
                     </Button>
@@ -205,24 +236,39 @@ const TemplateKadis = () => {
               <Thead>
                 <Tr>
                   <Th>Nomor Surat</Th>
-                  <Th>Surat Tugas dan SPD</Th>
+                  <Th>Surat Tugas </Th>
+                  <Th>SPD</Th>
                 </Tr>
               </Thead>
-              <Tr>
-                <Td>{dataTemplate[0]?.nomorSurat}</Td>
-                <Td>
-                  {dataTemplate[0]?.template ? (
-                    <Button
-                      variant={"primary"}
-                      onClick={() => handleDownload(dataTemplate[0]?.template)}
-                    >
-                      lihat
-                    </Button>
-                  ) : (
-                    "-"
-                  )}
-                </Td>
-              </Tr>
+              <Tbody>
+                <Tr>
+                  <Td>{templateData?.nomorSurat || "-"}</Td>
+                  <Td>
+                    {templateData?.template ? (
+                      <Button
+                        variant={"primary"}
+                        onClick={() => handleDownload(templateData.template)}
+                      >
+                        lihat
+                      </Button>
+                    ) : (
+                      "-"
+                    )}
+                  </Td>
+                  <Td>
+                    {templateData?.templateSPD ? (
+                      <Button
+                        variant={"primary"}
+                        onClick={() => handleDownload(templateData.templateSPD)}
+                      >
+                        lihat
+                      </Button>
+                    ) : (
+                      "-"
+                    )}
+                  </Td>
+                </Tr>
+              </Tbody>
             </Table>
           </Box>
         </Container>

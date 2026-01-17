@@ -152,6 +152,7 @@ const menuData = [
       { label: "Pengaturan", path: "/surat/nomor" },
       { label: "Daftar Surat Keluar", path: "/surat/surat-keluar" },
       { label: "Daftar SPPD", path: "/surat/sppd" },
+      { label: "Daftar Surat Tugas", path: "/surat/surat-tugas" },
     ],
   },
   {

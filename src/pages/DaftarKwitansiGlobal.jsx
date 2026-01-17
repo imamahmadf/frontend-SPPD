@@ -88,6 +88,21 @@ function DaftarKwitansiGlobal() {
     onOpen: onTambahOpen,
     onClose: onTambahClose,
   } = useDisclosure();
+  const {
+    isOpen: isHapusOpen,
+    onOpen: onHapusOpen,
+    onClose: onHapusClose,
+  } = useDisclosure();
+  const [selectedId, setSelectedId] = useState(null);
+
+  const formatRupiah = (value) => {
+    if (value === null || value === undefined || isNaN(value)) return "-";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
 
   const changePage = ({ selected }) => {
     setPage(selected);
@@ -114,10 +129,24 @@ function DaftarKwitansiGlobal() {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/kwitansi-global/hapus/${id}`
       );
+      toast({
+        title: "Berhasil!",
+        description: "Kwitansi berhasil dihapus.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
       onHapusClose();
       fetchKwitansiGlobal();
     } catch (err) {
       console.error(err);
+      toast({
+        title: "Error!",
+        description: "Gagal menghapus kwitansi.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -202,82 +231,124 @@ function DaftarKwitansiGlobal() {
             p={"30px"}
             borderRadius={"5px"}
             bg={colorMode === "dark" ? "gray.800" : "white"}
+            boxShadow="md"
           >
-            <HStack gap={5} mb={"30px"}>
-              <Button onClick={onTambahOpen} variant={"primary"} px={"50px"}>
-                Tambah +
+            <Heading
+              size="lg"
+              mb={6}
+              color={colorMode === "dark" ? "white" : "gray.700"}
+            >
+              Daftar Kwitansi Global
+            </Heading>
+            <Flex justify="space-between" align="center" mb={6}>
+              <Button
+                onClick={onTambahOpen}
+                variant={"primary"}
+                size="md"
+                leftIcon={<BsCartPlus />}
+              >
+                Tambah Kwitansi
               </Button>
-
-              <Spacer />
-            </HStack>
-            {/* {JSON.stringify(dataKwitGlobal)} */}
-            <Table variant={"primary"}>
+            </Flex>
+            <Table variant={"primary"} size="md">
               <Thead>
                 <Tr>
-                  <Th>Tanggal pengajuan</Th>
-                  <Th>jenis Perjalanan</Th>
+                  <Th>Tanggal Pengajuan</Th>
+                  <Th>Jenis Perjalanan</Th>
                   <Th>Sub Kegiatan</Th>
                   <Th>Pengguna Anggaran</Th>
                   <Th>Bendahara</Th>
+                  <Th>Total Nilai</Th>
                   <Th>Status</Th>
                   <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {dataKwitGlobal?.map((item, index) => (
-                  <Tr key={index}>
-                    <Td>
-                      {new Date(item?.createdAt).toLocaleDateString("id-ID", {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      }) || "-"}
-                    </Td>
-                    <Td>{item?.jenisPerjalanan?.jenis || "-"}</Td>
-                    <Td>{item?.subKegiatan?.subKegiatan || "-"}</Td>
-                    <Td>{item?.KPA?.pegawai_KPA?.nama || "-"}</Td>
-                    <Td>{item?.bendahara?.pegawai_bendahara?.nama}</Td>
-                    <Td>
-                      <Badge
-                        colorScheme={
-                          item?.status === "dibuat"
-                            ? "blue"
-                            : item?.status === "diajukan"
-                            ? "yellow"
-                            : item?.status === "ditolak"
-                            ? "red"
-                            : item?.status === "diterima"
-                            ? "green"
-                            : "gray"
-                        }
-                        px={3}
-                        py={1}
-                        borderRadius="md"
-                        fontSize="sm"
-                      >
-                        {item?.status}
-                      </Badge>
-                    </Td>
-                    <Td>
-                      <Button
-                        onClick={() =>
-                          history.push(
-                            `/perjalanan/detail-kwitansi-global/${item?.id}`
-                          )
-                        }
-                      >
-                        Detail
-                      </Button>
-                      {/* {item?.perjalanans[0]?.id ? null : (
-                        <Button onClick={hapusKwitansi(item?.id)}>
-                          {" "}
-                          hapus
-                        </Button>
-                      )} */}
+                {dataKwitGlobal?.length > 0 ? (
+                  dataKwitGlobal.map((item, index) => (
+                    <Tr key={index}>
+                      <Td>
+                        {item?.createdAt
+                          ? new Date(item.createdAt).toLocaleDateString(
+                              "id-ID",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )
+                          : "-"}
+                      </Td>
+                      <Td>{item?.jenisPerjalanan?.jenis || "-"}</Td>
+                      <Td>{item?.subKegiatan?.subKegiatan || "-"}</Td>
+                      <Td>{item?.KPA?.pegawai_KPA?.nama || "-"}</Td>
+                      <Td>{item?.bendahara?.pegawai_bendahara?.nama || "-"}</Td>
+                      <Td>
+                        <Text fontWeight="medium">
+                          {formatRupiah(item?.total)}
+                        </Text>
+                      </Td>
+                      <Td>
+                        <Badge
+                          colorScheme={
+                            item?.status === "dibuat"
+                              ? "blue"
+                              : item?.status === "diajukan"
+                              ? "yellow"
+                              : item?.status === "ditolak"
+                              ? "red"
+                              : item?.status === "diterima"
+                              ? "green"
+                              : "gray"
+                          }
+                          px={3}
+                          py={1}
+                          borderRadius="md"
+                          fontSize="sm"
+                          textTransform="capitalize"
+                        >
+                          {item?.status}
+                        </Badge>
+                      </Td>
+                      <Td>
+                        <HStack gap={2} spacing={2}>
+                          <Button
+                            size="sm"
+                            colorScheme="blue"
+                            variant="outline"
+                            onClick={() =>
+                              history.push(
+                                `/perjalanan/detail-kwitansi-global/${item?.id}`
+                              )
+                            }
+                          >
+                            Detail
+                          </Button>
+                          {(item?.status === "ditolak" ||
+                            item?.status === "dibuat") && (
+                            <Button
+                              size="sm"
+                              colorScheme="red"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedId(item?.id);
+                                onHapusOpen();
+                              }}
+                            >
+                              Hapus
+                            </Button>
+                          )}
+                        </HStack>
+                      </Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td colSpan={8} textAlign="center" py={8}>
+                      <Text color="gray.500">Tidak ada data</Text>
                     </Td>
                   </Tr>
-                ))}
+                )}
               </Tbody>
             </Table>
           </Container>{" "}
@@ -314,20 +385,28 @@ function DaftarKwitansiGlobal() {
           closeOnOverlayClick={false}
           isOpen={isTambahOpen}
           onClose={onTambahClose}
+          size="xl"
         >
-          <ModalOverlay />
-          <ModalContent borderRadius={0} maxWidth="1200px">
-            <ModalHeader></ModalHeader>
+          <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+          <ModalContent borderRadius="lg" maxWidth="1200px">
+            <ModalHeader>
+              <HStack>
+                <Box
+                  bgColor={"primary"}
+                  width={"30px"}
+                  height={"30px"}
+                  borderRadius="md"
+                ></Box>
+                <Heading color={"primary"} size="md">
+                  Buat Kwitansi Global
+                </Heading>
+              </HStack>
+            </ModalHeader>
             <ModalCloseButton />
 
             <ModalBody>
-              <Box>
-                <HStack>
-                  <Box bgColor={"primary"} width={"30px"} height={"30px"}></Box>
-                  <Heading color={"primary"}>Buat Kwitansi Global</Heading>
-                </HStack>
-
-                <SimpleGrid columns={2} spacing={10} p={"30px"}>
+              <Box pt={4}>
+                <SimpleGrid columns={2} spacing={6}>
                   <FormControl>
                     <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
                     <AsyncSelect
@@ -393,7 +472,7 @@ function DaftarKwitansiGlobal() {
                         value: val?.id,
                         label: `${val?.pegawai_KPA?.nama}`,
                       }))}
-                      placeholder="Contoh: Roda Dua"
+                      placeholder="Pilih Pengguna Anggaran"
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         setKPAId(selectedOption.value);
@@ -438,7 +517,7 @@ function DaftarKwitansiGlobal() {
                         value: val?.id,
                         label: `${val?.pegawai_bendahara?.nama}`,
                       }))}
-                      placeholder="Contoh: Roda Dua"
+                      placeholder="Pilih Bendahara"
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         setBendaharaId(selectedOption.value);
@@ -482,7 +561,7 @@ function DaftarKwitansiGlobal() {
                         value: val?.id,
                         label: `${val?.subKegiatan}`,
                       }))}
-                      placeholder="Contoh: Roda Dua"
+                      placeholder="Pilih Sub Kegiatan"
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         setSubKegiatanId(selectedOption.value);
@@ -526,7 +605,7 @@ function DaftarKwitansiGlobal() {
                         value: val?.id,
                         label: `${val?.jenis}`,
                       }))}
-                      placeholder="Contoh: Roda Dua"
+                      placeholder="Pilih Jenis Perjalanan"
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         setJenisPerjalananId(selectedOption.value);
@@ -571,7 +650,7 @@ function DaftarKwitansiGlobal() {
                         value: val?.id,
                         label: `${val?.pegawai_PPTK?.nama}`,
                       }))}
-                      placeholder="Contoh: Roda Dua"
+                      placeholder="Pilih PPTK"
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         setPPTKId(selectedOption.value);
@@ -616,7 +695,7 @@ function DaftarKwitansiGlobal() {
                         value: val?.id,
                         label: `${val?.nama}`,
                       }))}
-                      placeholder="Contoh: Roda Dua"
+                      placeholder="Pilih Jenis Kwitansi"
                       focusBorderColor="red"
                       onChange={(selectedOption) => {
                         setTemplateId(selectedOption.value);
@@ -652,9 +731,37 @@ function DaftarKwitansiGlobal() {
               </Box>
             </ModalBody>
 
-            <ModalFooter pe={"60px"} pb={"30px"}>
+            <ModalFooter gap={3}>
+              <Button variant="ghost" onClick={onTambahClose}>
+                Batal
+              </Button>
               <Button onClick={tambahKwitansiGlobal} variant={"primary"}>
-                buat Kwitansi Global
+                Buat Kwitansi Global
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+        {/* Modal Konfirmasi Hapus */}
+        <Modal isOpen={isHapusOpen} onClose={onHapusClose} isCentered>
+          <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+          <ModalContent borderRadius="lg">
+            <ModalHeader>Konfirmasi Hapus</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Text>
+                Apakah Anda yakin ingin menghapus kwitansi ini? Tindakan ini
+                tidak dapat dibatalkan.
+              </Text>
+            </ModalBody>
+            <ModalFooter gap={3}>
+              <Button variant="ghost" onClick={onHapusClose}>
+                Batal
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={() => hapusKwitansi(selectedId)}
+              >
+                Ya, Hapus
               </Button>
             </ModalFooter>
           </ModalContent>

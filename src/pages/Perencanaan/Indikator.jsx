@@ -108,7 +108,7 @@ function Indikator(props) {
 
   // Pagination state
   const [page, setPage] = useState(0);
-  const [limit] = useState(10);
+  const [limit] = useState(50);
   const [totalRows, setTotalRows] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
 
@@ -605,10 +605,24 @@ function Indikator(props) {
 
           {/* Filter Section */}
           <Card
+            width="100vw"
             mb={6}
             bg={colorMode === "dark" ? "gray.700" : "white"}
             borderRadius="lg"
             boxShadow="md"
+            mx={{ base: -3, md: -6 }}
+            px={{ base: 3, md: 6 }}
+            position="relative"
+            left="50%"
+            right="50%"
+            marginLeft={{
+              base: "calc(-50vw + 3px)",
+              md: "calc(-50vw + 6px)",
+            }}
+            marginRight={{
+              base: "calc(-50vw + 3px)",
+              md: "calc(-50vw + 6px)",
+            }}
           >
             <CardHeader pb={4}>
               <Heading
@@ -1018,121 +1032,137 @@ function Indikator(props) {
             </Center>
           ) : (
             <>
-              <Card
+              <Box
+                width="100vw"
+                mb={4}
+                overflowX="auto"
                 bg={colorMode === "dark" ? "gray.700" : "white"}
                 borderRadius="lg"
                 boxShadow="md"
-                mb={4}
+                p={4}
+                mx={{ base: -3, md: -6 }}
+                px={{ base: 3, md: 6 }}
+                position="relative"
+                left="50%"
+                right="50%"
+                marginLeft={{
+                  base: "calc(-50vw + 3px)",
+                  md: "calc(-50vw + 6px)",
+                }}
+                marginRight={{
+                  base: "calc(-50vw + 3px)",
+                  md: "calc(-50vw + 6px)",
+                }}
               >
-                <CardBody>
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>No</Th>
-                        <Th>Indikator</Th>
-                        <Th>Satuan</Th>
-                        <Th>Program</Th>
-                        <Th>Kegiatan</Th>
-                        <Th>Sub Kegiatan</Th>
-                        <Th>Unit Kerja</Th>
-                        <Th>Pegawai</Th>
-                        <Th textAlign="center">Aksi</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {dataIndikator.map((item, index) => (
-                        <Tr key={item.id}>
-                          <Td>{page * limit + index + 1}</Td>
-                          <Td maxW="300px">
-                            <Text isTruncated>{item.indikator}</Text>
-                          </Td>
-                          <Td>
-                            {item.satuanIndikator ? (
-                              <Badge
+                <Table variant="simple" width="100%">
+                  <Thead>
+                    <Tr>
+                      <Th>No</Th>
+                      <Th minW="400px" w="30%">
+                        Indikator
+                      </Th>
+                      <Th>Satuan</Th>
+                      <Th>Program</Th>
+                      <Th>Kegiatan</Th>
+                      <Th>Sub Kegiatan</Th>
+                      <Th>Unit Kerja</Th>
+                      <Th>Pegawai</Th>
+                      <Th textAlign="center">Aksi</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {dataIndikator.map((item, index) => (
+                      <Tr key={item.id}>
+                        <Td>{page * limit + index + 1}</Td>
+                        <Td minW="400px" w="30%">
+                          <Text>{item.indikator}</Text>
+                        </Td>
+                        <Td>
+                          {item.satuanIndikator ? (
+                            <Badge
+                              colorScheme="blue"
+                              borderRadius="full"
+                              px={3}
+                              py={1}
+                            >
+                              {item.satuanIndikator.satuan}
+                            </Badge>
+                          ) : (
+                            "-"
+                          )}
+                        </Td>
+                        <Td>
+                          {item.program ? (
+                            <Text fontSize="sm">
+                              {item.program.kode} - {item.program.nama}
+                            </Text>
+                          ) : (
+                            "-"
+                          )}
+                        </Td>
+                        <Td>
+                          {item.kegiatan ? (
+                            <Text fontSize="sm">
+                              {item.kegiatan.kode} - {item.kegiatan.nama}
+                            </Text>
+                          ) : (
+                            "-"
+                          )}
+                        </Td>
+                        <Td>
+                          {item.subKegPer ? (
+                            <Text fontSize="sm">
+                              {item.subKegPer.kode} - {item.subKegPer.nama}
+                            </Text>
+                          ) : (
+                            "-"
+                          )}
+                        </Td>
+                        <Td>
+                          {item.daftarUnitKerja ? (
+                            <Text fontSize="sm">
+                              {item.daftarUnitKerja.unitKerja}
+                            </Text>
+                          ) : (
+                            "-"
+                          )}
+                        </Td>
+                        <Td>
+                          {item.pegawai ? (
+                            <Text fontSize="sm">
+                              {item.pegawai.nip} - {item.pegawai.nama}
+                            </Text>
+                          ) : (
+                            "-"
+                          )}
+                        </Td>
+                        <Td>
+                          <HStack spacing={2} justify="center">
+                            <Tooltip label="Edit">
+                              <IconButton
+                                icon={<FaEdit />}
                                 colorScheme="blue"
-                                borderRadius="full"
-                                px={3}
-                                py={1}
-                              >
-                                {item.satuanIndikator.satuan}
-                              </Badge>
-                            ) : (
-                              "-"
-                            )}
-                          </Td>
-                          <Td>
-                            {item.program ? (
-                              <Text fontSize="sm">
-                                {item.program.kode} - {item.program.nama}
-                              </Text>
-                            ) : (
-                              "-"
-                            )}
-                          </Td>
-                          <Td>
-                            {item.kegiatan ? (
-                              <Text fontSize="sm">
-                                {item.kegiatan.kode} - {item.kegiatan.nama}
-                              </Text>
-                            ) : (
-                              "-"
-                            )}
-                          </Td>
-                          <Td>
-                            {item.subKegPer ? (
-                              <Text fontSize="sm">
-                                {item.subKegPer.kode} - {item.subKegPer.nama}
-                              </Text>
-                            ) : (
-                              "-"
-                            )}
-                          </Td>
-                          <Td>
-                            {item.daftarUnitKerja ? (
-                              <Text fontSize="sm">
-                                {item.daftarUnitKerja.unitKerja}
-                              </Text>
-                            ) : (
-                              "-"
-                            )}
-                          </Td>
-                          <Td>
-                            {item.pegawai ? (
-                              <Text fontSize="sm">
-                                {item.pegawai.nip} - {item.pegawai.nama}
-                              </Text>
-                            ) : (
-                              "-"
-                            )}
-                          </Td>
-                          <Td>
-                            <HStack spacing={2} justify="center">
-                              <Tooltip label="Edit">
-                                <IconButton
-                                  icon={<FaEdit />}
-                                  colorScheme="blue"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleEdit(item)}
-                                />
-                              </Tooltip>
-                              <Tooltip label="Hapus">
-                                <IconButton
-                                  icon={<FaTrash />}
-                                  colorScheme="red"
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleHapusClick(item)}
-                                />
-                              </Tooltip>
-                            </HStack>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </CardBody>
-              </Card>
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleEdit(item)}
+                              />
+                            </Tooltip>
+                            <Tooltip label="Hapus">
+                              <IconButton
+                                icon={<FaTrash />}
+                                colorScheme="red"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleHapusClick(item)}
+                              />
+                            </Tooltip>
+                          </HStack>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </Box>
 
               {/* Pagination */}
               <Box

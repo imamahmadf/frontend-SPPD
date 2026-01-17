@@ -15,6 +15,7 @@ import axios from "axios";
 import { loginSuccess, logout } from "./Redux/Reducers/auth.js";
 import ProtectedRoute from "./Componets/ProtectedRoute";
 import Template from "./pages/Template.jsx";
+import DaftarSuratTugas from "./pages/Surat/DaftarSuratTugas.jsx";
 import RampungAdmin from "./pages/Admin/RampungAdmin.jsx";
 import Perjalanan from "./pages/Perjalanan/Perjalanan.jsx";
 import suratKeluarAdmin from "./pages/Admin/suratKeluarAdmin.jsx";
@@ -45,7 +46,7 @@ import Profile from "./pages/Profile.jsx";
 import DeveloperProfile from "./pages/DeveloperProfile.jsx";
 import TemplateKadis from "./pages/TemplateKadis.jsx";
 import PegawaiUnitKerja from "./pages/PegawaiUnitKerja.jsx";
-import PerjalananKadis from "./pages/PerjalananKadis.jsx";
+import PerjalananKadis from "./pages/PerjalananKadis/PerjalananKadis.jsx";
 import RekapPerjalanan from "./pages/RekapPerjalanan.jsx";
 import KadisKalender from "./pages/KadisKalender.jsx";
 import DaftarKendaraan from "./pages/Sijaka/DaftarKendaraan.jsx";
@@ -359,6 +360,12 @@ function App() {
           <ProtectedRoute
             component={DaftarSPPD}
             path="/surat/sppd"
+            exact
+            roleRoute={[4, 5]}
+          />
+          <ProtectedRoute
+            component={DaftarSuratTugas}
+            path="/surat/surat-tugas"
             exact
             roleRoute={[4, 5]}
           />
