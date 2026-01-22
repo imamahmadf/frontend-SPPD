@@ -115,6 +115,7 @@ import AtasanDaftarKontrak from "./pages/PJPL/AtasanDaftarKontrak.jsx";
 import AtasanDetailKontrak from "./pages/PJPL/AtasanDetailKontrak.jsx";
 import PenilaianAtasan from "./pages/PJPL/PenilaianAtasan.jsx";
 import DashboardKeuangan from "./pages/Keuangan/DashboardKeuangan.jsx";
+import DetailKontrakPJPL from "./pages/PJPL/DetailKontrakPJPL.jsx";
 function App() {
   const dispatch = useDispatch();
 
@@ -688,6 +689,12 @@ function App() {
           <ProtectedRoute
             component={PejabatVerifikator}
             path="/admin-pegawai/pejabat-verifikator"
+            exact
+            roleRoute={[5, 1]}
+          />
+          <ProtectedRoute
+            component={DetailKontrakPJPL}
+            path="/admin-pegawai/detail-kontrak/:id"
             exact
             roleRoute={[5, 1]}
           />

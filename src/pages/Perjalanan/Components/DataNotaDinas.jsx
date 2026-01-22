@@ -18,6 +18,9 @@ import { useFormikContext } from "formik";
 
 const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
   const { values, errors, touched, setFieldValue } = useFormikContext();
+  
+  // Pastikan isSrikandi selalu memiliki nilai default
+  const isSrikandiChecked = (state.isSrikandi ?? 1) === 1;
 
   return (
     <Container
@@ -181,18 +184,31 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             <option value="2">Undangan</option>
           </Select>
         </FormControl>
-        <Flex gap={4} mt="30px">
+        <Box mb={"25px"} mt="30px">
           <Checkbox
-            isChecked={state.isSrikandi === 0}
-            onChange={(e) => actions.setIsSrikandi(e.target.checked ? 0 : 1)}
+            isChecked={isSrikandiChecked}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              actions.setIsSrikandi(checked ? 1 : 0);
+            }}
             size="lg"
-            colorScheme="primary"
+            colorScheme="green"
+            sx={{
+              "& span[data-checked]": {
+                bg: "green.500",
+                borderColor: "green.500",
+              },
+              "& span": {
+                borderColor: "gray.300",
+                borderWidth: "2px",
+              },
+            }}
           >
-            <Box fontSize="18px" fontWeight="500">
+            <Box as="span" fontSize="18px" fontWeight="500">
               Srikandi
             </Box>
           </Checkbox>
-        </Flex>
+        </Box>
       </Box>
     </Container>
   );

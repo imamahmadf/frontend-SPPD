@@ -63,6 +63,7 @@ import {
   StatNumber,
   StatHelpText,
   Icon,
+  Avatar,
 } from "@chakra-ui/react";
 import { useToast } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
@@ -929,12 +930,55 @@ function Rampung(props) {
                           fontWeight="semibold"
                           color="gray.600"
                           fontSize="sm"
+                          mb={2}
                         >
                           Nama Pegawai
                         </Text>
-                        <Text fontSize="md" fontWeight="medium">
-                          {dataRampung?.result?.pegawai?.nama || "-"}
-                        </Text>
+                        <HStack spacing={3} align="start">
+                          {dataRampung?.result?.pegawai?.profiles?.[0]
+                            ?.profilePic ? (
+                            <Image
+                              src={`${
+                                import.meta.env.VITE_REACT_APP_API_BASE_URL
+                              }${
+                                dataRampung.result.pegawai.profiles[0]
+                                  .profilePic
+                              }`}
+                              alt={dataRampung?.result?.pegawai?.nama || "Foto"}
+                              width="80px"
+                              height="80px"
+                              objectFit="cover"
+                              borderRadius="md"
+                              bg="gray.200"
+                            />
+                          ) : (
+                            <Box
+                              width="80px"
+                              height="80px"
+                              bg="primary"
+                              borderRadius="md"
+                              display="flex"
+                              alignItems="center"
+                              justifyContent="center"
+                              color="white"
+                              fontWeight="bold"
+                              fontSize="lg"
+                              flexShrink={0}
+                            >
+                              {dataRampung?.result?.pegawai?.nama
+                                ?.charAt(0)
+                                .toUpperCase() || "-"}
+                            </Box>
+                          )}
+                          <VStack spacing={1} align="start">
+                            <Text fontSize="md" fontWeight="medium">
+                              {dataRampung?.result?.pegawai?.nama || "-"}
+                            </Text>
+                            <Text fontSize="sm" color="gray.500">
+                              {dataRampung?.result?.pegawai?.nip || "-"}
+                            </Text>
+                          </VStack>
+                        </HStack>
                       </Box>
                       <Box>
                         <Text

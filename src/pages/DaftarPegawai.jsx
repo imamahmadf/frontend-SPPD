@@ -276,7 +276,7 @@ function DaftarPegawai() {
       setJabatan(val);
     } else if (field == "pendidikan") {
       setPendidikan(val);
-    } else if (field == "nip") {
+    } else if (field == "nik") {
       setNik(val);
     }
   };

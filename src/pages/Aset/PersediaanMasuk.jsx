@@ -48,6 +48,7 @@ import { useDisclosure } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
+import { formatRupiah, parseRupiah } from "../../utils/formatRupiah";
 
 function PersediaanMasuk() {
   const [DataPersediaan, setDataPersediaan] = useState([]);
@@ -323,13 +324,16 @@ function PersediaanMasuk() {
                   <FormControl my={"30px"}>
                     <FormLabel fontSize={"24px"}>harga Satuan</FormLabel>
                     <Input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       height={"60px"}
                       bgColor={"terang"}
-                      onChange={(e) =>
-                        handleSubmitChange("harga", e.target.value)
-                      }
-                      placeholder="Contoh: 5000"
+                      value={formatRupiah(harga)}
+                      onChange={(e) => {
+                        const parsed = parseRupiah(e.target.value);
+                        setHarga(parsed);
+                      }}
+                      placeholder="Contoh: Rp 5.000"
                     />
                   </FormControl>
                   <FormControl my={"30px"}>

@@ -877,17 +877,48 @@ function RampungAdmin(props) {
               >
                 <CardHeader bg="gray.50" py={4}>
                   <Flex justify="space-between" align="center">
-                    <Box>
-                      <Heading size="md" color="gray.800">
-                        {item?.pegawai?.nama}
-                      </Heading>
-                      <Text color="gray.600" fontSize="sm">
-                        NIP: {item?.pegawai?.nip}
-                      </Text>
-                      <Text color="gray.600" fontSize="sm">
-                        Nomor SPD: {item?.nomorSPD}
-                      </Text>
-                    </Box>
+                    <HStack spacing={3} align="start">
+                      {item?.pegawai?.profiles?.[0]?.profilePic ? (
+                        <Image
+                          src={`${import.meta.env.VITE_REACT_APP_API_BASE_URL}${
+                            item.pegawai.profiles[0].profilePic
+                          }`}
+                          alt={item?.pegawai?.nama || "Foto"}
+                          width="80px"
+                          height="80px"
+                          objectFit="cover"
+                          borderRadius="md"
+                          bg="gray.200"
+                        />
+                      ) : (
+                        <Box
+                          width="80px"
+                          height="80px"
+                          bg="primary"
+                          borderRadius="md"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          color="white"
+                          fontWeight="bold"
+                          fontSize="lg"
+                          flexShrink={0}
+                        >
+                          {item?.pegawai?.nama?.charAt(0).toUpperCase() || "-"}
+                        </Box>
+                      )}
+                      <VStack spacing={1} align="start">
+                        <Heading size="md" color="gray.800">
+                          {item?.pegawai?.nama}
+                        </Heading>
+                        <Text color="gray.600" fontSize="sm">
+                          NIP: {item?.pegawai?.nip}
+                        </Text>
+                        <Text color="gray.600" fontSize="sm">
+                          Nomor SPD: {item?.nomorSPD}
+                        </Text>
+                      </VStack>
+                    </HStack>
                     <Badge
                       colorScheme={getStatusColor(item.statusId)}
                       size="lg"

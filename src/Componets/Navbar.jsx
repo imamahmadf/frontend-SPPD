@@ -194,6 +194,7 @@ function Navbar() {
     count: 0,
     message: "",
   });
+  const [profilePic, setProfilePic] = useState(null);
   const toast = useToast();
 
   // Check apakah user memiliki role keuangan (roleId: 3)
@@ -205,6 +206,52 @@ function Navbar() {
     // Check apakah user memiliki roleId 3 (keuangan)
     return userRoleIds.includes(3);
   }, [role]);
+
+  // Fetch foto profile
+  const fetchProfilePic = useCallback(async () => {
+    if (!isAuthenticated || !user || !user[0]?.id) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/profile/${
+          user[0].id
+        }`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (response.data?.result?.profilePic) {
+        setProfilePic(response.data.result.profilePic);
+      }
+    } catch (error) {
+      console.error("Error fetching profile pic:", error);
+    }
+  }, [isAuthenticated, user]);
+
+  // Fetch foto profile saat mount atau saat authenticated berubah
+  useEffect(() => {
+    if (isAuthenticated && user && user[0]?.id) {
+      fetchProfilePic();
+    } else {
+      setProfilePic(null);
+    }
+  }, [isAuthenticated, user, fetchProfilePic]);
+
+  // Refresh foto profile saat kembali ke halaman (misalnya setelah upload foto)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (isAuthenticated && user && user[0]?.id) {
+        fetchProfilePic();
+      }
+    };
+
+    // Refresh saat window focus (user kembali ke tab)
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [isAuthenticated, user, fetchProfilePic]);
 
   // Color mode values untuk mobile drawer (dari Style folder)
   const {
@@ -1069,6 +1116,13 @@ function Navbar() {
                           <Avatar
                             size="sm"
                             name={user[0]?.nama}
+                            src={
+                              profilePic
+                                ? `${
+                                    import.meta.env.VITE_REACT_APP_API_BASE_URL
+                                  }${profilePic}`
+                                : undefined
+                            }
                             border="2px solid"
                             borderColor="rgba(255, 255, 255, 0.4)"
                             boxShadow="0 2px 8px rgba(0, 0, 0, 0.15)"
@@ -1125,7 +1179,20 @@ function Navbar() {
                     >
                       <Link to={"/profile"}>
                         <MenuItem
-                          icon={<Avatar size="xs" name={user[0]?.nama} />}
+                          icon={
+                            <Avatar
+                              size="xs"
+                              name={user[0]?.nama}
+                              src={
+                                profilePic
+                                  ? `${
+                                      import.meta.env
+                                        .VITE_REACT_APP_API_BASE_URL
+                                    }${profilePic}`
+                                  : undefined
+                              }
+                            />
+                          }
                           _hover={{
                             bg: "gray.50",
                             transform: "translateX(4px)",
@@ -1309,6 +1376,13 @@ function Navbar() {
                       <Avatar
                         size="lg"
                         name={user[0]?.nama}
+                        src={
+                          profilePic
+                            ? `${
+                                import.meta.env.VITE_REACT_APP_API_BASE_URL
+                              }${profilePic}`
+                            : undefined
+                        }
                         border="3px solid"
                         borderColor="rgba(255, 255, 255, 0.4)"
                         boxShadow="0 4px 12px rgba(0,0,0,0.2)"
@@ -1352,7 +1426,19 @@ function Navbar() {
                       variant="outline"
                       colorScheme="whiteAlpha"
                       size="md"
-                      leftIcon={<Avatar size="xs" name={user[0]?.nama} />}
+                      leftIcon={
+                        <Avatar
+                          size="xs"
+                          name={user[0]?.nama}
+                          src={
+                            profilePic
+                              ? `${
+                                  import.meta.env.VITE_REACT_APP_API_BASE_URL
+                                }${profilePic}`
+                              : undefined
+                          }
+                        />
+                      }
                       _hover={{
                         bg: "rgba(255, 255, 255, 0.25)",
                         transform: "translateY(-2px)",

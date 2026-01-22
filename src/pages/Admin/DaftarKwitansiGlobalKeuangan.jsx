@@ -72,6 +72,16 @@ function DaftarKwitansiGlobalKeuangan() {
   const [dataTemplate, setDataTemplate] = useState(null);
   const [dataSubKegiatan, setDataSubKegiatan] = useState(null);
 
+  // Filter states
+  const [filterSumberDanaId, setFilterSumberDanaId] = useState(null);
+  const [filterJenisPerjalananId, setFilterJenisPerjalananId] = useState(null);
+  const [filterUnitKerjaId, setFilterUnitKerjaId] = useState(null);
+  const [filterStatus, setFilterStatus] = useState(null);
+  const [filterTanggalAwal, setFilterTanggalAwal] = useState("");
+  const [filterTanggalAkhir, setFilterTanggalAkhir] = useState("");
+  const [dataSumberDana, setDataSumberDana] = useState(null);
+  const [dataUnitKerja, setDataUnitKerja] = useState(null);
+
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
   const {
@@ -94,13 +104,36 @@ function DaftarKwitansiGlobalKeuangan() {
   };
 
   async function fetchKwitansiGlobal() {
+    // Build query string directly like the example
+    let queryString = `page=${page}&limit=${limit}`;
+
+    // Add unitKerjaId only if filter is selected by user (no default value)
+    if (filterUnitKerjaId) {
+      queryString += `&unitKerjaId=${filterUnitKerjaId}`;
+    }
+
+    // Add filter parameters (only if they have values)
+    if (filterSumberDanaId) {
+      queryString += `&sumberDanaId=${filterSumberDanaId}`;
+    }
+    if (filterJenisPerjalananId) {
+      queryString += `&jenisPerjalananId=${filterJenisPerjalananId}`;
+    }
+    if (filterStatus) {
+      queryString += `&status=${filterStatus}`;
+    }
+    if (filterTanggalAwal) {
+      queryString += `&tanggalAwal=${filterTanggalAwal}`;
+    }
+    if (filterTanggalAkhir) {
+      queryString += `&tanggalAkhir=${filterTanggalAkhir}`;
+    }
+
     await axios
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/kwitansi-global/get/all?page=${page}&limit=${limit}&unitKerjaId=${
-          user[0]?.unitKerja_profile?.id
-        }&indukUnitKerjaId=${user[0]?.unitKerja_profile?.indukUnitKerja.id}`
+        }/kwitansi-global/get/all?${queryString}`
       )
       .then((res) => {
         setDataKwitGlobal(res.data.result);
@@ -120,9 +153,54 @@ function DaftarKwitansiGlobalKeuangan() {
       });
   }
 
+  async function fetchSumberDana() {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/admin/get/sumber-dana`
+      );
+      setDataSumberDana(res.data.result);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function fetchUnitKerja() {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/admin/get/unit-kerja`
+      );
+      setDataUnitKerja(res.data.result);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const resetFilter = () => {
+    setFilterSumberDanaId(null);
+    setFilterJenisPerjalananId(null);
+    setFilterUnitKerjaId(null);
+    setFilterStatus(null);
+    setFilterTanggalAwal("");
+    setFilterTanggalAkhir("");
+    setPage(0);
+  };
+
   useEffect(() => {
     fetchKwitansiGlobal();
-  }, [page]);
+  }, [
+    page,
+    filterSumberDanaId,
+    filterJenisPerjalananId,
+    filterUnitKerjaId,
+    filterStatus,
+    filterTanggalAwal,
+    filterTanggalAkhir,
+  ]);
+
+  useEffect(() => {
+    fetchSumberDana();
+    fetchUnitKerja();
+  }, []);
   return (
     <>
       <Layout>
@@ -143,6 +221,288 @@ function DaftarKwitansiGlobalKeuangan() {
             >
               Daftar Kwitansi Global Keuangan
             </Heading>
+
+            {/* Filter Section */}
+            <Box
+              mb={6}
+              p={4}
+              bg={colorMode === "dark" ? "gray.700" : "gray.50"}
+              borderRadius="8px"
+            >
+              <Flex justifyContent="space-between" alignItems="center" mb={4}>
+                <Heading
+                  size="sm"
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                >
+                  Filter Data
+                </Heading>
+                <Button size="sm" colorScheme="gray" onClick={resetFilter}>
+                  Reset Filter
+                </Button>
+              </Flex>
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Sumber Dana
+                  </FormLabel>
+                  <Select2
+                    options={dataSumberDana?.map((val) => ({
+                      value: val.id,
+                      label: val.sumber,
+                    }))}
+                    placeholder="Pilih Sumber Dana"
+                    onChange={(selectedOption) => {
+                      setFilterSumberDanaId(selectedOption?.value || null);
+                    }}
+                    value={
+                      filterSumberDanaId
+                        ? {
+                            value: filterSumberDanaId,
+                            label:
+                              dataSumberDana?.find(
+                                (val) => val.id === filterSumberDanaId
+                              )?.sumber || "",
+                          }
+                        : null
+                    }
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor:
+                          colorMode === "dark" ? "gray.800" : "white",
+                        border: "1px solid",
+                        borderColor:
+                          colorMode === "dark" ? "gray.600" : "gray.300",
+                        height: "40px",
+                        _hover: { borderColor: "primary" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Jenis Perjalanan
+                  </FormLabel>
+                  <Select2
+                    options={dataJenisPerjalanan?.map((val) => ({
+                      value: val.id,
+                      label: val.jenis,
+                    }))}
+                    placeholder="Pilih Jenis Perjalanan"
+                    onChange={(selectedOption) => {
+                      setFilterJenisPerjalananId(selectedOption?.value || null);
+                    }}
+                    value={
+                      filterJenisPerjalananId
+                        ? {
+                            value: filterJenisPerjalananId,
+                            label:
+                              dataJenisPerjalanan?.find(
+                                (val) => val.id === filterJenisPerjalananId
+                              )?.jenis || "",
+                          }
+                        : null
+                    }
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor:
+                          colorMode === "dark" ? "gray.800" : "white",
+                        border: "1px solid",
+                        borderColor:
+                          colorMode === "dark" ? "gray.600" : "gray.300",
+                        height: "40px",
+                        _hover: { borderColor: "primary" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Unit Kerja
+                  </FormLabel>
+                  <Select2
+                    options={dataUnitKerja?.map((val) => ({
+                      value: val.id,
+                      label: val.unitKerja,
+                    }))}
+                    placeholder="Pilih Unit Kerja"
+                    onChange={(selectedOption) => {
+                      setFilterUnitKerjaId(selectedOption?.value || null);
+                    }}
+                    value={
+                      filterUnitKerjaId
+                        ? {
+                            value: filterUnitKerjaId,
+                            label:
+                              dataUnitKerja?.find(
+                                (val) => val.id === filterUnitKerjaId
+                              )?.unitKerja || "",
+                          }
+                        : null
+                    }
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor:
+                          colorMode === "dark" ? "gray.800" : "white",
+                        border: "1px solid",
+                        borderColor:
+                          colorMode === "dark" ? "gray.600" : "gray.300",
+                        height: "40px",
+                        _hover: { borderColor: "primary" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Status
+                  </FormLabel>
+                  <Select2
+                    options={[
+                      { value: "dibuat", label: "Dibuat" },
+                      { value: "diajukan", label: "Diajukan" },
+                      { value: "ditolak", label: "Ditolak" },
+                      { value: "diterima", label: "Diterima" },
+                    ]}
+                    placeholder="Pilih Status"
+                    onChange={(selectedOption) => {
+                      setFilterStatus(selectedOption?.value || null);
+                    }}
+                    value={
+                      filterStatus
+                        ? {
+                            value: filterStatus,
+                            label:
+                              filterStatus === "dibuat"
+                                ? "Dibuat"
+                                : filterStatus === "diajukan"
+                                ? "Diajukan"
+                                : filterStatus === "ditolak"
+                                ? "Ditolak"
+                                : "Diterima",
+                          }
+                        : null
+                    }
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "6px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor:
+                          colorMode === "dark" ? "gray.800" : "white",
+                        border: "1px solid",
+                        borderColor:
+                          colorMode === "dark" ? "gray.600" : "gray.300",
+                        height: "40px",
+                        _hover: { borderColor: "primary" },
+                        minHeight: "40px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "primary" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Tanggal Pengajuan (Awal)
+                  </FormLabel>
+                  <Input
+                    type="date"
+                    value={filterTanggalAwal}
+                    onChange={(e) => setFilterTanggalAwal(e.target.value)}
+                    bg={colorMode === "dark" ? "gray.800" : "white"}
+                    borderColor={colorMode === "dark" ? "gray.600" : "gray.300"}
+                    height="40px"
+                    _hover={{
+                      borderColor: "primary",
+                    }}
+                    _focus={{
+                      borderColor: "primary",
+                      boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                    }}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Tanggal Pengajuan (Akhir)
+                  </FormLabel>
+                  <Input
+                    type="date"
+                    value={filterTanggalAkhir}
+                    onChange={(e) => setFilterTanggalAkhir(e.target.value)}
+                    bg={colorMode === "dark" ? "gray.800" : "white"}
+                    borderColor={colorMode === "dark" ? "gray.600" : "gray.300"}
+                    height="40px"
+                    _hover={{
+                      borderColor: "primary",
+                    }}
+                    _focus={{
+                      borderColor: "primary",
+                      boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                    }}
+                  />
+                </FormControl>
+              </SimpleGrid>
+            </Box>
+
             <HStack gap={5} mb={"30px"}>
               <Spacer />
             </HStack>

@@ -30,6 +30,28 @@ import {
 import axios from "axios";
 import Layout from "../../Componets/Layout";
 import { Link, useHistory } from "react-router-dom";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar, Doughnut, Pie } from "react-chartjs-2";
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+);
 export default function DashboardKeuangan() {
   const [dataDashboard, setDataDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -147,6 +169,219 @@ export default function DashboardKeuangan() {
   };
 
   const totals = calculateTotals();
+
+  // Fungsi untuk menyiapkan data chart distribusi status personil
+  const prepareStatusPersonilData = () => {
+    return {
+      labels: [
+        "SPD Sudah dibuat",
+        "Pengajuan kwitansi",
+        "Kwitansi Terverivikasi",
+        "Kwitansi ditolak",
+      ],
+      datasets: [
+        {
+          label: "Jumlah Personil",
+          data: [
+            totals.totalPersonilStatus1,
+            totals.totalPersonilStatus2,
+            totals.totalPersonilStatus3,
+            totals.totalPersonilStatus4,
+          ],
+          backgroundColor: [
+            "rgba(54, 162, 235, 0.8)",
+            "rgba(75, 192, 192, 0.8)",
+            "rgba(255, 206, 86, 0.8)",
+            "rgba(255, 99, 132, 0.8)",
+          ],
+          borderColor: [
+            "rgba(54, 162, 235, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(255, 99, 132, 1)",
+          ],
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data chart unit kerja berdasarkan total personil
+  const prepareUnitKerjaChartData = () => {
+    if (!dataDashboard || dataDashboard.length === 0) return null;
+
+    const labels = dataDashboard.map((uk) => uk.unitKerja || "Unknown");
+    const data = dataDashboard.map((uk) => uk.totalPersonilUnitKerja || 0);
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          label: "Total Personil",
+          data: data,
+          backgroundColor: "rgba(54, 162, 235, 0.8)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data chart unit kerja berdasarkan sub kegiatan
+  const prepareSubKegiatanChartData = () => {
+    if (!dataDashboard || dataDashboard.length === 0) return null;
+
+    const labels = dataDashboard.map((uk) => uk.unitKerja || "Unknown");
+    const data = dataDashboard.map((uk) => uk.daftarSubKegiatans?.length || 0);
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          label: "Jumlah Sub Kegiatan",
+          data: data,
+          backgroundColor: "rgba(75, 192, 192, 0.8)",
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Fungsi untuk menyiapkan data chart anggaran vs realisasi
+  const prepareAnggaranRealisasiChartData = () => {
+    if (!dataDashboard || dataDashboard.length === 0) return null;
+
+    const labels = [];
+    const anggaranData = [];
+    const realisasiData = [];
+
+    dataDashboard.forEach((unitKerja) => {
+      if (unitKerja.daftarSubKegiatans) {
+        unitKerja.daftarSubKegiatans.forEach((subKegiatan) => {
+          if (subKegiatan.anggaranByTipe) {
+            subKegiatan.anggaranByTipe.forEach((anggaran) => {
+              const label = `${unitKerja.unitKerja} - ${subKegiatan.subKegiatan}`;
+              labels.push(label);
+              anggaranData.push(anggaran.anggaran || 0);
+              realisasiData.push(anggaran.totalRealisasi || 0);
+            });
+          }
+        });
+      }
+    });
+
+    // Batasi jumlah data untuk menghindari chart terlalu padat
+    const maxItems = 10;
+    const slicedLabels = labels.slice(0, maxItems);
+    const slicedAnggaran = anggaranData.slice(0, maxItems);
+    const slicedRealisasi = realisasiData.slice(0, maxItems);
+
+    return {
+      labels: slicedLabels,
+      datasets: [
+        {
+          label: "Anggaran",
+          data: slicedAnggaran,
+          backgroundColor: "rgba(54, 162, 235, 0.8)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+        },
+        {
+          label: "Realisasi",
+          data: slicedRealisasi,
+          backgroundColor: "rgba(75, 192, 192, 0.8)",
+          borderColor: "rgba(75, 192, 192, 1)",
+          borderWidth: 2,
+        },
+      ],
+    };
+  };
+
+  // Options untuk chart
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            let label = context.dataset.label || "";
+            if (label) {
+              label += ": ";
+            }
+            if (context.parsed.y !== null) {
+              label += formatRupiah(context.parsed.y);
+            } else if (context.parsed !== null) {
+              label += context.parsed;
+            }
+            return label;
+          },
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function (value) {
+            if (value >= 1000000000) {
+              return (value / 1000000000).toFixed(1) + "M";
+            } else if (value >= 1000000) {
+              return (value / 1000000).toFixed(1) + "Jt";
+            } else if (value >= 1000) {
+              return (value / 1000).toFixed(1) + "K";
+            }
+            return value;
+          },
+        },
+      },
+    },
+  };
+
+  const barChartOptions = {
+    ...chartOptions,
+    indexAxis: "y", // Horizontal bar chart
+    scales: {
+      x: {
+        beginAtZero: true,
+      },
+      y: {
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0,
+          autoSkip: false,
+          font: {
+            size: 11,
+          },
+        },
+      },
+    },
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom",
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const label = context.label || "";
+            const value = context.parsed || 0;
+            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${label}: ${value} (${percentage}%)`;
+          },
+        },
+      },
+    },
+  };
 
   return (
     <Layout>
@@ -291,6 +526,98 @@ export default function DashboardKeuangan() {
                     </CardBody>
                   </Card>
                 </SimpleGrid>
+
+                {/* Chart dan Diagram Section */}
+                <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4}>
+                  {/* Chart Distribusi Status Personil - Doughnut */}
+                  <Card>
+                    <CardHeader>
+                      <Heading size="md">Distribusi Status Personil</Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <Box height="300px">
+                        <Doughnut
+                          data={prepareStatusPersonilData()}
+                          options={doughnutOptions}
+                        />
+                      </Box>
+                    </CardBody>
+                  </Card>
+
+                  {/* Chart Distribusi Status Personil - Pie */}
+                  <Card>
+                    <CardHeader>
+                      <Heading size="md">Persentase Status Personil</Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <Box height="300px">
+                        <Pie
+                          data={prepareStatusPersonilData()}
+                          options={doughnutOptions}
+                        />
+                      </Box>
+                    </CardBody>
+                  </Card>
+                </SimpleGrid>
+
+                {/* Chart Unit Kerja */}
+                <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4}>
+                  {/* Chart Total Personil per Unit Kerja */}
+                  <Card>
+                    <CardHeader>
+                      <Heading size="md">Total Personil per Unit Kerja</Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <Box height="400px">
+                        {prepareUnitKerjaChartData() && (
+                          <Bar
+                            data={prepareUnitKerjaChartData()}
+                            options={barChartOptions}
+                          />
+                        )}
+                      </Box>
+                    </CardBody>
+                  </Card>
+
+                  {/* Chart Sub Kegiatan per Unit Kerja */}
+                  <Card>
+                    <CardHeader>
+                      <Heading size="md">
+                        Jumlah Sub Kegiatan per Unit Kerja
+                      </Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <Box height="400px">
+                        {prepareSubKegiatanChartData() && (
+                          <Bar
+                            data={prepareSubKegiatanChartData()}
+                            options={barChartOptions}
+                          />
+                        )}
+                      </Box>
+                    </CardBody>
+                  </Card>
+                </SimpleGrid>
+
+                {/* Chart Anggaran vs Realisasi */}
+                {prepareAnggaranRealisasiChartData() &&
+                  prepareAnggaranRealisasiChartData().labels.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <Heading size="md">
+                          Perbandingan Anggaran vs Realisasi
+                        </Heading>
+                      </CardHeader>
+                      <CardBody>
+                        <Box height="500px">
+                          <Bar
+                            data={prepareAnggaranRealisasiChartData()}
+                            options={chartOptions}
+                          />
+                        </Box>
+                      </CardBody>
+                    </Card>
+                  )}
 
                 {/* Data Unit Kerja */}
                 <Card>

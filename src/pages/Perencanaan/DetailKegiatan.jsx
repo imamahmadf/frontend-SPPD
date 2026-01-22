@@ -66,6 +66,7 @@ import {
   FaUser,
 } from "react-icons/fa";
 import Loading from "../../Componets/Loading";
+import { formatRupiah, parseRupiah } from "../../utils/formatRupiah";
 function DetailKegiatan(props) {
   const [DataSubKegiatan, setDataSubKegiatan] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,16 +89,6 @@ function DetailKegiatan(props) {
   const [errors, setErrors] = useState({});
   const toast = useToast();
   const user = useSelector(userRedux);
-
-  // Fungsi untuk format rupiah
-  const formatRupiah = (value) => {
-    if (!value && value !== 0) return "-";
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
 
   // Fungsi untuk memeriksa apakah user memiliki unitKerjaId yang sama dengan indikator
   const canInputCapaian = (indikator) => {
@@ -1446,11 +1437,13 @@ function DetailKegiatan(props) {
                   </HStack>
                 </FormLabel>
                 <Input
-                  type="number"
-                  placeholder="Masukkan anggaran"
-                  value={anggaran}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Masukkan anggaran (contoh: Rp 1.000.000)"
+                  value={formatRupiah(anggaran)}
                   onChange={(e) => {
-                    setAnggaran(e.target.value);
+                    const parsed = parseRupiah(e.target.value);
+                    setAnggaran(parsed.toString());
                     setErrors({ ...errors, anggaran: "" });
                   }}
                   bg={colorMode === "dark" ? "gray.700" : "white"}
@@ -1581,11 +1574,13 @@ function DetailKegiatan(props) {
                   </HStack>
                 </FormLabel>
                 <Input
-                  type="number"
-                  placeholder="Masukkan anggaran"
-                  value={anggaran}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Masukkan anggaran (contoh: Rp 1.000.000)"
+                  value={formatRupiah(anggaran)}
                   onChange={(e) => {
-                    setAnggaran(e.target.value);
+                    const parsed = parseRupiah(e.target.value);
+                    setAnggaran(parsed.toString());
                     setErrors({ ...errors, anggaran: "" });
                   }}
                   bg={colorMode === "dark" ? "gray.700" : "white"}

@@ -28,6 +28,7 @@ import {
   Input,
   Heading,
   SimpleGrid,
+  useDisclosure,
 } from "@chakra-ui/react";
 import axios from "axios";
 import Layout from "../../Componets/Layout";
@@ -38,6 +39,12 @@ function EditPegawai(props) {
   const [isEditing, setIsEditing] = useState(false);
   const [dataSeed, setDataSeed] = useState([]);
   const [dataRiwayat, setDataRiwayat] = useState(null);
+  const [selectedUnitKerjaId, setSelectedUnitKerjaId] = useState("");
+  const {
+    isOpen: isModalMutasiOpen,
+    onOpen: onModalMutasiOpen,
+    onClose: onModalMutasiClose,
+  } = useDisclosure();
   const [dataPegawai, setDataPegawai] = useState({
     id: "",
     nama: "",
@@ -72,6 +79,37 @@ function EditPegawai(props) {
       })
       .catch((err) => {
         console.error(err);
+      });
+  };
+
+  const mutasiUnitKerja = () => {
+    if (!selectedUnitKerjaId) {
+      alert("Silakan pilih unit kerja baru");
+      return;
+    }
+
+    axios
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/post/mutasi`,
+        {
+          pegawaiId: props.match.params.id,
+          unitKerjaId: selectedUnitKerjaId,
+          unitKerjaIdLama: dataPegawai.daftarUnitKerja.id,
+        }
+      )
+      .then((res) => {
+        console.log(res.data, "MUTASI BERHASIL");
+        fetchDataPegawai();
+        onModalMutasiClose();
+        setSelectedUnitKerjaId("");
+        alert("Mutasi unit kerja berhasil");
+      })
+      .catch((err) => {
+        console.error(err);
+        alert(
+          "Gagal melakukan mutasi unit kerja: " +
+            (err.response?.data?.message || err.message)
+        );
       });
   };
   async function fetchSeed() {
@@ -403,62 +441,43 @@ function EditPegawai(props) {
                       </>
                     )}
                   </Td>
-                </Tr>{" "}
+                </Tr>
                 <Tr>
                   <Th>Unit Kerja</Th>
                   <Td>
-                    {isEditing ? (
-                      <>
-                        <Select
-                          defaultValue={dataPegawai?.daftarUnitKerja.id}
-                          onChange={(e) =>
-                            handleSelectChange(
-                              "daftarUnitKerja",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option value="">Pilih Unit Kerja</option>
-                          {dataSeed.resultUnitKerja &&
-                            dataSeed.resultUnitKerja.map((val) => (
-                              <option key={val.id} value={val.id}>
-                                {val.unitKerja}
-                              </option>
-                            ))}
-                        </Select>
-                      </>
-                    ) : (
-                      <>
-                        <Text>{dataPegawai.daftarUnitKerja?.unitKerja}</Text>
-                      </>
-                    )}
+                    <Text>{dataPegawai.daftarUnitKerja?.unitKerja || "-"}</Text>
                   </Td>
                 </Tr>
               </Thead>
             </Table>
             <Box mt={"30px"}>
-              {isEditing ? (
-                <>
-                  {" "}
-                  <Button
-                    me={"15px"}
-                    variant={"primary"}
-                    onClick={() => editData()}
-                  >
-                    Simpan
-                  </Button>
-                  <Button
-                    variant={"cancle"}
-                    onClick={() => setIsEditing(false)}
-                  >
-                    Batal
-                  </Button>
-                </>
-              ) : (
-                <Button variant={"primary"} onClick={() => setIsEditing(true)}>
-                  Edit
-                </Button>
-              )}
+              <HStack spacing={"15px"}>
+                {isEditing ? (
+                  <>
+                    <Button variant={"primary"} onClick={() => editData()}>
+                      Simpan
+                    </Button>
+                    <Button
+                      variant={"cancle"}
+                      onClick={() => setIsEditing(false)}
+                    >
+                      Batal
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant={"primary"}
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Edit
+                    </Button>
+                    <Button variant={"primary"} onClick={onModalMutasiOpen}>
+                      Mutasi
+                    </Button>
+                  </>
+                )}
+              </HStack>
             </Box>
           </Box>
         </Container>
@@ -497,6 +516,55 @@ function EditPegawai(props) {
           </Table>
         </Container>
       </Box>
+
+      {/* Modal Mutasi Unit Kerja */}
+      <Modal
+        isOpen={isModalMutasiOpen}
+        onClose={onModalMutasiClose}
+        closeOnOverlayClick={false}
+      >
+        <ModalOverlay />
+        <ModalContent borderRadius={0} maxWidth="600px">
+          <ModalHeader>Mutasi Unit Kerja</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <FormControl>
+              <FormLabel>Unit Kerja Saat Ini</FormLabel>
+              <Input
+                value={dataPegawai.daftarUnitKerja?.unitKerja || "-"}
+                isReadOnly
+                bgColor="gray.100"
+              />
+            </FormControl>
+            <FormControl mt={4}>
+              <FormLabel>Unit Kerja Baru</FormLabel>
+              <Select
+                value={selectedUnitKerjaId}
+                onChange={(e) => setSelectedUnitKerjaId(e.target.value)}
+                placeholder="Pilih Unit Kerja Baru"
+              >
+                {dataSeed.resultUnitKerja &&
+                  dataSeed.resultUnitKerja
+                    .filter((val) => val.id !== dataPegawai.daftarUnitKerja?.id)
+                    .map((val) => (
+                      <option key={val.id} value={val.id}>
+                        {val.unitKerja}
+                      </option>
+                    ))}
+              </Select>
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant={"primary"} onClick={mutasiUnitKerja} mr={3}>
+              Simpan Mutasi
+            </Button>
+            <Button variant={"cancle"} onClick={onModalMutasiClose}>
+              Batal
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </LayoutPegawai>
   );
 }

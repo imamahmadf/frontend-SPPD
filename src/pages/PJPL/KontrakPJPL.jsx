@@ -69,17 +69,27 @@ function KontrakPJPL() {
     onClose: onTambahClose,
   } = useDisclosure();
 
-  async function fetchDataPegawai() {
-    await axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/PJPL/get/pegawai`)
-      .then((res) => {
-        setDataPegawai(res.data.result);
+  async function fetchDataPegawai(unitKerjaIdParam = null) {
+    try {
+      const url = unitKerjaIdParam
+        ? `${
+            import.meta.env.VITE_REACT_APP_API_BASE_URL
+          }/PJPL/get/pegawai?unitKerjaId=${unitKerjaIdParam}`
+        : `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/PJPL/get/pegawai`;
 
-        console.log(res.data.result);
-      })
-      .catch((err) => {
-        console.error(err);
+      const res = await axios.get(url);
+      setDataPegawai(res.data.result);
+      console.log(res.data.result);
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error!",
+        description: "Gagal memuat data pegawai",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
       });
+    }
   }
 
   //   const tambahPejabat = () => {
@@ -119,11 +129,12 @@ function KontrakPJPL() {
   //   };
 
   useEffect(() => {
-    fetchDataPegawai();
-  }, []);
+    fetchDataPegawai(unitKerjaId);
+  }, [unitKerjaId]);
+
   useEffect(() => {
     setSelectedPegawaiIds([]);
-  }, [tanggalAwal, tanggalAkhir]);
+  }, [tanggalAwal, tanggalAkhir, unitKerjaId]);
 
   const canSelectPegawai = Boolean(tanggalAwal && tanggalAkhir);
   const displayedPegawaiIds =
@@ -243,8 +254,10 @@ function KontrakPJPL() {
               }}
               placeholder="Ketik Nama Unit Kerja"
               onChange={(selectedOption) => {
-                setUnitKerjaId(selectedOption.value);
+                setUnitKerjaId(selectedOption?.value || null);
+                setSelectedPegawaiIds([]);
               }}
+              isClearable
               components={{
                 DropdownIndicator: () => null,
                 IndicatorSeparator: () => null,
@@ -288,7 +301,7 @@ function KontrakPJPL() {
                 <Th>Jabatan</Th>
                 <Th>Pendidikan</Th>
                 <Th>Unit Kerja</Th>
-                <Th>Profesi</Th>
+                <Th>Aksi</Th>
               </Tr>
             </Thead>
             <Tbody bgColor={"secondary"}>
@@ -311,7 +324,16 @@ function KontrakPJPL() {
 
                     <Td>
                       <Flex gap={"20px"}>
-                        <Button variant={"primary"}>Edit</Button>
+                        <Button
+                          onClick={() => {
+                            history.push(
+                              `/admin-pegawai/detail-kontrak/${item.id}`
+                            );
+                          }}
+                          variant={"primary"}
+                        >
+                          Detail
+                        </Button>
                       </Flex>
                     </Td>
                   </Tr>

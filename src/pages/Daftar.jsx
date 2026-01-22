@@ -183,7 +183,8 @@ function Daftar() {
           tanggalPengajuan: val?.tanggalPengajuan || "",
           noSurTug: val?.noSuratTugas || "",
           noNotDis: val?.noNotaDinas || "",
-
+isSrikandi:val?.tipeSrikandi,
+isNotaDinas:val?.isNotaDinas,
           subKegiatan: val?.daftarSubKegiatan?.subKegiatan || "",
           untuk: val?.untuk || "",
           dasar: val?.dasar || "",
@@ -292,6 +293,7 @@ function Daftar() {
           noSuratTugas: val?.noSuratTugas || "",
           unitKerja: user[0]?.unitKerja_profile || null,
           indukUnitKerjaFE: user[0]?.unitKerja_profile || null,
+          tipeSrikandi:val?.tipeSrikandi
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob

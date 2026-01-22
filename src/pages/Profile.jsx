@@ -61,6 +61,8 @@ import {
   FaEye,
   FaEyeSlash,
   FaLock,
+  FaUser,
+  FaCamera,
 } from "react-icons/fa";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import { parseISO } from "date-fns";
@@ -115,6 +117,17 @@ function Profile() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = localStorage.getItem("token");
 
+  // State untuk edit foto profile
+  const {
+    isOpen: isOpenEditFoto,
+    onOpen: onOpenEditFoto,
+    onClose: onCloseEditFoto,
+  } = useDisclosure();
+  const fileInputRef = useRef(null);
+  const [selectedFoto, setSelectedFoto] = useState(null);
+  const [previewFoto, setPreviewFoto] = useState(null);
+  const [isUploadingFoto, setIsUploadingFoto] = useState(false);
+
   // Color mode values
   const {
     boxBg,
@@ -137,7 +150,7 @@ function Profile() {
       .then((res) => {
         // Tindakan setelah berhasil
         setDataProfile(res.data.result);
-        console.log(res.data);
+        console.log(res.data, "ini");
       })
       .catch((err) => {
         console.error(err);
@@ -187,6 +200,129 @@ function Profile() {
     fetchProfile();
     fetchDataPegawai();
   }, []);
+
+  // Cleanup preview URL saat komponen unmount
+  useEffect(() => {
+    return () => {
+      if (previewFoto) {
+        URL.revokeObjectURL(previewFoto);
+      }
+    };
+  }, [previewFoto]);
+
+  // Function untuk handle edit foto profile
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validasi ukuran file (maksimal 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Ukuran file maksimal 2MB",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      // Validasi tipe file (hanya gambar)
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Error",
+          description: "File harus berupa gambar",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      setSelectedFoto(file);
+      const preview = URL.createObjectURL(file);
+      setPreviewFoto(preview);
+    }
+  };
+
+  const handleUploadFoto = async () => {
+    if (!selectedFoto) {
+      toast({
+        title: "Error",
+        description: "Silakan pilih foto terlebih dahulu",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsUploadingFoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("photo", selectedFoto);
+      if (dataProfile?.profilePic) {
+        formData.append("old_img", dataProfile.profilePic);
+      }
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/profile/photo`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast({
+        title: "Berhasil",
+        description: res.data.message || "Foto profil berhasil diubah",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      // Reset state dan tutup modal
+      setSelectedFoto(null);
+      if (previewFoto) {
+        URL.revokeObjectURL(previewFoto);
+      }
+      setPreviewFoto(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      onCloseEditFoto();
+
+      // Refresh data profile
+      await fetchProfile();
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message ||
+        "Gagal mengubah foto profil. Silakan coba lagi.";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsUploadingFoto(false);
+    }
+  };
+
+  const handleCancelEditFoto = () => {
+    setSelectedFoto(null);
+    if (previewFoto) {
+      URL.revokeObjectURL(previewFoto);
+    }
+    setPreviewFoto(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    onCloseEditFoto();
+  };
 
   // Function untuk handle ganti password
   const handleChangePassword = async () => {
@@ -269,9 +405,70 @@ function Profile() {
           <Box p={"30px"}>
             {dataProfile ? (
               <>
-                <Heading size="lg" mb={"30px"}>
-                  Profil Pengguna
-                </Heading>
+                <Flex justify="space-between" align="center" mb={"30px"}>
+                  <Heading size="lg">Profil Pengguna</Heading>
+                </Flex>
+
+                {/* Foto Profile */}
+                <Box mb={"30px"}>
+                  <Heading size="md" mb={"15px"}>
+                    Foto Profile
+                  </Heading>
+                  <Box
+                    border={"1px"}
+                    borderColor={"rgba(229, 231, 235, 1)"}
+                    borderRadius={"6px"}
+                    p={"20px"}
+                  >
+                    <Flex align="center" gap={6}>
+                      <Box position="relative">
+                        <Image
+                          src={
+                            dataProfile.profilePic
+                              ? `${
+                                  import.meta.env.VITE_REACT_APP_API_BASE_URL
+                                }${dataProfile.profilePic}`
+                              : previewFoto || Foto
+                          }
+                          alt="Foto Profile"
+                          boxSize="150px"
+                          borderRadius="full"
+                          objectFit="cover"
+                          border="4px solid"
+                          borderColor="blue.200"
+                        />
+                        <IconButton
+                          aria-label="Edit foto profile"
+                          icon={<FaCamera />}
+                          position="absolute"
+                          bottom="0"
+                          right="0"
+                          colorScheme="blue"
+                          borderRadius="full"
+                          size="sm"
+                          onClick={onOpenEditFoto}
+                        />
+                      </Box>
+                      <VStack align="start" spacing={2}>
+                        <Text fontSize="md" fontWeight="medium">
+                          {dataProfile.nama}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                          Klik ikon kamera untuk mengubah foto profile
+                        </Text>
+                        <Button
+                          leftIcon={<Icon as={FaCamera} />}
+                          colorScheme="blue"
+                          variant="outline"
+                          size="sm"
+                          onClick={onOpenEditFoto}
+                        >
+                          Ubah Foto
+                        </Button>
+                      </VStack>
+                    </Flex>
+                  </Box>
+                </Box>
 
                 {/* Informasi Dasar */}
                 <Box mb={"30px"}>
@@ -736,6 +933,78 @@ function Profile() {
               loadingText="Mengubah..."
             >
               Ubah Password
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Edit Foto Profile */}
+      <Modal isOpen={isOpenEditFoto} onClose={handleCancelEditFoto} size="md">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Ubah Foto Profile</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4}>
+              <FormControl>
+                <FormLabel>Pilih Foto</FormLabel>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  display="none"
+                />
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  leftIcon={<Icon as={FaCamera} />}
+                  variant="outline"
+                  width="full"
+                >
+                  Pilih Foto
+                </Button>
+                <FormHelperText>
+                  Format: JPG, PNG, atau GIF. Maksimal 2MB
+                </FormHelperText>
+              </FormControl>
+
+              {previewFoto && (
+                <Box>
+                  <Text mb={2} fontSize="sm" fontWeight="medium">
+                    Preview:
+                  </Text>
+                  <Image
+                    src={previewFoto}
+                    alt="Preview foto"
+                    boxSize="200px"
+                    borderRadius="full"
+                    objectFit="cover"
+                    border="2px solid"
+                    borderColor="gray.200"
+                    mx="auto"
+                  />
+                </Box>
+              )}
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={handleCancelEditFoto}
+              isDisabled={isUploadingFoto}
+            >
+              Batal
+            </Button>
+            <Button
+              colorScheme="blue"
+              onClick={handleUploadFoto}
+              isLoading={isUploadingFoto}
+              loadingText="Mengupload..."
+              isDisabled={!selectedFoto}
+            >
+              Simpan Foto
             </Button>
           </ModalFooter>
         </ModalContent>

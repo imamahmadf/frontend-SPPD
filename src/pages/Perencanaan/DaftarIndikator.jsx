@@ -47,6 +47,7 @@ import {
 import { useSelector } from "react-redux";
 import { userRedux } from "../../Redux/Reducers/auth";
 import { Select as Select2 } from "chakra-react-select";
+import { formatRupiah, parseRupiah } from "../../utils/formatRupiah";
 
 function DaftarIndikator() {
   const [DataIndikator, setDataIndikator] = useState([]);
@@ -117,7 +118,8 @@ function DaftarIndikator() {
       setDataIndikatorKegiatan(indikatorKegiatan);
       setDataJenisAnggaran(res.data.resultJenisAnggaran || []);
       setDataNamaTarget(res.data.resultNamaTarget || []);
-      console.log(res.data);
+      console.log("Response API:", res.data);
+      console.log("Data Nama Target:", res.data.resultNamaTarget);
     } catch (err) {
       console.error(err);
     }
@@ -132,11 +134,16 @@ function DaftarIndikator() {
     setSelectedIndikatorType(type);
     setIsEditMode(false);
 
+    // Debug: Log data nama target
+    console.log("dataNamatarget saat modal dibuka:", dataNamatarget);
+
     // Inisialisasi newTargets dengan struktur kosong untuk setiap namaTarget
     const initialTargets = {};
-    dataNamatarget.forEach((namaTarget) => {
-      initialTargets[namaTarget.id] = "";
-    });
+    if (dataNamatarget && dataNamatarget.length > 0) {
+      dataNamatarget.forEach((namaTarget) => {
+        initialTargets[namaTarget.id] = "";
+      });
+    }
     setNewTargets(initialTargets);
 
     onOpen();
@@ -148,6 +155,10 @@ function DaftarIndikator() {
     setSelectedIndikatorType(type);
     setIsEditMode(true);
 
+    // Debug: Log data
+    console.log("Edit modal - target:", target);
+    console.log("Edit modal - dataNamatarget:", dataNamatarget);
+
     // Inisialisasi editTargets dengan nilai dari target triwulan yang ada
     const initialTargets = {};
     if (target.targetTriwulans && target.targetTriwulans.length > 0) {
@@ -157,11 +168,13 @@ function DaftarIndikator() {
       });
     }
     // Pastikan semua namaTarget ada di initialTargets
-    dataNamatarget.forEach((namaTarget) => {
-      if (!initialTargets[namaTarget.id]) {
-        initialTargets[namaTarget.id] = "";
-      }
-    });
+    if (dataNamatarget && dataNamatarget.length > 0) {
+      dataNamatarget.forEach((namaTarget) => {
+        if (!initialTargets[namaTarget.id]) {
+          initialTargets[namaTarget.id] = "";
+        }
+      });
+    }
     setEditTargets(initialTargets);
 
     // Set anggaran dan tahun dari tahun anggaran murni (prioritas) atau yang pertama
@@ -172,6 +185,10 @@ function DaftarIndikator() {
       const tahunAnggaran = anggaranMurni || target.tahunAnggarans[0];
       setEditAnggaran(tahunAnggaran.anggaran?.toString() || "");
       setEditTahun(tahunAnggaran.tahun?.toString() || "");
+    } else {
+      // Jika tidak ada tahunAnggarans, set nilai default
+      setEditAnggaran("");
+      setEditTahun("");
     }
 
     onEditOpen();
@@ -251,10 +268,36 @@ function DaftarIndikator() {
     const targetValues = Object.values(editTargets);
     const hasEmptyTarget = targetValues.some((value) => !value || value === "");
 
-    if (hasEmptyTarget || !editAnggaran || !editTahun) {
+    // Validasi anggaran - harus lebih dari 0
+    const parsedAnggaran = editAnggaran
+      ? parseRupiah(editAnggaran.toString())
+      : 0;
+    const parsedTahun = editTahun ? parseInt(editTahun) : null;
+
+    if (
+      hasEmptyTarget ||
+      !editAnggaran ||
+      parsedAnggaran <= 0 ||
+      !editTahun ||
+      !parsedTahun ||
+      isNaN(parsedTahun) ||
+      parsedTahun <= 0
+    ) {
       toast({
         title: "Peringatan",
-        description: "Semua field wajib diisi",
+        description: "Semua field wajib diisi dengan nilai yang valid",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Validasi indikatorId
+    if (!selectedIndikator || !selectedIndikator.id) {
+      toast({
+        title: "Peringatan",
+        description: "Indikator tidak dipilih",
         status: "warning",
         duration: 3000,
         isClosable: true,
@@ -266,11 +309,30 @@ function DaftarIndikator() {
       // Membuat array of object untuk target triwulan
       const targetData = dataNamatarget.map((namaTarget) => {
         const targetValue = editTargets[namaTarget.id];
+        const parsedNilai = parseInt(targetValue);
+
+        // Validasi nilai target
+        if (isNaN(parsedNilai) || parsedNilai < 0) {
+          throw new Error(`Nilai target ${namaTarget.nama} tidak valid`);
+        }
+
         return {
           namaTargetId: namaTarget.id,
-          nilai: parseInt(targetValue),
+          nilai: parsedNilai,
         };
       });
+
+      // Validasi array targets tidak kosong
+      if (!targetData || targetData.length === 0) {
+        toast({
+          title: "Peringatan",
+          description: "Target harus diisi",
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
+        return;
+      }
 
       // Update target
       await axios.post(
@@ -280,8 +342,8 @@ function DaftarIndikator() {
         {
           targetId: selectedTarget.id,
           targets: targetData,
-          anggaran: parseInt(editAnggaran),
-          tahun: parseInt(editTahun),
+          anggaran: parsedAnggaran,
+          tahun: parsedTahun,
         }
       );
 
@@ -1574,14 +1636,6 @@ function DaftarIndikator() {
                                   >
                                     Edit
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    colorScheme="red"
-                                    variant="outline"
-                                    leftIcon={<Icon as={FiTrash2} />}
-                                  >
-                                    Hapus
-                                  </Button>
                                 </Flex>
                               </CardBody>
                             </Card>
@@ -2240,31 +2294,46 @@ function DaftarIndikator() {
                 >
                   Target yang akan ditambahkan:
                 </Heading>
-                {dataNamatarget.map((namaTarget) => (
-                  <FormControl key={namaTarget.id}>
-                    <FormLabel fontWeight="semibold" color="gray.600">
-                      Target {namaTarget.nama}
-                    </FormLabel>
-                    <Input
-                      placeholder={`Masukkan target ${namaTarget.nama}`}
-                      type="number"
-                      value={newTargets[namaTarget.id] || ""}
-                      onChange={(e) =>
-                        setNewTargets((prev) => ({
-                          ...prev,
-                          [namaTarget.id]: e.target.value,
-                        }))
-                      }
-                      size="lg"
-                      borderRadius="lg"
-                      borderColor="gray.300"
-                      _focus={{
-                        borderColor: "blue.400",
-                        boxShadow: "0 0 0 1px #3182CE",
-                      }}
-                    />
-                  </FormControl>
-                ))}
+                {dataNamatarget && dataNamatarget.length > 0 ? (
+                  dataNamatarget.map((namaTarget) => (
+                    <FormControl key={namaTarget.id} isRequired>
+                      <FormLabel fontWeight="semibold" color="gray.600">
+                        Target {namaTarget.nama}
+                      </FormLabel>
+                      <Input
+                        placeholder={`Masukkan target ${namaTarget.nama}`}
+                        type="number"
+                        value={newTargets[namaTarget.id] || ""}
+                        onChange={(e) =>
+                          setNewTargets((prev) => ({
+                            ...prev,
+                            [namaTarget.id]: e.target.value,
+                          }))
+                        }
+                        size="lg"
+                        borderRadius="lg"
+                        borderColor="gray.300"
+                        _focus={{
+                          borderColor: "blue.400",
+                          boxShadow: "0 0 0 1px #3182CE",
+                        }}
+                      />
+                    </FormControl>
+                  ))
+                ) : (
+                  <Box
+                    p={4}
+                    bg={colorMode === "dark" ? "gray.800" : "yellow.50"}
+                    borderRadius="lg"
+                    border="1px solid"
+                    borderColor="yellow.300"
+                  >
+                    <Text color="yellow.700" fontWeight="medium">
+                      ⚠️ Data nama target belum tersedia. Silakan refresh
+                      halaman atau hubungi administrator.
+                    </Text>
+                  </Box>
+                )}
               </VStack>
 
               {/* Anggaran dan Tahun */}
@@ -2275,10 +2344,14 @@ function DaftarIndikator() {
                     Anggaran (Rp)
                   </FormLabel>
                   <Input
-                    placeholder="Masukkan anggaran"
-                    type="number"
-                    value={newAnggaran || ""}
-                    onChange={(e) => setNewAnggaran(e.target.value)}
+                    placeholder="Masukkan anggaran (contoh: Rp 1.000.000)"
+                    type="text"
+                    inputMode="numeric"
+                    value={formatRupiah(newAnggaran)}
+                    onChange={(e) => {
+                      const parsed = parseRupiah(e.target.value);
+                      setNewAnggaran(parsed.toString());
+                    }}
                     size="lg"
                     borderRadius="lg"
                     borderColor="gray.300"
@@ -2386,10 +2459,21 @@ function DaftarIndikator() {
                   Anggaran Perubahan (Rp)
                 </FormLabel>
                 <Input
-                  placeholder="Masukkan nominal anggaran"
-                  type="number"
-                  value={apAmount || ""}
-                  onChange={(e) => setApAmount(e.target.value)}
+                  placeholder="Masukkan nominal anggaran (contoh: Rp 1.000.000)"
+                  type="text"
+                  inputMode="numeric"
+                  value={formatRupiah(apAmount)}
+                  onChange={(e) => {
+                    const parsed = parseRupiah(e.target.value);
+                    setApAmount(parsed);
+                  }}
+                  size="lg"
+                  borderRadius="lg"
+                  borderColor="gray.300"
+                  _focus={{
+                    borderColor: "green.400",
+                    boxShadow: "0 0 0 1px #38A169",
+                  }}
                 />
               </FormControl>
               <FormControl>
@@ -2474,31 +2558,46 @@ function DaftarIndikator() {
                 >
                   Target yang akan diubah:
                 </Heading>
-                {dataNamatarget.map((namaTarget) => (
-                  <FormControl key={namaTarget.id}>
-                    <FormLabel fontWeight="semibold" color="gray.600">
-                      Target {namaTarget.nama}
-                    </FormLabel>
-                    <Input
-                      placeholder={`Masukkan target ${namaTarget.nama}`}
-                      type="number"
-                      value={editTargets[namaTarget.id] || ""}
-                      onChange={(e) =>
-                        setEditTargets((prev) => ({
-                          ...prev,
-                          [namaTarget.id]: e.target.value,
-                        }))
-                      }
-                      size="lg"
-                      borderRadius="lg"
-                      borderColor="gray.300"
-                      _focus={{
-                        borderColor: "teal.400",
-                        boxShadow: "0 0 0 1px #319795",
-                      }}
-                    />
-                  </FormControl>
-                ))}
+                {dataNamatarget && dataNamatarget.length > 0 ? (
+                  dataNamatarget.map((namaTarget) => (
+                    <FormControl key={namaTarget.id} isRequired>
+                      <FormLabel fontWeight="semibold" color="gray.600">
+                        Target {namaTarget.nama}
+                      </FormLabel>
+                      <Input
+                        placeholder={`Masukkan target ${namaTarget.nama}`}
+                        type="number"
+                        value={editTargets[namaTarget.id] || ""}
+                        onChange={(e) =>
+                          setEditTargets((prev) => ({
+                            ...prev,
+                            [namaTarget.id]: e.target.value,
+                          }))
+                        }
+                        size="lg"
+                        borderRadius="lg"
+                        borderColor="gray.300"
+                        _focus={{
+                          borderColor: "teal.400",
+                          boxShadow: "0 0 0 1px #319795",
+                        }}
+                      />
+                    </FormControl>
+                  ))
+                ) : (
+                  <Box
+                    p={4}
+                    bg={colorMode === "dark" ? "gray.800" : "yellow.50"}
+                    borderRadius="lg"
+                    border="1px solid"
+                    borderColor="yellow.300"
+                  >
+                    <Text color="yellow.700" fontWeight="medium">
+                      ⚠️ Data nama target belum tersedia. Silakan refresh
+                      halaman atau hubungi administrator.
+                    </Text>
+                  </Box>
+                )}
               </VStack>
 
               {/* Anggaran dan Tahun */}
@@ -2509,10 +2608,14 @@ function DaftarIndikator() {
                     Anggaran (Rp)
                   </FormLabel>
                   <Input
-                    placeholder="Masukkan anggaran"
-                    type="number"
-                    value={editAnggaran || ""}
-                    onChange={(e) => setEditAnggaran(e.target.value)}
+                    placeholder="Masukkan anggaran (contoh: Rp 1.000.000)"
+                    type="text"
+                    inputMode="numeric"
+                    value={formatRupiah(editAnggaran)}
+                    onChange={(e) => {
+                      const parsed = parseRupiah(e.target.value);
+                      setEditAnggaran(parsed.toString());
+                    }}
                     size="lg"
                     borderRadius="lg"
                     borderColor="gray.300"
@@ -2531,13 +2634,15 @@ function DaftarIndikator() {
                     placeholder="Masukkan tahun"
                     type="number"
                     value={editTahun || ""}
-                    onChange={(e) => setEditTahun(e.target.value)}
                     size="lg"
                     borderRadius="lg"
                     borderColor="gray.300"
+                    isReadOnly={true}
+                    bg={colorMode === "dark" ? "gray.700" : "gray.100"}
+                    cursor="not-allowed"
                     _focus={{
-                      borderColor: "teal.400",
-                      boxShadow: "0 0 0 1px #319795",
+                      borderColor: "gray.300",
+                      boxShadow: "none",
                     }}
                   />
                 </FormControl>
@@ -2616,10 +2721,14 @@ function DaftarIndikator() {
                   Anggaran Perubahan (Rp)
                 </FormLabel>
                 <Input
-                  placeholder="Masukkan nominal anggaran"
-                  type="number"
-                  value={editApAmount || ""}
-                  onChange={(e) => setEditApAmount(e.target.value)}
+                  placeholder="Masukkan nominal anggaran (contoh: Rp 1.000.000)"
+                  type="text"
+                  inputMode="numeric"
+                  value={formatRupiah(editApAmount)}
+                  onChange={(e) => {
+                    const parsed = parseRupiah(e.target.value);
+                    setEditApAmount(parsed.toString());
+                  }}
                   size="lg"
                   borderRadius="lg"
                   borderColor="gray.300"
@@ -2637,13 +2746,15 @@ function DaftarIndikator() {
                   placeholder="Tahun anggaran"
                   type="number"
                   value={editApYear || ""}
-                  onChange={(e) => setEditApYear(e.target.value)}
                   size="lg"
                   borderRadius="lg"
                   borderColor="gray.300"
+                  isReadOnly={true}
+                  bg={colorMode === "dark" ? "gray.700" : "gray.100"}
+                  cursor="not-allowed"
                   _focus={{
-                    borderColor: "orange.400",
-                    boxShadow: "0 0 0 1px #DD6B20",
+                    borderColor: "gray.300",
+                    boxShadow: "none",
                   }}
                 />
               </FormControl>
