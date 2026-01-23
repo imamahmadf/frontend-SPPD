@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Home from "./pages/Home";
 import Daftar from "./pages/Daftar";
-import Detail from "./pages/Detail";
+import Detail from "./pages/Detail/Detail";
 import Rill from "./pages/Rill";
 import Login from "./pages/login";
 import Register from "./pages/Register.jsx";
@@ -116,6 +116,10 @@ import AtasanDetailKontrak from "./pages/PJPL/AtasanDetailKontrak.jsx";
 import PenilaianAtasan from "./pages/PJPL/PenilaianAtasan.jsx";
 import DashboardKeuangan from "./pages/Keuangan/DashboardKeuangan.jsx";
 import DetailKontrakPJPL from "./pages/PJPL/DetailKontrakPJPL.jsx";
+
+// /////////KEUANGAN/////////////////////
+import templateBPD from "./pages/Keuangan/templateBPD.jsx";
+
 function App() {
   const dispatch = useDispatch();
 
@@ -685,6 +689,16 @@ function App() {
             exact
             roleRoute={[5, 1]}
           />
+
+{/* ///////////////////KEUANGAN//////////////////////////// */}
+
+<ProtectedRoute
+            component={templateBPD}
+            path="/unit-kerja/template-bpd"
+            exact
+            roleRoute={[5, 2]}
+          />
+
           {/* //////////////////PJPL////////////////////// */}
           <ProtectedRoute
             component={PejabatVerifikator}

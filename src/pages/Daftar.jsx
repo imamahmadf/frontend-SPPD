@@ -1073,7 +1073,7 @@ isNotaDinas:val?.isNotaDinas,
                           bg={colorMode === "dark" ? "gray.800" : "white"}
                           zIndex={1}
                         >
-                          <Menu>
+                          <Menu placement="auto" strategy="fixed">
                             <MenuButton
                               as={IconButton}
                               icon={<BsThreeDotsVertical />}
@@ -1092,6 +1092,7 @@ isNotaDinas:val?.isNotaDinas,
                               borderColor={
                                 colorMode === "dark" ? "gray.700" : "gray.200"
                               }
+                              zIndex={9999}
                             >
                               {item?.noSuratTugas && (
                                 <MenuItem

@@ -142,6 +142,7 @@ const menuData = [
       { label: "Daftar Bendahara", path: "/unit-kerja/daftar-bendahara" },
       { label: "Template Surat", path: "/unit-kerja/template" },
       { label: "Sub Kegiatan", path: "/unit-kerja/sub-kegiatan" },
+      {label:"Template BPD", path:"/unit-kerja/template-bpd"}
     ],
   },
   {
