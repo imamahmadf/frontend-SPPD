@@ -827,16 +827,31 @@ function RampungAdmin(props) {
                           Tujuan
                         </Text>
                         <Text fontSize="md">{daftarTempat || "-"}</Text>
-                        {/* {JSON.stringify(
-                          Math.max(
-                            ...(detailPerjalanan?.tempats || []).map(
-                              (t) => t?.dalamKota?.uangTransport ?? 0
-                            )
-                          )
-                        )}
-
-                        {JSON.stringify(detailPerjalanan)} */}
                       </Box>
+                      {detailPerjalanan?.jenisPerjalanan?.tipePerjalananId ===
+                        1 && (
+                        <Box>
+                          <Text
+                            fontWeight="semibold"
+                            color="gray.600"
+                            fontSize="sm"
+                          >
+                            Uang Transport
+                          </Text>
+                          <Text fontSize="md" fontFamily="mono" color="green.600">
+                            {new Intl.NumberFormat("id-ID", {
+                              style: "currency",
+                              currency: "IDR",
+                            }).format(
+                              Math.max(
+                                ...(detailPerjalanan?.tempats || []).map(
+                                  (t) => t?.dalamKota?.uangTransport ?? 0
+                                )
+                              )
+                            )}
+                          </Text>
+                        </Box>
+                      )}
                       <Box>
                         <Text
                           fontWeight="semibold"

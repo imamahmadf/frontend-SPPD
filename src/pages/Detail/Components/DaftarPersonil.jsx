@@ -9,11 +9,17 @@ import {
   HStack,
   Button,
   SimpleGrid,
+  Select,
+  Wrap,
+  WrapItem,
+  Badge,
 } from "@chakra-ui/react";
 import {
   FiUsers,
   FiCheckCircle,
   FiUserPlus,
+  FiSearch,
+  FiPrinter,
 } from "react-icons/fi";
 import PersonilCard from "./PersonilCard";
 
@@ -22,17 +28,26 @@ function DaftarPersonil({
   adaStatusDuaAtauTiga,
   semuaPersonilBelumAdaRincian,
   adaPersonilYangBisaDiajukan,
+  adaPersonilYangBisaDicetak,
   isSubmittingPengajuan,
   isCreatingAutoBulk,
+  isPrintingAll,
   onPengajuanBulk,
   onBuatOtomatisBulk,
+  onCetakSemuaKwitansi,
   onTambahPersonil,
   onEditPersonil,
   onHapusPersonil,
+  onSearchTemplateBPD,
+  dataTemplate,
+  templateId,
+  setTemplateId,
   cardBg,
   borderColor,
   headerBg,
 }) {
+  const jumlahPersonil = detailPerjalanan?.personils?.length || 0;
+
   return (
     <Card
       bg={cardBg}
@@ -45,69 +60,159 @@ function DaftarPersonil({
         bg={headerBg}
         borderBottom="1px"
         borderColor={borderColor}
+        py={{ base: 3, md: 4 }}
+        px={{ base: 4, md: 6 }}
       >
         <Flex
           justify="space-between"
-          align={{ base: "start", md: "center" }}
-          direction={{ base: "column", md: "row" }}
-          gap={4}
+          align="center"
+          wrap="wrap"
+          gap={3}
         >
-          <Heading
-            color={"white"}
-            size={{ base: "sm", md: "md" }}
-            display="flex"
-            align="center"
-            gap={2}
-            flexWrap="wrap"
-          >
-            <Icon as={FiUsers} color="white" />
-            Daftar Personil ({detailPerjalanan?.personils?.length} orang)
-          </Heading>
-          <HStack spacing={2} flexWrap="wrap">
-            {/* Tombol Ajukan untuk Semua Personil */}
-            {adaPersonilYangBisaDiajukan && (
-              <Button
-                leftIcon={<FiCheckCircle />}
-                variant={"primary"}
-                onClick={onPengajuanBulk}
-                isLoading={isSubmittingPengajuan}
-                loadingText="Mengajukan..."
+          {/* Header Title */}
+          <HStack spacing={3} flexShrink={0}>
+            <Flex
+              bg="whiteAlpha.200"
+              p={2}
+              borderRadius="lg"
+              align="center"
+              justify="center"
+            >
+              <Icon as={FiUsers} color="white" boxSize={5} />
+            </Flex>
+            <HStack spacing={2}>
+              <Heading
+                color="white"
                 size={{ base: "sm", md: "md" }}
-                transition="all 0.2s"
-                colorScheme="green"
               >
-                Ajukan Semua
-              </Button>
-            )}
-            {/* Tombol Buat Otomatis Semua */}
-            {!adaStatusDuaAtauTiga &&
-              semuaPersonilBelumAdaRincian &&
-              detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1 && (
+                Daftar Personil
+              </Heading>
+              <Badge
+                bg="whiteAlpha.300"
+                color="white"
+                fontSize="xs"
+                px={2}
+                py={0.5}
+                borderRadius="full"
+              >
+                {jumlahPersonil} orang
+              </Badge>
+            </HStack>
+          </HStack>
+
+          {/* Action Buttons - Semua tombol di samping kanan */}
+          <Wrap spacing={2} justify="flex-end">
+            {/* Tombol Ajukan Semua */}
+            {adaPersonilYangBisaDiajukan && (
+              <WrapItem>
                 <Button
                   leftIcon={<FiCheckCircle />}
-                  variant={"primary"}
-                  onClick={onBuatOtomatisBulk}
-                  isLoading={isCreatingAutoBulk}
-                  loadingText="Membuat..."
+                  colorScheme="green"
+                  onClick={onPengajuanBulk}
+                  isLoading={isSubmittingPengajuan}
+                  loadingText="Mengajukan..."
                   size={{ base: "sm", md: "md" }}
                   transition="all 0.2s"
                 >
-                  Buat Otomatis
+                  Ajukan Semua
                 </Button>
-              )}
+              </WrapItem>
+            )}
+
+            {/* Tombol Buat Otomatis */}
             {!adaStatusDuaAtauTiga &&
-              detailPerjalanan?.personils?.length < 5 && (
+              semuaPersonilBelumAdaRincian &&
+              detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1 && (
+                <WrapItem>
+                  <Button
+                    leftIcon={<FiCheckCircle />}
+                    colorScheme="teal"
+                    onClick={onBuatOtomatisBulk}
+                    isLoading={isCreatingAutoBulk}
+                    loadingText="Membuat..."
+                    size={{ base: "sm", md: "md" }}
+                    transition="all 0.2s"
+                  >
+                    Buat Otomatis
+                  </Button>
+                </WrapItem>
+              )}
+
+            {/* Tombol Cari Template BPD */}
+            {onSearchTemplateBPD &&
+              !adaStatusDuaAtauTiga &&
+              semuaPersonilBelumAdaRincian &&
+              detailPerjalanan.jenisPerjalanan?.tipePerjalananId !== 1 && (
+                <WrapItem>
+                  <Button
+                    leftIcon={<FiSearch />}
+                    colorScheme="purple"
+                    onClick={onSearchTemplateBPD}
+                    size={{ base: "sm", md: "md" }}
+                    transition="all 0.2s"
+                  >
+                    Cari Template BPD
+                  </Button>
+                </WrapItem>
+              )}
+
+            {/* Tombol Tambah Personil */}
+            {!adaStatusDuaAtauTiga && jumlahPersonil < 5 && (
+              <WrapItem>
                 <Button
                   leftIcon={<FiUserPlus />}
-                  variant={"primary"}
+                  colorScheme="whiteAlpha"
+                  bg="whiteAlpha.200"
+                  color="white"
+                  _hover={{ bg: "whiteAlpha.300" }}
                   onClick={onTambahPersonil}
                   size={{ base: "sm", md: "md" }}
                   transition="all 0.2s"
                 >
                   Tambah Personil
                 </Button>
-              )}
-          </HStack>
+              </WrapItem>
+            )}
+
+            {/* Group Cetak Kwitansi */}
+            {onCetakSemuaKwitansi && adaPersonilYangBisaDicetak && (
+              <WrapItem>
+                <HStack spacing={2}>
+                  <Select
+                    size={{ base: "sm", md: "md" }}
+                    bg="white"
+                    borderRadius="md"
+                    borderColor="gray.300"
+                    w={{ base: "130px", md: "170px" }}
+                    value={templateId || ""}
+                    onChange={(e) => setTemplateId(e.target.value)}
+                    _focus={{
+                      borderColor: "blue.400",
+                      boxShadow: "outline",
+                    }}
+                    fontSize="sm"
+                  >
+                    {dataTemplate?.map((val) => (
+                      <option key={val.id} value={val.id}>
+                        {val.nama}
+                      </option>
+                    ))}
+                  </Select>
+                  <Button
+                    leftIcon={<FiPrinter />}
+                    colorScheme="blue"
+                    onClick={() => onCetakSemuaKwitansi(templateId)}
+                    isLoading={isPrintingAll}
+                    loadingText="Mencetak..."
+                    size={{ base: "sm", md: "md" }}
+                    transition="all 0.2s"
+                  >
+                    Cetak Semua
+                  </Button>
+                </HStack>
+              </WrapItem>
+            )}
+          </Wrap>
         </Flex>
       </CardHeader>
       <CardBody p={{ base: 4, md: 6 }}>

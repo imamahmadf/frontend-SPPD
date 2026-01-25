@@ -7,6 +7,7 @@ import {
   Grid,
   GridItem,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import Layout from "../../Componets/Layout";
 import Loading from "../../Componets/Loading";
@@ -23,6 +24,7 @@ import ModalTambahPersonil from "./Components/ModalTambahPersonil";
 import ModalHapusPersonil from "./Components/ModalHapusPersonil";
 import ModalEditSubKegiatan from "./Components/ModalEditSubKegiatan";
 import ModalEditTempat from "./Components/ModalEditTempat";
+import ModalSearchTemplateBPD from "./Components/ModalSearchTemplateBPD";
 
 function Detail(props) {
   const user = useSelector(userRedux);
@@ -38,20 +40,26 @@ function Detail(props) {
     detailPerjalanan,
     dataSubKegiatan,
     dataDalamKota,
+    dataTemplate,
+    templateId,
     isLoading,
     isCreatingAutoBulk,
     isSubmittingPengajuan,
+    isPrintingAll,
     randomNumber,
     semuaPersonilBelumAdaRincian,
     adaPersonilYangBisaDiajukan,
     adaStatusDuaAtauTiga,
+    adaPersonilYangBisaDicetak,
   } = state;
 
   const {
     fetchDataPerjalan,
     buatOtomatisBulk,
     pengajuanBulk,
+    cetakSemuaKwitansi,
     setRandomNumber,
+    setTemplateId,
   } = actions;
 
   // Modal states
@@ -72,6 +80,17 @@ function Detail(props) {
     onOpen: onTambahOpen,
     onClose: onTambahClose,
   } = useDisclosure();
+
+  const {
+    isOpen: isSearchTemplateBPDOpen,
+    onOpen: onSearchTemplateBPDOpen,
+    onClose: onSearchTemplateBPDClose,
+  } = useDisclosure();
+
+  // State untuk search template BPD
+  const [selectedTemplateBPD, setSelectedTemplateBPD] = useState(null);
+  const [isSubmittingTemplateBPD, setIsSubmittingTemplateBPD] = useState(false);
+  const toast = useToast();
 
   // State untuk edit personil
   const [pegawaiId, setPegawaiId] = useState(null);
@@ -245,6 +264,73 @@ function Detail(props) {
     setIsEditUntukOpen(true);
   };
 
+  // Handler untuk pilih template BPD
+  const handlePilihTemplateBPD = async () => {
+    if (!selectedTemplateBPD?.data) return;
+
+    setIsSubmittingTemplateBPD(true);
+    try {
+      // Kumpulkan semua personil ID
+      const personilIds = detailPerjalanan?.personils?.map((p) => p.id) || [];
+
+      // Siapkan data template BPD beserta relasinya
+      const templateData = selectedTemplateBPD.data;
+      const templateRillData = templateData.templateRills || templateData.templateRill || [];
+
+      // Ambil data tanggal dari tempats (menggunakan tempat pertama sebagai referensi)
+      const tempats = detailPerjalanan?.tempats || [];
+      const tanggalBerangkat = tempats.length > 0 ? tempats[0].tanggalBerangkat : null;
+      const tanggalPulang = tempats.length > 0 ? tempats[tempats.length - 1].tanggalPulang : null;
+
+      // Kirim data ke API
+      const payload = {
+        perjalananId: perjalananId,
+        templateBPDId: templateData.id,
+        namaKota: templateData.namaKota,
+        uangHarian: templateData.uangHarian,
+        unitKerjaId: templateData.unitKerjaId,
+        tanggalBerangkat: tanggalBerangkat,
+        tanggalPulang: tanggalPulang,
+        templateRill: templateRillData.map((rill) => ({
+          id: rill.id,
+          uraian: rill.uraian,
+          nilai: rill.nilai,
+        })),
+        personilIds: personilIds,
+      };
+
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/templateBPD/apply`,
+        payload
+      );
+
+      toast({
+        title: "Berhasil",
+        description: `Template BPD "${templateData.namaKota}" berhasil diterapkan ke ${personilIds.length} personil`,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      onSearchTemplateBPDClose();
+      setSelectedTemplateBPD(null);
+      
+      // Refresh data perjalanan
+      await fetchDataPerjalan();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Gagal menerapkan template BPD",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmittingTemplateBPD(false);
+    }
+  };
+
   if (isLoading) return <Loading />;
 
   const cardBg = useColorModeValue("white", "gray.800");
@@ -303,16 +389,26 @@ function Detail(props) {
               adaStatusDuaAtauTiga={adaStatusDuaAtauTiga}
               semuaPersonilBelumAdaRincian={semuaPersonilBelumAdaRincian}
               adaPersonilYangBisaDiajukan={adaPersonilYangBisaDiajukan}
+              adaPersonilYangBisaDicetak={adaPersonilYangBisaDicetak}
               isSubmittingPengajuan={isSubmittingPengajuan}
               isCreatingAutoBulk={isCreatingAutoBulk}
+              isPrintingAll={isPrintingAll}
               onPengajuanBulk={pengajuanBulk}
               onBuatOtomatisBulk={buatOtomatisBulk}
+              onCetakSemuaKwitansi={cetakSemuaKwitansi}
               onTambahPersonil={() => {
                 setPegawaiTambahId(null);
                 onTambahOpen();
               }}
               onEditPersonil={onEditPersonilClick}
               onHapusPersonil={onHapusPersonilClick}
+              onSearchTemplateBPD={() => {
+                setSelectedTemplateBPD(null);
+                onSearchTemplateBPDOpen();
+              }}
+              dataTemplate={dataTemplate}
+              templateId={templateId}
+              setTemplateId={setTemplateId}
               cardBg={cardBg}
               borderColor={borderColor}
               headerBg={headerBg}
@@ -373,6 +469,23 @@ function Detail(props) {
             onSave={handleEditTempat}
             borderColor={borderColor}
             headerBg={headerBg}
+          />
+
+          <ModalSearchTemplateBPD
+            isOpen={isSearchTemplateBPDOpen}
+            onClose={() => {
+              if (!isSubmittingTemplateBPD) {
+                onSearchTemplateBPDClose();
+                setSelectedTemplateBPD(null);
+              }
+            }}
+            selectedTemplateBPD={selectedTemplateBPD}
+            setSelectedTemplateBPD={setSelectedTemplateBPD}
+            onSave={handlePilihTemplateBPD}
+            headerBg={headerBg}
+            unitKerjaId={user?.[0]?.unitKerja_profile?.id}
+            isLoading={isSubmittingTemplateBPD}
+            personilCount={detailPerjalanan?.personils?.length || 0}
           />
         </Box>
       </Layout>

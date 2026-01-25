@@ -109,6 +109,7 @@ const menuData = [
       { label: "Template Keuangan", path: "/keuangan/template" },
       { label: "Daftar Tujuan Dalam Kota", path: "/keuangan/dalam-kota" },
       { label: "Sumber Dana", path: "/keuangan/sumber-dana" },
+      { label: "verifikasi Template BPD", path: "/keuangan/template-bpd" },
     ],
   },
   // {

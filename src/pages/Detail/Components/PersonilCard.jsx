@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   Flex,
+  Icon,
   useColorModeValue,
 } from "@chakra-ui/react";
 import {
@@ -30,17 +31,26 @@ function PersonilCard({
 }) {
   const history = useHistory();
 
-  const getStatusColor = (statusId) => {
+  const getStatusBgColor = (statusId) => {
     switch (statusId) {
       case 1:
-        return "yellow";
+        return "gelap";
       case 2:
-        return "green";
+        return "ungu";
       case 3:
-        return "blue";
+        return "primary";
+      case 4:
+        return "danger";
       default:
-        return "gray";
+        return "gray.200";
     }
+  };
+
+  const getStatusTextColor = (statusId) => {
+    if (statusId === 1 || statusId === 2 || statusId === 3 || statusId === 4) {
+      return "white";
+    }
+    return "gray.700";
   };
 
   return (
@@ -83,9 +93,11 @@ function PersonilCard({
                   SPD: {item.nomorSPD}
                 </Text>
                 <Badge
-                  colorScheme={getStatusColor(item.statusId)}
-                  variant="subtle"
+                  bgColor={getStatusBgColor(item.statusId)}
+                  color={getStatusTextColor(item.statusId)}
                   borderRadius="full"
+                  px={2}
+                  py={0.5}
                 >
                   {item?.status?.statusKuitansi}
                 </Badge>

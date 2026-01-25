@@ -7,10 +7,13 @@ const useDetailData = (perjalananId, user) => {
   const [resultUangHarian, setResultUangHarian] = useState([]);
   const [dataSubKegiatan, setDataSubKegiatan] = useState(null);
   const [dataDalamKota, setDataDalamKota] = useState(null);
+  const [dataTemplate, setDataTemplate] = useState([]);
+  const [templateId, setTemplateId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingAuto, setIsCreatingAuto] = useState(false);
   const [isCreatingAutoBulk, setIsCreatingAutoBulk] = useState(false);
   const [isSubmittingPengajuan, setIsSubmittingPengajuan] = useState(false);
+  const [isPrintingAll, setIsPrintingAll] = useState(false);
   const [randomNumber, setRandomNumber] = useState(0);
 
   const toast = useToast();
@@ -67,6 +70,24 @@ const useDetailData = (perjalananId, user) => {
       });
   }
 
+  async function fetchTemplate() {
+    await axios
+      .get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/get-all-kwitansi`
+      )
+      .then((res) => {
+        setDataTemplate(res.data.result || []);
+        // Set default template ID ke template pertama jika ada
+        if (res.data.result && res.data.result.length > 0) {
+          setTemplateId(res.data.result[0].id);
+        }
+        console.log(res.data.result, "TEMPLATE");
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
   useEffect(() => {
     const fetchAll = async () => {
       setIsLoading(true);
@@ -74,6 +95,7 @@ const useDetailData = (perjalananId, user) => {
         fetchDataPerjalan(),
         fetchSubKegiatan(),
         fetchDataDalamKota(),
+        fetchTemplate(),
       ]);
       setIsLoading(false);
     };
@@ -372,6 +394,111 @@ const useDetailData = (perjalananId, user) => {
     }
   };
 
+  // Fungsi cetak semua kwitansi untuk semua personil sekaligus
+  const cetakSemuaKwitansi = async (selectedTemplateId = templateId || 1) => {
+    // Filter personil yang sudah memiliki rincianBPDs dan statusId >= 2
+    const personilsToPrint = detailPerjalanan.personils?.filter(
+      (personil) => 
+        personil.rincianBPDs && 
+        personil.rincianBPDs.length > 0 &&
+        personil.statusId >= 2
+    );
+
+    if (!personilsToPrint || personilsToPrint.length === 0) {
+      toast({
+        title: "Info",
+        description: "Tidak ada personil yang dapat dicetak kwitansinya",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsPrintingAll(true);
+
+    try {
+      // Siapkan data semua personil untuk dicetak
+      const personilsData = personilsToPrint.map((personil) => ({
+        personilId: personil.id,
+        pegawaiNama: personil.pegawai?.nama,
+        pegawaiNip: personil.pegawai?.nip,
+        pegawaiJabatan: personil.pegawai?.jabatan,
+        nomorSPD: personil.nomorSPD,
+        rincianBPD: personil.rincianBPDs,
+      }));
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kwitansi/post/cetak-kwitansi-bulk`,
+        {
+          perjalananId: detailPerjalanan.id,
+          nomorST: detailPerjalanan.noSuratTugas,
+          untuk: detailPerjalanan.untuk,
+          // Data PPTK
+          PPTKNama: detailPerjalanan.PPTK?.pegawai_PPTK?.nama,
+          PPTKNip: detailPerjalanan.PPTK?.pegawai_PPTK?.nip,
+          PPTKJabatan: detailPerjalanan.PPTK?.jabatan,
+          // Data KPA
+          KPANama: detailPerjalanan.KPA?.pegawai_KPA?.nama,
+          KPANip: detailPerjalanan.KPA?.pegawai_KPA?.nip,
+          KPAJabatan: detailPerjalanan.KPA?.jabatan,
+          // Data Bendahara
+          bendaharaNama: detailPerjalanan.bendahara?.pegawai_bendahara?.nama,
+          bendaharaNip: detailPerjalanan.bendahara?.pegawai_bendahara?.nip,
+          bendaharaJabatan: detailPerjalanan.bendahara?.jabatan,
+          dataBendahara: detailPerjalanan.bendahara,
+          // Data lainnya
+          foto: detailPerjalanan.fotoPerjalanans || [],
+          templateId: selectedTemplateId,
+          subKegiatan: detailPerjalanan.daftarSubKegiatan?.subKegiatan,
+          kodeRekening: `${detailPerjalanan.daftarSubKegiatan?.kodeRekening || ""}${detailPerjalanan.jenisPerjalanan?.kodeRekening || ""}`,
+          tanggalPengajuan: detailPerjalanan.tanggalPengajuan,
+          jenis: detailPerjalanan.jenisPerjalanan?.id,
+          tempat: detailPerjalanan.tempats,
+          jenisPerjalanan: detailPerjalanan.jenisPerjalanan?.jenis,
+          tahun: new Date(detailPerjalanan.tanggalPengajuan).getFullYear(),
+          indukUnitKerja: user[0]?.unitKerja_profile?.indukUnitKerja?.indukUnitKerja,
+          personils: personilsData,
+        },
+        {
+          responseType: "blob",
+        }
+      );
+
+      // Download file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `kwitansi_semua_personil_${detailPerjalanan.id}.docx`
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast({
+        title: "Berhasil!",
+        description: `Kwitansi berhasil diunduh untuk ${personilsToPrint.length} personil.`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (err) {
+      console.error("Error cetak semua kwitansi:", err);
+      toast({
+        title: "Error!",
+        description:
+          err.response?.data?.message || "Gagal mengunduh file kwitansi.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsPrintingAll(false);
+    }
+  };
+
   // Cek apakah semua personil belum memiliki rincianBPDs
   const semuaPersonilBelumAdaRincian =
     detailPerjalanan.personils &&
@@ -393,28 +520,42 @@ const useDetailData = (perjalananId, user) => {
   // Cek apakah ada statusId yang 2 atau 3
   const adaStatusDuaAtauTiga = statusIds?.includes(2) || statusIds?.includes(3);
 
+  // Cek apakah ada personil yang bisa dicetak kwitansinya (sudah ada rincian dan statusId >= 2)
+  const adaPersonilYangBisaDicetak = detailPerjalanan.personils?.some(
+    (personil) =>
+      personil.rincianBPDs &&
+      personil.rincianBPDs.length > 0 &&
+      personil.statusId >= 2
+  );
+
   return {
     state: {
       detailPerjalanan,
       resultUangHarian,
       dataSubKegiatan,
       dataDalamKota,
+      dataTemplate,
+      templateId,
       isLoading,
       isCreatingAuto,
       isCreatingAutoBulk,
       isSubmittingPengajuan,
+      isPrintingAll,
       randomNumber,
       totalDurasi,
       semuaPersonilBelumAdaRincian,
       adaPersonilYangBisaDiajukan,
       adaStatusDuaAtauTiga,
+      adaPersonilYangBisaDicetak,
     },
     actions: {
       fetchDataPerjalan,
       buatOtomatis,
       buatOtomatisBulk,
       pengajuanBulk,
+      cetakSemuaKwitansi,
       setRandomNumber,
+      setTemplateId,
     },
   };
 };

@@ -119,6 +119,7 @@ import DetailKontrakPJPL from "./pages/PJPL/DetailKontrakPJPL.jsx";
 
 // /////////KEUANGAN/////////////////////
 import templateBPD from "./pages/Keuangan/templateBPD.jsx";
+import templateBPDKeuangan from "./pages/Keuangan/TemplateBPDKeuangan.jsx";
 
 function App() {
   const dispatch = useDispatch();
@@ -698,6 +699,16 @@ function App() {
             exact
             roleRoute={[5, 2]}
           />
+
+
+
+<ProtectedRoute
+            component={templateBPDKeuangan}
+            path="/keuangan/template-bpd"
+            exact
+            roleRoute={[5, 3]}
+          />
+
 
           {/* //////////////////PJPL////////////////////// */}
           <ProtectedRoute

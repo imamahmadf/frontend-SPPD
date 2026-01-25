@@ -20,8 +20,12 @@ import {
   FiDollarSign,
   FiTarget,
   FiEdit3,
+  FiUser,
+  FiUsers,
+  FiExternalLink,
 } from "react-icons/fi";
 import { Spacer } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 
 function InformasiPerjalanan({
   detailPerjalanan,
@@ -33,6 +37,14 @@ function InformasiPerjalanan({
   borderColor,
   headerBg,
 }) {
+  const history = useHistory();
+  const kwitGlobalId = detailPerjalanan?.kwitGlobalId;
+
+  const handleGoToKwitGlobal = () => {
+    if (kwitGlobalId) {
+      history.push(`/perjalanan/detail-kwitansi-global/${kwitGlobalId}`);
+    }
+  };
   return (
     <Card
       bg={cardBg}
@@ -47,10 +59,22 @@ function InformasiPerjalanan({
         borderBottom="1px"
         borderColor={borderColor}
       >
-        <Heading size="md" display="flex" align="center" gap={2}>
-          <Icon as={FiFileText} color="purple.500" />
-          Informasi Perjalanan
-        </Heading>
+        <HStack justify="space-between" align="center">
+          <Heading size="md" display="flex" align="center" gap={2}>
+            <Icon as={FiFileText} color="purple.500" />
+            Informasi Perjalanan
+          </Heading>
+          {kwitGlobalId && (
+            <Button
+              colorScheme="blue"
+              size="sm"
+              leftIcon={<FiExternalLink />}
+              onClick={handleGoToKwitGlobal}
+            >
+              Kwitansi Global
+            </Button>
+          )}
+        </HStack>
       </CardHeader>
       <CardBody p={{ base: 4, md: 6, lg: 8 }}>
         <SimpleGrid columns={{ base: 1, md: 2, lg: 2 }} spacing={{ base: 4, md: 6 }}>
@@ -207,6 +231,111 @@ function InformasiPerjalanan({
                 {detailPerjalanan.bendahara?.sumberDana?.sumber}
               </Text>
             </HStack>
+          </VStack>
+
+          {/* PPTK */}
+          <VStack align="start" spacing={2}>
+            <Text
+              fontSize="sm"
+              fontWeight="semibold"
+              color="gray.500"
+              textTransform="uppercase"
+            >
+              PPTK
+            </Text>
+            <Box
+              p={3}
+              bg={useColorModeValue("blue.50", "blue.900")}
+              borderRadius="lg"
+              border="1px"
+              borderColor={useColorModeValue("blue.200", "blue.700")}
+              w="full"
+            >
+              <VStack align="start" spacing={1}>
+                <HStack>
+                  <Icon as={FiUser} color="blue.500" />
+                  <Text fontSize="md" fontWeight="medium">
+                    {detailPerjalanan.PPTK?.pegawai_PPTK?.nama || "-"}
+                  </Text>
+                </HStack>
+                <Text fontSize="sm" color="gray.600">
+                  NIP: {detailPerjalanan.PPTK?.pegawai_PPTK?.nip || "-"}
+                </Text>
+                <Text fontSize="sm" color="gray.600">
+                  Jabatan: {detailPerjalanan.PPTK?.jabatan || "-"}
+                </Text>
+              </VStack>
+            </Box>
+          </VStack>
+
+          {/* KPA */}
+          <VStack align="start" spacing={2}>
+            <Text
+              fontSize="sm"
+              fontWeight="semibold"
+              color="gray.500"
+              textTransform="uppercase"
+            >
+              KPA
+            </Text>
+            <Box
+              p={3}
+              bg={useColorModeValue("green.50", "green.900")}
+              borderRadius="lg"
+              border="1px"
+              borderColor={useColorModeValue("green.200", "green.700")}
+              w="full"
+            >
+              <VStack align="start" spacing={1}>
+                <HStack>
+                  <Icon as={FiUser} color="green.500" />
+                  <Text fontSize="md" fontWeight="medium">
+                    {detailPerjalanan.KPA?.pegawai_KPA?.nama || "-"}
+                  </Text>
+                </HStack>
+                <Text fontSize="sm" color="gray.600">
+                  NIP: {detailPerjalanan.KPA?.pegawai_KPA?.nip || "-"}
+                </Text>
+                <Text fontSize="sm" color="gray.600">
+                  Jabatan: {detailPerjalanan.KPA?.jabatan || "-"}
+                </Text>
+              </VStack>
+            </Box>
+          </VStack>
+
+          {/* Bendahara */}
+          <VStack align="start" spacing={2}>
+            <Text
+              fontSize="sm"
+              fontWeight="semibold"
+              color="gray.500"
+              textTransform="uppercase"
+            >
+              Bendahara
+            </Text>
+            <Box
+              p={3}
+              bg={useColorModeValue("orange.50", "orange.900")}
+              borderRadius="lg"
+              border="1px"
+              borderColor={useColorModeValue("orange.200", "orange.700")}
+              w="full"
+            >
+              <VStack align="start" spacing={1}>
+                <HStack>
+                  <Icon as={FiUsers} color="orange.500" />
+                  <Text fontSize="md" fontWeight="medium">
+                    {detailPerjalanan.bendahara?.pegawai_bendahara?.nama || "-"}
+                  </Text>
+                </HStack>
+                <Text fontSize="sm" color="gray.600">
+                  NIP: {detailPerjalanan.bendahara?.pegawai_bendahara?.nip || "-"}
+                </Text>
+                <Text fontSize="sm" color="gray.600">
+                  Jabatan: {detailPerjalanan.bendahara?.jabatan || "-"}
+                </Text>
+              </VStack>
+            </Box>
           </VStack>
 
           {/* Sub Kegiatan */}

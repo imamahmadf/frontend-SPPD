@@ -685,21 +685,26 @@ function Rampung(props) {
   console.log("Grand Total:", grandTotal);
   console.log("===================");
 
-  const getStatusColor = (statusId) => {
+  const getStatusBgColor = (statusId) => {
     switch (statusId) {
       case 1:
-        return "gray";
+        return "gelap";
       case 2:
-        return "blue";
+        return "ungu";
       case 3:
-        return "purple";
+        return "primary";
       case 4:
-        return "orange";
-      case 5:
-        return "green";
+        return "danger";
       default:
-        return "gray";
+        return "gray.200";
     }
+  };
+
+  const getStatusTextColor = (statusId) => {
+    if (statusId === 1 || statusId === 2 || statusId === 3 || statusId === 4) {
+      return "white";
+    }
+    return "gray.700";
   };
 
   const getStatusText = (statusId) => {
@@ -739,7 +744,8 @@ function Rampung(props) {
                 </Heading>
               </HStack>
               <Badge
-                colorScheme={getStatusColor(dataRampung?.result?.status?.id)}
+                bgColor={getStatusBgColor(dataRampung?.result?.status?.id)}
+                color={getStatusTextColor(dataRampung?.result?.status?.id)}
                 size="lg"
                 px={4}
                 py={2}
