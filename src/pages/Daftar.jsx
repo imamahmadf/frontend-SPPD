@@ -48,6 +48,7 @@ import {
   SimpleGrid,
   Spinner,
   Skeleton,
+  Checkbox,
 } from "@chakra-ui/react";
 import { BsEyeFill, BsThreeDotsVertical, BsX } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -152,6 +153,13 @@ function Daftar() {
   const role = useSelector(selectRole);
   const [selectedPerjalanan, setSelectedPerjalanan] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isOpenCetakSPD, onOpen: onOpenCetakSPD, onClose: onCloseCetakSPD } = useDisclosure();
+  const [selectedPerjalananSPD, setSelectedPerjalananSPD] = useState(null);
+  const [jenisKendaraan, setJenisKendaraan] = useState({
+    darat: true,
+    laut: false,
+    udara: false,
+  });
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
 
@@ -338,7 +346,47 @@ isNotaDinas:val?.isNotaDinas,
       });
   };
 
-  const postSPD = (val) => {
+  const handleCetakSPD = () => {
+    if (!selectedPerjalananSPD) return;
+    
+    // Mengumpulkan jenis kendaraan yang dipilih
+    const kendaraanTerpilih = [];
+    if (jenisKendaraan.darat) kendaraanTerpilih.push(1);
+    if (jenisKendaraan.laut) kendaraanTerpilih.push(2);
+    if (jenisKendaraan.udara) kendaraanTerpilih.push(3);
+    
+    // Jika tidak ada yang dipilih, default ke darat
+    if (kendaraanTerpilih.length === 0) {
+      kendaraanTerpilih.push(1);
+    }
+    
+    postSPD(selectedPerjalananSPD, kendaraanTerpilih);
+    handleTutupModalCetakSPD();
+  };
+
+  const handleBukaModalCetakSPD = (item) => {
+    setSelectedPerjalananSPD(item);
+    // Reset checkbox ke default
+    setJenisKendaraan({
+      darat: true,
+      laut: false,
+      udara: false,
+    });
+    onOpenCetakSPD();
+  };
+
+  const handleTutupModalCetakSPD = () => {
+    setSelectedPerjalananSPD(null);
+    // Reset checkbox ke default
+    setJenisKendaraan({
+      darat: true,
+      laut: false,
+      udara: false,
+    });
+    onCloseCetakSPD();
+  };
+
+  const postSPD = (val, kendaraanTerpilih = [1]) => {
     console.log(val?.personils);
     setIsLoading(true);
     axios
@@ -372,6 +420,7 @@ isNotaDinas:val?.isNotaDinas,
           noSuratTugas: val?.noSuratTugas || "",
           unitKerja: user[0]?.unitKerja_profile || null,
           indukUnitKerjaFE: user[0]?.unitKerja_profile || null,
+          jenisKendaraan: kendaraanTerpilih,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
@@ -1126,7 +1175,7 @@ isNotaDinas:val?.isNotaDinas,
                               </MenuItem>
                               <MenuItem
                                 icon={<BsFileEarmarkArrowDown />}
-                                onClick={() => postSPD(item)}
+                                onClick={() => handleBukaModalCetakSPD(item)}
                                 _hover={{
                                   bg:
                                     colorMode === "dark"
@@ -1238,6 +1287,166 @@ isNotaDinas:val?.isNotaDinas,
                     }}
                   >
                     Ya, Hapus
+                  </Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+
+            {/* Modal Pilih Jenis Kendaraan untuk Cetak SPD */}
+            <Modal isOpen={isOpenCetakSPD} onClose={handleTutupModalCetakSPD} isCentered>
+              <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(2px)" />
+              <ModalContent
+                bg={colorMode === "dark" ? "gray.800" : "white"}
+                borderRadius="10px"
+              >
+                <ModalHeader
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                  borderBottom="1px solid"
+                  borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+                  pb={4}
+                >
+                  Pilih Jenis Kendaraan
+                </ModalHeader>
+                <ModalCloseButton
+                  color={colorMode === "dark" ? "white" : "gray.700"}
+                />
+                <ModalBody py={6}>
+                  <VStack align="stretch" spacing={4}>
+                    <Text
+                      color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                      mb={2}
+                    >
+                      Pilih jenis kendaraan yang digunakan untuk perjalanan dinas:
+                    </Text>
+                    <FormControl>
+                      <Checkbox
+                        isChecked={jenisKendaraan.darat}
+                        onChange={(e) =>
+                          setJenisKendaraan({
+                            ...jenisKendaraan,
+                            darat: e.target.checked,
+                          })
+                        }
+                        
+                        size="lg"
+                        sx={{
+                          "& .chakra-checkbox__control": {
+                            borderColor: "primary.500",
+                            _checked: {
+                              bg: "primary.500",
+                              borderColor: "primary.500",
+                              _hover: {
+                                bg: "primary.600",
+                                borderColor: "primary.600",
+                              },
+                            },
+                            _hover: {
+                              borderColor: "primary.400",
+                            },
+                          },
+                        }}
+                      >
+                        <Text
+                          color={colorMode === "dark" ? "white" : "gray.700"}
+                          fontSize="md"
+                          fontWeight="medium"
+                        >
+                          Kendaraan Darat
+                        </Text>
+                      </Checkbox>
+                    </FormControl>
+                    <FormControl>
+                      <Checkbox
+                        isChecked={jenisKendaraan.laut}
+                        onChange={(e) =>
+                          setJenisKendaraan({
+                            ...jenisKendaraan,
+                            laut: e.target.checked,
+                          })
+                        }
+                    
+                        size="lg"
+                        sx={{
+                          "& .chakra-checkbox__control": {
+                            borderColor: "primary.500",
+                            _checked: {
+                              bg: "primary.500",
+                              borderColor: "primary.500",
+                              _hover: {
+                                bg: "primary.600",
+                                borderColor: "primary.600",
+                              },
+                            },
+                            _hover: {
+                              borderColor: "primary.400",
+                            },
+                          },
+                        }}
+                      >
+                        <Text
+                          color={colorMode === "dark" ? "white" : "gray.700"}
+                          fontSize="md"
+                          fontWeight="medium"
+                        >
+                          Kendaraan Laut
+                        </Text>
+                      </Checkbox>
+                    </FormControl>
+                    <FormControl>
+                      <Checkbox
+                        isChecked={jenisKendaraan.udara}
+                        onChange={(e) =>
+                          setJenisKendaraan({
+                            ...jenisKendaraan,
+                            udara: e.target.checked,
+                          })
+                        }
+                    
+                        size="lg"
+                        sx={{
+                          "& .chakra-checkbox__control": {
+                            borderColor: "primary.500",
+                            _checked: {
+                              bg: "primary.500",
+                              borderColor: "primary.500",
+                              _hover: {
+                                bg: "primary.600",
+                                borderColor: "primary.600",
+                              },
+                            },
+                            _hover: {
+                              borderColor: "primary.400",
+                            },
+                          },
+                        }}
+                      >
+                        <Text
+                          color={colorMode === "dark" ? "white" : "gray.700"}
+                          fontSize="md"
+                          fontWeight="medium"
+                        >
+                          Kendaraan Udara
+                        </Text>
+                      </Checkbox>
+                    </FormControl>
+                  </VStack>
+                </ModalBody>
+                <ModalFooter
+                  borderTop="1px solid"
+                  borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+                  pt={4}
+                >
+                  <Button variant="ghost" mr={3} onClick={handleTutupModalCetakSPD}>
+                    Batal
+                  </Button>
+                  <Button
+                    variant={"primary"}
+                    onClick={handleCetakSPD}
+                    isLoading={isLoading}
+                    loadingText="Memproses..."
+                 
+                  >
+                    Buat
                   </Button>
                 </ModalFooter>
               </ModalContent>
