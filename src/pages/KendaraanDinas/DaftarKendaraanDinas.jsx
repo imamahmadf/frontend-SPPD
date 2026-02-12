@@ -5,9 +5,8 @@ import Layout from "../../Componets/Layout";
 import ReactPaginate from "react-paginate";
 
 import "../../Style/pagination.css";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import Foto from "../../assets/add_photo.png";
-import { BsDownload } from "react-icons/bs";
 import {
   Box,
   Text,
@@ -20,11 +19,8 @@ import {
   ModalBody,
   Image,
   ModalCloseButton,
-  Container,
   FormControl,
   FormLabel,
-  Center,
-  HStack,
   Table,
   Thead,
   Tbody,
@@ -34,31 +30,18 @@ import {
   Th,
   Td,
   Flex,
-  Textarea,
   Tooltip,
   Input,
-  Spacer,
   useToast,
   useColorMode,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  IconButton,
+  Badge,
+  Skeleton,
+  VStack,
+  Wrap,
 } from "@chakra-ui/react";
-import {
-  Select as Select2,
-  CreatableSelect,
-  AsyncSelect,
-} from "chakra-react-select";
+import { Select as Select2, AsyncSelect } from "chakra-react-select";
 import { useDisclosure } from "@chakra-ui/react";
-
-import {
-  BsThreeDotsVertical,
-  BsEyeFill,
-  BsFileEarmarkArrowDown,
-  BsTrash,
-} from "react-icons/bs";
+import { BsTrash, BsSearch, BsXCircle, BsEye, BsInfoCircle } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
@@ -66,7 +49,6 @@ function DaftarKendaraanDinas() {
   const [DataKendaraan, setDataKendaraan] = useState([]);
   const [DataKendaraanDinas, setDataKendaraanDinas] = useState([]);
   const history = useHistory();
-  const [dataSeed, setDataSeed] = useState(null);
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(50);
   const [pages, setPages] = useState(0);
@@ -103,27 +85,35 @@ function DaftarKendaraanDinas() {
   } = useDisclosure();
   const [kendaraanToDelete, setKendaraanToDelete] = useState(null);
   const [perjalananToDelete, setPerjalananToDelete] = useState(null);
-
-  // State untuk modal detail foto
+  const [isLoading, setIsLoading] = useState(true);
 
   const changePage = ({ selected }) => {
     setPage(selected);
   };
 
   async function fetchDataKendaraanDinas() {
-    await axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan-dinas/get`)
-      .then((res) => {
-        setDataKendaraanDinas(res.data.result);
-        setDataUnitKerja(res.data.resultUnitKerja);
-        setPage(res.data.page);
-        setPages(res.data.totalPage);
-        setRows(res.data.totalRows);
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.error(err);
+    setIsLoading(true);
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan-dinas/get`
+      );
+      setDataKendaraanDinas(res.data.result ?? []);
+      setDataUnitKerja(res.data.resultUnitKerja ?? []);
+      setPage(res.data.page ?? 0);
+      setPages(res.data.totalPage ?? 0);
+      setRows(res.data.totalRows ?? 0);
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Gagal memuat data",
+        description: "Silakan refresh halaman atau coba lagi nanti.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
       });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function fetchDataKendaraan() {
@@ -191,6 +181,13 @@ function DaftarKendaraanDinas() {
     onDeleteOpen();
   };
 
+  const resetFilter = () => {
+    setPegawaiFilterId(0);
+    setUnitKerjaFilterId(0);
+    setTanggalAwal("");
+    setTanggalAkhir("");
+  };
+
   useEffect(() => {
     fetchDataKendaraanDinas();
     fetchDataKendaraan();
@@ -205,25 +202,57 @@ function DaftarKendaraanDinas() {
   return (
     <>
       <Layout>
-        <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        <Box bgColor={"secondary"} pb={"40px"} px={{ base: 4, md: "30px" }}>
           <Box
             style={{ overflowX: "auto" }}
             bgColor={"white"}
-            p={"30px"}
-            borderRadius={"5px"}
+            p={{ base: 4, md: "30px" }}
+            borderRadius={"8px"}
             bg={colorMode === "dark" ? "gray.800" : "white"}
+            boxShadow={colorMode === "dark" ? "none" : "sm"}
           >
-            <HStack gap={5} mb={"30px"}>
-              <Spacer />
-            </HStack>{" "}
             <Flex
-              borderRadius={"5px"}
-              bg={colorMode === "dark" ? "gray.800" : "white"}
-              mb={"30px"}
-              gap={5}
+              justify="space-between"
+              align={{ base: "flex-start", md: "center" }}
+              direction={{ base: "column", md: "row" }}
+              gap={4}
+              mb={6}
             >
+              <Heading
+                size="lg"
+                color={colorMode === "dark" ? "white" : "gray.800"}
+              >
+                Daftar Kendaraan Dinas
+              </Heading>
+            </Flex>
+
+            <Box
+              mb={6}
+              p={4}
+              borderRadius="lg"
+              bg={colorMode === "dark" ? "gray.700" : "gray.50"}
+              borderWidth="1px"
+              borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+            >
+              <Flex justify="space-between" align="center" mb={4}>
+                <Text fontSize="sm" fontWeight="semibold" color="gray.600" _dark={{ color: "gray.300" }}>
+                  Filter
+                </Text>
+                <Button
+                  size="sm"
+                  leftIcon={<BsXCircle />}
+                  variant="ghost"
+                  colorScheme="gray"
+                  onClick={resetFilter}
+                >
+                  Reset filter
+                </Button>
+              </Flex>
+              <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={4}>
               <FormControl>
-                <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                <FormLabel fontSize={"sm"} fontWeight="medium">
+                  Nama Pegawai
+                </FormLabel>
                 <AsyncSelect
                   loadOptions={async (inputValue) => {
                     if (!inputValue) return [];
@@ -247,7 +276,7 @@ function DaftarKendaraanDinas() {
                   }}
                   placeholder="Ketik Nama Pegawai"
                   onChange={(selectedOption) => {
-                    setPegawaiFilterId(selectedOption.value);
+                    setPegawaiFilterId(selectedOption?.value ?? 0);
                   }}
                   components={{
                     DropdownIndicator: () => null,
@@ -275,16 +304,18 @@ function DaftarKendaraanDinas() {
                 />
               </FormControl>
               <FormControl border={0}>
-                <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                <FormLabel fontSize={"sm"} fontWeight="medium">
+                  Unit Kerja
+                </FormLabel>
                 <Select2
-                  options={dataSeed?.unitKerja?.map((val) => ({
+                  options={dataUnitKerja?.map((val) => ({
                     value: val.id,
-                    label: `${val.unitKerja}`,
-                  }))}
-                  placeholder="Contoh: Laboratorium kesehatan daerah"
+                    label: val.unitKerja || val.nama || "-",
+                  })) ?? []}
+                  placeholder="Pilih unit kerja"
                   focusBorderColor="red"
                   onChange={(selectedOption) => {
-                    setUnitKerjaFilterId(selectedOption.value);
+                    setUnitKerjaFilterId(selectedOption?.value ?? 0);
                   }}
                   components={{
                     DropdownIndicator: () => null, // Hilangkan tombol panah
@@ -312,31 +343,80 @@ function DaftarKendaraanDinas() {
                     }),
                   }}
                 />
-              </FormControl>{" "}
+              </FormControl>
               <FormControl>
-                <FormLabel fontSize={"24px"}>Awal</FormLabel>
+                <FormLabel fontSize={"sm"} fontWeight="medium">
+                  Tanggal Awal
+                </FormLabel>
                 <Input
-                  minWidth={"200px"}
-                  bgColor={"terang"}
-                  height={"60px"}
+                  bgColor={colorMode === "dark" ? "gray.700" : "gray.50"}
+                  height={"40px"}
                   type="date"
                   value={tanggalAwal}
                   onChange={(e) => setTanggalAwal(e.target.value)}
                 />
               </FormControl>
               <FormControl>
-                <FormLabel fontSize={"24px"}> Akhir</FormLabel>
+                <FormLabel fontSize={"sm"} fontWeight="medium">
+                  Tanggal Akhir
+                </FormLabel>
                 <Input
                   type="date"
-                  minWidth={"200px"}
-                  bgColor={"terang"}
-                  height={"60px"}
+                  bgColor={colorMode === "dark" ? "gray.700" : "gray.50"}
+                  height={"40px"}
                   value={tanggalAkhir}
                   onChange={(e) => setTanggalAkhir(e.target.value)}
                 />
               </FormControl>
+              </SimpleGrid>
+            </Box>
+
+            {isLoading ? (
+              <VStack spacing={4} py={8} align="stretch">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Skeleton key={i} height="56px" borderRadius="md" />
+                ))}
+              </VStack>
+            ) : !DataKendaraanDinas?.length ? (
+              <VStack py={12} spacing={4} color="gray.500">
+                <BsInfoCircle size={48} />
+                <Text fontWeight="medium">Belum ada data kendaraan dinas</Text>
+                <Text fontSize="sm" textAlign="center">
+                  Data peminjaman kendaraan dinas akan tampil di sini.
+                </Text>
+              </VStack>
+            ) : (
+              <>
+            <Flex
+              mb={3}
+              fontSize="sm"
+              color="gray.600"
+              _dark={{ color: "gray.400" }}
+              justify="space-between"
+              align="center"
+              flexWrap="wrap"
+              gap={2}
+            >
+              <Text>
+                Menampilkan <strong>{DataKendaraanDinas?.length}</strong> data
+                {rows > 0 && ` dari ${rows} total`}
+              </Text>
             </Flex>
-            <Table variant={"primary"}>
+            <Box overflowX="auto" mb={4} borderRadius="lg" borderWidth="1px" borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}>
+            <Table
+              variant="primary"
+              size="sm"
+              minWidth="900px"
+              sx={{
+                "thead th": {
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 1,
+                  bg: colorMode === "dark" ? "gray.800" : "white",
+                  boxShadow: "sm",
+                },
+              }}
+            >
               <Thead>
                 <Tr>
                   <Th>Kendaraan</Th>
@@ -360,7 +440,7 @@ function DaftarKendaraanDinas() {
                         alt="foto kendaraan"
                         width="80px"
                         height="100px"
-                        overflow="hiden"
+                        overflow="hidden"
                         objectFit="cover"
                         src={
                           item?.kendaraan?.foto
@@ -388,11 +468,11 @@ function DaftarKendaraanDinas() {
                       </Box>
                     </Td>
                     <Td>
-                      <Box>
+                      <Box maxW="180px">
                         {item?.perjalanans?.map((perjalanan, idx) => (
                           <Box key={perjalanan.id} mb={2}>
-                            {perjalanan?.personils?.map((personil, pIdx) => (
-                              <Text key={personil.id} fontSize="12px">
+                            {perjalanan?.personils?.map((personil) => (
+                              <Text key={personil.id} fontSize="xs" noOfLines={1}>
                                 {personil?.pegawai?.nama || "N/A"}
                               </Text>
                             ))}
@@ -401,16 +481,16 @@ function DaftarKendaraanDinas() {
                       </Box>
                     </Td>
                     <Td>
-                      <Box>
+                      <Box maxW="200px">
                         {item?.perjalanans?.map((perjalanan, idx) => (
                           <Box key={perjalanan.id} mb={2}>
                             {perjalanan?.tempats?.map((tempat, tIdx) => (
                               <Box key={tIdx}>
-                                <Text fontSize="12px" fontWeight="bold">
+                                <Text fontSize="xs" fontWeight="bold" noOfLines={1}>
                                   {tempat?.tempat || "N/A"}
                                 </Text>
                                 {tempat?.dalamKota && (
-                                  <Text fontSize="10px" color="gray.600">
+                                  <Text fontSize="10px" color="gray.600" noOfLines={1}>
                                     {tempat.dalamKota.nama}
                                   </Text>
                                 )}
@@ -535,7 +615,7 @@ function DaftarKendaraanDinas() {
                           alt="foto km akhir"
                           width="80px"
                           height="60px"
-                          overflow="hiden"
+                          overflow="hidden"
                           objectFit="cover"
                           src={
                             item?.kmAkhir
@@ -552,7 +632,7 @@ function DaftarKendaraanDinas() {
                           alt="foto kondisi akhir"
                           width="80px"
                           height="60px"
-                          overflow="hiden"
+                          overflow="hidden"
                           objectFit="cover"
                           src={
                             item?.kondisiAkhir
@@ -564,97 +644,104 @@ function DaftarKendaraanDinas() {
                       </Flex>
                     </Td>
                     <Td>
-                      <Text
-                        fontSize="12px"
-                        fontWeight="bold"
-                        color={
-                          item?.status === "dipinjam" ? "red.500" : "green.500"
-                        }
+                      <Badge
+                        colorScheme={item?.status === "dipinjam" ? "red" : "green"}
+                        variant={item?.status === "dipinjam" ? "solid" : "subtle"}
+                        textTransform="capitalize"
+                        px={2}
+                        py={1}
+                        borderRadius="md"
                       >
                         {item?.status || "N/A"}
+                      </Badge>
+                    </Td>
+                    <Td>
+                      <Text fontSize="sm" fontWeight="medium">
+                        {item?.jarak != null ? `${item.jarak} Km` : "–"}
                       </Text>
                     </Td>
-                    <Td>{`${item?.jarak} Km` || "N/A"}</Td>
                     <Td>
-                      <Flex gap={2}>
-                        <Button
-                          onClick={() =>
-                            history.push(
-                              `/perjalanan/detail-kendaraan-dinas/${item?.kendaraan?.id}`
-                            )
-                          }
-                          size="sm"
-                          variant="outline"
-                        >
-                          Detail
-                        </Button>
-                        {item?.status === "dipinjam" && (
+                      <Wrap spacing={2}>
+                        <Tooltip label="Lihat detail kendaraan" placement="top">
                           <Button
                             onClick={() =>
-                              openDeleteModal(
-                                item?.id,
-                                item?.perjalanans?.[0]?.id
+                              history.push(
+                                `/perjalanan/detail-kendaraan-dinas/${item?.kendaraan?.id}`
                               )
                             }
                             size="sm"
-                            colorScheme="red"
                             variant="outline"
-                            leftIcon={<BsTrash />}
+                            colorScheme="blue"
+                            leftIcon={<BsEye />}
                           >
-                            Hapus
+                            Detail
                           </Button>
+                        </Tooltip>
+                        {item?.status === "dipinjam" && (
+                          <Tooltip label="Batalkan / hapus peminjaman" placement="top">
+                            <Button
+                              onClick={() =>
+                                openDeleteModal(
+                                  item?.id,
+                                  item?.perjalanans?.[0]?.id
+                                )
+                              }
+                              size="sm"
+                              colorScheme="red"
+                              variant="outline"
+                              leftIcon={<BsTrash />}
+                            >
+                              Hapus
+                            </Button>
+                          </Tooltip>
                         )}
-                      </Flex>
+                      </Wrap>
                     </Td>
                   </Tr>
                 ))}
               </Tbody>
             </Table>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-
-                boxSizing: "border-box",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <ReactPaginate
-                previousLabel={"+"}
-                nextLabel={"-"}
-                pageCount={pages}
-                onPageChange={changePage}
-                activeClassName={"item active "}
-                breakClassName={"item break-me "}
-                breakLabel={"..."}
-                containerClassName={"pagination"}
-                disabledClassName={"disabled-page"}
-                marginPagesDisplayed={1}
-                nextClassName={"item next "}
-                pageClassName={"item pagination-page "}
-                pageRangeDisplayed={2}
-                previousClassName={"item previous"}
-              />
-            </div>
+            </Box>
+            {pages > 1 && (
+              <Flex justify="center" align="center" py={4} width="100%">
+                <ReactPaginate
+                  previousLabel="← Sebelumnya"
+                  nextLabel="Selanjutnya →"
+                  pageCount={Math.max(1, pages)}
+                  onPageChange={changePage}
+                  forcePage={page}
+                  activeClassName="item active"
+                  breakClassName="item break-me"
+                  breakLabel="..."
+                  containerClassName="pagination"
+                  disabledClassName="disabled-page"
+                  marginPagesDisplayed={1}
+                  nextClassName="item next"
+                  pageClassName="item pagination-page"
+                  pageRangeDisplayed={2}
+                  previousClassName="item previous"
+                />
+              </Flex>
+            )}
+              </>
+            )}
           </Box>
         </Box>
 
         {/* Modal Konfirmasi Hapus */}
-        <Modal isOpen={isDeleteOpen} onClose={onDeleteClose}>
-          <ModalOverlay />
-          <ModalContent>
+        <Modal isOpen={isDeleteOpen} onClose={onDeleteClose} isCentered size="md">
+          <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+          <ModalContent mx={4}>
             <ModalHeader>Konfirmasi Hapus</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Text>
+              <Text color="gray.600" _dark={{ color: "gray.300" }}>
                 Apakah Anda yakin ingin menghapus data kendaraan dinas ini?
                 Tindakan ini tidak dapat dibatalkan.
               </Text>
             </ModalBody>
-            <ModalFooter>
-              <Button variant="ghost" mr={3} onClick={onDeleteClose}>
+            <ModalFooter gap={2}>
+              <Button variant="ghost" onClick={onDeleteClose}>
                 Batal
               </Button>
               <Button

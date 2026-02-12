@@ -702,346 +702,7 @@ function DetailSP(props) {
           </Container>
         </Box>
 
-        {/* Bagian 2: Tambah Dokumen Barang dan Jasa + Daftar Dokumen */}
-        <Box py={{ base: 8, md: 12 }} position="relative">
-          <Container
-            borderRadius={"12px"}
-            bgColor={colorMode === "dark" ? "gray.900" : "white"}
-            maxW="1280px"
-            p={{ base: 4, md: 8 }}
-          >
-            {/* Section Header */}
-            <Box mb={10}>
-              <Flex align="center" gap={4}>
-                <Box
-                  bgColor="aset"
-                  color="white"
-                  w="56px"
-                  h="56px"
-                  borderRadius="full"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  fontWeight="bold"
-                  fontSize="2xl"
-                  boxShadow="xl"
-                  flexShrink={0}
-                >
-                  2
-                </Box>
-                <Box flex={1}>
-                  <Heading
-                    size="xl"
-                    color={colorMode === "dark" ? "white" : "gray.800"}
-                    mb={2}
-                  >
-                    Dokumen Barang dan Jasa
-                  </Heading>
-                  <Text color="gray.500" fontSize="md">
-                    Kelola dan tambahkan dokumen barang dan jasa
-                  </Text>
-                </Box>
-              </Flex>
-            </Box>
-            {/* Form Tambah Dokumen */}
-            <Box
-              bgColor={colorMode === "dark" ? "gray.800" : "white"}
-              p={{ base: 4, md: 6 }}
-              borderRadius="12px"
-              boxShadow="md"
-              mb={6}
-              borderTop="4px solid"
-              borderColor="aset"
-            >
-              <Flex align="center" mb={4}>
-                <Icon as={FaPlus} color="aset" mr={2} boxSize={5} />
-                <Heading size="md" color="aset">
-                  Tambah Dokumen Barang dan Jasa
-                </Heading>
-              </Flex>
-
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                <FormControl>
-                  <FormLabel fontSize="md" fontWeight="medium" mb={2}>
-                    Jenis Surat
-                  </FormLabel>
-                  <Select2
-                    options={dataJenisDokumen?.map((val) => ({
-                      value: val.id,
-                      label: `${val.jenis}`,
-                    }))}
-                    placeholder="Pilih jenis surat..."
-                    focusBorderColor="aset"
-                    onChange={(selectedOption) => {
-                      setJenisDokumenId(selectedOption.value);
-                    }}
-                    components={{
-                      DropdownIndicator: () => null,
-                      IndicatorSeparator: () => null,
-                    }}
-                    chakraStyles={{
-                      container: (provided) => ({
-                        ...provided,
-                        borderRadius: "8px",
-                      }),
-                      control: (provided) => ({
-                        ...provided,
-                        backgroundColor:
-                          colorMode === "dark" ? "gray.700" : "terang",
-                        border: "1px solid",
-                        borderColor:
-                          colorMode === "dark" ? "gray.600" : "gray.200",
-                        height: "48px",
-                        _hover: {
-                          borderColor: "aset",
-                        },
-                        minHeight: "48px",
-                      }),
-                      option: (provided, state) => ({
-                        ...provided,
-                        bg: state.isFocused ? "aset" : "white",
-                        color: state.isFocused ? "white" : "black",
-                      }),
-                    }}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="md" fontWeight="medium" mb={2}>
-                    Tanggal
-                  </FormLabel>
-                  <Input
-                    bgColor={colorMode === "dark" ? "gray.700" : "terang"}
-                    height="48px"
-                    type="date"
-                    value={tanggal}
-                    onChange={(e) => setTanggal(e.target.value)}
-                    borderRadius="8px"
-                    border="1px solid"
-                    borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
-                  />
-                </FormControl>
-              </SimpleGrid>
-              <Button
-                onClick={handlePilihBarjas}
-                variant="primary"
-                mt={4}
-                w={{ base: "full", md: "auto" }}
-                leftIcon={<Icon as={FaPlus} />}
-              >
-                Tambah Dokumen
-              </Button>
-            </Box>
-
-            {/* Daftar Dokumen Card */}
-            <Box>
-              <Flex align="center" justify="space-between" mb={4}>
-                <Flex align="center">
-                  <Icon as={FaList} color="aset" mr={2} boxSize={5} />
-                  <Heading size="md" color="aset">
-                    Daftar Dokumen
-                  </Heading>
-                </Flex>
-                {totalDokumen > 0 && (
-                  <Badge
-                    colorScheme="gray"
-                    variant="subtle"
-                    fontSize="md"
-                    p={2}
-                    borderRadius="md"
-                  >
-                    {totalDokumen} Dokumen
-                  </Badge>
-                )}
-              </Flex>
-              {dataDokumen?.dokumenBarjas?.length > 0 ? (
-                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-                  {dataDokumen.dokumenBarjas.map((item, index) => {
-                    const totalJumlahBarang = (
-                      item?.itemDokumenBarjas || []
-                    ).reduce((sum, it) => sum + Number(it?.jumlah || 0), 0);
-                    const totalNominal = (item?.itemDokumenBarjas || []).reduce(
-                      (sum, it) =>
-                        sum +
-                        Number(it?.jumlah || 0) * Number(it?.barja?.harga || 0),
-                      0
-                    );
-                    return (
-                      <Box
-                        key={item.id}
-                        bgColor={colorMode === "dark" ? "gray.800" : "white"}
-                        p={4}
-                        borderRadius="12px"
-                        boxShadow="md"
-                        borderLeft="4px solid"
-                        borderColor="aset"
-                        _hover={{
-                          boxShadow: "lg",
-                          transform: "translateY(-2px)",
-                          transition: "all 0.2s",
-                        }}
-                      >
-                        <Flex justify="space-between" align="start" mb={3}>
-                          <Badge
-                            colorScheme="gray"
-                            variant="subtle"
-                            fontSize="sm"
-                            p={1}
-                          >
-                            {item?.jenisDokumenBarja?.jenis || "-"}
-                          </Badge>
-                          <Badge
-                            colorScheme="gray"
-                            variant="solid"
-                            fontSize="xs"
-                          >
-                            #{index + 1}
-                          </Badge>
-                        </Flex>
-
-                        <VStack align="stretch" spacing={3}>
-                          <Box>
-                            <Text fontSize="xs" color="gray.600" mb={1}>
-                              Nomor Dokumen
-                            </Text>
-                            <Text fontSize="md" fontWeight="semibold">
-                              {item?.nomor || "-"}
-                            </Text>
-                          </Box>
-
-                          <SimpleGrid columns={2} spacing={3}>
-                            <Box>
-                              <Text fontSize="xs" color="gray.600" mb={1}>
-                                Tanggal Surat
-                              </Text>
-                              <Text fontSize="sm">
-                                {item?.tanggal
-                                  ? new Date(item?.tanggal).toLocaleDateString(
-                                      "id-ID",
-                                      {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      }
-                                    )
-                                  : "-"}
-                              </Text>
-                            </Box>
-                            <Box>
-                              <Text fontSize="xs" color="gray.600" mb={1}>
-                                Tanggal Input
-                              </Text>
-                              <Text fontSize="sm">
-                                {item?.createdAt
-                                  ? new Date(
-                                      item?.createdAt
-                                    ).toLocaleDateString("id-ID", {
-                                      day: "numeric",
-                                      month: "short",
-                                      year: "numeric",
-                                    })
-                                  : "-"}
-                              </Text>
-                            </Box>
-                          </SimpleGrid>
-
-                          <Divider />
-
-                          <SimpleGrid columns={3} spacing={2}>
-                            <Box>
-                              <Text fontSize="xs" color="gray.600" mb={1}>
-                                Jumlah Item
-                              </Text>
-                              <Text
-                                fontSize="lg"
-                                fontWeight="bold"
-                                color="aset"
-                              >
-                                {item?.itemDokumenBarjas?.length || 0}
-                              </Text>
-                            </Box>
-                            <Box>
-                              <Text fontSize="xs" color="gray.600" mb={1}>
-                                Jumlah Barang
-                              </Text>
-                              <Text
-                                fontSize="lg"
-                                fontWeight="bold"
-                                color="aset"
-                              >
-                                {totalJumlahBarang.toLocaleString("id-ID")}
-                              </Text>
-                            </Box>
-                            <Box>
-                              <Text fontSize="xs" color="gray.600" mb={1}>
-                                Nominal
-                              </Text>
-                              <Text
-                                fontSize="sm"
-                                fontWeight="bold"
-                                color="aset"
-                              >
-                                {formatRupiah(totalNominal)}
-                              </Text>
-                            </Box>
-                          </SimpleGrid>
-
-                          {item?.itemDokumenBarjas?.length > 0 && (
-                            <>
-                              <Divider />
-                              <Box>
-                                <Text fontSize="xs" color="gray.600" mb={2}>
-                                  Rincian Item
-                                </Text>
-                                <VStack align="stretch" spacing={1}>
-                                  {item.itemDokumenBarjas.map((it, idx) => {
-                                    const nama = it?.barja?.nama ?? "-";
-                                    const qty = Number(
-                                      it?.jumlah || 0
-                                    ).toLocaleString("id-ID");
-                                    return (
-                                      <Text
-                                        key={idx}
-                                        fontSize="xs"
-                                        color="gray.700"
-                                        noOfLines={1}
-                                      >
-                                        • {nama} ({qty})
-                                      </Text>
-                                    );
-                                  })}
-                                </VStack>
-                              </Box>
-                            </>
-                          )}
-                        </VStack>
-                      </Box>
-                    );
-                  })}
-                </SimpleGrid>
-              ) : (
-                <Box
-                  bgColor={colorMode === "dark" ? "gray.800" : "white"}
-                  p={8}
-                  borderRadius="12px"
-                  boxShadow="md"
-                  textAlign="center"
-                >
-                  <VStack spacing={2}>
-                    <Icon as={FaFileAlt} boxSize={10} color="gray.400" />
-                    <Text color="gray.500" fontSize="md" fontWeight="medium">
-                      Belum ada dokumen
-                    </Text>
-                    <Text color="gray.400" fontSize="sm">
-                      Tambahkan dokumen baru menggunakan form di atas
-                    </Text>
-                  </VStack>
-                </Box>
-              )}
-            </Box>
-          </Container>
-        </Box>
-
-        {/* Bagian 3: Input Barang dan Jasa + Daftar Barang dan Jasa */}
+        {/* Bagian 2: Input Barang dan Jasa + Daftar Barang dan Jasa */}
         <Box
           bgColor={"secondary"}
           pb={{ base: 8, md: 12 }}
@@ -1072,7 +733,7 @@ function DetailSP(props) {
                   boxShadow="xl"
                   flexShrink={0}
                 >
-                  3
+                  2
                 </Box>
                 <Box flex={1}>
                   <Heading
@@ -1440,6 +1101,345 @@ function DetailSP(props) {
                   </Tr>
                 </Tfoot>
               </Table>
+            </Box>
+          </Container>
+        </Box>
+
+        {/* Bagian 3: Tambah Dokumen Barang dan Jasa + Daftar Dokumen */}
+        <Box py={{ base: 8, md: 12 }} position="relative">
+          <Container
+            borderRadius={"12px"}
+            bgColor={colorMode === "dark" ? "gray.900" : "white"}
+            maxW="1280px"
+            p={{ base: 4, md: 8 }}
+          >
+            {/* Section Header */}
+            <Box mb={10}>
+              <Flex align="center" gap={4}>
+                <Box
+                  bgColor="aset"
+                  color="white"
+                  w="56px"
+                  h="56px"
+                  borderRadius="full"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  fontWeight="bold"
+                  fontSize="2xl"
+                  boxShadow="xl"
+                  flexShrink={0}
+                >
+                  3
+                </Box>
+                <Box flex={1}>
+                  <Heading
+                    size="xl"
+                    color={colorMode === "dark" ? "white" : "gray.800"}
+                    mb={2}
+                  >
+                    Dokumen Barang dan Jasa
+                  </Heading>
+                  <Text color="gray.500" fontSize="md">
+                    Kelola dan tambahkan dokumen barang dan jasa
+                  </Text>
+                </Box>
+              </Flex>
+            </Box>
+            {/* Form Tambah Dokumen */}
+            <Box
+              bgColor={colorMode === "dark" ? "gray.800" : "white"}
+              p={{ base: 4, md: 6 }}
+              borderRadius="12px"
+              boxShadow="md"
+              mb={6}
+              borderTop="4px solid"
+              borderColor="aset"
+            >
+              <Flex align="center" mb={4}>
+                <Icon as={FaPlus} color="aset" mr={2} boxSize={5} />
+                <Heading size="md" color="aset">
+                  Tambah Dokumen Barang dan Jasa
+                </Heading>
+              </Flex>
+
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                <FormControl>
+                  <FormLabel fontSize="md" fontWeight="medium" mb={2}>
+                    Jenis Surat
+                  </FormLabel>
+                  <Select2
+                    options={dataJenisDokumen?.map((val) => ({
+                      value: val.id,
+                      label: `${val.jenis}`,
+                    }))}
+                    placeholder="Pilih jenis surat..."
+                    focusBorderColor="aset"
+                    onChange={(selectedOption) => {
+                      setJenisDokumenId(selectedOption.value);
+                    }}
+                    components={{
+                      DropdownIndicator: () => null,
+                      IndicatorSeparator: () => null,
+                    }}
+                    chakraStyles={{
+                      container: (provided) => ({
+                        ...provided,
+                        borderRadius: "8px",
+                      }),
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor:
+                          colorMode === "dark" ? "gray.700" : "terang",
+                        border: "1px solid",
+                        borderColor:
+                          colorMode === "dark" ? "gray.600" : "gray.200",
+                        height: "48px",
+                        _hover: {
+                          borderColor: "aset",
+                        },
+                        minHeight: "48px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "aset" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="md" fontWeight="medium" mb={2}>
+                    Tanggal
+                  </FormLabel>
+                  <Input
+                    bgColor={colorMode === "dark" ? "gray.700" : "terang"}
+                    height="48px"
+                    type="date"
+                    value={tanggal}
+                    onChange={(e) => setTanggal(e.target.value)}
+                    borderRadius="8px"
+                    border="1px solid"
+                    borderColor={colorMode === "dark" ? "gray.600" : "gray.200"}
+                  />
+                </FormControl>
+              </SimpleGrid>
+              <Button
+                onClick={handlePilihBarjas}
+                variant="primary"
+                mt={4}
+                w={{ base: "full", md: "auto" }}
+                leftIcon={<Icon as={FaPlus} />}
+              >
+                Tambah Dokumen
+              </Button>
+            </Box>
+
+            {/* Daftar Dokumen Card */}
+            <Box>
+              <Flex align="center" justify="space-between" mb={4}>
+                <Flex align="center">
+                  <Icon as={FaList} color="aset" mr={2} boxSize={5} />
+                  <Heading size="md" color="aset">
+                    Daftar Dokumen
+                  </Heading>
+                </Flex>
+                {totalDokumen > 0 && (
+                  <Badge
+                    colorScheme="gray"
+                    variant="subtle"
+                    fontSize="md"
+                    p={2}
+                    borderRadius="md"
+                  >
+                    {totalDokumen} Dokumen
+                  </Badge>
+                )}
+              </Flex>
+              {dataDokumen?.dokumenBarjas?.length > 0 ? (
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+                  {dataDokumen.dokumenBarjas.map((item, index) => {
+                    const totalJumlahBarang = (
+                      item?.itemDokumenBarjas || []
+                    ).reduce((sum, it) => sum + Number(it?.jumlah || 0), 0);
+                    const totalNominal = (item?.itemDokumenBarjas || []).reduce(
+                      (sum, it) =>
+                        sum +
+                        Number(it?.jumlah || 0) * Number(it?.barja?.harga || 0),
+                      0
+                    );
+                    return (
+                      <Box
+                        key={item.id}
+                        bgColor={colorMode === "dark" ? "gray.800" : "white"}
+                        p={4}
+                        borderRadius="12px"
+                        boxShadow="md"
+                        borderLeft="4px solid"
+                        borderColor="aset"
+                        _hover={{
+                          boxShadow: "lg",
+                          transform: "translateY(-2px)",
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        <Flex justify="space-between" align="start" mb={3}>
+                          <Badge
+                            colorScheme="gray"
+                            variant="subtle"
+                            fontSize="sm"
+                            p={1}
+                          >
+                            {item?.jenisDokumenBarja?.jenis || "-"}
+                          </Badge>
+                          <Badge
+                            colorScheme="gray"
+                            variant="solid"
+                            fontSize="xs"
+                          >
+                            #{index + 1}
+                          </Badge>
+                        </Flex>
+
+                        <VStack align="stretch" spacing={3}>
+                          <Box>
+                            <Text fontSize="xs" color="gray.600" mb={1}>
+                              Nomor Dokumen
+                            </Text>
+                            <Text fontSize="md" fontWeight="semibold">
+                              {item?.nomor || "-"}
+                            </Text>
+                          </Box>
+
+                          <SimpleGrid columns={2} spacing={3}>
+                            <Box>
+                              <Text fontSize="xs" color="gray.600" mb={1}>
+                                Tanggal Surat
+                              </Text>
+                              <Text fontSize="sm">
+                                {item?.tanggal
+                                  ? new Date(item?.tanggal).toLocaleDateString(
+                                      "id-ID",
+                                      {
+                                        day: "numeric",
+                                        month: "short",
+                                        year: "numeric",
+                                      }
+                                    )
+                                  : "-"}
+                              </Text>
+                            </Box>
+                            <Box>
+                              <Text fontSize="xs" color="gray.600" mb={1}>
+                                Tanggal Input
+                              </Text>
+                              <Text fontSize="sm">
+                                {item?.createdAt
+                                  ? new Date(
+                                      item?.createdAt
+                                    ).toLocaleDateString("id-ID", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })
+                                  : "-"}
+                              </Text>
+                            </Box>
+                          </SimpleGrid>
+
+                          <Divider />
+
+                          <SimpleGrid columns={3} spacing={2}>
+                            <Box>
+                              <Text fontSize="xs" color="gray.600" mb={1}>
+                                Jumlah Item
+                              </Text>
+                              <Text
+                                fontSize="lg"
+                                fontWeight="bold"
+                                color="aset"
+                              >
+                                {item?.itemDokumenBarjas?.length || 0}
+                              </Text>
+                            </Box>
+                            <Box>
+                              <Text fontSize="xs" color="gray.600" mb={1}>
+                                Jumlah Barang
+                              </Text>
+                              <Text
+                                fontSize="lg"
+                                fontWeight="bold"
+                                color="aset"
+                              >
+                                {totalJumlahBarang.toLocaleString("id-ID")}
+                              </Text>
+                            </Box>
+                            <Box>
+                              <Text fontSize="xs" color="gray.600" mb={1}>
+                                Nominal
+                              </Text>
+                              <Text
+                                fontSize="sm"
+                                fontWeight="bold"
+                                color="aset"
+                              >
+                                {formatRupiah(totalNominal)}
+                              </Text>
+                            </Box>
+                          </SimpleGrid>
+
+                          {item?.itemDokumenBarjas?.length > 0 && (
+                            <>
+                              <Divider />
+                              <Box>
+                                <Text fontSize="xs" color="gray.600" mb={2}>
+                                  Rincian Item
+                                </Text>
+                                <VStack align="stretch" spacing={1}>
+                                  {item.itemDokumenBarjas.map((it, idx) => {
+                                    const nama = it?.barja?.nama ?? "-";
+                                    const qty = Number(
+                                      it?.jumlah || 0
+                                    ).toLocaleString("id-ID");
+                                    return (
+                                      <Text
+                                        key={idx}
+                                        fontSize="xs"
+                                        color="gray.700"
+                                        noOfLines={1}
+                                      >
+                                        • {nama} ({qty})
+                                      </Text>
+                                    );
+                                  })}
+                                </VStack>
+                              </Box>
+                            </>
+                          )}
+                        </VStack>
+                      </Box>
+                    );
+                  })}
+                </SimpleGrid>
+              ) : (
+                <Box
+                  bgColor={colorMode === "dark" ? "gray.800" : "white"}
+                  p={8}
+                  borderRadius="12px"
+                  boxShadow="md"
+                  textAlign="center"
+                >
+                  <VStack spacing={2}>
+                    <Icon as={FaFileAlt} boxSize={10} color="gray.400" />
+                    <Text color="gray.500" fontSize="md" fontWeight="medium">
+                      Belum ada dokumen
+                    </Text>
+                    <Text color="gray.400" fontSize="sm">
+                      Tambahkan dokumen baru menggunakan form di atas
+                    </Text>
+                  </VStack>
+                </Box>
+              )}
             </Box>
           </Container>
         </Box>

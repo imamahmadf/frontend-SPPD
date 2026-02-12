@@ -21,6 +21,10 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
   
   // Pastikan isSrikandi selalu memiliki nilai default
   const isSrikandiChecked = (state.isSrikandi ?? 1) === 1;
+  // 0 = Telaahan Staf, 1 = Nota Dinas, 2 = Undangan
+  const jenisSelected = state.isNotaDinas ?? 1;
+  const isUndangan = jenisSelected === 2;
+  const isNotaDinasOrTelaahan = jenisSelected === 0 || jenisSelected === 1;
 
   return (
     <Container
@@ -42,6 +46,27 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
         </Heading>
       </HStack>
       <Box p={"30px"}>
+        <FormControl mb={"25px"}>
+          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
+            Jenis
+          </FormLabel>
+          <Select
+            border="1px"
+            height={"60px"}
+            borderRadius={"8px"}
+            borderColor={"rgba(229, 231, 235, 1)"}
+            bgColor={"terang"}
+            value={jenisSelected}
+            onChange={(e) => actions.setIsNotaDinas(parseInt(e.target.value))}
+          >
+            <option value="1">Nota Dinas</option>
+            <option value="0">Telaahan Staf</option>
+            <option value="2">Undangan</option>
+          </Select>
+        </FormControl>
+
+        {isNotaDinasOrTelaahan && (
+          <>
         <FormControl
           mb={"25px"}
           isInvalid={touched.klasifikasi && errors.klasifikasi}
@@ -130,6 +155,8 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             <FormErrorMessage>{errors.kodeKlasifikasi}</FormErrorMessage>
           </FormControl>
         )}
+          </>
+        )}
 
         <FormControl mb={"25px"} isInvalid={touched.untuk && errors.untuk}>
           <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
@@ -150,7 +177,8 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
           <FormErrorMessage>{errors.untuk}</FormErrorMessage>
         </FormControl>
 
-        <FormControl mb={"25px"}>
+        {isUndangan && (
+        <FormControl mb={"25px"} isInvalid={touched.dasar && errors.dasar}>
           <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
             Dasar
           </FormLabel>
@@ -166,24 +194,9 @@ const DataNotaDinas = ({ dataSeed, state, actions, dataKlasifikasi }) => {
             p={"20px"}
             minHeight={"160px"}
           />
+          <FormErrorMessage>{errors.dasar}</FormErrorMessage>
         </FormControl>
-        <FormControl mb={"25px"}>
-          <FormLabel fontSize={"20px"} fontWeight={"500"} mb={"10px"}>
-            Jenis
-          </FormLabel>
-          <Select
-            border="1px"
-            height={"60px"}
-            borderRadius={"8px"}
-            borderColor={"rgba(229, 231, 235, 1)"}
-            bgColor={"terang"}
-            onChange={(e) => actions.setIsNotaDinas(parseInt(e.target.value))}
-          >
-            <option value="1">Nota Dinas</option>
-            <option value="0">Telaahan Staf</option>{" "}
-            <option value="2">Undangan</option>
-          </Select>
-        </FormControl>
+        )}
         <Box mb={"25px"} mt="30px">
           <Checkbox
             isChecked={isSrikandiChecked}

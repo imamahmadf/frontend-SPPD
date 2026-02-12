@@ -514,21 +514,30 @@ function templateBPDKeuangan() {
           )}
 
           {/* Pagination */}
-         
-            <Box mt={"30px"} display="flex" justifyContent="center">
-              <ReactPaginate
-                previousLabel={"Sebelumnya"}
-                nextLabel={"Selanjutnya"}
-                breakLabel={"..."}
-                pageCount={totalPage}
-                marginPagesDisplayed={2}
-                pageRangeDisplayed={5}
-                onPageChange={changePage}
-                containerClassName={"pagination"}
-                activeClassName={"active"}
-                forcePage={page}
-              />
-            </Box>
+          <Box
+            mt={6}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <ReactPaginate
+              previousLabel={"←"}
+              nextLabel={"→"}
+              breakLabel={"..."}
+              pageCount={totalPage}
+              marginPagesDisplayed={1}
+              pageRangeDisplayed={2}
+              onPageChange={changePage}
+              activeClassName={"item active "}
+              breakClassName={"item break-me "}
+              containerClassName={"pagination"}
+              disabledClassName={"disabled-page"}
+              nextClassName={"item next "}
+              pageClassName={"item pagination-page "}
+              previousClassName={"item previous"}
+              forcePage={page}
+            />
+          </Box>
           
         </Container>
       </Box>

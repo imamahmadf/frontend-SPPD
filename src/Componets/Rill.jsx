@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  Text,
   Button,
   Modal,
   ModalOverlay,
@@ -9,13 +8,9 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-  Image,
   ModalCloseButton,
-  Container,
   FormControl,
-  Select,
   FormLabel,
-  Center,
   HStack,
   Table,
   Thead,
@@ -23,9 +18,9 @@ import {
   Tr,
   Th,
   Td,
-  Flex,
-  Textarea,
   Input,
+  Stack,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/react";
 import axios from "axios";
@@ -35,16 +30,16 @@ function Rill(props) {
   const [nilai, setNilai] = useState(0);
   const [editMode, setEditMode] = useState(null);
   const [editedData, setEditedData] = useState({});
-  const [itemToDelete, setItemToDelete] = useState(null);
   const {
     isOpen: isRillOpen,
     onOpen: onRillOpen,
     onClose: onRillClose,
   } = useDisclosure();
   const handleChange = (e, field) => {
+    const value = e?.target?.value;
     setEditedData((prev) => ({
       ...prev,
-      [field]: e.target.value,
+      [field]: field === "nilai" ? (typeof value === "number" ? value : parseRupiah(value)) : value,
     }));
   };
   const handleEdit = (item) => {
@@ -120,128 +115,183 @@ function Rill(props) {
         console.error(err);
       });
   };
+  const isFormStacked = useBreakpointValue({ base: true, md: false });
+
   return (
-    <Box p={0} m={0}>
-      <Container p={0} m={0}>
-        <Button variant={"secondary"} onClick={onRillOpen}>
-          Rill
-        </Button>
-      </Container>
+    <Box>
+      <Button variant="secondary" onClick={onRillOpen} size="sm">
+        Rill
+      </Button>
       <Modal
         closeOnOverlayClick={false}
         isOpen={isRillOpen}
         onClose={onRillClose}
+        size={{ base: "full", md: "4xl", lg: "6xl" }}
       >
         <ModalOverlay />
-        <ModalContent borderRadius={0} maxWidth="1500px" bgColor={"terang"}>
-          <ModalHeader>Rill </ModalHeader>
-          <ModalCloseButton />
+        <ModalContent
+          borderRadius="lg"
+          maxWidth={{ base: "100%", md: "900px", lg: "1200px" }}
+          mx={{ base: 0, md: 4 }}
+          my={{ base: 0, md: 8 }}
+        >
+          <ModalHeader bg="primary" color="white" borderTopRadius="lg" pr={12}>
+            Rill
+          </ModalHeader>
+          <ModalCloseButton color="white" top={3} right={3} />
 
-          <ModalBody pb={6}>
-            <Table variant={"primary"}>
-              <Thead>
-                <Tr>
-                  <Th>Item</Th>
-                  <Th>Nilai</Th> <Th>Aksi</Th>
-                </Tr>
-              </Thead>
-              <Tbody bgColor={"secondary"}>
-                {props?.data?.map((item) => (
-                  <Tr key={item.id}>
-                    <Td>
-                      {editMode === item.id ? (
-                        <Input
-                          value={editedData.item}
-                          onChange={(e) => handleChange(e, "item")}
-                        />
-                      ) : (
-                        item.item
-                      )}
-                    </Td>{" "}
-                    <Td>
-                      {editMode === item.id ? (
-                        <Input
-                          value={editedData.nilai}
-                          onChange={(e) => handleChange(e, "nilai")}
-                        />
-                      ) : (
-                        new Intl.NumberFormat("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                        }).format(item.nilai)
-                      )}
-                    </Td>
-                    <Td>
-                      {editMode === item.id ? (
-                        <HStack>
-                          <Button
-                            colorScheme="green"
-                            onClick={() => handleSave(item)}
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            colorScheme="gray"
-                            onClick={() => setEditMode(null)}
-                          >
-                            Cancel
-                          </Button>
-                        </HStack>
-                      ) : (
-                        <HStack>
-                          <Button
-                            colorScheme="blue"
-                            onClick={() => handleEdit(item)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            colorScheme="red"
-                            onClick={() => {
-                              hapusRill(item);
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </HStack>
-                      )}
-                    </Td>
+          <ModalBody pb={6} pt={6}>
+            <Box overflowX="auto" mb={6}>
+              <Table variant="primary" size={{ base: "sm", md: "md" }}>
+                <Thead>
+                  <Tr>
+                    <Th>Item</Th>
+                    <Th>Nilai</Th>
+                    <Th>Aksi</Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
-            {props.status === 3 || props.status === 2 ? null : (
-              <HStack
-                border={"1px"}
-                borderRadius={"6px"}
-                borderColor={"rgba(229, 231, 235, 1)"}
-                bgColor={"white"}
+                </Thead>
+                <Tbody>
+                  {props?.data?.length > 0 ? (
+                    props.data.map((row) => (
+                      <Tr key={row.id}>
+                        <Td>
+                          {editMode === row.id ? (
+                            <Input
+                              size="sm"
+                              bgColor="terang"
+                              value={editedData.item ?? ""}
+                              onChange={(e) => handleChange(e, "item")}
+                            />
+                          ) : (
+                            row.item
+                          )}
+                        </Td>
+                        <Td>
+                          {editMode === row.id ? (
+                            <Input
+                              size="sm"
+                              bgColor="terang"
+                              inputMode="numeric"
+                              value={formatRupiah(editedData.nilai ?? 0)}
+                              onChange={(e) =>
+                                handleChange(
+                                  { target: { value: parseRupiah(e.target.value) } },
+                                  "nilai"
+                                )
+                              }
+                            />
+                          ) : (
+                            formatRupiah(row.nilai)
+                          )}
+                        </Td>
+                        <Td>
+                          {editMode === row.id ? (
+                            <HStack spacing={2} flexWrap="wrap">
+                              <Button
+                                size="sm"
+                                colorScheme="green"
+                                variant="solid"
+                                onClick={() => handleSave(row)}
+                                _hover={{ opacity: 0.9, transform: "translateY(-1px)" }}
+                              >
+                                Simpan
+                              </Button>
+                              <Button
+                                size="sm"
+                                colorScheme="gray"
+                                variant="outline"
+                                onClick={() => setEditMode(null)}
+                                _hover={{ bg: "gray.100" }}
+                              >
+                                Batal
+                              </Button>
+                            </HStack>
+                          ) : (
+                            <HStack spacing={2} flexWrap="wrap">
+                              <Button
+                                size="sm"
+                                colorScheme="blue"
+                                variant="solid"
+                                onClick={() => handleEdit(row)}
+                                _hover={{ opacity: 0.9, transform: "translateY(-1px)" }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                colorScheme="red"
+                                variant="solid"
+                                onClick={() => hapusRill(row)}
+                                _hover={{ opacity: 0.9, transform: "translateY(-1px)" }}
+                              >
+                                Hapus
+                              </Button>
+                            </HStack>
+                          )}
+                        </Td>
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={3} textAlign="center" py={8} color="gray.500">
+                        Belum ada data rill. Tambah data menggunakan form di bawah.
+                      </Td>
+                    </Tr>
+                  )}
+                </Tbody>
+              </Table>
+            </Box>
+
+            {props.status !== 3 && props.status !== 2 && (
+              <Stack
+                as="form"
+                border="1px solid"
+                borderRadius="lg"
+                borderColor="gray.200"
+                bgColor="terang"
                 spacing={4}
-                p={"30px"}
-                mt={"30px"}
+                p={6}
+                direction={isFormStacked ? "column" : "row"}
+                align={isFormStacked ? "stretch" : "flex-end"}
               >
-                <Input
-                  placeholder="Item"
-                  onChange={(e) => setItem(e.target.value)}
-                />
-                <Input
-                  placeholder="Nilai"
-                  type="text"
-                  inputMode="numeric"
-                  value={formatRupiah(nilai)}
-                  onChange={(e) => {
-                    const parsed = parseRupiah(e.target.value);
-                    setNilai(parsed);
-                  }}
-                />
-                <Button onClick={submitRill} variant={"primary"}>
+                <FormControl>
+                  <FormLabel fontSize="sm" mb={1}>
+                    Item
+                  </FormLabel>
+                  <Input
+                    placeholder="Masukkan item"
+                    bgColor="white"
+                    value={item}
+                    onChange={(e) => setItem(e.target.value)}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" mb={1}>
+                    Nilai
+                  </FormLabel>
+                  <Input
+                    placeholder="0"
+                    inputMode="numeric"
+                    bgColor="white"
+                    value={formatRupiah(nilai)}
+                    onChange={(e) => {
+                      const parsed = parseRupiah(e.target.value);
+                      setNilai(parsed);
+                    }}
+                  />
+                </FormControl>
+                <Button
+                  onClick={submitRill}
+                  variant="primary"
+                  alignSelf={isFormStacked ? "stretch" : "flex-end"}
+                >
                   Tambah
                 </Button>
-              </HStack>
+              </Stack>
             )}
           </ModalBody>
 
-          <ModalFooter></ModalFooter>
+          <ModalFooter />
         </ModalContent>
       </Modal>
     </Box>

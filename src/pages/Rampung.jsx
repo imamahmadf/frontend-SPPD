@@ -100,6 +100,15 @@ function Rampung(props) {
     onOpen: onInputOpen,
     onClose: onInputClose,
   } = useDisclosure();
+  const {
+    isOpen: isValidasiRillOpen,
+    onOpen: onValidasiRillOpen,
+    onClose: onValidasiRillClose,
+  } = useDisclosure();
+  const [validasiRillData, setValidasiRillData] = useState({
+    totalNilaiRill: 0,
+    maxUangTransport: 0,
+  });
   const [isPrinting, setIsPrinting] = useState(false);
   const validationSchema = Yup.object().shape({
     file: Yup.mixed()
@@ -187,6 +196,36 @@ function Rampung(props) {
     if (!dataRampung.result.id) {
       console.error("ID tidak valid");
       return;
+    }
+
+    // Validasi untuk Perjalanan Dinas Dalam Kota (jenisPerjalanan.id === 2):
+    // Total nilai rincian jenis Rill tidak boleh melebihi uangTransport maksimal dari tempats
+    const jenisPerjalananId = dataRampung.result?.perjalanan?.jenisPerjalanan?.id;
+    if (jenisPerjalananId === 2) {
+      const tempats = dataRampung.result?.perjalanan?.tempats || [];
+      const maxUangTransport =
+        tempats.length > 0
+          ? Math.max(
+              ...tempats.map((t) => Number(t?.dalamKota?.uangTransport) || 0)
+            )
+          : 0;
+
+      const totalNilaiRill = (
+        dataRampung.result?.rincianBPDs?.filter(
+          (item) =>
+            (item.jenisRincianBPD?.jenis || "").toLowerCase() === "rill"
+        ) || []
+      ).reduce((sum, item) => {
+        const nilai = Number(item.nilai) || 0;
+        const qty = Number(item.qty) || 0;
+        return sum + nilai * qty;
+      }, 0);
+
+      if (totalNilaiRill > maxUangTransport) {
+        setValidasiRillData({ totalNilaiRill, maxUangTransport });
+        onValidasiRillOpen();
+        return;
+      }
     }
 
     axios
@@ -724,6 +763,31 @@ function Rampung(props) {
     }
   };
 
+  // Cek apakah user memiliki keuangan nonaktif
+  const isKeuanganNonaktif =
+    user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan === "nonaktif";
+
+  // Helper function untuk mengecek apakah user bisa menambah/edit
+  const canAddOrEdit = () => {
+    if (isKeuanganNonaktif) {
+      return true; // Jika keuangan nonaktif, selalu bisa menambah/edit
+    }
+    // Jika keuangan aktif, cek status seperti biasa
+    return (
+      dataRampung?.result?.statusId !== 3 &&
+      dataRampung?.result?.statusId !== 2
+    );
+  };
+
+  // Helper function untuk mengecek apakah user bisa mencetak
+  const canPrint = () => {
+    if (isKeuanganNonaktif) {
+      return true; // Jika keuangan nonaktif, selalu bisa mencetak
+    }
+    // Jika keuangan aktif, hanya bisa mencetak jika status = 3 (Diverifikasi)
+    return dataRampung?.result?.statusId === 3;
+  };
+
   return (
     <Layout>
       {isPrinting && <Loading />}
@@ -1006,7 +1070,34 @@ function Rampung(props) {
                         >
                           Tujuan
                         </Text>
-                        <Text fontSize="md">{daftarTempat || "-"}</Text>
+                        {dataRampung?.result?.perjalanan?.jenisPerjalanan
+                          ?.tipePerjalananId === 1 ? (
+                          <VStack align="stretch" spacing={2} mt={1}>
+                            {dataRampung?.result?.perjalanan?.tempats?.map(
+                              (tempat, index) => (
+                                <HStack key={index} spacing={2} align="center">
+                                  <Text fontSize="md">
+                                    {tempat?.dalamKota?.nama ?? tempat?.tempat ?? "-"}
+                                  </Text>
+                                  {tempat?.dalamKota?.status && (
+                                    <Badge
+                                      colorScheme={
+                                        tempat.dalamKota.status === "aktif"
+                                          ? "green"
+                                          : "gray"
+                                      }
+                                      fontSize="xs"
+                                    >
+                                      {tempat.dalamKota.status}
+                                    </Badge>
+                                  )}
+                                </HStack>
+                              )
+                            )}
+                          </VStack>
+                        ) : (
+                          <Text fontSize="md">{daftarTempat || "-"}</Text>
+                        )}
                       </Box>
                       <Box>
                         <Text
@@ -1089,7 +1180,7 @@ function Rampung(props) {
                 </Card>
 
                 {/* Template Selection */}
-                {dataRampung?.result?.statusId === 3 && (
+                {canPrint() && (
                   <Card shadow="md" borderRadius="lg">
                     <CardHeader bg="orange.50" py={4}>
                       <Heading size="sm" color="orange.700">
@@ -1158,17 +1249,16 @@ function Rampung(props) {
                     randomNumber={setRandomNumber}
                     status={dataRampung?.result?.statusId}
                   />
-                  {dataRampung?.result?.statusId === 3 && (
+                  {canPrint() && (
                     <Button variant="primary" onClick={cetak} size="lg">
                       CETAK
                     </Button>
                   )}
-                  {dataRampung?.result?.statusId !== 3 &&
-                    dataRampung?.result?.statusId !== 2 && (
-                      <Button onClick={onInputOpen} variant="primary" size="lg">
-                        Tambah +
-                      </Button>
-                    )}
+                  {canAddOrEdit() && (
+                    <Button onClick={onInputOpen} variant="primary" size="lg">
+                      Tambah +
+                    </Button>
+                  )}
                   {dataRampung?.result?.perjalanan?.jenisPerjalanan
                     ?.tipePerjalananId === 1 &&
                     dataRampung?.result?.rincianBPDs.length === 0 && (
@@ -1219,10 +1309,9 @@ function Rampung(props) {
                                 Total
                               </Th>
                               <Th style={{ width: "15%" }}>Bukti</Th>
-                              {dataRampung?.result?.statusId !== 3 &&
-                                dataRampung?.result?.statusId !== 2 && (
-                                  <Th style={{ width: "10%" }}>Aksi</Th>
-                                )}
+                              {canAddOrEdit() && (
+                                <Th style={{ width: "10%" }}>Aksi</Th>
+                              )}
                             </Tr>
                           </Thead>
                           <Tbody>
@@ -1324,10 +1413,9 @@ function Rampung(props) {
                                     cursor="pointer"
                                     _hover={{ opacity: 0.8 }}
                                     transition="opacity 0.2s"
-                                  />
+                                    />
                                 </Td>
-                                {dataRampung?.result?.statusId !== 3 &&
-                                  dataRampung?.result?.statusId !== 2 && (
+                                {canAddOrEdit() && (
                                     <Td>
                                       {editMode === item.id ? (
                                         <HStack spacing={2}>
@@ -1436,6 +1524,55 @@ function Rampung(props) {
           {/* Breakdown Perhitungan - Development Only */}
         </Container>
       </Box>
+
+      {/* Modal Peringatan Validasi Rill (Dalam Kota) */}
+      <Modal
+        closeOnOverlayClick={false}
+        isOpen={isValidasiRillOpen}
+        onClose={onValidasiRillClose}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent borderRadius="lg" maxWidth="500px">
+          <ModalHeader color="red.600">Validasi Gagal</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Text mb={2}>
+              Total nilai rincian <strong>Rill</strong> tidak boleh melebihi uang
+              transport maksimal untuk perjalanan dalam kota.
+            </Text>
+            <VStack align="stretch" spacing={2} py={2}>
+              <Flex justify="space-between">
+                <Text color="gray.600">Total nilai Rill:</Text>
+                <Text fontWeight="semibold" color="red.600">
+                  {new Intl.NumberFormat("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                  }).format(validasiRillData.totalNilaiRill)}
+                </Text>
+              </Flex>
+              <Flex justify="space-between">
+                <Text color="gray.600">Batas maksimal:</Text>
+                <Text fontWeight="semibold">
+                  {new Intl.NumberFormat("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                  }).format(validasiRillData.maxUangTransport)}
+                </Text>
+              </Flex>
+            </VStack>
+            <Text fontSize="sm" color="gray.600">
+              Silakan perbaiki rincian BPD agar total nilai Rill tidak melebihi
+              batas di atas, lalu ajukan kembali.
+            </Text>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={onValidasiRillClose}>
+              Mengerti
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Delete Modal */}
       <Modal

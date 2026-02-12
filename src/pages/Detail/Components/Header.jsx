@@ -8,56 +8,219 @@ import {
   Button,
   Flex,
   Icon,
+  HStack,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Badge,
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { FiInfo, FiEdit3 } from "react-icons/fi";
+import { FiInfo, FiChevronRight, FiHome } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
-function Header({ detailPerjalanan, adaStatusDuaAtauTiga, onEditClick }) {
+function Header({ detailPerjalanan, adaStatusDuaAtauTiga, onEditClick, penomoran }) {
+  // Tentukan status berdasarkan statusId personil
+  const getStatusLabel = () => {
+    const statusIds = detailPerjalanan?.personils?.map((p) => p.statusId) || [];
+    if (statusIds.includes(3)) return "Selesai";
+    if (statusIds.includes(2)) return "Disetujui";
+    return "Diproses";
+  };
+
+  const getStatusColor = () => {
+    const statusIds = detailPerjalanan?.personils?.map((p) => p.statusId) || [];
+    if (statusIds.includes(3)) return "green";
+    if (statusIds.includes(2)) return "green";
+    return "green";
+  };
+
+  // Tentukan status penomoran
+  const getPenomoranStatus = () => {
+    if (!penomoran) return null;
+    const isAktif = penomoran === "aktif" || penomoran === true;
+    return {
+      label: isAktif ? "Penomoran Aktif" : "Penomoran Nonaktif",
+      bg: isAktif ? "blue.100" : "gray.100",
+      color: isAktif ? "blue.700" : "gray.700",
+      borderColor: isAktif ? "blue.200" : "gray.200",
+    };
+  };
+
+  const penomoranStatus = getPenomoranStatus();
+
   return (
     <Box
-      py={{ base: 4, md: 6, lg: 8 }}
-      mb={{ base: 4, md: 6, lg: 8 }}
-      px={{ base: 4, md: 0 }}
+      py={8}
+      mb={8}
     >
-      <Container maxW={{ base: "100%", md: "1280px" }} px={{ base: 4, md: 6 }}>
-        <Flex
-          align={{ base: "start", md: "center" }}
-          justify="space-between"
-          direction={{ base: "column", md: "row" }}
-          gap={4}
+      <Container
+        maxW={{ base: "100%", md: "1280px", lg: "1380px" }}
+        px={{ base: 4, sm: 6, lg: 8 }}
+      >
+        <VStack align="stretch" spacing={4}>
+        {/* Breadcrumbs */}
+        <HStack
+          spacing={2}
+          fontSize="sm"
+          color="gray.500"
+          mb={4}
+          overflowX="auto"
+          pb={1}
         >
-          <VStack align="start" spacing={2} flex={1}>
-            <Heading
-              size={{ base: "md", md: "lg" }}
-              display="flex"
-              align="center"
-              gap={3}
-              flexWrap="wrap"
+          <Button
+            as={Link}
+            to="/perjalanan"
+            variant="ghost"
+            size="xs"
+            p={1}
+            minW="auto"
+            h="auto"
+            _hover={{
+              color: "teal.600",
+              bg: "gray.100",
+            }}
+            borderRadius="md"
+            transition="colors 0.2s"
+          >
+            <Icon as={FiHome} boxSize={3.5} />
+          </Button>
+          <Icon as={FiChevronRight} boxSize={3} color="gray.300" />
+          <Button
+            as={Link}
+            to="/perjalanan"
+            variant="ghost"
+            size="xs"
+            p={1}
+            minW="auto"
+            h="auto"
+            whiteSpace="nowrap"
+            _hover={{
+              color: "teal.600",
+              bg: "gray.100",
+            }}
+            borderRadius="md"
+            transition="colors 0.2s"
+          >
+            Perjalanan Dinas
+          </Button>
+          <Icon as={FiChevronRight} boxSize={3} color="gray.300" />
+          <Badge
+            fontSize="xs"
+            px={2}
+            py={0.5}
+            borderRadius="md"
+            bg="gray.100"
+            color="gray.900"
+            fontWeight="medium"
+          >
+            Detail Perjalanan
+          </Badge>
+        </HStack>
+
+        {/* Title and Status */}
+        <Flex
+          align={{ base: "start", sm: "center" }}
+          justify="space-between"
+          direction={{ base: "column", sm: "row" }}
+          gap={4}
+          flexWrap="wrap"
+        >
+          <HStack spacing={4} align="start" flexWrap="wrap">
+            <Box
+              p={3}
+              bg="white"
+              borderRadius="xl"
+              shadow="sm"
+              border="1px"
+              borderColor="gray.200"
+              display={{ base: "none", sm: "flex" }}
+              alignItems="center"
+              justifyContent="center"
             >
-              <Icon as={FiInfo} boxSize={{ base: 5, md: 6 }} />
-              Detail Perjalanan Dinas
-            </Heading>
-            <Text fontSize={{ base: "md", md: "lg" }} opacity={0.9}>
-              Informasi lengkap perjalanan dinas dan personil
-            </Text>
-          </VStack>
-          {!adaStatusDuaAtauTiga && (
-            <Button
-              leftIcon={<FiEdit3 />}
-              colorScheme="whiteAlpha"
-              variant="outline"
-              size={{ base: "md", md: "lg" }}
-              onClick={onEditClick}
-              _hover={{
-                bg: "whiteAlpha.200",
-                transform: "translateY(-2px)",
-              }}
-              transition="all 0.2s"
-              w={{ base: "full", md: "auto" }}
-            >
-              Edit Perjalanan
-            </Button>
-          )}
+              <Icon as={FiInfo} boxSize={6} color="teal.600" />
+            </Box>
+            <VStack align="start" spacing={1}>
+              <HStack spacing={3} mb={1} flexWrap="wrap">
+                <Heading
+                  size={{ base: "lg", sm: "xl", md: "2xl" }}
+                  fontWeight="bold"
+                  color="gray.900"
+                  letterSpacing="tight"
+                >
+                  Detail Perjalanan Dinas
+                </Heading>
+                <Badge
+                  bg="green.100"
+                  color="green.700"
+                  fontSize="xs"
+                  fontWeight="bold"
+                  px={2.5}
+                  py={0.5}
+                  borderRadius="full"
+                  border="1px"
+                  borderColor="green.200"
+                  shadow="sm"
+                >
+                  {getStatusLabel()}
+                </Badge>
+                {penomoranStatus && (
+                  <Badge
+                    bg={penomoranStatus.bg}
+                    color={penomoranStatus.color}
+                    fontSize="xs"
+                    fontWeight="bold"
+                    px={2.5}
+                    py={0.5}
+                    borderRadius="full"
+                    border="1px"
+                    borderColor={penomoranStatus.borderColor}
+                    shadow="sm"
+                  >
+                    {penomoranStatus.label}
+                  </Badge>
+                )}
+              </HStack>
+              <Text
+                fontSize={{ base: "sm", sm: "base" }}
+                color="gray.500"
+                maxW="2xl"
+              >
+                Informasi lengkap perjalanan dinas dan personil terkait untuk
+                keperluan administrasi.
+              </Text>
+            </VStack>
+          </HStack>
+
+          <Button
+            px={4}
+            py={2}
+            bg="white"
+            border="1px"
+            borderColor="gray.200"
+            color="gray.600"
+            fontSize="sm"
+            fontWeight="medium"
+            borderRadius="lg"
+            _hover={{
+              bg: "gray.50",
+              color: "gray.900",
+            }}
+            transition="colors 0.2s"
+            shadow="sm"
+            onClick={() => window.history.back()}
+          >
+            Kembali
+          </Button>
         </Flex>
+
+        {/* Divider */}
+        <Box
+          h="1px"
+          bgGradient="linear(to-r, transparent, gray.200, transparent)"
+          mt={8}
+          w="100%"
+        />
+        </VStack>
       </Container>
     </Box>
   );

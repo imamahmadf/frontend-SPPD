@@ -22,6 +22,7 @@ import suratKeluarAdmin from "./pages/Admin/suratKeluarAdmin.jsx";
 import PengaturanPegawai from "./pages/PengaturanPegawai.jsx";
 import DaftarPegawai from "./pages/DaftarPegawai.jsx";
 import EditPegawai from "./pages/Admin/EditPegawai.jsx";
+import DalamKota from "./pages/DalamKota.jsx";
 import DalamKotaAdmin from "./pages/Admin/DalamKotaAdmin.jsx";
 import IndukUnitKerjaAdmin from "./pages/Admin/IndukUnitKerjaAdmin.jsx";
 import DetailPegawaiAdmin from "./pages/Admin/DetailPegawaiAdmin.jsx";
@@ -698,6 +699,12 @@ function App() {
             path="/unit-kerja/template-bpd"
             exact
             roleRoute={[5, 2]}
+          />
+          <ProtectedRoute
+            component={DalamKota}
+            path="/unit-kerja/dalam-kota"
+            exact
+            roleRoute={[2, 5]}
           />
 
 

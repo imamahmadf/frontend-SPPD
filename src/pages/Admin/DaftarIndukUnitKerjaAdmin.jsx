@@ -24,7 +24,7 @@ import {
   Stack,
   Card,
   CardBody,
-  CardHeader,
+  CardHeader, 
   Input,
   useToast,
   Badge,
@@ -34,9 +34,13 @@ import {
   useDisclosure,
   Checkbox,
   Flex,
+  SimpleGrid,
+  TableContainer,
+  Spinner,
+  Center,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { BsEyeFill } from "react-icons/bs";
+import { BsEyeFill, BsToggleOn, BsToggleOff } from "react-icons/bs";
 import { Link, useHistory } from "react-router-dom";
 import Layout from "../../Componets/Layout";
 import { useSelector } from "react-redux";
@@ -45,14 +49,18 @@ import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 function DaftarIndukUnitKerjaAdmin() {
   const [allChecked, setAllChecked] = useState(false);
   const history = useHistory();
+  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [data, setData] = useState(null);
   const [dataSumberDana, setDataSumberDana] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
+  const [updatingKeuanganId, setUpdatingKeuanganId] = useState(null);
   const [indukUnitKerja, setIndukUnitKerja] = useState("");
   const [kodeInduk, setKodeInduk] = useState("");
   const [checkedItems, setCheckedItems] = useState([]);
   const [checkedIds, setCheckedIds] = useState([]);
   const [asal, setAsal] = useState("");
+  const [loading, setLoading] = useState(true);
   const handleCheckboxChange = (index) => {
     const updatedCheckedItems = [...checkedItems];
     updatedCheckedItems[index] = !updatedCheckedItems[index];
@@ -75,21 +83,37 @@ function DaftarIndukUnitKerjaAdmin() {
           kodeInduk,
           asal,
           sumberDanaId: checkedIds,
-        }
+        },
       )
       .then((res) => {
         console.log(res.data);
-        onClose();
+        toast({
+          title: "Berhasil",
+          description: "Data OPD berhasil ditambahkan.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        handleCloseModal();
         fetchDaftarIndukUnitKerja();
       })
       .catch((err) => {
         console.error(err);
+        toast({
+          title: "Gagal",
+          description:
+            err.response?.data?.message || "Gagal menambahkan data OPD.",
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
       });
   };
   async function fetchDaftarIndukUnitKerja() {
+    setLoading(true);
     await axios
       .get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/induk-unit-kerja/get`
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/induk-unit-kerja/get`,
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -99,121 +123,355 @@ function DaftarIndukUnitKerjaAdmin() {
       })
       .catch((err) => {
         console.error(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
+  const togglePenomoran = async (item) => {
+    const isAktif = item.penomoran === "aktif" || item.penomoran === true;
+    const nilaiBaru = isAktif ? "nonaktif" : "aktif";
+    setUpdatingId(item.id);
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/induk-unit-kerja/penomoran/${item.id}`,
+        { penomoran: nilaiBaru },
+      );
+      toast({
+        title: "Berhasil",
+        description: nilaiBaru === "aktif"
+          ? "Penomoran diaktifkan."
+          : "Penomoran dinonaktifkan.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      fetchDaftarIndukUnitKerja();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Gagal",
+        description:
+          err.response?.data?.message || "Gagal mengubah status penomoran.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+  const toggleKeuangan = async (item) => {
+    const isAktif = item.keuangan === "aktif" || item.keuangan === true;
+    const nilaiBaru = isAktif ? "nonaktif" : "aktif";
+    setUpdatingKeuanganId(item.id);
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/induk-unit-kerja/keuangan/${item.id}`,
+        { keuangan: nilaiBaru },
+      );
+      toast({
+        title: "Berhasil",
+        description: nilaiBaru === "aktif"
+          ? "Keuangan diaktifkan."
+          : "Keuangan dinonaktifkan.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      fetchDaftarIndukUnitKerja();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Gagal",
+        description:
+          err.response?.data?.message || "Gagal mengubah status keuangan.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setUpdatingKeuanganId(null);
+    }
+  };
   useEffect(() => {
     fetchDaftarIndukUnitKerja();
   }, []);
 
+  const handleCloseModal = () => {
+    onClose();
+    // Reset form when modal closes
+    setIndukUnitKerja("");
+    setKodeInduk("");
+    setAsal("");
+    setCheckedItems([]);
+    setCheckedIds([]);
+  };
+
   return (
     <Layout>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+      <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH="100vh">
         <Container variant={"primary"} maxW={"1280px"} p={"30px"} my={"30px"}>
-          <Button variant={"primary"} onClick={onOpen}>
-            Tambah OPD +
-          </Button>
-          <Table mt={"30px"} variant={"primary"}>
-            <Thead>
-              <Tr>
-                <Th>No</Th>
-                <Th>OPD</Th>
-                <Th>Kode</Th>
-                <Th>Sumber Dana</Th>
-                <Th>Aksi</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data?.map((item, index) => (
-                <Tr>
-                  <Td>{index + 1}</Td>
-                  <Td>{item.indukUnitKerja}</Td>
-                  <Td>{item.kodeInduk}</Td>
-                  <Td>
-                    {item.indukUKSumberDanas.map((val, idx) => (
-                      <Text>{val.sumberDana.sumber}</Text>
-                    ))}
-                  </Td>
-                  <Td>
-                    <Button
-                      variant={"primary"}
-                      p={"0px"}
-                      fontSize={"14px"}
-                      onClick={() =>
-                        history.push(
-                          `/admin/detail-induk-unit-kerja/${item.id}`
-                        )
-                      }
-                    >
-                      <BsEyeFill />
-                    </Button>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+          <Flex justify="space-between" align="center" mb={"30px"}>
+            <Heading size="lg" color="gray.700">
+              Daftar Induk Unit Kerja
+            </Heading>
+            <Button variant={"primary"} onClick={onOpen}>
+              Tambah OPD +
+            </Button>
+          </Flex>
+
+          {loading ? (
+            <Center py={10}>
+              <Spinner size="xl" color="blue.500" />
+            </Center>
+          ) : (
+            <TableContainer
+              bg="white"
+              borderRadius="md"
+              boxShadow="sm"
+              overflowX="auto"
+            >
+              <Table variant={"primary"} size="md">
+                <Thead bg="gray.50">
+                  <Tr>
+                    <Th>No</Th>
+                    <Th>OPD</Th>
+                    <Th>Kode</Th>
+                    <Th>Asal</Th>
+                    <Th>Sumber Dana</Th>
+                    <Th>Penomoran</Th>
+                    <Th>Keuangan</Th>
+                    <Th>Aksi</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {data && data.length > 0 ? (
+                    data.map((item, index) => (
+                      <Tr key={item.id} _hover={{ bg: "gray.50" }}>
+                        <Td fontWeight="medium">{index + 1}</Td>
+                        <Td>{item.indukUnitKerja}</Td>
+                        <Td>
+                          <Badge colorScheme="blue" variant="subtle">
+                            {item.kodeInduk}
+                          </Badge>
+                        </Td>
+                        <Td>{item.asal || "-"}</Td>
+                        <Td>
+                          <VStack align="start" spacing={1}>
+                            {item.indukUKSumberDanas && item.indukUKSumberDanas.length > 0 ? (
+                              item.indukUKSumberDanas.map((val, idx) => (
+                                <Badge
+                                  key={idx}
+                                  colorScheme="purple"
+                                  variant="subtle"
+                                  fontSize="xs"
+                                >
+                                  {val.sumberDana?.sumber || "-"}
+                                </Badge>
+                              ))
+                            ) : (
+                              <Text fontSize="sm" color="gray.400">
+                                -
+                              </Text>
+                            )}
+                          </VStack>
+                        </Td>
+                        <Td>
+                          <Badge
+                            colorScheme={item.penomoran === "aktif" ? "green" : "gray"}
+                            fontSize="sm"
+                            px={2}
+                            py={1}
+                          >
+                            {item.penomoran === "aktif" ? "Aktif" : "Nonaktif"}
+                          </Badge>
+                        </Td>
+                        <Td>
+                          <Badge
+                            colorScheme={item.keuangan === "aktif" ? "green" : "gray"}
+                            fontSize="sm"
+                            px={2}
+                            py={1}
+                          >
+                            {item.keuangan === "aktif" ? "Aktif" : "Nonaktif"}
+                          </Badge>
+                        </Td>
+                        <Td>
+                          <HStack spacing={2} flexWrap="wrap">
+                            <Button
+                              variant={"primary"}
+                              size="sm"
+                              p={"8px"}
+                              fontSize={"14px"}
+                              onClick={() =>
+                                history.push(
+                                  `/admin/detail-induk-unit-kerja/${item.id}`,
+                                )
+                              }
+                              title="Detail"
+                            >
+                              <BsEyeFill />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              colorScheme={item.penomoran === "aktif" ? "orange" : "green"}
+                              leftIcon={
+                                item.penomoran === "aktif" ? (
+                                  <BsToggleOn />
+                                ) : (
+                                  <BsToggleOff />
+                                )
+                              }
+                              onClick={() => togglePenomoran(item)}
+                              isLoading={updatingId === item.id}
+                              loadingText="..."
+                              title={
+                                item.penomoran === "aktif"
+                                  ? "Nonaktifkan penomoran"
+                                  : "Aktifkan penomoran"
+                              }
+                            >
+                              {item.penomoran === "aktif" ? "Nonaktifkan" : "Aktifkan"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              colorScheme={item.keuangan === "aktif" ? "orange" : "green"}
+                              leftIcon={
+                                item.keuangan === "aktif" ? (
+                                  <BsToggleOn />
+                                ) : (
+                                  <BsToggleOff />
+                                )
+                              }
+                              onClick={() => toggleKeuangan(item)}
+                              isLoading={updatingKeuanganId === item.id}
+                              loadingText="..."
+                              title={
+                                item.keuangan === "aktif"
+                                  ? "Nonaktifkan keuangan"
+                                  : "Aktifkan keuangan"
+                              }
+                            >
+                              {item.keuangan === "aktif" ? "Nonaktifkan" : "Aktifkan"}
+                            </Button>
+                          </HStack>
+                        </Td>
+                      </Tr>
+                    ))
+                  ) : (
+                    <Tr>
+                      <Td colSpan={8} textAlign="center" py={10}>
+                        <VStack spacing={2}>
+                          <Text color="gray.500" fontSize="lg">
+                            Belum ada data
+                          </Text>
+                          <Text color="gray.400" fontSize="sm">
+                            Klik "Tambah OPD +" untuk menambahkan data baru
+                          </Text>
+                        </VStack>
+                      </Td>
+                    </Tr>
+                  )}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          )}
         </Container>
       </Box>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
         <ModalOverlay />
         <ModalContent maxWidth="900px">
-          <ModalHeader>Tambah OPD</ModalHeader>
+          <ModalHeader fontSize="xl" fontWeight="bold">
+            Tambah OPD
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl>
-              <FormLabel fontSize={"24px"}>OPD</FormLabel>
-              <Input
-                onChange={(e) => {
-                  setIndukUnitKerja(e.target.value);
-                }}
-                bgColor={"terang"}
-                height="60px"
-                placeholder="isi dengan nama Unit Kerja"
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Kode</FormLabel>
-              <Input
-                onChange={(e) => {
-                  setKodeInduk(e.target.value);
-                }}
-                bgColor={"terang"}
-                height="60px"
-                placeholder="isi dengan Kode"
-              />
-            </FormControl>
-            <FormControl my={"30px"}>
-              <FormLabel fontSize={"24px"}>Asal</FormLabel>
-              <Input
-                onChange={(e) => {
-                  setAsal(e.target.value);
-                }}
-                bgColor={"terang"}
-                height="60px"
-                placeholder="isi dengan Kode"
-              />
-            </FormControl>
+            <VStack spacing={4} align="stretch">
+              <FormControl>
+                <FormLabel fontSize={"16px"} fontWeight="medium">
+                  OPD
+                </FormLabel>
+                <Input
+                  onChange={(e) => {
+                    setIndukUnitKerja(e.target.value);
+                  }}
+                  bgColor={"terang"}
+                  height="50px"
+                  placeholder="Masukkan nama Unit Kerja"
+                />
+              </FormControl>
 
-            <Flex>
-              {dataSumberDana?.map((item, index) => (
-                <Box>
-                  <Checkbox
-                    colorScheme="blue"
-                    key={item.id}
-                    isChecked={checkedItems[index]}
-                    onChange={() => handleCheckboxChange(index)}
-                  >
-                    {item.sumber}
-                  </Checkbox>
+              <FormControl>
+                <FormLabel fontSize={"16px"} fontWeight="medium">
+                  Kode
+                </FormLabel>
+                <Input
+                  onChange={(e) => {
+                    setKodeInduk(e.target.value);
+                  }}
+                  bgColor={"terang"}
+                  height="50px"
+                  placeholder="Masukkan Kode"
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel fontSize={"16px"} fontWeight="medium">
+                  Asal
+                </FormLabel>
+                <Input
+                  onChange={(e) => {
+                    setAsal(e.target.value);
+                  }}
+                  bgColor={"terang"}
+                  height="50px"
+                  placeholder="Masukkan Asal"
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel fontSize={"16px"} fontWeight="medium" mb={3}>
+                  Sumber Dana
+                </FormLabel>
+                <Box
+                  border="1px"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  p={4}
+                  maxH="200px"
+                  overflowY="auto"
+                >
+                  {dataSumberDana && dataSumberDana.length > 0 ? (
+                    <SimpleGrid columns={2} spacing={3}>
+                      {dataSumberDana.map((item, index) => (
+                        <Checkbox
+                          colorScheme="blue"
+                          key={item.id}
+                          isChecked={checkedItems[index]}
+                          onChange={() => handleCheckboxChange(index)}
+                        >
+                          {item.sumber}
+                        </Checkbox>
+                      ))}
+                    </SimpleGrid>
+                  ) : (
+                    <Text color="gray.500" fontSize="sm">
+                      Tidak ada sumber dana tersedia
+                    </Text>
+                  )}
                 </Box>
-              ))}
-            </Flex>
+              </FormControl>
+            </VStack>
           </ModalBody>
 
           <ModalFooter>
-            {/* <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button> */}
+            <Button variant="ghost" mr={3} onClick={handleCloseModal}>
+              Batal
+            </Button>
             <Button onClick={postIndukUnitKerja} variant="primary">
               Tambah
             </Button>

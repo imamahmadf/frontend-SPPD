@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Formik } from "formik";
+import * as Yup from "yup";
 import axios from "axios";
 
 import LayoutAset from "../../Componets/Aset/LayoutAset";
@@ -23,6 +25,7 @@ import {
   Container,
   FormControl,
   FormLabel,
+  FormErrorMessage,
   Center,
   HStack,
   Table,
@@ -92,17 +95,48 @@ function DaftarDokumen() {
   const [pegawaiFilterId, setPegawaiFilterId] = useState(0);
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
-  const [subKegPerId, setSubKegPerId] = useState(null);
-  const [rekananId, setRekananId] = useState(null);
-  const [unitKerjaId, setUnitKerjaId] = useState(null);
-  const [nomorSPId, setNomorSPId] = useState(null);
-  const [akunBelanjaId, setAkunBelanjaId] = useState(null);
-  const [tanggal, setTanggal] = useState("");
-  const [isTambahRekananBaru, setIsTambahRekananBaru] = useState(false);
   const [subKegPerFilterId, setSubKegPerFilterId] = useState(null);
-  const [namaRekananBaru, setNamaRekananBaru] = useState("");
-  const [isTulisManualSP, setIsTulisManualSP] = useState(false);
-  const [nomorSPManual, setNomorSPManual] = useState("");
+  const initialValuesTambahSP = {
+    subKegPerId: null,
+    rekananId: null,
+    rekananLabel: "",
+    subKegPerLabel: "",
+    nomorSPId: null,
+    akunBelanjaId: null,
+    tanggal: "",
+    isTulisManualSP: false,
+    nomorSPManual: "",
+    isTambahRekananBaru: false,
+    namaRekananBaru: "",
+  };
+
+  const validationSchemaTambahSP = Yup.object()
+    .shape({
+      subKegPerId: Yup.mixed()
+        .nullable()
+        .required("Sub Kegiatan wajib dipilih"),
+      rekananId: Yup.mixed()
+        .nullable()
+        .required("Rekanan wajib dipilih"),
+      akunBelanjaId: Yup.mixed()
+        .nullable()
+        .required("Akun Belanja wajib dipilih"),
+      tanggal: Yup.string().required("Tanggal wajib diisi"),
+      nomorSPId: Yup.mixed().nullable(),
+      nomorSPManual: Yup.string(),
+    })
+    .test(
+      "nomorSP",
+      "Nomor SP wajib diisi (pilih dari daftar atau tulis manual)",
+      (value) => {
+        const hasNomorSPId = value?.nomorSPId != null && value?.nomorSPId !== "";
+        const hasNomorSPManual =
+          value?.nomorSPManual != null &&
+          String(value.nomorSPManual).trim() !== "";
+        return hasNomorSPId || hasNomorSPManual;
+      }
+    );
+
   const {
     isOpen: isTambahOpen,
     onOpen: onTambahOpen,
@@ -114,6 +148,7 @@ function DaftarDokumen() {
     onClose: onDeleteClose,
   } = useDisclosure();
   const [spToDelete, setSpToDelete] = useState(null);
+  const formikRefTambahSP = useRef(null);
 
   const changePage = ({ selected }) => {
     setPage(selected);
@@ -130,21 +165,12 @@ function DaftarDokumen() {
     subKegPerFilterId,
   ]);
 
-  const handleCloseModal = () => {
-    setNomorSPId(null);
-    setNomorSPManual("");
-    setIsTulisManualSP(false);
-    setSubKegPerId(null);
-    setRekananId(null);
-    setUnitKerjaId(null);
-    setAkunBelanjaId(null);
-    setTanggal("");
-    setNamaRekananBaru("");
-    setIsTambahRekananBaru(false);
+  const handleCloseModal = (resetForm) => {
+    if (resetForm) resetForm();
     onTambahClose();
   };
 
-  const tambahRekanan = () => {
+  const tambahRekanan = (namaRekananBaru, setFieldValue) => {
     axios
       .post(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/post/rekanan`,
@@ -158,8 +184,8 @@ function DaftarDokumen() {
           duration: 5000,
           isClosable: true,
         });
-        setNamaRekananBaru("");
-        setIsTambahRekananBaru(false);
+        setFieldValue("namaRekananBaru", "");
+        setFieldValue("isTambahRekananBaru", false);
       })
       .catch((err) => {
         console.error(err.message);
@@ -172,15 +198,16 @@ function DaftarDokumen() {
         });
       });
   };
-  const tambahSP = () => {
+
+  const submitTambahSP = (values, { resetForm, setSubmitting }) => {
     axios
       .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/post/sp`, {
-        subKegPerId,
-        nomorSPId: isTulisManualSP ? null : nomorSPId,
-        nomorSPManual: isTulisManualSP ? nomorSPManual : null,
-        rekananId,
-        akunBelanjaId,
-        tanggal,
+        subKegPerId: values.subKegPerId,
+        nomorSPId: values.isTulisManualSP ? null : values.nomorSPId,
+        nomorSPManual: values.isTulisManualSP ? values.nomorSPManual : null,
+        rekananId: values.rekananId,
+        akunBelanjaId: values.akunBelanjaId,
+        tanggal: values.tanggal,
         indukUnitKerjaId: user[0]?.unitKerja_profile?.indukUnitKerja?.id,
       })
       .then((res) => {
@@ -193,7 +220,7 @@ function DaftarDokumen() {
           isClosable: true,
         });
         fetchDataDokumen();
-        handleCloseModal();
+        handleCloseModal(resetForm);
       })
       .catch((err) => {
         console.error(err.message);
@@ -204,8 +231,8 @@ function DaftarDokumen() {
           duration: 5000,
           isClosable: true,
         });
-        handleCloseModal();
-      });
+      })
+      .finally(() => setSubmitting(false));
   };
 
   const handleDeleteSP = (item) => {
@@ -723,51 +750,97 @@ function DaftarDokumen() {
           <Modal
             closeOnOverlayClick={false}
             isOpen={isTambahOpen}
-            onClose={handleCloseModal}
+            onClose={() =>
+              handleCloseModal(() => formikRefTambahSP.current?.resetForm())
+            }
           >
             <ModalOverlay />
             <ModalContent borderRadius={0} maxWidth="1200px">
-              <ModalHeader></ModalHeader>
-              <ModalCloseButton />
-
-              <ModalBody>
-                <Box>
-                  <HStack mb={6} spacing={3}>
-                    <Box
-                      bgColor={"aset"}
-                      width={"4px"}
-                      height={"30px"}
-                      borderRadius="2px"
-                    ></Box>
-                    <Heading size="lg" color={"aset"}>
-                      Buat Nomor Surat Pesanan
-                    </Heading>
-                  </HStack>
-
-                  <SimpleGrid
-                    columns={{ base: 1, md: 2 }}
-                    spacing={6}
-                    p={"20px"}
+              <Formik
+                innerRef={formikRefTambahSP}
+                initialValues={initialValuesTambahSP}
+                validationSchema={validationSchemaTambahSP}
+                onSubmit={submitTambahSP}
+                enableReinitialize
+                validateOnBlur={true}
+                validateOnChange={true}
+              >
+                {(formik) => (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const keys = Object.keys(initialValuesTambahSP);
+                      const touched = {};
+                      keys.forEach((k) => {
+                        touched[k] = true;
+                      });
+                      formik.setTouched(touched);
+                      formik.handleSubmit(e);
+                    }}
                   >
-                    <FormControl>
-                      <FormLabel fontSize={"16px"} fontWeight="medium">
-                        Nomor SP
-                      </FormLabel>
-                      <Select2
-                        options={dataSeed?.resultNomorSP?.map((val) => ({
-                          value: val.id,
-                          label: `${val.nomorSurat}`,
-                        }))}
-                        placeholder="Contoh: Roda Dua"
-                        focusBorderColor="red"
-                        onChange={(selectedOption) => {
-                          setNomorSPId(selectedOption?.value || null);
-                          if (selectedOption) {
-                            setNomorSPManual("");
-                            setIsTulisManualSP(false);
-                          }
-                        }}
-                        isDisabled={isTulisManualSP}
+                    <ModalHeader></ModalHeader>
+                    <ModalCloseButton
+                      onClick={() => handleCloseModal(formik.resetForm)}
+                    />
+
+                    <ModalBody>
+                      <Box>
+                        <HStack mb={6} spacing={3}>
+                          <Box
+                            bgColor={"aset"}
+                            width={"4px"}
+                            height={"30px"}
+                            borderRadius="2px"
+                          ></Box>
+                          <Heading size="lg" color={"aset"}>
+                            Buat Nomor Surat Pesanan
+                          </Heading>
+                        </HStack>
+
+                        <SimpleGrid
+                          columns={{ base: 1, md: 2 }}
+                          spacing={6}
+                          p={"20px"}
+                        >
+                          <FormControl
+                            isInvalid={
+                              (formik.touched.nomorSPId ||
+                                formik.touched.nomorSPManual) &&
+                              formik.errors.nomorSP
+                            }
+                          >
+                            <FormLabel fontSize={"16px"} fontWeight="medium">
+                              Nomor SP
+                            </FormLabel>
+                            <Select2
+                              options={dataSeed?.resultNomorSP?.map((val) => ({
+                                value: val.id,
+                                label: `${val.nomorSurat}`,
+                              }))}
+                              placeholder="Contoh: Roda Dua"
+                              focusBorderColor="red"
+                              value={
+                                formik.values.nomorSPId
+                                  ? {
+                                      value: formik.values.nomorSPId,
+                                      label:
+                                        dataSeed?.resultNomorSP?.find(
+                                          (v) => v.id === formik.values.nomorSPId
+                                        )?.nomorSurat || "",
+                                    }
+                                  : null
+                              }
+                              onChange={(selectedOption) => {
+                                formik.setFieldValue(
+                                  "nomorSPId",
+                                  selectedOption?.value || null
+                                );
+                                if (selectedOption) {
+                                  formik.setFieldValue("nomorSPManual", "");
+                                  formik.setFieldValue("isTulisManualSP", false);
+                                }
+                              }}
+                              isDisabled={formik.values.isTulisManualSP}
                         components={{
                           DropdownIndicator: () => null, // Hilangkan tombol panah
                           IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
@@ -793,265 +866,396 @@ function DaftarDokumen() {
                             color: state.isFocused ? "white" : "black",
                           }),
                         }}
-                      />{" "}
-                      <Button
-                        mt={4}
-                        size="sm"
-                        variant="outline"
-                        colorScheme="blue"
-                        onClick={() => {
-                          if (isTulisManualSP) {
-                            // Jika sedang mode tulis manual, batalkan dan reset
-                            setIsTulisManualSP(false);
-                            setNomorSPManual("");
-                            setNomorSPId(null);
-                          } else {
-                            // Jika tidak, aktifkan mode tulis manual
-                            setIsTulisManualSP(true);
-                            setNomorSPId(null);
-                          }
-                        }}
-                      >
-                        {isTulisManualSP ? "Batalkan" : "Tulis Manual"}
-                      </Button>
-                      {isTulisManualSP && (
-                        <>
-                          <Input
-                            mt={4}
-                            height={"50px"}
-                            bgColor={"terang"}
-                            placeholder="Masukkan Nomor SP Manual"
-                            value={nomorSPManual}
-                            onChange={(e) => {
-                              setNomorSPManual(e.target.value);
-                              setNomorSPId(null);
-                            }}
-                          />
-                        </>
-                      )}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"16px"} fontWeight="medium">
-                        Rekanan
-                      </FormLabel>
-                      <AsyncSelect
-                        loadOptions={async (inputValue) => {
-                          if (!inputValue) return [];
-                          try {
-                            const res = await axios.get(
-                              `${
-                                import.meta.env.VITE_REACT_APP_API_BASE_URL
-                              }/barjas/get/rekanan/search?q=${inputValue}`
-                            );
-
-                            const filtered = res.data.result;
-
-                            return filtered.map((val) => ({
-                              value: val.id,
-                              label: val.nama,
-                            }));
-                          } catch (err) {
-                            console.error(
-                              "Failed to load options:",
-                              err.message
-                            );
-                            return [];
-                          }
-                        }}
-                        placeholder="Ketik Nama Rekanan"
-                        onChange={(selectedOption) => {
-                          setRekananId(selectedOption.value);
-                        }}
-                        components={{
-                          DropdownIndicator: () => null,
-                          IndicatorSeparator: () => null,
-                        }}
-                        chakraStyles={{
-                          container: (provided) => ({
-                            ...provided,
-                            borderRadius: "6px",
-                          }),
-                          control: (provided) => ({
-                            ...provided,
-                            backgroundColor: "terang",
-                            border: "0px",
-                            height: "60px",
-                            _hover: { borderColor: "yellow.700" },
-                            minHeight: "40px",
-                          }),
-                          option: (provided, state) => ({
-                            ...provided,
-                            bg: state.isFocused ? "aset" : "white",
-                            color: state.isFocused ? "white" : "black",
-                          }),
-                        }}
-                      />
-                      <Button
-                        mt={4}
-                        size="sm"
-                        variant="outline"
-                        colorScheme="blue"
-                        onClick={() =>
-                          setIsTambahRekananBaru((prevState) => !prevState)
-                        }
-                      >
-                        {isTambahRekananBaru ? "Batalkan" : "Tambah Rekanan"}
-                      </Button>
-                      {isTambahRekananBaru && (
-                        <>
-                          <Flex>
-                            <Input
-                              height={"50px"}
-                              bgColor={"terang"}
-                              me={"10px"}
-                              placeholder="Nama Rekanan Baru"
-                              value={namaRekananBaru}
-                              onChange={(e) =>
-                                setNamaRekananBaru(e.target.value)
-                              }
-                            />{" "}
+                              />{" "}
                             <Button
+                              mt={4}
+                              size="sm"
                               variant="outline"
                               colorScheme="blue"
-                              height={"50px"}
-                              onClick={tambahRekanan}
+                              type="button"
+                              onClick={() => {
+                                if (formik.values.isTulisManualSP) {
+                                  formik.setFieldValue("isTulisManualSP", false);
+                                  formik.setFieldValue("nomorSPManual", "");
+                                  formik.setFieldValue("nomorSPId", null);
+                                } else {
+                                  formik.setFieldValue("isTulisManualSP", true);
+                                  formik.setFieldValue("nomorSPId", null);
+                                }
+                              }}
                             >
-                              +
+                              {formik.values.isTulisManualSP
+                                ? "Batalkan"
+                                : "Tulis Manual"}
                             </Button>
-                          </Flex>
-                        </>
-                      )}
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"16px"} fontWeight="medium">
-                        Sub Kegiatan
-                      </FormLabel>
-                      <AsyncSelect
-                        loadOptions={async (inputValue) => {
-                          if (!inputValue) return [];
-                          try {
-                            const res = await axios.get(
-                              `${
-                                import.meta.env.VITE_REACT_APP_API_BASE_URL
-                              }/barjas/get/sub-kegiatan/search?q=${inputValue}&indukUnitKerjaId=${
-                                user[0]?.unitKerja_profile?.id
-                              }`
-                            );
+                            {formik.values.isTulisManualSP && (
+                              <>
+                                <Input
+                                  mt={4}
+                                  height={"50px"}
+                                  bgColor={"terang"}
+                                  placeholder="Masukkan Nomor SP Manual"
+                                  name="nomorSPManual"
+                                  value={formik.values.nomorSPManual}
+                                  onChange={(e) => {
+                                    formik.setFieldValue(
+                                      "nomorSPManual",
+                                      e.target.value
+                                    );
+                                    formik.setFieldValue("nomorSPId", null);
+                                  }}
+                                />
+                              </>
+                            )}
+                            <FormErrorMessage>
+                              {formik.errors.nomorSP}
+                            </FormErrorMessage>
+                          </FormControl>
+                          <FormControl
+                            isInvalid={
+                              formik.touched.rekananId &&
+                              formik.errors.rekananId
+                            }
+                          >
+                            <FormLabel fontSize={"16px"} fontWeight="medium">
+                              Rekanan
+                            </FormLabel>
+                            <AsyncSelect
+                              loadOptions={async (inputValue) => {
+                                if (!inputValue) return [];
+                                try {
+                                  const res = await axios.get(
+                                    `${
+                                      import.meta.env.VITE_REACT_APP_API_BASE_URL
+                                    }/barjas/get/rekanan/search?q=${inputValue}`
+                                  );
 
-                            const filtered = res.data.result;
+                                  const filtered = res.data.result;
 
-                            return filtered.map((val) => ({
-                              value: val.id,
-                              label: `${val.nama} - ${val.daftarUnitKerja.unitKerja}`,
-                            }));
-                          } catch (err) {
-                            console.error(
-                              "Failed to load options:",
-                              err.message
-                            );
-                            return [];
+                                  return filtered.map((val) => ({
+                                    value: val.id,
+                                    label: val.nama,
+                                  }));
+                                } catch (err) {
+                                  console.error(
+                                    "Failed to load options:",
+                                    err.message
+                                  );
+                                  return [];
+                                }
+                              }}
+                              placeholder="Ketik Nama Rekanan"
+                              value={
+                                formik.values.rekananId
+                                  ? {
+                                      value: formik.values.rekananId,
+                                      label:
+                                        formik.values.rekananLabel || "Rekanan",
+                                    }
+                                  : null
+                              }
+                              onChange={(selectedOption) => {
+                                formik.setFieldValue(
+                                  "rekananId",
+                                  selectedOption?.value ?? null
+                                );
+                                formik.setFieldValue(
+                                  "rekananLabel",
+                                  selectedOption?.label ?? ""
+                                );
+                              }}
+                              onBlur={() =>
+                                formik.setFieldTouched("rekananId", true)
+                              }
+                              components={{
+                                DropdownIndicator: () => null,
+                                IndicatorSeparator: () => null,
+                              }}
+                              chakraStyles={{
+                                container: (provided) => ({
+                                  ...provided,
+                                  borderRadius: "6px",
+                                }),
+                                control: (provided) => ({
+                                  ...provided,
+                                  backgroundColor: "terang",
+                                  border: "0px",
+                                  height: "60px",
+                                  _hover: { borderColor: "yellow.700" },
+                                  minHeight: "40px",
+                                }),
+                                option: (provided, state) => ({
+                                  ...provided,
+                                  bg: state.isFocused ? "aset" : "white",
+                                  color: state.isFocused ? "white" : "black",
+                                }),
+                              }}
+                            />
+                            <FormErrorMessage>
+                              {formik.errors.rekananId}
+                            </FormErrorMessage>
+                            <Button
+                              mt={4}
+                              size="sm"
+                              variant="outline"
+                              colorScheme="blue"
+                              type="button"
+                              onClick={() =>
+                                formik.setFieldValue(
+                                  "isTambahRekananBaru",
+                                  !formik.values.isTambahRekananBaru
+                                )
+                              }
+                            >
+                              {formik.values.isTambahRekananBaru
+                                ? "Batalkan"
+                                : "Tambah Rekanan"}
+                            </Button>
+                            {formik.values.isTambahRekananBaru && (
+                              <>
+                                <Flex>
+                                  <Input
+                                    height={"50px"}
+                                    bgColor={"terang"}
+                                    me={"10px"}
+                                    placeholder="Nama Rekanan Baru"
+                                    name="namaRekananBaru"
+                                    value={formik.values.namaRekananBaru}
+                                    onChange={(e) =>
+                                      formik.setFieldValue(
+                                        "namaRekananBaru",
+                                        e.target.value
+                                      )
+                                    }
+                                  />{" "}
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    colorScheme="blue"
+                                    height={"50px"}
+                                    onClick={() =>
+                                      tambahRekanan(
+                                        formik.values.namaRekananBaru,
+                                        formik.setFieldValue
+                                      )
+                                    }
+                                  >
+                                    +
+                                  </Button>
+                                </Flex>
+                              </>
+                            )}
+                          </FormControl>
+                          <FormControl
+                            isInvalid={
+                              formik.touched.subKegPerId &&
+                              formik.errors.subKegPerId
+                            }
+                          >
+                            <FormLabel fontSize={"16px"} fontWeight="medium">
+                              Sub Kegiatan
+                            </FormLabel>
+                            <AsyncSelect
+                              loadOptions={async (inputValue) => {
+                                if (!inputValue) return [];
+                                try {
+                                  const res = await axios.get(
+                                    `${
+                                      import.meta.env.VITE_REACT_APP_API_BASE_URL
+                                    }/barjas/get/sub-kegiatan/search?q=${inputValue}&indukUnitKerjaId=${
+                                      user[0]?.unitKerja_profile?.id
+                                    }`
+                                  );
+
+                                  const filtered = res.data.result;
+
+                                  return filtered.map((val) => ({
+                                    value: val.id,
+                                    label: `${val.nama} - ${val.daftarUnitKerja.unitKerja}`,
+                                  }));
+                                } catch (err) {
+                                  console.error(
+                                    "Failed to load options:",
+                                    err.message
+                                  );
+                                  return [];
+                                }
+                              }}
+                              placeholder="Ketik Nama Sub Kegiatan"
+                              value={
+                                formik.values.subKegPerId
+                                  ? {
+                                      value: formik.values.subKegPerId,
+                                      label:
+                                        formik.values.subKegPerLabel ||
+                                        "Sub Kegiatan",
+                                    }
+                                  : null
+                              }
+                              onChange={(selectedOption) => {
+                                formik.setFieldValue(
+                                  "subKegPerId",
+                                  selectedOption?.value ?? null
+                                );
+                                formik.setFieldValue(
+                                  "subKegPerLabel",
+                                  selectedOption?.label ?? ""
+                                );
+                              }}
+                              onBlur={() =>
+                                formik.setFieldTouched("subKegPerId", true)
+                              }
+                              components={{
+                                DropdownIndicator: () => null,
+                                IndicatorSeparator: () => null,
+                              }}
+                              chakraStyles={{
+                                container: (provided) => ({
+                                  ...provided,
+                                  borderRadius: "6px",
+                                }),
+                                control: (provided) => ({
+                                  ...provided,
+                                  backgroundColor: "terang",
+                                  border: "0px",
+                                  height: "60px",
+                                  _hover: { borderColor: "yellow.700" },
+                                  minHeight: "40px",
+                                }),
+                                option: (provided, state) => ({
+                                  ...provided,
+                                  bg: state.isFocused ? "aset" : "white",
+                                  color: state.isFocused ? "white" : "black",
+                                }),
+                              }}
+                            />
+                            <FormErrorMessage>
+                              {formik.errors.subKegPerId}
+                            </FormErrorMessage>
+                          </FormControl>
+                          <FormControl
+                            isInvalid={
+                              formik.touched.akunBelanjaId &&
+                              formik.errors.akunBelanjaId
+                            }
+                          >
+                            <FormLabel fontSize={"16px"} fontWeight="medium">
+                              Akun Belanja
+                            </FormLabel>
+                            <Select2
+                              options={dataSeed?.resultAkunBelanja?.map(
+                                (val) => ({
+                                  value: val.id,
+                                  label: `${val.akun}`,
+                                })
+                              )}
+                              placeholder="Pilih Akun Belanja"
+                              focusBorderColor="red"
+                              value={
+                                formik.values.akunBelanjaId
+                                  ? {
+                                      value: formik.values.akunBelanjaId,
+                                      label:
+                                        dataSeed?.resultAkunBelanja?.find(
+                                          (v) =>
+                                            v.id === formik.values.akunBelanjaId
+                                        )?.akun || "",
+                                    }
+                                  : null
+                              }
+                              onChange={(selectedOption) => {
+                                formik.setFieldValue(
+                                  "akunBelanjaId",
+                                  selectedOption?.value ?? null
+                                );
+                              }}
+                              onBlur={() =>
+                                formik.setFieldTouched("akunBelanjaId", true)
+                              }
+                              components={{
+                                DropdownIndicator: () => null,
+                                IndicatorSeparator: () => null,
+                              }}
+                              chakraStyles={{
+                                container: (provided) => ({
+                                  ...provided,
+                                  borderRadius: "6px",
+                                }),
+                                control: (provided) => ({
+                                  ...provided,
+                                  backgroundColor: "terang",
+                                  border: "0px",
+                                  height: "60px",
+                                  _hover: {
+                                    borderColor: "yellow.700",
+                                  },
+                                  minHeight: "40px",
+                                }),
+                                option: (provided, state) => ({
+                                  ...provided,
+                                  bg: state.isFocused ? "aset" : "white",
+                                  color: state.isFocused ? "white" : "black",
+                                }),
+                              }}
+                            />
+                            <FormErrorMessage>
+                              {formik.errors.akunBelanjaId}
+                            </FormErrorMessage>
+                          </FormControl>
+                          <FormControl
+                            isInvalid={
+                              formik.touched.tanggal && formik.errors.tanggal
+                            }
+                          >
+                            <FormLabel fontSize={"16px"} fontWeight="medium">
+                              Tanggal
+                            </FormLabel>
+                            <Input
+                              bgColor={"terang"}
+                              height={"50px"}
+                              type="date"
+                              name="tanggal"
+                              value={formik.values.tanggal}
+                              onChange={(e) =>
+                                formik.setFieldValue("tanggal", e.target.value)
+                              }
+                              onBlur={() =>
+                                formik.setFieldTouched("tanggal", true)
+                              }
+                            />
+                            <FormErrorMessage>
+                              {formik.errors.tanggal}
+                            </FormErrorMessage>
+                          </FormControl>
+                        </SimpleGrid>
+                      </Box>
+                    </ModalBody>
+
+                    <ModalFooter pe={"30px"} pb={"30px"} pt={"20px"}>
+                      <HStack spacing={3}>
+                        <Button
+                          type="button"
+                          onClick={() =>
+                            handleCloseModal(formik.resetForm)
                           }
-                        }}
-                        placeholder="Ketik Nama Sub Kegiatan"
-                        onChange={(selectedOption) => {
-                          setSubKegPerId(selectedOption.value);
-                        }}
-                        components={{
-                          DropdownIndicator: () => null,
-                          IndicatorSeparator: () => null,
-                        }}
-                        chakraStyles={{
-                          container: (provided) => ({
-                            ...provided,
-                            borderRadius: "6px",
-                          }),
-                          control: (provided) => ({
-                            ...provided,
-                            backgroundColor: "terang",
-                            border: "0px",
-                            height: "60px",
-                            _hover: { borderColor: "yellow.700" },
-                            minHeight: "40px",
-                          }),
-                          option: (provided, state) => ({
-                            ...provided,
-                            bg: state.isFocused ? "aset" : "white",
-                            color: state.isFocused ? "white" : "black",
-                          }),
-                        }}
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"16px"} fontWeight="medium">
-                        Akun Belanja
-                      </FormLabel>
-                      <Select2
-                        options={dataSeed?.resultAkunBelanja?.map((val) => ({
-                          value: val.id,
-                          label: `${val.akun}`,
-                        }))}
-                        placeholder="Pilih Akun Belanja"
-                        focusBorderColor="red"
-                        onChange={(selectedOption) => {
-                          setAkunBelanjaId(selectedOption.value);
-                        }}
-                        components={{
-                          DropdownIndicator: () => null, // Hilangkan tombol panah
-                          IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                        }}
-                        chakraStyles={{
-                          container: (provided) => ({
-                            ...provided,
-                            borderRadius: "6px",
-                          }),
-                          control: (provided) => ({
-                            ...provided,
-                            backgroundColor: "terang",
-                            border: "0px",
-                            height: "60px",
-                            _hover: {
-                              borderColor: "yellow.700",
-                            },
-                            minHeight: "40px",
-                          }),
-                          option: (provided, state) => ({
-                            ...provided,
-                            bg: state.isFocused ? "aset" : "white",
-                            color: state.isFocused ? "white" : "black",
-                          }),
-                        }}
-                      />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel fontSize={"16px"} fontWeight="medium">
-                        Tanggal
-                      </FormLabel>
-                      <Input
-                        bgColor={"terang"}
-                        height={"50px"}
-                        type="date"
-                        value={tanggal}
-                        onChange={(e) => setTanggal(e.target.value)}
-                      />
-                    </FormControl>
-                  </SimpleGrid>
-                </Box>
-              </ModalBody>
-
-              <ModalFooter pe={"30px"} pb={"30px"} pt={"20px"}>
-                <HStack spacing={3}>
-                  <Button
-                    onClick={handleCloseModal}
-                    variant="ghost"
-                    colorScheme="gray"
-                  >
-                    Batal
-                  </Button>
-                  <Button onClick={tambahSP} variant={"primary"} size="md">
-                    Simpan Surat Pesanan
-                  </Button>
-                </HStack>
-              </ModalFooter>
+                          variant="ghost"
+                          colorScheme="gray"
+                        >
+                          Batal
+                        </Button>
+                        <Button
+                          type="submit"
+                          variant={"primary"}
+                          size="md"
+                          isLoading={formik.isSubmitting}
+                        >
+                          Simpan Surat Pesanan
+                        </Button>
+                      </HStack>
+                    </ModalFooter>
+                  </form>
+                )}
+              </Formik>
             </ModalContent>
           </Modal>
 

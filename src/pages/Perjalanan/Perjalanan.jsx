@@ -1,6 +1,6 @@
 // --- Perjalanan.jsx ---
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Container, useToast, Center, Button } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux } from "../../Redux/Reducers/auth";
@@ -34,7 +34,59 @@ function Perjalanan() {
     perjalananKota,
   } = usePerjalananData(user);
 
-  if (isLoading) return <Loading />;
+  // Validasi disesuaikan dengan Jenis: Undangan (2) vs Nota Dinas (1) / Telaahan Staf (0)
+  // useMemo harus dipanggil sebelum early return agar jumlah hook konsisten tiap render
+  const isUndangan = (state?.isNotaDinas ?? 1) === 2;
+  const isNotaDinasOrTelaahan =
+    (state?.isNotaDinas ?? 1) === 0 || (state?.isNotaDinas ?? 1) === 1;
+
+  const validationSchema = useMemo(
+    () =>
+      Yup.object().shape({
+        klasifikasi: isNotaDinasOrTelaahan
+          ? Yup.mixed().nullable().required("Klasifikasi wajib diisi")
+          : Yup.mixed().nullable(),
+        kodeKlasifikasi: isNotaDinasOrTelaahan
+          ? Yup.mixed().nullable().required("Kode Klasifikasi wajib diisi")
+          : Yup.mixed().nullable(),
+        dasar: isUndangan
+          ? Yup.string().required("Dasar wajib diisi")
+          : Yup.string().nullable(),
+        jenisPerjalanan: Yup.mixed()
+          .nullable()
+          .required("Jenis Perjalanan wajib diisi"),
+        untuk: Yup.string().required("Untuk wajib diisi"),
+        asal: Yup.string().required("Asal wajib diisi"),
+        pengajuan: Yup.string()
+          .nullable()
+          .required("Tanggal pengajuan wajib diisi")
+          .matches(
+            /^\d{4}-\d{2}-\d{2}$/,
+            "Format tanggal tidak valid (YYYY-MM-DD)"
+          ),
+        sumberDana: Yup.mixed().nullable().required("Sumber Dana wajib dipilih"),
+        bendahara: Yup.mixed().nullable().required("Bendahara wajib dipilih"),
+        personil: Yup.array()
+          .of(Yup.mixed().nullable())
+          .test(
+            "personil-0-required",
+            "Personil 1 wajib dipilih",
+            (arr) => arr[0] !== null
+          ),
+        subKegiatan: isNotaDinasOrTelaahan
+          ? Yup.mixed().nullable().required("Sub kegiatan wajib diisi")
+          : Yup.mixed().nullable(),
+      }),
+    [isUndangan, isNotaDinasOrTelaahan]
+  );
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <Loading />
+      </Layout>
+    );
+  }
 
   if (!dataTemplate.templateNotaDinas) {
     return (
@@ -66,35 +118,6 @@ function Perjalanan() {
     personil: [null],
     jenisPerjalanan: null,
   };
-
-  const validationSchema = Yup.object().shape({
-    klasifikasi: Yup.mixed().nullable().required("Klasifikasi wajib diisi"),
-    kodeKlasifikasi: Yup.mixed()
-      .nullable()
-      .required("Kode Klasifikasi wajib diisi"),
-    jenisPerjalanan: Yup.mixed()
-      .nullable()
-      .required("Jenis Perjalanan wajib diisi"),
-    untuk: Yup.string().required("Untuk wajib diisi"),
-    asal: Yup.string().required("Asal wajib diisi"),
-    pengajuan: Yup.string()
-      .nullable()
-      .required("Tanggal pengajuan wajib diisi")
-      .matches(
-        /^\d{4}-\d{2}-\d{2}$/,
-        "Format tanggal tidak valid (YYYY-MM-DD)"
-      ),
-    sumberDana: Yup.mixed().nullable().required("Sumber Dana wajib dipilih"),
-    bendahara: Yup.mixed().nullable().required("Bendahara wajib dipilih"),
-    personil: Yup.array()
-      .of(Yup.mixed().nullable())
-      .test(
-        "personil-0-required",
-        "Personil 1 wajib dipilih",
-        (arr) => arr[0] !== null
-      ),
-    subKegiatan: Yup.mixed().nullable().required("Sub kegiatan wajib diisi"),
-  });
 
   return (
     <Layout>
@@ -152,6 +175,7 @@ function Perjalanan() {
                   actions={actions}
                   dataKota={dataKota}
                   perjalananKota={perjalananKota}
+                  indukUnitKerjaId={user[0]?.unitKerja_profile?.indukUnitKerja?.id}
                   values={values}
                   errors={errors}
                   touched={touched}

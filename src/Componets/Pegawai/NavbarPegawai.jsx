@@ -313,80 +313,23 @@ function NavbarPegawai() {
             variant="ghost"
             leftIcon={<IconComponent />}
             position="relative"
-            color={{
-              base: "white",
-              lg: isActive ? "white" : "gray.700",
-            }}
-            fontWeight="700"
-            fontSize="15px"
-            px={5}
-            py={3}
-            borderRadius="xl"
-            bg={{
-              base: isActive ? "rgba(255, 255, 255, 0.2)" : "transparent",
-              lg: isActive ? "pegawai" : "transparent",
-            }}
-            backdropFilter={{
-              base: "blur(10px)",
-              lg: "none",
-            }}
-            border="1px solid"
-            borderColor={{
-              base: isActive ? "rgba(255, 255, 255, 0.3)" : "transparent",
-              lg: isActive ? "pegawai" : "transparent",
-            }}
-            boxShadow={{
-              base: isActive
-                ? "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
-                : "none",
-              lg: isActive ? "0 4px 12px rgba(185, 28, 28, 0.3)" : "none",
-            }}
+            color={isActive ? "pegawai" : "gray.700"}
+            fontWeight={isActive ? "600" : "500"}
+            fontSize="14px"
+            px={4}
+            py={2}
+            bg="transparent"
             _hover={{
-              bg: {
-                base: "rgba(255, 255, 255, 0.25)",
-                lg: isActive ? "pegawaiGelap" : "pegawai",
-              },
-              color: {
-                base: "white",
-                lg: "white",
-              },
-              transform: "translateY(-2px)",
-              borderColor: {
-                base: "rgba(255, 255, 255, 0.4)",
-                lg: "pegawai",
-              },
-              boxShadow: {
-                base: "0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
-                lg: "0 6px 16px rgba(185, 28, 28, 0.4)",
-              },
+              bg: "gray.50",
+              color: "pegawai",
             }}
             _active={{
-              bg: {
-                base: "rgba(255, 255, 255, 0.3)",
-                lg: "pegawaiGelap",
-              },
-              transform: "translateY(0px)",
+              bg: "gray.100",
             }}
-            transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-            _after={{
-              content: '""',
-              position: "absolute",
-              bottom: "4px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: isActive ? "70%" : "0%",
-              height: "3px",
-              bg: {
-                base: "white",
-                lg: "white",
-              },
-              borderRadius: "full",
-              boxShadow: {
-                base: "0 0 8px rgba(255, 255, 255, 0.6)",
-                lg: "0 0 8px rgba(255, 255, 255, 0.8)",
-              },
-              transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
+            transition="all 0.2s ease"
+            borderBottom={isActive ? "2px solid" : "2px solid transparent"}
+            borderColor={isActive ? "pegawai" : "transparent"}
+            borderRadius="0"
             onClick={handleClick}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -442,129 +385,72 @@ function NavbarPegawai() {
     <>
       {/* Main Navbar */}
       <Box position="fixed" top={0} left={0} right={0} zIndex={999}>
-        {/* Header dengan Gradient dan Glassmorphism */}
+        {/* Header dengan Background Putih */}
         <Box
-          bgGradient={{
-            base: "linear(to-r, pegawai, pegawaiGelap)",
-            lg: "none",
-          }}
-          bg={{
-            lg: colorMode === "light" ? "white" : "gray.800",
-          }}
+          bg="white"
           px={{ base: 4, md: 6, lg: 8 }}
-          py={5}
-          minH="85px"
-          boxShadow={{
-            base: "0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)",
-            lg:
-              colorMode === "light"
-                ? "0 2px 8px rgba(0, 0, 0, 0.08)"
-                : "0 2px 8px rgba(0, 0, 0, 0.3)",
-          }}
+          py={4}
+          minH="70px"
+          boxShadow="0 2px 8px rgba(0, 0, 0, 0.08)"
           position="relative"
-          borderBottom={{
-            base: "none",
-            lg: "1px solid",
-          }}
-          borderColor={{
-            base: "transparent",
-            lg: colorMode === "light" ? "gray.200" : "gray.700",
-          }}
-          _before={{
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            bg: {
-              base: "linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)",
-              lg: "transparent",
-            },
-            pointerEvents: "none",
-          }}
+          borderBottom="1px solid"
+          borderColor="gray.200"
         >
           {/* Container untuk konten navbar */}
           <Flex
-            maxW="1400px"
-            mx="auto"
+            w="100%"
+            px={{ base: 4, md: 6, lg: 8 }}
             justifyContent="space-between"
             alignItems="center"
             gap={4}
             flexWrap="nowrap"
+            position="relative"
           >
             {/* Left Section: Logo */}
             <Flex
-              gap={4}
+              gap={3}
               alignItems="center"
               flexShrink={0}
-              flex="1"
               position="relative"
               zIndex={1}
             >
               {/* Logo dan Brand */}
-              <Flex gap={4} alignItems="center" flexShrink={0}>
-                {" "}
+              <Flex gap={3} alignItems="center" flexShrink={0}>
                 <Box
-                  p={3}
-                  bg="rgba(255, 255, 255, 0.2)"
-                  borderRadius="xl"
-                  backdropFilter="blur(20px)"
-                  boxShadow="0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)"
-                  border="1px solid"
-                  borderColor="rgba(255, 255, 255, 0.3)"
-                  transition="all 0.3s ease"
-                  _hover={{
-                    transform: "scale(1.05) translateY(-2px)",
-                    boxShadow:
-                      "0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
-                    bg: "rgba(255, 255, 255, 0.25)",
-                  }}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                  h="32px"
                 >
-                  <Image height="42px" src={LogoPegawai} alt="Logo" />
+                  <Image height="100%" src={LogoPegawai} alt="Logo Pena" />
                 </Box>
                 <Box
-                  p={3}
-                  bg="rgba(255, 255, 255, 0.2)"
-                  borderRadius="xl"
-                  backdropFilter="blur(20px)"
-                  boxShadow="0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)"
-                  border="1px solid"
-                  borderColor="rgba(255, 255, 255, 0.3)"
-                  transition="all 0.3s ease"
-                  _hover={{
-                    transform: "scale(1.05) translateY(-2px)",
-                    boxShadow:
-                      "0 6px 20px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
-                    bg: "rgba(255, 255, 255, 0.25)",
-                  }}
+                  w="48px"
+                  h="48px"
+                  borderRadius="md"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                  p={2}
                 >
-                  <Image height="42px" src={Logo} alt="Logo" />
+                  <Image height="100%" src={Logo} alt="Logo Dinas Kesehatan" />
                 </Box>
                 <Box display={{ base: "none", sm: "block" }}>
                   <Text
-                    color={{
-                      base: "white",
-                      lg: colorMode === "light" ? "gray.800" : "white",
-                    }}
-                    fontSize={{ base: "15px", md: "17px" }}
-                    fontWeight={800}
-                    letterSpacing="0.3px"
-                    textShadow={{
-                      base: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                      lg: "none",
-                    }}
+                    color="gray.800"
+                    fontSize={{ base: "16px", md: "18px" }}
+                    fontWeight={700}
+                    letterSpacing="0.2px"
                   >
                     Dinas Kesehatan
                   </Text>
                   <Text
-                    color={{
-                      base: "whiteAlpha.900",
-                      lg: colorMode === "light" ? "gray.600" : "gray.300",
-                    }}
-                    fontSize={{ base: "12px", md: "14px" }}
-                    fontWeight={500}
-                    letterSpacing="0.2px"
+                    color="gray.600"
+                    fontSize={{ base: "12px", md: "13px" }}
+                    fontWeight={400}
+                    letterSpacing="0.1px"
                     mt={0.5}
                   >
                     Kabupaten Paser
@@ -573,12 +459,12 @@ function NavbarPegawai() {
               </Flex>
             </Flex>
 
-            {/* Center Section: Menu Navigation - Hidden on mobile */}
+            {/* Center Section: Menu Navigation - Hidden on mobile, positioned absolutely in center */}
             <Box
               display={{ base: "none", lg: "block" }}
-              flex="1"
-              mx={6}
-              position="relative"
+              position="absolute"
+              left="50%"
+              transform="translateX(-50%)"
               zIndex={1}
             >
               <HStack spacing={1} justifyContent="center">
@@ -589,7 +475,7 @@ function NavbarPegawai() {
             </Box>
 
             {/* Right Section: User Menu (Desktop) dan Hamburger (Mobile) */}
-            <HStack spacing={3} flexShrink={0} position="relative" zIndex={1}>
+            <HStack spacing={3} flexShrink={0} position="relative" zIndex={1} ml="auto">
               {/* Color Mode Toggle - Hidden on mobile */}
               <IconButton
                 display={{ base: "none", lg: "flex" }}
@@ -598,21 +484,13 @@ function NavbarPegawai() {
                 icon={<Icon as={colorMode === "light" ? FaMoon : FaSun} />}
                 size="md"
                 variant="ghost"
-                color={colorMode === "light" ? "gray.700" : "gray.200"}
-                borderRadius="xl"
-                bg={colorMode === "light" ? "gray.100" : "gray.700"}
-                border="1px solid"
-                borderColor={colorMode === "light" ? "gray.200" : "gray.600"}
+                color="gray.700"
+                borderRadius="md"
                 _hover={{
-                  bg: colorMode === "light" ? "gray.200" : "gray.600",
-                  transform: "scale(1.1) rotate(15deg)",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                  borderColor: colorMode === "light" ? "gray.300" : "gray.500",
+                  bg: "gray.100",
+                  color: "pegawai",
                 }}
-                _active={{
-                  transform: "scale(0.95) rotate(0deg)",
-                }}
-                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                transition="all 0.2s ease"
               />
 
               {/* User Menu - Hidden on mobile, shown on desktop */}
@@ -623,73 +501,42 @@ function NavbarPegawai() {
                       as={Button}
                       variant="ghost"
                       size="md"
-                      color={colorMode === "light" ? "gray.700" : "gray.200"}
                       display={{ base: "none", lg: "flex" }}
-                      borderRadius="xl"
-                      bg={colorMode === "light" ? "gray.100" : "gray.700"}
-                      border="1px solid"
-                      borderColor={
-                        colorMode === "light" ? "gray.200" : "gray.600"
-                      }
-                      px={3}
-                      py={2}
+                      px={2}
+                      py={1}
                       _hover={{
-                        bg: colorMode === "light" ? "gray.200" : "gray.600",
-                        borderColor:
-                          colorMode === "light" ? "gray.300" : "gray.500",
-                        transform: "translateY(-2px)",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                        bg: "transparent",
                       }}
                       _active={{
-                        bg: colorMode === "light" ? "gray.300" : "gray.500",
-                        transform: "translateY(0px)",
+                        bg: "transparent",
                       }}
-                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                     >
                       <HStack spacing={3}>
-                        <Box position="relative">
-                          <Avatar
-                            size="sm"
-                            name={user[0]?.nama}
-                            border="2px solid"
-                            borderColor={
-                              colorMode === "light" ? "gray.300" : "gray.600"
-                            }
-                            boxShadow="0 2px 8px rgba(0, 0, 0, 0.15)"
-                          />
-                          {jumlahNotifikasi > 0 && (
-                            <Badge
-                              position="absolute"
-                              top="-2"
-                              right="-2"
-                              bg="red.500"
-                              color="white"
-                              fontSize="10px"
-                              fontWeight="bold"
-                              borderRadius="full"
-                              minW="6"
-                              h="6"
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="center"
-                              boxShadow="0 2px 8px rgba(220, 38, 38, 0.4)"
-                              border="2px solid white"
-                              animation="pulse 2s infinite"
-                            >
-                              {jumlahNotifikasi > 9 ? "9+" : jumlahNotifikasi}
-                            </Badge>
-                          )}
-                        </Box>
-                        <Text
-                          color={
-                            colorMode === "light" ? "gray.700" : "gray.200"
-                          }
-                          fontSize="sm"
-                          fontWeight="700"
-                          letterSpacing="0.2px"
-                        >
-                          {user[0]?.nama}
-                        </Text>
+                        <VStack spacing={0} align="flex-end" mr={2}>
+                          <Text
+                            color="gray.800"
+                            fontSize="14px"
+                            fontWeight="600"
+                            lineHeight="1.2"
+                          >
+                            {user[0]?.nama || "admin dinkes"}
+                          </Text>
+                          <Text
+                            color="gray.600"
+                            fontSize="12px"
+                            fontWeight="400"
+                            lineHeight="1.2"
+                          >
+                            Administrator
+                          </Text>
+                        </VStack>
+                        <Avatar
+                          size="sm"
+                          name={user[0]?.nama || "AD"}
+                          bg="pegawai"
+                          color="white"
+                          border="none"
+                        />
                       </HStack>
                     </MenuButton>
                     <MenuList
@@ -859,7 +706,8 @@ function NavbarPegawai() {
             borderColor="rgba(0,0,0,0.1)"
           >
             <Flex gap={3} alignItems="center">
-              <Image height="32px" src={Logo} alt="Logo" />
+              <Image height="32px" src={LogoPegawai} alt="Logo Pena" />
+              <Image height="32px" src={Logo} alt="Logo Dinkes" />
               <Box>
                 <Text fontSize="14px" fontWeight={700}>
                   Dinas Kesehatan
@@ -1275,7 +1123,7 @@ function NavbarPegawai() {
         </DrawerContent>
       </Drawer>
       {/* Spacing untuk konten utama */}
-      <Box h="80px" /> {/* Spacer untuk konten */}
+      <Box h="70px" /> {/* Spacer untuk konten */}
     </>
   );
 }

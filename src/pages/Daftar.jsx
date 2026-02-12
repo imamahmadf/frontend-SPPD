@@ -153,7 +153,11 @@ function Daftar() {
   const role = useSelector(selectRole);
   const [selectedPerjalanan, setSelectedPerjalanan] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen: isOpenCetakSPD, onOpen: onOpenCetakSPD, onClose: onCloseCetakSPD } = useDisclosure();
+  const {
+    isOpen: isOpenCetakSPD,
+    onOpen: onOpenCetakSPD,
+    onClose: onCloseCetakSPD,
+  } = useDisclosure();
   const [selectedPerjalananSPD, setSelectedPerjalananSPD] = useState(null);
   const [jenisKendaraan, setJenisKendaraan] = useState({
     darat: true,
@@ -187,12 +191,12 @@ function Daftar() {
           pegawai: val?.personils || [],
           dataTtdSurTug: val?.ttdSuratTuga || null,
           dataTtdNotaDinas: val?.ttdNotaDina || null,
-
+          penomoran: user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran,
           tanggalPengajuan: val?.tanggalPengajuan || "",
           noSurTug: val?.noSuratTugas || "",
           noNotDis: val?.noNotaDinas || "",
-isSrikandi:val?.tipeSrikandi,
-isNotaDinas:val?.isNotaDinas,
+          isSrikandi: val?.tipeSrikandi,
+          isNotaDinas: val?.isNotaDinas,
           subKegiatan: val?.daftarSubKegiatan?.subKegiatan || "",
           untuk: val?.untuk || "",
           dasar: val?.dasar || "",
@@ -207,7 +211,7 @@ isNotaDinas:val?.isNotaDinas,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
-        }
+        },
       )
       .then((res) => {
         console.log(res.data); // Log respons dari backend
@@ -253,7 +257,7 @@ isNotaDinas:val?.isNotaDinas,
     console.log(e);
     axios
       .post(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/perjalanan/delete/${e}`
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/perjalanan/delete/${e}`,
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -301,11 +305,12 @@ isNotaDinas:val?.isNotaDinas,
           noSuratTugas: val?.noSuratTugas || "",
           unitKerja: user[0]?.unitKerja_profile || null,
           indukUnitKerjaFE: user[0]?.unitKerja_profile || null,
-          tipeSrikandi:val?.tipeSrikandi
+          tipeSrikandi: val?.tipeSrikandi,
+          penomoran: user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
-        }
+        },
       )
       .then((res) => {
         // Buat URL untuk file yang diunduh
@@ -316,7 +321,7 @@ isNotaDinas:val?.isNotaDinas,
           "download",
           `Surat_Tugas_${
             user[0]?.unitKerja_profile?.kode || "unknown"
-          }_${Date.now()}.docx`
+          }_${Date.now()}.docx`,
         ); // Nama file yang diunduh
         document.body.appendChild(link);
         link.click();
@@ -348,18 +353,18 @@ isNotaDinas:val?.isNotaDinas,
 
   const handleCetakSPD = () => {
     if (!selectedPerjalananSPD) return;
-    
+
     // Mengumpulkan jenis kendaraan yang dipilih
     const kendaraanTerpilih = [];
     if (jenisKendaraan.darat) kendaraanTerpilih.push(1);
     if (jenisKendaraan.laut) kendaraanTerpilih.push(2);
     if (jenisKendaraan.udara) kendaraanTerpilih.push(3);
-    
+
     // Jika tidak ada yang dipilih, default ke darat
     if (kendaraanTerpilih.length === 0) {
       kendaraanTerpilih.push(1);
     }
-    
+
     postSPD(selectedPerjalananSPD, kendaraanTerpilih);
     handleTutupModalCetakSPD();
   };
@@ -421,10 +426,11 @@ isNotaDinas:val?.isNotaDinas,
           unitKerja: user[0]?.unitKerja_profile || null,
           indukUnitKerjaFE: user[0]?.unitKerja_profile || null,
           jenisKendaraan: kendaraanTerpilih,
+          penomoran: user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
-        }
+        },
       )
       .then((res) => {
         // Buat URL untuk file yang diunduh
@@ -435,7 +441,7 @@ isNotaDinas:val?.isNotaDinas,
           "download",
           `Surat_Tugas_${
             user[0]?.unitKerja_profile?.kode || "unknown"
-          }_${Date.now()}.docx`
+          }_${Date.now()}.docx`,
         ); // Nama file yang diunduh
         document.body.appendChild(link);
         link.click();
@@ -507,7 +513,7 @@ isNotaDinas:val?.isNotaDinas,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
-        }
+        },
       )
       .then((res) => {
         fetchDataPerjalanan();
@@ -544,7 +550,7 @@ isNotaDinas:val?.isNotaDinas,
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/get/all-perjalanan?&time=${time}&page=${page}&limit=${limit}&unitKerjaId=${
           user[0]?.unitKerja_profile?.id || ""
-        }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`
+        }&tanggalBerangkat=${tanggalAwal}&tanggalPulang=${tanggalAkhir}`,
       );
       setDataPerjalanan(res?.data?.result || []);
       setPage(res?.data?.page || 0);
@@ -726,7 +732,9 @@ isNotaDinas:val?.isNotaDinas,
               </Flex>
 
               <Divider mb={6} />
-
+              {JSON.stringify(
+                user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran,
+              )}
               {/* Filter Section */}
               <Box
                 mb={6}
@@ -944,7 +952,7 @@ isNotaDinas:val?.isNotaDinas,
                           >
                             {item?.tempats?.[0]?.tanggalBerangkat
                               ? new Date(
-                                  item?.tempats?.[0]?.tanggalBerangkat
+                                  item?.tempats?.[0]?.tanggalBerangkat,
                                 ).toLocaleDateString("id-ID", {
                                   day: "numeric",
                                   month: "short",
@@ -963,9 +971,8 @@ isNotaDinas:val?.isNotaDinas,
                             {item?.tempats?.[item?.tempats?.length - 1]
                               ?.tanggalPulang
                               ? new Date(
-                                  item?.tempats?.[
-                                    item?.tempats?.length - 1
-                                  ]?.tanggalPulang
+                                  item?.tempats?.[item?.tempats?.length - 1]
+                                    ?.tanggalPulang,
                                 ).toLocaleDateString("id-ID", {
                                   day: "numeric",
                                   month: "short",
@@ -1055,12 +1062,12 @@ isNotaDinas:val?.isNotaDinas,
                                   item?.personils?.[i]?.statusId === 1
                                     ? "gelap"
                                     : item?.personils?.[i]?.statusId === 2
-                                    ? "ungu"
-                                    : item?.personils?.[i]?.statusId === 3
-                                    ? "primary"
-                                    : item?.personils?.[i]?.statusId === 4
-                                    ? "danger"
-                                    : "gray.600"
+                                      ? "ungu"
+                                      : item?.personils?.[i]?.statusId === 3
+                                        ? "primary"
+                                        : item?.personils?.[i]?.statusId === 4
+                                          ? "danger"
+                                          : "gray.600"
                                 }
                                 hasArrow
                                 placement="top"
@@ -1083,12 +1090,12 @@ isNotaDinas:val?.isNotaDinas,
                                     item?.personils?.[i]?.statusId === 1
                                       ? "gelap"
                                       : item?.personils?.[i]?.statusId === 2
-                                      ? "ungu"
-                                      : item?.personils?.[i]?.statusId === 3
-                                      ? "primary"
-                                      : item?.personils?.[i]?.statusId === 4
-                                      ? "danger"
-                                      : "gray.200"
+                                        ? "ungu"
+                                        : item?.personils?.[i]?.statusId === 3
+                                          ? "primary"
+                                          : item?.personils?.[i]?.statusId === 4
+                                            ? "danger"
+                                            : "gray.200"
                                   }
                                   color={
                                     item?.personils?.[i]?.statusId === 1 ||
@@ -1148,7 +1155,7 @@ isNotaDinas:val?.isNotaDinas,
                                   icon={<BsEyeFill />}
                                   onClick={() =>
                                     history.push(
-                                      `/detail-perjalanan/${item?.id || ""}`
+                                      `/detail-perjalanan/${item?.id || ""}`,
                                     )
                                   }
                                   _hover={{
@@ -1198,7 +1205,7 @@ isNotaDinas:val?.isNotaDinas,
                                 Cetak Nota Dinas
                               </MenuItem>
                               {!item?.personils?.some(
-                                (p) => p?.statusId === 2 || p?.statusId === 3
+                                (p) => p?.statusId === 2 || p?.statusId === 3,
                               ) && (
                                 <MenuItem
                                   onClick={() => {
@@ -1293,7 +1300,11 @@ isNotaDinas:val?.isNotaDinas,
             </Modal>
 
             {/* Modal Pilih Jenis Kendaraan untuk Cetak SPD */}
-            <Modal isOpen={isOpenCetakSPD} onClose={handleTutupModalCetakSPD} isCentered>
+            <Modal
+              isOpen={isOpenCetakSPD}
+              onClose={handleTutupModalCetakSPD}
+              isCentered
+            >
               <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(2px)" />
               <ModalContent
                 bg={colorMode === "dark" ? "gray.800" : "white"}
@@ -1316,7 +1327,8 @@ isNotaDinas:val?.isNotaDinas,
                       color={colorMode === "dark" ? "gray.300" : "gray.600"}
                       mb={2}
                     >
-                      Pilih jenis kendaraan yang digunakan untuk perjalanan dinas:
+                      Pilih jenis kendaraan yang digunakan untuk perjalanan
+                      dinas:
                     </Text>
                     <FormControl>
                       <Checkbox
@@ -1327,7 +1339,6 @@ isNotaDinas:val?.isNotaDinas,
                             darat: e.target.checked,
                           })
                         }
-                        
                         size="lg"
                         sx={{
                           "& .chakra-checkbox__control": {
@@ -1364,7 +1375,6 @@ isNotaDinas:val?.isNotaDinas,
                             laut: e.target.checked,
                           })
                         }
-                    
                         size="lg"
                         sx={{
                           "& .chakra-checkbox__control": {
@@ -1401,7 +1411,6 @@ isNotaDinas:val?.isNotaDinas,
                             udara: e.target.checked,
                           })
                         }
-                    
                         size="lg"
                         sx={{
                           "& .chakra-checkbox__control": {
@@ -1436,7 +1445,11 @@ isNotaDinas:val?.isNotaDinas,
                   borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
                   pt={4}
                 >
-                  <Button variant="ghost" mr={3} onClick={handleTutupModalCetakSPD}>
+                  <Button
+                    variant="ghost"
+                    mr={3}
+                    onClick={handleTutupModalCetakSPD}
+                  >
                     Batal
                   </Button>
                   <Button
@@ -1444,7 +1457,6 @@ isNotaDinas:val?.isNotaDinas,
                     onClick={handleCetakSPD}
                     isLoading={isLoading}
                     loadingText="Memproses..."
-                 
                   >
                     Buat
                   </Button>

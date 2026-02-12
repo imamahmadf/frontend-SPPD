@@ -1,8 +1,6 @@
 import React from "react";
 import {
-  Card,
-  CardHeader,
-  CardBody,
+  Box,
   Heading,
   Icon,
   Flex,
@@ -13,6 +11,7 @@ import {
   Wrap,
   WrapItem,
   Badge,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import {
   FiUsers,
@@ -20,6 +19,7 @@ import {
   FiUserPlus,
   FiSearch,
   FiPrinter,
+  FiZap,
 } from "react-icons/fi";
 import PersonilCard from "./PersonilCard";
 
@@ -48,60 +48,60 @@ function DaftarPersonil({
 }) {
   const jumlahPersonil = detailPerjalanan?.personils?.length || 0;
 
+  const sectionBg = useColorModeValue("white", "gray.800");
+  const borderCardColor = useColorModeValue("gray.200", "gray.600");
+
   return (
-    <Card
-      bg={cardBg}
-      borderColor={borderColor}
-      shadow="lg"
-      borderRadius="xl"
-      overflow="hidden"
-    >
-      <CardHeader
-        bg={headerBg}
-        borderBottom="1px"
-        borderColor={borderColor}
-        py={{ base: 3, md: 4 }}
-        px={{ base: 4, md: 6 }}
+    <Box>
+      {/* Section Header */}
+      <Box
+        bg={sectionBg}
+        borderRadius="xl"
+        p={4}
+        shadow="sm"
+        border="1px"
+        borderColor={borderCardColor}
+        mb={6}
       >
         <Flex
+          direction={{ base: "column", sm: "row" }}
           justify="space-between"
-          align="center"
-          wrap="wrap"
-          gap={3}
+          align={{ base: "start", sm: "center" }}
+          gap={4}
         >
-          {/* Header Title */}
-          <HStack spacing={3} flexShrink={0}>
-            <Flex
-              bg="whiteAlpha.200"
+          <HStack spacing={3}>
+            <Box
               p={2}
+              bg="teal.100"
+              color="teal.700"
               borderRadius="lg"
-              align="center"
-              justify="center"
+              shadow="sm"
             >
-              <Icon as={FiUsers} color="white" boxSize={5} />
-            </Flex>
-            <HStack spacing={2}>
-              <Heading
-                color="white"
-                size={{ base: "sm", md: "md" }}
-              >
+              <Icon as={FiUsers} boxSize={5} />
+            </Box>
+            <HStack spacing={3}>
+              <Heading size="md" fontWeight="bold" color="gray.900">
                 Daftar Personil
               </Heading>
               <Badge
-                bg="whiteAlpha.300"
-                color="white"
+                bg="teal.50"
+                color="teal.700"
+                border="1px"
+                borderColor="teal.100"
                 fontSize="xs"
-                px={2}
+                px={2.5}
                 py={0.5}
                 borderRadius="full"
+                fontWeight="bold"
+                shadow="sm"
               >
-                {jumlahPersonil} orang
+                {jumlahPersonil} ORANG
               </Badge>
             </HStack>
           </HStack>
 
-          {/* Action Buttons - Semua tombol di samping kanan */}
-          <Wrap spacing={2} justify="flex-end">
+          {/* Action Buttons */}
+          <Wrap spacing={2} justify={{ base: "start", sm: "flex-end" }}>
             {/* Tombol Ajukan Semua */}
             {adaPersonilYangBisaDiajukan && (
               <WrapItem>
@@ -111,8 +111,11 @@ function DaftarPersonil({
                   onClick={onPengajuanBulk}
                   isLoading={isSubmittingPengajuan}
                   loadingText="Mengajukan..."
-                  size={{ base: "sm", md: "md" }}
+                  size="sm"
                   transition="all 0.2s"
+                  shadow="sm"
+                  _hover={{ shadow: "md" }}
+                  _active={{ transform: "scale(0.95)" }}
                 >
                   Ajukan Semua
                 </Button>
@@ -125,13 +128,16 @@ function DaftarPersonil({
               detailPerjalanan.jenisPerjalanan?.tipePerjalananId === 1 && (
                 <WrapItem>
                   <Button
-                    leftIcon={<FiCheckCircle />}
-                    colorScheme="teal"
+                    leftIcon={<FiZap />}
+                    colorScheme="green"
                     onClick={onBuatOtomatisBulk}
                     isLoading={isCreatingAutoBulk}
                     loadingText="Membuat..."
-                    size={{ base: "sm", md: "md" }}
+                    size="sm"
                     transition="all 0.2s"
+                    shadow="sm"
+                    _hover={{ shadow: "md" }}
+                    _active={{ transform: "scale(0.95)" }}
                   >
                     Buat Otomatis
                   </Button>
@@ -148,7 +154,7 @@ function DaftarPersonil({
                     leftIcon={<FiSearch />}
                     colorScheme="purple"
                     onClick={onSearchTemplateBPD}
-                    size={{ base: "sm", md: "md" }}
+                    size="sm"
                     transition="all 0.2s"
                   >
                     Cari Template BPD
@@ -161,13 +167,15 @@ function DaftarPersonil({
               <WrapItem>
                 <Button
                   leftIcon={<FiUserPlus />}
-                  colorScheme="whiteAlpha"
-                  bg="whiteAlpha.200"
-                  color="white"
-                  _hover={{ bg: "whiteAlpha.300" }}
+                  bg="white"
+                  color="gray.700"
+                  border="1px"
+                  borderColor="gray.200"
+                  _hover={{ bg: "gray.50", borderColor: "gray.300" }}
                   onClick={onTambahPersonil}
-                  size={{ base: "sm", md: "md" }}
+                  size="sm"
                   transition="all 0.2s"
+                  shadow="sm"
                 >
                   Tambah Personil
                 </Button>
@@ -179,7 +187,7 @@ function DaftarPersonil({
               <WrapItem>
                 <HStack spacing={2}>
                   <Select
-                    size={{ base: "sm", md: "md" }}
+                    size="sm"
                     bg="white"
                     borderRadius="md"
                     borderColor="gray.300"
@@ -204,7 +212,7 @@ function DaftarPersonil({
                     onClick={() => onCetakSemuaKwitansi(templateId)}
                     isLoading={isPrintingAll}
                     loadingText="Mencetak..."
-                    size={{ base: "sm", md: "md" }}
+                    size="sm"
                     transition="all 0.2s"
                   >
                     Cetak Semua
@@ -214,23 +222,23 @@ function DaftarPersonil({
             )}
           </Wrap>
         </Flex>
-      </CardHeader>
-      <CardBody p={{ base: 4, md: 6 }}>
-        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={{ base: 4, md: 6 }}>
-          {detailPerjalanan?.personils?.map((item, index) => (
-            <PersonilCard
-              key={index}
-              item={item}
-              index={index}
-              detailPerjalanan={detailPerjalanan}
-              onEditClick={onEditPersonil}
-              onHapusClick={onHapusPersonil}
-              borderColor={borderColor}
-            />
-          ))}
-        </SimpleGrid>
-      </CardBody>
-    </Card>
+      </Box>
+
+      {/* Cards Grid */}
+      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
+        {detailPerjalanan?.personils?.map((item, index) => (
+          <PersonilCard
+            key={index}
+            item={item}
+            index={index}
+            detailPerjalanan={detailPerjalanan}
+            onEditClick={onEditPersonil}
+            onHapusClick={onHapusPersonil}
+            borderColor={borderColor}
+          />
+        ))}
+      </SimpleGrid>
+    </Box>
   );
 }
 

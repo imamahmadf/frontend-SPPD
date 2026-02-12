@@ -3,11 +3,22 @@ import { useDisclosure } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import {
   Box,
+  Button,
   Container,
+  Flex,
   Grid,
   GridItem,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
   useColorModeValue,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
 import Layout from "../../Componets/Layout";
 import Loading from "../../Componets/Loading";
@@ -19,17 +30,23 @@ import Header from "./Components/Header";
 import InformasiPerjalanan from "./Components/InformasiPerjalanan";
 import BuktiKegiatan from "./Components/BuktiKegiatan";
 import DaftarPersonil from "./Components/DaftarPersonil";
+import SubKegiatan from "./Components/SubKegiatan";
 import ModalEditPersonil from "./Components/ModalEditPersonil";
 import ModalTambahPersonil from "./Components/ModalTambahPersonil";
 import ModalHapusPersonil from "./Components/ModalHapusPersonil";
 import ModalEditSubKegiatan from "./Components/ModalEditSubKegiatan";
 import ModalEditTempat from "./Components/ModalEditTempat";
+import ModalEditNomorSurat from "./Components/ModalEditNomorSurat";
 import ModalSearchTemplateBPD from "./Components/ModalSearchTemplateBPD";
 
 function Detail(props) {
   const user = useSelector(userRedux);
   const history = useHistory();
   const perjalananId = props.match.params.id;
+
+  // Edit nomor surat hanya boleh jika penomoran induk unit kerja = nonaktif
+  const bolehEditNomorSurat =
+    user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran === "nonaktif";
 
   const {
     state,
@@ -51,6 +68,7 @@ function Detail(props) {
     adaPersonilYangBisaDiajukan,
     adaStatusDuaAtauTiga,
     adaPersonilYangBisaDicetak,
+    validasiRillError,
   } = state;
 
   const {
@@ -58,8 +76,10 @@ function Detail(props) {
     buatOtomatisBulk,
     pengajuanBulk,
     cetakSemuaKwitansi,
+    simpanEditNomorSurat,
     setRandomNumber,
     setTemplateId,
+    clearValidasiRillError,
   } = actions;
 
   // Modal states
@@ -87,6 +107,12 @@ function Detail(props) {
     onClose: onSearchTemplateBPDClose,
   } = useDisclosure();
 
+  const {
+    isOpen: isEditNomorSuratOpen,
+    onOpen: onEditNomorSuratOpen,
+    onClose: onEditNomorSuratClose,
+  } = useDisclosure();
+
   // State untuk search template BPD
   const [selectedTemplateBPD, setSelectedTemplateBPD] = useState(null);
   const [isSubmittingTemplateBPD, setIsSubmittingTemplateBPD] = useState(false);
@@ -103,6 +129,9 @@ function Detail(props) {
   // State untuk edit sub kegiatan
   const [isEditUntukOpen, setIsEditUntukOpen] = useState(false);
   const [editSubKegiatanId, setEditSubKegiatanId] = useState(null);
+
+  // State untuk edit nomor surat
+  const [isSubmittingNomorSurat, setIsSubmittingNomorSurat] = useState(false);
 
   // State untuk edit tempat
   const [isEditTempatOpen, setIsEditTempatOpen] = useState(false);
@@ -217,6 +246,32 @@ function Detail(props) {
       await fetchDataPerjalan();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleSimpanEditNomorSurat = async (updates) => {
+    setIsSubmittingNomorSurat(true);
+    try {
+      await simpanEditNomorSurat(updates);
+      onEditNomorSuratClose();
+      toast({
+        title: "Berhasil",
+        description: "Nomor surat berhasil diperbarui",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Gagal memperbarui nomor surat",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmittingNomorSurat(false);
     }
   };
 
@@ -345,25 +400,27 @@ function Detail(props) {
             detailPerjalanan={detailPerjalanan}
             adaStatusDuaAtauTiga={adaStatusDuaAtauTiga}
             onEditClick={onEditPerjalananClick}
+            penomoran={user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran}
           />
 
           <Container
             maxW={{ base: "100%", md: "1280px", lg: "1380px" }}
             px={{ base: 4, md: 6 }}
           >
-            {/* Grid untuk Informasi Perjalanan dan Bukti Kegiatan */}
+            {/* Grid untuk Layout Utama */}
             <Grid
               templateColumns={{ base: "1fr", lg: "2fr 1fr" }}
               gap={{ base: 4, md: 6, lg: 8 }}
               mb={{ base: 6, md: 8 }}
             >
-              {/* Kolom Kiri - Informasi Perjalanan */}
-              <GridItem>
+              {/* Kolom Kiri - Informasi Perjalanan, Sub Kegiatan, Pejabat Berwenang */}
+              <GridItem display="flex" flexDirection="column">
                 <InformasiPerjalanan
                   detailPerjalanan={detailPerjalanan}
                   adaStatusDuaAtauTiga={adaStatusDuaAtauTiga}
-                  onEditSubKegiatanClick={onEditSubKegiatanClick}
                   onEditTempatClick={onEditTempatClick}
+                  onEditNomorSuratClick={bolehEditNomorSurat ? onEditNomorSuratOpen : undefined}
+                  onEditSubKegiatanClick={onEditSubKegiatanClick}
                   formatDateForInput={formatDateForInput}
                   cardBg={cardBg}
                   borderColor={borderColor}
@@ -371,8 +428,8 @@ function Detail(props) {
                 />
               </GridItem>
 
-              {/* Kolom Kanan - Bukti Kegiatan */}
-              <GridItem>
+              {/* Kolom Kanan - Bukti Kegiatan, Kendaraan Dinas */}
+              <GridItem display="flex" flexDirection="column">
                 <BuktiKegiatan
                   detailPerjalanan={detailPerjalanan}
                   setRandomNumber={setRandomNumber}
@@ -471,6 +528,15 @@ function Detail(props) {
             headerBg={headerBg}
           />
 
+          <ModalEditNomorSurat
+            isOpen={isEditNomorSuratOpen}
+            onClose={onEditNomorSuratClose}
+            detailPerjalanan={detailPerjalanan}
+            onSave={handleSimpanEditNomorSurat}
+            headerBg={headerBg}
+            isLoading={isSubmittingNomorSurat}
+          />
+
           <ModalSearchTemplateBPD
             isOpen={isSearchTemplateBPDOpen}
             onClose={() => {
@@ -487,6 +553,64 @@ function Detail(props) {
             isLoading={isSubmittingTemplateBPD}
             personilCount={detailPerjalanan?.personils?.length || 0}
           />
+
+          {/* Modal Peringatan Validasi Rill (Dalam Kota) */}
+          <Modal
+            closeOnOverlayClick={false}
+            isOpen={!!validasiRillError}
+            onClose={clearValidasiRillError}
+            isCentered
+          >
+            <ModalOverlay />
+            <ModalContent borderRadius="lg" maxWidth="500px">
+              <ModalHeader color="red.600">Validasi Gagal</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody pb={6}>
+                <Text mb={2}>
+                  Total nilai rincian <strong>Rill</strong> tidak boleh melebihi
+                  uang transport maksimal untuk perjalanan dalam kota.
+                  {validasiRillError?.namaPegawai && (
+                    <>
+                      {" "}
+                      Personil <strong>{validasiRillError.namaPegawai}</strong>{" "}
+                      melebihi batas.
+                    </>
+                  )}
+                </Text>
+                <VStack align="stretch" spacing={2} py={2}>
+                  <Flex justify="space-between">
+                    <Text color="gray.600">Total nilai Rill:</Text>
+                    <Text fontWeight="semibold" color="red.600">
+                      {validasiRillError &&
+                        new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        }).format(validasiRillError.totalNilaiRill)}
+                    </Text>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text color="gray.600">Batas maksimal:</Text>
+                    <Text fontWeight="semibold">
+                      {validasiRillError &&
+                        new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        }).format(validasiRillError.maxUangTransport)}
+                    </Text>
+                  </Flex>
+                </VStack>
+                <Text fontSize="sm" color="gray.600">
+                  Silakan perbaiki rincian BPD agar total nilai Rill tidak
+                  melebihi batas di atas, lalu ajukan kembali.
+                </Text>
+              </ModalBody>
+              <ModalFooter>
+                <Button colorScheme="blue" onClick={clearValidasiRillError}>
+                  Mengerti
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
         </Box>
       </Layout>
     </>

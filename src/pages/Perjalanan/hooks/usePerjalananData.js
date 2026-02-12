@@ -196,7 +196,7 @@ const usePerjalananData = (user) => {
         }&unitKerjaId=${user[0]?.unitKerja_profile?.id}`
       );
       setDataSeed(res.data);
-
+console.log(res.data)
       if (res.data.resultPPTK?.length > 0) {
         setDataPPTK({
           value: res.data.resultPPTK[0],

@@ -15,6 +15,7 @@ const useDetailData = (perjalananId, user) => {
   const [isSubmittingPengajuan, setIsSubmittingPengajuan] = useState(false);
   const [isPrintingAll, setIsPrintingAll] = useState(false);
   const [randomNumber, setRandomNumber] = useState(0);
+  const [validasiRillError, setValidasiRillError] = useState(null);
 
   const toast = useToast();
 
@@ -312,6 +313,52 @@ const useDetailData = (perjalananId, user) => {
       return;
     }
 
+    // Validasi untuk Perjalanan Dinas Dalam Kota (jenisPerjalanan.id === 2):
+    // Total nilai rincian jenis Rill per personil tidak boleh melebihi uangTransport maksimal
+    const jenisPerjalananId = detailPerjalanan.jenisPerjalanan?.id;
+    if (jenisPerjalananId === 2) {
+      const tempats = detailPerjalanan.tempats || [];
+      const maxUangTransport =
+        tempats.length > 0
+          ? Math.max(
+              ...tempats.map((t) => Number(t?.dalamKota?.uangTransport) || 0)
+            )
+          : 0;
+
+      const personilGagal = personilsToSubmit.find((personil) => {
+        const totalNilaiRill = (
+          personil.rincianBPDs?.filter(
+            (item) =>
+              (item.jenisRincianBPD?.jenis || "").toLowerCase() === "rill"
+          ) || []
+        ).reduce((sum, item) => {
+          const nilai = Number(item.nilai) || 0;
+          const qty = Number(item.qty) || 0;
+          return sum + nilai * qty;
+        }, 0);
+        return totalNilaiRill > maxUangTransport;
+      });
+
+      if (personilGagal) {
+        const totalNilaiRill = (
+          personilGagal.rincianBPDs?.filter(
+            (item) =>
+              (item.jenisRincianBPD?.jenis || "").toLowerCase() === "rill"
+          ) || []
+        ).reduce((sum, item) => {
+          const nilai = Number(item.nilai) || 0;
+          const qty = Number(item.qty) || 0;
+          return sum + nilai * qty;
+        }, 0);
+        setValidasiRillError({
+          totalNilaiRill,
+          maxUangTransport,
+          namaPegawai: personilGagal.pegawai?.nama || "Personil",
+        });
+        return;
+      }
+    }
+
     setIsSubmittingPengajuan(true);
 
     try {
@@ -528,6 +575,24 @@ const useDetailData = (perjalananId, user) => {
       personil.statusId >= 2
   );
 
+  /**
+   * Mengirim data ke API untuk menyimpan perubahan nomor surat (no. surat tugas, no. nota dinas, nomor SPD per personil).
+   * @param {Object} updates - { noSuratTugas, noNotaDinas, personilNomorSPD: [{ personilId, nomorSPD }] }
+   * @returns {Promise<void>}
+   */
+  const simpanEditNomorSurat = async (updates) => {
+    const response = await axios.post(
+      `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/perjalanan/edit-nomor-surat/${perjalananId}`,
+      {
+        noSuratTugas: updates.noSuratTugas ?? null,
+        noNotaDinas: updates.noNotaDinas ?? null,
+        personilNomorSPD: updates.personilNomorSPD ?? [],
+      }
+    );
+    await fetchDataPerjalan();
+    return response.data;
+  };
+
   return {
     state: {
       detailPerjalanan,
@@ -547,6 +612,7 @@ const useDetailData = (perjalananId, user) => {
       adaPersonilYangBisaDiajukan,
       adaStatusDuaAtauTiga,
       adaPersonilYangBisaDicetak,
+      validasiRillError,
     },
     actions: {
       fetchDataPerjalan,
@@ -554,8 +620,10 @@ const useDetailData = (perjalananId, user) => {
       buatOtomatisBulk,
       pengajuanBulk,
       cetakSemuaKwitansi,
+      simpanEditNomorSurat,
       setRandomNumber,
       setTemplateId,
+      clearValidasiRillError: () => setValidasiRillError(null),
     },
   };
 };

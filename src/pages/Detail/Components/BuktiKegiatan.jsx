@@ -1,20 +1,17 @@
 import React from "react";
 import {
   Card,
-  CardHeader,
   CardBody,
   Heading,
   Icon,
-  Box,
-  Image,
   Text,
-  VStack,
+  Box,
   HStack,
-  Badge,
-  Divider,
+  VStack,
   useColorModeValue,
+  Divider,
 } from "@chakra-ui/react";
-import { FiFileText, FiTruck } from "react-icons/fi";
+import { FiCamera, FiTruck, FiAlertCircle } from "react-icons/fi";
 import TambahBuktiKegiatan from "../../../Componets/TambahBuktiKegiatan";
 
 function BuktiKegiatan({
@@ -24,188 +21,153 @@ function BuktiKegiatan({
   borderColor,
   headerBg,
 }) {
-  const kendaraan = detailPerjalanan?.kendaraanDina;
-  
-  const infoBg = useColorModeValue("gray.50", "gray.700");
-  const labelColor = useColorModeValue("gray.600", "gray.400");
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "dipinjam":
-        return "orange";
-      case "tersedia":
-        return "green";
-      case "tidak tersedia":
-        return "red";
-      default:
-        return "gray";
-    }
-  };
+  const sectionBg = useColorModeValue("white", "gray.800");
+  const headerSectionBg = useColorModeValue("rgba(248, 250, 252, 0.5)", "rgba(31, 41, 55, 0.5)");
+  const borderCardColor = useColorModeValue("gray.200", "gray.600");
 
   return (
     <Card
       bg={cardBg}
-      borderColor={borderColor}
-      shadow="lg"
+      border="1px"
+      borderColor={borderCardColor}
+      shadow="sm"
       borderRadius="xl"
       overflow="hidden"
       h="100%"
+      display="flex"
+      flexDirection="column"
     >
-      <CardHeader
-        bg={headerBg}
+      {/* Header */}
+      <Box
+        p={6}
         borderBottom="1px"
-        borderColor={borderColor}
+        borderColor={borderCardColor}
+        bg={headerSectionBg}
       >
-        <Heading size="md" display="flex" align="center" gap={2}>
-          <Icon as={FiFileText} color="purple.500" />
-          Bukti Kegiatan
-        </Heading>
-      </CardHeader>
-      <CardBody p={0}>
-        <TambahBuktiKegiatan
-          fotoPerjalanan={detailPerjalanan?.fotoPerjalanans || []}
-          id={detailPerjalanan?.id}
-          status={detailPerjalanan?.personils?.[0]?.statusId || 1}
-          randomNumber={setRandomNumber}
-        />
+        <HStack spacing={3}>
+          <Box p={2} bg="teal.100" color="teal.700" borderRadius="lg" shadow="sm">
+            <Icon as={FiCamera} boxSize={5} />
+          </Box>
+          <Heading size="md" fontWeight="semibold" color="gray.900">
+            Bukti Kegiatan
+          </Heading>
+        </HStack>
+      </Box>
 
-        {/* Informasi Kendaraan Dinas */}
-        <Divider />
-        <Box p={4}>
-          <HStack mb={3}>
-            <Icon as={FiTruck} color="blue.500" />
-            <Heading size="sm">Kendaraan Dinas</Heading>
+      {/* Body */}
+      <CardBody p={6} flex={1} display="flex" flexDirection="column" gap={6}>
+        {/* Photo Section */}
+        <Box flex={1} minH="240px">
+          <TambahBuktiKegiatan
+            fotoPerjalanan={detailPerjalanan?.fotoPerjalanans || []}
+            id={detailPerjalanan?.id}
+            status={detailPerjalanan?.personils?.[0]?.statusId || 1}
+            randomNumber={setRandomNumber}
+          />
+        </Box>
+
+        <Divider borderColor={borderCardColor} />
+
+        {/* Vehicle Section */}
+        <Box>
+          <HStack spacing={2} mb={3}>
+            <Icon as={FiTruck} boxSize={4} color="teal.600" />
+            <Text fontSize="sm" fontWeight="semibold" color="gray.900">
+              Kendaraan Dinas
+            </Text>
           </HStack>
 
-          {kendaraan ? (
-            <VStack spacing={3} align="stretch">
-              {/* Foto Kendaraan */}
-              {kendaraan.kendaraan?.foto && (
-                <Box
-                  borderRadius="lg"
-                  overflow="hidden"
-                  border="1px"
-                  borderColor={borderColor}
-                >
-                  <Image
-                    src={`${import.meta.env.VITE_REACT_APP_API_BASE_URL}${kendaraan.kendaraan.foto}`}
-                    alt={kendaraan.kendaraan?.merek || "Kendaraan"}
-                    w="100%"
-                    h="150px"
-                    objectFit="cover"
-                    fallbackSrc="https://via.placeholder.com/300x150?text=No+Image"
-                  />
-                </Box>
-              )}
-
-              {/* Info Kendaraan */}
-              <Box bg={infoBg} p={3} borderRadius="md">
-                <VStack spacing={2} align="stretch">
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color={labelColor}>
-                      Merek/Tipe
-                    </Text>
-                    <Text fontSize="sm" fontWeight="medium">
-                      {kendaraan.kendaraan?.merek || "-"}
-                    </Text>
-                  </HStack>
-
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color={labelColor}>
-                      Nomor Polisi
-                    </Text>
-                    <Text fontSize="sm" fontWeight="medium">
-                      KT {kendaraan.kendaraan?.nomor || "-"}{" "}
-                      {kendaraan.kendaraan?.seri || ""}
-                    </Text>
-                  </HStack>
-
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color={labelColor}>
-                      Status
-                    </Text>
-                    <Badge colorScheme={getStatusColor(kendaraan.status)}>
-                      {kendaraan.status || "-"}
-                    </Badge>
-                  </HStack>
-
-                  {kendaraan.kmAkhir && (
-                    <HStack justify="space-between">
-                      <Text fontSize="sm" color={labelColor}>
-                        KM Akhir
-                      </Text>
-                      <Text fontSize="sm" fontWeight="medium">
-                        {kendaraan.kmAkhir} km
-                      </Text>
-                    </HStack>
-                  )}
-
-                  {kendaraan.jarak && (
-                    <HStack justify="space-between">
-                      <Text fontSize="sm" color={labelColor}>
-                        Jarak Tempuh
-                      </Text>
-                      <Text fontSize="sm" fontWeight="medium">
-                        {kendaraan.jarak} km
-                      </Text>
-                    </HStack>
-                  )}
-
-                  {kendaraan.kondisiAkhir && (
-                    <HStack justify="space-between">
-                      <Text fontSize="sm" color={labelColor}>
-                        Kondisi Akhir
-                      </Text>
-                      <Text fontSize="sm" fontWeight="medium">
-                        {kendaraan.kondisiAkhir}
-                      </Text>
-                    </HStack>
-                  )}
-
-                  {kendaraan.catatan && (
-                    <Box>
-                      <Text fontSize="sm" color={labelColor} mb={1}>
-                        Catatan
-                      </Text>
-                      <Text fontSize="sm">{kendaraan.catatan}</Text>
-                    </Box>
-                  )}
-
-                  {kendaraan.keterangan && (
-                    <Box>
-                      <Text fontSize="sm" color={labelColor} mb={1}>
-                        Keterangan
-                      </Text>
-                      <Text fontSize="sm">{kendaraan.keterangan}</Text>
-                    </Box>
-                  )}
-                </VStack>
-              </Box>
-            </VStack>
-          ) : (
-            /* Empty State - Tidak Ada Kendaraan Dinas */
+          <Box
+            bg={useColorModeValue("gray.50", "gray.700")}
+            borderRadius="xl"
+            border="1px"
+            borderColor={borderCardColor}
+            p={6}
+            textAlign="center"
+            position="relative"
+            overflow="hidden"
+            transition="all 0.2s"
+            _hover={{
+              borderColor: "gray.300",
+            }}
+          >
+            {/* Background pattern */}
             <Box
-              bg={infoBg}
-              p={6}
-              borderRadius="lg"
-              border="2px dashed"
-              borderColor={borderColor}
-              textAlign="center"
+              position="absolute"
+              top={0}
+              right={0}
+              p={4}
+              opacity={0.05}
+              zIndex={0}
             >
-              <Icon
-                as={FiTruck}
-                boxSize={10}
-                color="gray.400"
-                mb={3}
-              />
-              <Text fontSize="md" fontWeight="medium" color="gray.500" mb={1}>
-                Tidak Menggunakan Kendaraan Dinas
-              </Text>
-              <Text fontSize="sm" color="gray.400">
-                Perjalanan ini tidak menggunakan kendaraan dinas
-              </Text>
+              <Icon as={FiTruck} boxSize={20} color="gray.400" />
             </Box>
-          )}
+
+            <VStack spacing={3} position="relative" zIndex={1}>
+              <Box
+                w="56px"
+                h="56px"
+                bg="white"
+                borderRadius="full"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                mb={3}
+                shadow="sm"
+                border="1px"
+                borderColor={borderCardColor}
+                transition="transform 0.2s"
+                _groupHover={{
+                  transform: "scale(1.05)",
+                }}
+              >
+                <Box position="relative">
+                  <Icon as={FiTruck} boxSize={6} color="gray.300" />
+                  <Box
+                    position="absolute"
+                    top="-4px"
+                    right="-4px"
+                    bg={useColorModeValue("gray.200", "gray.600")}
+                    borderRadius="full"
+                    p={0.5}
+                    border="1px"
+                    borderColor="white"
+                  >
+                    <Icon as={FiAlertCircle} boxSize={2.5} color="gray.400" />
+                  </Box>
+                </Box>
+              </Box>
+
+              {detailPerjalanan?.kendaraanDina ? (
+                <>
+                  <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={1}>
+                    Menggunakan Kendaraan Dinas
+                  </Text>
+                  <Text fontSize="sm" color="gray.600">
+                    {detailPerjalanan.kendaraanDina.kendaraan?.merek || "-"} - KT{" "}
+                    {detailPerjalanan.kendaraanDina.kendaraan?.nomor || "-"}{" "}
+                    {detailPerjalanan.kendaraanDina.kendaraan?.seri || ""}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text fontSize="sm" fontWeight="bold" color="gray.700" mb={1}>
+                    Tidak Menggunakan Kendaraan Dinas
+                  </Text>
+                  <Text
+                    fontSize="xs"
+                    color="gray.500"
+                    maxW="200px"
+                    mx="auto"
+                    lineHeight="relaxed"
+                  >
+                    Perjalanan ini tercatat tidak menggunakan fasilitas kendaraan
+                    dinas.
+                  </Text>
+                </>
+              )}
+            </VStack>
+          </Box>
         </Box>
       </CardBody>
     </Card>

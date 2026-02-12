@@ -23,13 +23,13 @@ export const myNewTheme = extendTheme({
     oren: "rgba(235, 92, 24, 1)",
     ungu: "rgba(73, 79, 171, 1)",
     secondary: {
-      light: "rgb(245 245 245)",
+      light: "rgb(248 250 252)",
       dark: "black.900",
     },
     danger: "rgba(198, 46, 46, 1)",
     gelap: "rgba(38, 38, 38, 1)",
-    terang: "rgba(243, 243, 243, 1)",
-    background: "rgba(243, 243, 243, 1)",
+    terang: "rgba(248, 250, 252, 1)",
+    background: "rgba(248, 250, 252, 1)",
     aset: "rgba(0, 125, 226, 1)",
     // Warna untuk fitur Pegawai - Merah Profesional untuk Kepegawaian
     // Merah yang lebih dalam dan elegan, cocok untuk HR/People Management

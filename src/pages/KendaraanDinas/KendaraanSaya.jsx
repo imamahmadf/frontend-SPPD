@@ -18,33 +18,31 @@ import {
   FormControl,
   FormLabel,
   Center,
-  HStack,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
   Heading,
-  SimpleGrid,
-  Th,
-  Td,
   Flex,
-  Textarea,
-  Tooltip,
   Input,
-  Spacer,
   useToast,
-  useColorMode,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  IconButton,
   VStack,
   FormErrorMessage,
+  Stack,
+  Divider,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import Foto from "../../assets/add_photo.png";
+
+// Format tanggal aman: pakai tanggalAwal/tanggalAkhir jika ada, fallback ke createdAt/updatedAt
+function formatTanggalId(value) {
+  if (value == null || value === "") return "–";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "–";
+  return d.toLocaleString("id-ID", {
+    dateStyle: "long",
+    timeStyle: "short",
+  });
+}
+
 function KendaraanSaya() {
   const [DataKendaraanDinas, setDataKendaraanDinas] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,67 +183,143 @@ function KendaraanSaya() {
     setPreview2(null);
     setErrors({});
   };
+  const stackDirection = useBreakpointValue({ base: "column", lg: "row" });
+
   return (
     <Layout>
-      <Box bgColor={"secondary"} pb={"40px"} px={"30px"} minH={"60vh"}>
-        <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
+      <Box bgColor={"secondary"} pb={8} px={{ base: 4, md: 6 }} minH={"60vh"}>
+        <Container variant={"primary"} maxW={"1280px"} p={{ base: 4, md: 6 }}>
           {DataKendaraanDinas && DataKendaraanDinas.length > 0 ? (
             <>
-              <Flex justify="space-between" align="center" mb={5}>
-                <Heading size="lg">Detail Kendaraan Dinas</Heading>
+              <Flex
+                justify="space-between"
+                align="center"
+                mb={6}
+                flexDir={{ base: "column", sm: "row" }}
+                gap={4}
+              >
+                <Heading size="lg" fontSize={{ base: "xl", md: "2xl" }}>
+                  Detail Kendaraan Dinas
+                </Heading>
                 <Button
                   colorScheme="blue"
                   onClick={() => setIsModalOpen(true)}
                   leftIcon={<Text>📷</Text>}
+                  size={{ base: "sm", md: "md" }}
                 >
                   Upload Foto
                 </Button>
               </Flex>
 
-              <Flex p={"15px"} gap={5}>
-                <Image
-                  borderRadius={"5px"}
-                  alt="foto kendaraan"
-                  width="50%"
-                  height="800px"
-                  overflow="hiden"
-                  objectFit="cover"
-                  src={
-                    DataKendaraanDinas[0]?.kendaraan?.foto
-                      ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
-                        DataKendaraanDinas[0]?.kendaraan?.foto
-                      : Foto
-                  }
-                />
-                <Box>
-                  <Text fontSize="lg" fontWeight="bold" mb={3}>
-                    {`Nomor Plat: KT ${DataKendaraanDinas[0]?.kendaraan?.nomor} ${DataKendaraanDinas[0]?.kendaraan?.seri}`}
-                  </Text>
-                  <Text mb={2}>Tujuan: {DataKendaraanDinas[0]?.tujuan}</Text>
-                  <Text mb={2}>
-                    Tanggal Pinjam:
-                    {new Date(
-                      DataKendaraanDinas[0]?.tanggalAwal
-                    ).toLocaleString("id-ID", {
-                      dateStyle: "long",
-                      timeStyle: "short",
-                    })}
-                  </Text>
-                  <Text>
-                    Tanggal Pengembalian:
-                    {new Date(
-                      DataKendaraanDinas[0]?.tanggalAkhir
-                    ).toLocaleString("id-ID", {
-                      dateStyle: "long",
-                      timeStyle: "short",
-                    })}
-                  </Text>
+              <Stack
+                direction={stackDirection}
+                spacing={6}
+                p={4}
+                bg="white"
+                borderRadius="lg"
+                boxShadow="sm"
+                borderWidth="1px"
+                borderColor="gray.100"
+              >
+                <Box
+                  flex={{ base: "none", lg: "0 0 45%" }}
+                  position="relative"
+                  overflow="hidden"
+                  borderRadius="lg"
+                >
+                  <Image
+                    borderRadius="lg"
+                    alt="foto kendaraan"
+                    w="100%"
+                    maxH={{ base: "280px", md: "400px", lg: "420px" }}
+                    objectFit="cover"
+                    src={
+                      DataKendaraanDinas[0]?.kendaraan?.foto
+                        ? import.meta.env.VITE_REACT_APP_API_BASE_URL +
+                          DataKendaraanDinas[0]?.kendaraan?.foto
+                        : Foto
+                    }
+                  />
                 </Box>
-              </Flex>
+                <Box flex={1}>
+                  <VStack align="stretch" spacing={4}>
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        color="gray.500"
+                        textTransform="uppercase"
+                        letterSpacing="wider"
+                        mb={1}
+                      >
+                        Nomor Plat
+                      </Text>
+                      <Text fontSize="lg" fontWeight="bold">
+                        {`KT ${DataKendaraanDinas[0]?.kendaraan?.nomor} ${DataKendaraanDinas[0]?.kendaraan?.seri}`}
+                      </Text>
+                    </Box>
+                    <Divider />
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        color="gray.500"
+                        textTransform="uppercase"
+                        letterSpacing="wider"
+                        mb={1}
+                      >
+                        Tujuan
+                      </Text>
+                      <Text>
+                        {DataKendaraanDinas[0]?.tujuan ||
+                          DataKendaraanDinas[0]?.perjalanans?.[0]?.noSuratTugas ||
+                          "–"}
+                      </Text>
+                    </Box>
+                    <Divider />
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        color="gray.500"
+                        textTransform="uppercase"
+                        letterSpacing="wider"
+                        mb={1}
+                      >
+                        Tanggal Pinjam
+                      </Text>
+                      <Text>
+                        {formatTanggalId(
+                          DataKendaraanDinas[0]?.tanggalAwal ||
+                            DataKendaraanDinas[0]?.createdAt
+                        )}
+                      </Text>
+                    </Box>
+                    <Divider />
+                    <Box>
+                      <Text
+                        fontSize="sm"
+                        color="gray.500"
+                        textTransform="uppercase"
+                        letterSpacing="wider"
+                        mb={1}
+                      >
+                        Tanggal Pengembalian
+                      </Text>
+                      <Text>
+                        {formatTanggalId(
+                          DataKendaraanDinas[0]?.tanggalAkhir ||
+                            DataKendaraanDinas[0]?.updatedAt
+                        )}
+                      </Text>
+                    </Box>
+                  </VStack>
+                </Box>
+              </Stack>
             </>
           ) : (
-            <Center py={10}>
-              <Text fontSize="lg" color="gray.500">
+            <Center py={16} flexDir="column" gap={4}>
+              <Text fontSize="4xl" opacity={0.5}>
+                🚗
+              </Text>
+              <Text fontSize="lg" color="gray.500" textAlign="center">
                 Tidak ada data kendaraan dinas yang tersedia
               </Text>
             </Center>

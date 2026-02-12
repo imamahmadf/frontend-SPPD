@@ -194,23 +194,17 @@ function TambahBuktiKegiatan(props) {
   const hasFoto = fotoPerjalanan.length > 0;
 
   return (
-    <Box position="relative" borderRadius="lg" overflow="hidden" shadow="md">
+    <Box 
+      position="relative" 
+      borderRadius="lg" 
+      overflow="hidden" 
+      shadow="md"
+      h="100%"
+      display="flex"
+      flexDirection="column"
+    >
       {hasFoto ? (
-        <Box>
-          {/* Badge jumlah foto */}
-          <Box position="absolute" top="10px" right="10px" zIndex={2}>
-            <Badge
-              colorScheme="blue"
-              fontSize="sm"
-              px={3}
-              py={1}
-              borderRadius="full"
-              shadow="md"
-            >
-              {fotoPerjalanan.length} Foto
-            </Badge>
-          </Box>
-
+        <Box flex={1} display="flex" flexDirection="column" position="relative">
           {/* Foto utama (foto pertama) */}
           <Box
             cursor="pointer"
@@ -218,12 +212,28 @@ function TambahBuktiKegiatan(props) {
             position="relative"
             overflow="hidden"
             borderRadius="lg"
+            flex={1}
+            minH="240px"
           >
+            {/* Badge jumlah foto */}
+            <Box position="absolute" top="10px" right="10px" zIndex={2}>
+              <Badge
+                colorScheme="blue"
+                fontSize="sm"
+                px={3}
+                py={1}
+                borderRadius="full"
+                shadow="md"
+              >
+                {fotoPerjalanan.length} Foto
+              </Badge>
+            </Box>
             <Image
               borderRadius="lg"
               alt="foto kegiatan"
               width="100%"
-              height="400px"
+              height="100%"
+              minH="240px"
               objectFit="cover"
               src={
                 import.meta.env.VITE_REACT_APP_API_BASE_URL +
@@ -317,12 +327,20 @@ function TambahBuktiKegiatan(props) {
           ) : null}
         </Box>
       ) : (
-        <Box position="relative">
+        <Box 
+          position="relative"
+          flex={1}
+          minH="240px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
           <Image
             borderRadius="lg"
             alt="foto kegiatan"
             width="100%"
-            height="520px"
+            height="100%"
+            minH="240px"
             objectFit="cover"
             src={Foto}
             opacity={0.7}
@@ -335,10 +353,7 @@ function TambahBuktiKegiatan(props) {
             flexDirection="column"
             gap={2}
           >
-            <BsImage size={48} color="gray" />
-            <Text color="gray.500" fontWeight="medium">
-              Belum ada foto
-            </Text>
+      
           </Center>
           {/* Tombol Tambah - untuk kondisi belum ada foto */}
           {props.status === 1 || props.status == 4 ? (

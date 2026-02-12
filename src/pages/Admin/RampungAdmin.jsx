@@ -72,12 +72,18 @@ function RampungAdmin(props) {
     onOpen: onUndanganOpen,
     onClose: onUndanganClose,
   } = useDisclosure();
+  const {
+    isOpen: isModalNonaktifOpen,
+    onOpen: onModalNonaktifOpen,
+    onClose: onModalNonaktifClose,
+  } = useDisclosure();
   const toast = useToast();
   const [selectedImage, setSelectedImage] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
   const [isModalBatalOpen, setIsModalBatalOpen] = useState(false);
   const [alasanBatal, setAlasanBatal] = useState("");
+  const [listDalamKotaNonaktif, setListDalamKotaNonaktif] = useState([]);
   const [dataTemplate, setDataTemplate] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
@@ -136,6 +142,70 @@ function RampungAdmin(props) {
         isClosable: true,
       });
     }
+  };
+
+  const getDalamKotaNonaktif = (perjalanan) => {
+    if (!perjalanan?.tempats?.length) return [];
+    const nonaktif = perjalanan.tempats.filter((t) => {
+      if (!t?.dalamKota) return false;
+      const s = String(t.dalamKota.status || "").toLowerCase();
+      return s === "nonaktif" || s === "non aktif";
+    });
+    return nonaktif.map((t) => ({
+      id: t.dalamKota.id,
+      nama: t.dalamKota.nama,
+      status: t.dalamKota.status,
+      uangTransport: t.dalamKota.uangTransport,
+    }));
+  };
+
+  const [loadingVerifDalamKotaId, setLoadingVerifDalamKotaId] = useState(null);
+  const updateStatusDalamKota = (dalamKotaId) => {
+    setLoadingVerifDalamKotaId(dalamKotaId);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/dalam-kota/update-status`,
+        { id: dalamKotaId }
+      )
+      .then(() => {
+        toast({
+          title: "Berhasil",
+          description: "Status tujuan dalam kota berhasil diubah menjadi aktif",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        setListDalamKotaNonaktif((prev) =>
+          prev.filter((dk) => dk.id !== dalamKotaId)
+        );
+        fetchDataPerjalanan();
+      })
+      .catch(() => {
+        toast({
+          title: "Gagal",
+          description: "Gagal mengubah status tujuan dalam kota",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .finally(() => setLoadingVerifDalamKotaId(null));
+  };
+
+  const handleKlikVerifikasi = (item) => {
+    const isDalamKota =
+      detailPerjalanan?.jenisPerjalanan?.tipePerjalananId === 1;
+    if (isDalamKota) {
+      const listNonaktif = getDalamKotaNonaktif(detailPerjalanan);
+      if (listNonaktif.length > 0) {
+        setListDalamKotaNonaktif(listNonaktif);
+        onModalNonaktifOpen();
+        return;
+      }
+    }
+    terimaVerifikasi(item.id);
   };
 
   const terimaVerifikasi = (personilId) => {
@@ -823,10 +893,46 @@ function RampungAdmin(props) {
                           fontWeight="semibold"
                           color="gray.600"
                           fontSize="sm"
+                          mb={2}
                         >
                           Tujuan
                         </Text>
-                        <Text fontSize="md">{daftarTempat || "-"}</Text>
+                        {detailPerjalanan?.jenisPerjalanan?.tipePerjalananId ===
+                        1 ? (
+                          <VStack align="stretch" spacing={2}>
+                            {(detailPerjalanan?.tempats || []).map(
+                              (t, i) =>
+                                t?.dalamKota && (
+                                  <HStack key={i} spacing={2} align="center">
+                                    <Text fontSize="md" color="gray.700">
+                                      {t.dalamKota.nama || `Tujuan ${i + 1}`}
+                                    </Text>
+                                    <Badge
+                                      colorScheme={
+                                        (
+                                          t.dalamKota.status || ""
+                                        ).toLowerCase() === "aktif"
+                                          ? "green"
+                                          : "orange"
+                                      }
+                                      fontSize="sm"
+                                    >
+                                      {t.dalamKota.status ?? "-"}
+                                    </Badge>
+                                  </HStack>
+                                )
+                            )}
+                            {!(detailPerjalanan?.tempats || []).some(
+                              (t) => t?.dalamKota
+                            ) && (
+                              <Text fontSize="md" color="gray.500">
+                                -
+                              </Text>
+                            )}
+                          </VStack>
+                        ) : (
+                          <Text fontSize="md">{daftarTempat || "-"}</Text>
+                        )}
                       </Box>
                       {detailPerjalanan?.jenisPerjalanan?.tipePerjalananId ===
                         1 && (
@@ -838,7 +944,11 @@ function RampungAdmin(props) {
                           >
                             Uang Transport
                           </Text>
-                          <Text fontSize="md" fontFamily="mono" color="green.600">
+                          <Text
+                            fontSize="md"
+                            fontFamily="mono"
+                            color="green.600"
+                          >
                             {new Intl.NumberFormat("id-ID", {
                               style: "currency",
                               currency: "IDR",
@@ -1116,7 +1226,7 @@ function RampungAdmin(props) {
                         <Button
                           colorScheme="green"
                           size="md"
-                          onClick={() => terimaVerifikasi(item.id)}
+                          onClick={() => handleKlikVerifikasi(item)}
                           leftIcon={<Box as="span">✅</Box>}
                         >
                           Verifikasi
@@ -1478,6 +1588,76 @@ function RampungAdmin(props) {
             <Text>Selected Image: {selectedImage ? "Yes" : "No"}</Text>
           </Box>
         )}
+
+        {/* Modal Pemberitahuan Dalam Kota Nonaktif */}
+        <Modal
+          isOpen={isModalNonaktifOpen}
+          onClose={onModalNonaktifClose}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader color="orange.600">Tidak Dapat Verifikasi</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Alert status="warning" borderRadius="md" mb={4}>
+                <AlertIcon />
+                <Box>
+                  <Text fontWeight="semibold">
+                    Terdapat tujuan dalam kota yang berstatus nonaktif.
+                  </Text>
+                  <Text fontSize="sm" mt={1}>
+                    Verifikasi tidak dapat dilakukan hingga data tujuan
+                    diperbarui.
+                  </Text>
+                </Box>
+              </Alert>
+              <Text fontWeight="semibold" mb={2}>
+                Daftar tujuan dalam kota nonaktif:
+              </Text>
+              <VStack align="stretch" spacing={2}>
+                {listDalamKotaNonaktif.map((dk, i) => (
+                  <HStack
+                    key={dk.id ?? i}
+                    p={3}
+                    bg="gray.50"
+                    borderRadius="md"
+                    borderWidth="1px"
+                    borderColor="gray.200"
+                    justify="space-between"
+                    flexWrap="wrap"
+                    spacing={3}
+                  >
+                    <Text fontWeight="medium">{dk.nama || "–"}</Text>
+                    <HStack spacing={3}>
+                      <Text fontSize="sm" fontFamily="mono" color="green.600">
+                        {new Intl.NumberFormat("id-ID", {
+                          style: "currency",
+                          currency: "IDR",
+                        }).format(dk.uangTransport ?? 0)}
+                      </Text>
+                      <Badge colorScheme="red" variant="subtle">
+                        {dk.status || "nonaktif"}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        colorScheme="green"
+                        onClick={() => updateStatusDalamKota(dk.id)}
+                        isLoading={loadingVerifDalamKotaId === dk.id}
+                        isDisabled={!dk.id}
+                      >
+                        Verif
+                      </Button>
+                    </HStack>
+                  </HStack>
+                ))}
+              </VStack>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={onModalNonaktifClose}>Tutup</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
         {/* Cancel Modal */}
         <Modal
