@@ -233,31 +233,137 @@ function DaftarIndukUnitKerjaAdmin() {
               overflowX="auto"
             >
               <Table variant={"primary"} size="md">
-                <Thead bg="gray.50">
+                <Thead bg="gray.100" borderBottom="2px solid" borderColor="gray.300">
                   <Tr>
-                    <Th>No</Th>
-                    <Th>OPD</Th>
-                    <Th>Kode</Th>
-                    <Th>Asal</Th>
-                    <Th>Sumber Dana</Th>
-                    <Th>Penomoran</Th>
-                    <Th>Keuangan</Th>
-                    <Th>Aksi</Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      borderRight="1px solid"
+                      borderColor="gray.200"
+                    >
+                      No
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      borderRight="1px solid"
+                      borderColor="gray.200"
+                    >
+                      OPD
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      borderRight="1px solid"
+                      borderColor="gray.200"
+                    >
+                      Kode
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      borderRight="1px solid"
+                      borderColor="gray.200"
+                    >
+                      Asal
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      borderRight="1px solid"
+                      borderColor="gray.200"
+                    >
+                      Sumber Dana
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      borderRight="1px solid"
+                      borderColor="gray.200"
+                    >
+                      Penomoran
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      borderRight="1px solid"
+                      borderColor="gray.200"
+                    >
+                      Keuangan
+                    </Th>
+                    <Th
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="gray.700"
+                      textTransform="uppercase"
+                      letterSpacing="wide"
+                      py={4}
+                      px={4}
+                      textAlign="center"
+                    >
+                      Aksi
+                    </Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {data && data.length > 0 ? (
                     data.map((item, index) => (
-                      <Tr key={item.id} _hover={{ bg: "gray.50" }}>
-                        <Td fontWeight="medium">{index + 1}</Td>
-                        <Td>{item.indukUnitKerja}</Td>
-                        <Td>
+                      <Tr 
+                        key={item.id} 
+                        _hover={{ bg: "gray.50" }}
+                        borderBottom="1px solid"
+                        borderColor="gray.200"
+                      >
+                        <Td fontWeight="medium" py={4} px={4} borderRight="1px solid" borderColor="gray.200">
+                          {index + 1}
+                        </Td>
+                        <Td py={4} px={4} borderRight="1px solid" borderColor="gray.200">
+                          {item.indukUnitKerja}
+                        </Td>
+                        <Td py={4} px={4} borderRight="1px solid" borderColor="gray.200">
                           <Badge colorScheme="blue" variant="subtle">
                             {item.kodeInduk}
                           </Badge>
                         </Td>
-                        <Td>{item.asal || "-"}</Td>
-                        <Td>
+                        <Td py={4} px={4} borderRight="1px solid" borderColor="gray.200">
+                          {item.asal || "-"}
+                        </Td>
+                        <Td py={4} px={4} borderRight="1px solid" borderColor="gray.200">
                           <VStack align="start" spacing={1}>
                             {item.indukUKSumberDanas && item.indukUKSumberDanas.length > 0 ? (
                               item.indukUKSumberDanas.map((val, idx) => (
@@ -277,7 +383,7 @@ function DaftarIndukUnitKerjaAdmin() {
                             )}
                           </VStack>
                         </Td>
-                        <Td>
+                        <Td py={4} px={4} borderRight="1px solid" borderColor="gray.200">
                           <Badge
                             colorScheme={item.penomoran === "aktif" ? "green" : "gray"}
                             fontSize="sm"
@@ -287,7 +393,7 @@ function DaftarIndukUnitKerjaAdmin() {
                             {item.penomoran === "aktif" ? "Aktif" : "Nonaktif"}
                           </Badge>
                         </Td>
-                        <Td>
+                        <Td py={4} px={4} borderRight="1px solid" borderColor="gray.200">
                           <Badge
                             colorScheme={item.keuangan === "aktif" ? "green" : "gray"}
                             fontSize="sm"
@@ -297,8 +403,8 @@ function DaftarIndukUnitKerjaAdmin() {
                             {item.keuangan === "aktif" ? "Aktif" : "Nonaktif"}
                           </Badge>
                         </Td>
-                        <Td>
-                          <HStack spacing={2} flexWrap="wrap">
+                        <Td py={4} px={4} textAlign="center">
+                          <HStack spacing={2} flexWrap="wrap" justify="center">
                             <Button
                               variant={"primary"}
                               size="sm"

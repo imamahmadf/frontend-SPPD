@@ -103,6 +103,11 @@ function DetailKwitansiGlobal(props) {
     setSelectedIds(ids);
   }, [selectedPerjalanan]);
   const user = useSelector(userRedux);
+  
+  // Cek apakah user memiliki keuangan nonaktif
+  const isKeuanganNonaktif =
+    user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan === "nonaktif";
+  
   const {
     isOpen: isDetailOpen,
     onOpen: onDetailOpen,
@@ -745,7 +750,7 @@ function DetailKwitansiGlobal(props) {
             <Box mb={6}>
               <Divider mb={4} />
               <Flex gap={3} wrap="wrap" align="center">
-                {dataKwitGlobal[0]?.status === "diterima" ? (
+                {(dataKwitGlobal[0]?.status === "diterima" || isKeuanganNonaktif) ? (
                   <Button
                     onClick={kirimDataTabel}
                     variant={"solid"}
