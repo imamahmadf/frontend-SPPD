@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import LayoutPegawai from "../Componets/Pegawai/LayoutPegawai";
+import { useSelector } from "react-redux";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -23,7 +24,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar, Pie, Doughnut } from "react-chartjs-2";
-
+import { userRedux, selectRole } from "../Redux/Reducers/auth";
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -32,19 +33,52 @@ ChartJS.register(
   ArcElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
+
+const STATUS_CONFIG = [
+  {
+    key: "PNS",
+    label: "PNS",
+    backgroundColor: "rgba(54, 162, 235, 0.8)",
+    borderColor: "rgba(54, 162, 235, 1)",
+  },
+  {
+    key: "CPNS",
+    label: "CPNS",
+    backgroundColor: "rgba(255, 99, 132, 0.8)",
+    borderColor: "rgba(255, 99, 132, 1)",
+  },
+  {
+    key: "P3K",
+    label: "P3K",
+    backgroundColor: "rgba(255, 206, 86, 0.8)",
+    borderColor: "rgba(255, 206, 86, 1)",
+  },
+  {
+    key: "P3KPW",
+    label: "P3K Paruh Waktu",
+    backgroundColor: "rgba(75, 192, 192, 0.8)",
+    borderColor: "rgba(75, 192, 192, 1)",
+  },
+  {
+    key: "PJPL",
+    label: "PJLP",
+    backgroundColor: "rgba(153, 102, 255, 0.8)",
+    borderColor: "rgba(153, 102, 255, 1)",
+  },
+];
 
 export default function DashboradPegawai() {
   const [dataPegawai, setDataPegawai] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const user = useSelector(userRedux);
   async function fetchDataPegawai() {
     try {
       const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/pegawai/get/unit-kerja-pegawai`
+        }/pegawai/get/unit-kerja-pegawai`,
       );
       setDataPegawai(res.data.result);
       console.log(res.data.result);
@@ -68,6 +102,7 @@ export default function DashboradPegawai() {
       CPNS: 0,
       P3K: 0,
       PJPL: 0,
+      P3KPW: 0,
     };
 
     dataPegawai.forEach((unit) => {
@@ -75,26 +110,19 @@ export default function DashboradPegawai() {
       statusCount.CPNS += unit.statusPegawai?.CPNS || 0;
       statusCount.P3K += unit.statusPegawai?.P3K || 0;
       statusCount.PJPL += unit.statusPegawai?.PJPL || 0;
+      statusCount.P3KPW += unit.statusPegawai?.p3KPW || 0;
     });
 
     return {
-      labels: Object.keys(statusCount),
+      labels: STATUS_CONFIG.map((status) => status.label),
       datasets: [
         {
           label: "Jumlah Pegawai",
-          data: Object.values(statusCount),
-          backgroundColor: [
-            "rgba(54, 162, 235, 0.8)",
-            "rgba(255, 99, 132, 0.8)",
-            "rgba(255, 206, 86, 0.8)",
-            "rgba(75, 192, 192, 0.8)",
-          ],
-          borderColor: [
-            "rgba(54, 162, 235, 1)",
-            "rgba(255, 99, 132, 1)",
-            "rgba(255, 206, 86, 1)",
-            "rgba(75, 192, 192, 1)",
-          ],
+          data: STATUS_CONFIG.map((status) => statusCount[status.key]),
+          backgroundColor: STATUS_CONFIG.map(
+            (status) => status.backgroundColor,
+          ),
+          borderColor: STATUS_CONFIG.map((status) => status.borderColor),
           borderWidth: 2,
         },
       ],
@@ -138,7 +166,8 @@ export default function DashboradPegawai() {
           (profesi.jumlah?.PNS || 0) +
           (profesi.jumlah?.CPNS || 0) +
           (profesi.jumlah?.P3K || 0) +
-          (profesi.jumlah?.PJPL || 0);
+          (profesi.jumlah?.PJPL || 0) +
+          (profesi.jumlah?.P3KPW || 0);
       });
     });
 
@@ -147,7 +176,7 @@ export default function DashboradPegawai() {
 
     // Generate colors dynamically
     const colors = labels.map(
-      (_, i) => `hsla(${(i * 360) / labels.length}, 70%, 50%, 0.8)`
+      (_, i) => `hsla(${(i * 360) / labels.length}, 70%, 50%, 0.8)`,
     );
 
     return {
@@ -167,13 +196,6 @@ export default function DashboradPegawai() {
   const prepareStatusProfesiData = () => {
     if (!dataPegawai) return null;
 
-    const statusList = ["PNS", "CPNS", "P3K", "PJPL"];
-    const statusColors = [
-      "rgba(54, 162, 235, 0.8)", // PNS - Blue
-      "rgba(255, 99, 132, 0.8)", // CPNS - Red
-      "rgba(255, 206, 86, 0.8)", // P3K - Yellow
-      "rgba(75, 192, 192, 0.8)", // PJPL - Teal
-    ];
     const profesiSet = new Set();
 
     // Collect all profesi names
@@ -184,13 +206,13 @@ export default function DashboradPegawai() {
     });
 
     const profesiList = Array.from(profesiSet);
-    const datasets = statusList.map((status, index) => {
+    const datasets = STATUS_CONFIG.map((status) => {
       const data = profesiList.map((profesiName) => {
         let total = 0;
         dataPegawai.forEach((unit) => {
           Object.values(unit.profesi || {}).forEach((profesi) => {
             if (profesi.namaProfesi === profesiName) {
-              total += profesi.jumlah?.[status] || 0;
+              total += profesi.jumlah?.[status.key] || 0;
             }
           });
         });
@@ -198,10 +220,10 @@ export default function DashboradPegawai() {
       });
 
       return {
-        label: status,
+        label: status.label,
         data: data,
-        backgroundColor: statusColors[index],
-        borderColor: statusColors[index].replace("0.8", "1"),
+        backgroundColor: status.backgroundColor,
+        borderColor: status.borderColor,
         borderWidth: 2,
       };
     });
@@ -259,6 +281,7 @@ export default function DashboradPegawai() {
   return (
     <LayoutPegawai>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
+        {JSON.stringify(user[0]?.pegawaiId)}
         <Container maxW={"full"} variant={"primary"} p={"30px"}>
           <Heading size="lg" mb={6}>
             Dashboard Statistik Pegawai
@@ -373,7 +396,7 @@ export default function DashboradPegawai() {
                     <Text fontSize="2xl" fontWeight="bold" color="green.600">
                       {dataPegawai.reduce(
                         (sum, unit) => sum + (unit.totalPegawai || 0),
-                        0
+                        0,
                       )}
                     </Text>
                   </Box>
@@ -390,7 +413,7 @@ export default function DashboradPegawai() {
                     <Text fontSize="2xl" fontWeight="bold" color="purple.600">
                       {dataPegawai.reduce(
                         (sum, unit) => sum + (unit.statusPegawai?.PNS || 0),
-                        0
+                        0,
                       )}
                     </Text>
                   </Box>
@@ -409,9 +432,9 @@ export default function DashboradPegawai() {
                         new Set(
                           dataPegawai.flatMap((unit) =>
                             Object.values(unit.profesi || {}).map(
-                              (p) => p.namaProfesi
-                            )
-                          )
+                              (p) => p.namaProfesi,
+                            ),
+                          ),
                         ).size
                       }
                     </Text>

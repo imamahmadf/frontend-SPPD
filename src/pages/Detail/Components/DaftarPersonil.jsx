@@ -29,6 +29,7 @@ function DaftarPersonil({
   semuaPersonilBelumAdaRincian,
   adaPersonilYangBisaDiajukan,
   adaPersonilYangBisaDicetak,
+  keuangan,
   isSubmittingPengajuan,
   isCreatingAutoBulk,
   isPrintingAll,
@@ -182,8 +183,8 @@ function DaftarPersonil({
               </WrapItem>
             )}
 
-            {/* Group Cetak Kwitansi */}
-            {onCetakSemuaKwitansi && adaPersonilYangBisaDicetak && (
+            {/* Group Cetak Kwitansi - selalu tampil jika keuangan nonaktif */}
+            {onCetakSemuaKwitansi && (keuangan === "nonaktif" || adaPersonilYangBisaDicetak) && (
               <WrapItem>
                 <HStack spacing={2}>
                   <Select

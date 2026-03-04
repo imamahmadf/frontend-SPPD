@@ -336,18 +336,33 @@ function InformasiPerjalanan({
               shadow="sm"
               h="100%"
             >
-              <HStack spacing={2} mb={3}>
-                <Icon as={FiFileText} boxSize={3} color={labelColor} />
-                <Text
-                  fontSize="xs"
-                  fontWeight="bold"
-                  color={labelColor}
-                  textTransform="uppercase"
-                  letterSpacing="wider"
-                >
-                  Dokumen Referensi
-                </Text>
-              </HStack>
+              <Flex justify="space-between" align="center" mb={3}>
+                <HStack spacing={2}>
+                  <Icon as={FiFileText} boxSize={3} color={labelColor} />
+                  <Text
+                    fontSize="xs"
+                    fontWeight="bold"
+                    color={labelColor}
+                    textTransform="uppercase"
+                    letterSpacing="wider"
+                  >
+                    Dokumen Referensi
+                  </Text>
+                </HStack>
+                {!adaStatusDuaAtauTiga && onEditNomorSuratClick && (
+                  <Button
+                    size="xs"
+                    leftIcon={<FiEdit3 />}
+                    colorScheme="purple"
+                    variant="outline"
+                    onClick={onEditNomorSuratClick}
+                    _hover={{ transform: "translateY(-1px)" }}
+                    transition="all 0.2s"
+                  >
+                    Edit nomor surat
+                  </Button>
+                )}
+              </Flex>
               <VStack spacing={4} align="stretch">
                 <InfoItem label="DASAR" value={detailPerjalanan.dasar || "-"} />
                 <InfoItem

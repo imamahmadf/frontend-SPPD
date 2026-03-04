@@ -18,7 +18,7 @@ import {
 import { FiInfo, FiChevronRight, FiHome } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
-function Header({ detailPerjalanan, adaStatusDuaAtauTiga, onEditClick, penomoran }) {
+function Header({ detailPerjalanan, adaStatusDuaAtauTiga, onEditClick, penomoran, keuangan }) {
   // Tentukan status berdasarkan statusId personil
   const getStatusLabel = () => {
     const statusIds = detailPerjalanan?.personils?.map((p) => p.statusId) || [];
@@ -46,7 +46,20 @@ function Header({ detailPerjalanan, adaStatusDuaAtauTiga, onEditClick, penomoran
     };
   };
 
+  // Tentukan status keuangan
+  const getKeuanganStatus = () => {
+    if (!keuangan) return null;
+    const isAktif = keuangan === "aktif" || keuangan === true;
+    return {
+      label: isAktif ? "Keuangan Aktif" : "Keuangan Nonaktif",
+      bg: isAktif ? "green.100" : "gray.100",
+      color: isAktif ? "green.700" : "gray.700",
+      borderColor: isAktif ? "green.200" : "gray.200",
+    };
+  };
+
   const penomoranStatus = getPenomoranStatus();
+  const keuanganStatus = getKeuanganStatus();
 
   return (
     <Box
@@ -177,6 +190,22 @@ function Header({ detailPerjalanan, adaStatusDuaAtauTiga, onEditClick, penomoran
                     shadow="sm"
                   >
                     {penomoranStatus.label}
+                  </Badge>
+                )}
+                {keuanganStatus && (
+                  <Badge
+                    bg={keuanganStatus.bg}
+                    color={keuanganStatus.color}
+                    fontSize="xs"
+                    fontWeight="bold"
+                    px={2.5}
+                    py={0.5}
+                    borderRadius="full"
+                    border="1px"
+                    borderColor={keuanganStatus.borderColor}
+                    shadow="sm"
+                  >
+                    {keuanganStatus.label}
                   </Badge>
                 )}
               </HStack>

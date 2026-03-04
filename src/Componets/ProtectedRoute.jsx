@@ -1,18 +1,15 @@
 import React from "react";
-import { Route, Redirect, useHistory } from "react-router-dom";
+import { Route, Redirect } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Loading from "./Loading";
 import {
   selectIsAuthenticated,
-  userRedux,
   selectRole,
 } from "../Redux/Reducers/auth";
 
 function ProtectedRoute({ component: Component, roleRoute, ...rest }) {
-  const history = useHistory();
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const loading = useSelector((state) => state.auth.loading);
-  const user = useSelector(userRedux);
   const roles = useSelector(selectRole); // This returns the array of role objects
 
   // Show loading while checking auth state
@@ -47,8 +44,14 @@ function ProtectedRoute({ component: Component, roleRoute, ...rest }) {
           );
 
           if (!hasRequiredRole) {
-            // You can redirect to unauthorized page or back to home
-            return <Redirect to="/" />;
+            return (
+              <Redirect
+                to={{
+                  pathname: "/unauthorized",
+                  state: { from: props.location },
+                }}
+              />
+            );
           }
         }
 

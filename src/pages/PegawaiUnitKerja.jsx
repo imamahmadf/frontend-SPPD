@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import {
   Box,
   Text,
@@ -36,6 +37,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 
 function PegawaiUnitKerja() {
+  const history = useHistory();
   const user = useSelector(userRedux);
   const [dataPegawai, setDataPegawai] = useState(null);
   const token = localStorage.getItem("token");
@@ -49,7 +51,7 @@ function PegawaiUnitKerja() {
         }`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -71,7 +73,7 @@ function PegawaiUnitKerja() {
         {
           responseType: "blob", // agar respons dibaca sebagai file
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -109,7 +111,8 @@ function PegawaiUnitKerja() {
                   <Th>Pendidikan</Th>
                   <Th>Status Pegawai</Th>
                   <Th>Profesi</Th>
-                  <Th>unit Kerja</Th>
+                  <Th>Unit Kerja</Th>
+                  <Th>Aksi</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -127,6 +130,15 @@ function PegawaiUnitKerja() {
                     <Td>{item?.statusPegawai?.status}</Td>
                     <Td>{item?.profesi?.nama}</Td>
                     <Td>{item?.daftarUnitKerja?.unitKerja}</Td>
+                    <Td>
+                      <Button
+                        onClick={() =>
+                          history.push(`/admin/edit-pegawai/${item.id}`)
+                        }
+                      >
+                        Detail
+                      </Button>
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>

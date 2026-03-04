@@ -36,6 +36,10 @@ import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 function EditPegawai(props) {
+  const role = useSelector(selectRole);
+  const canMutasi = role?.some(
+    (r) => (r.roleId ?? r.id) === 7 || (r.roleId ?? r.id) === 5,
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [dataSeed, setDataSeed] = useState([]);
   const [dataRiwayat, setDataRiwayat] = useState(null);
@@ -95,7 +99,7 @@ function EditPegawai(props) {
           pegawaiId: props.match.params.id,
           unitKerjaId: selectedUnitKerjaId,
           unitKerjaIdLama: dataPegawai.daftarUnitKerja.id,
-        }
+        },
       )
       .then((res) => {
         console.log(res.data, "MUTASI BERHASIL");
@@ -108,7 +112,7 @@ function EditPegawai(props) {
         console.error(err);
         alert(
           "Gagal melakukan mutasi unit kerja: " +
-            (err.response?.data?.message || err.message)
+            (err.response?.data?.message || err.message),
         );
       });
   };
@@ -128,7 +132,7 @@ function EditPegawai(props) {
       .get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/pegawai/get/one-pegawai/${props.match.params.id}`
+        }/pegawai/get/one-pegawai/${props.match.params.id}`,
       )
       .then((res) => {
         setDataPegawai({
@@ -368,7 +372,7 @@ function EditPegawai(props) {
                           onChange={(e) =>
                             handleSelectChange(
                               "daftarTingkatan",
-                              e.target.value
+                              e.target.value,
                             )
                           }
                         >
@@ -472,9 +476,11 @@ function EditPegawai(props) {
                     >
                       Edit
                     </Button>
-                    <Button variant={"primary"} onClick={onModalMutasiOpen}>
-                      Mutasi
-                    </Button>
+                    {canMutasi && (
+                      <Button variant={"primary"} onClick={onModalMutasiOpen}>
+                        Mutasi
+                      </Button>
+                    )}
                   </>
                 )}
               </HStack>

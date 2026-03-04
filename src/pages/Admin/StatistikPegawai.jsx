@@ -39,6 +39,14 @@ import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 import Loading from "../../Componets/Loading";
 import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 
+const STATUS_CONFIG = [
+  { key: "PNS", label: "PNS" },
+  { key: "CPNS", label: "CPNS" },
+  { key: "P3K", label: "P3K" },
+  { key: "P3KPW", label: "P3K Paruh Waktu" },
+  { key: "PJPL", label: "PJLP" },
+];
+
 function StatistikPegawai() {
   const [dataPegawai, setDataPegawai] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -80,18 +88,29 @@ function StatistikPegawai() {
                 <strong>Total Pegawai:</strong> {unit.totalPegawai}
               </Text>
               <HStack spacing={6} mb={4}>
-                <Text>
-                  <strong>PNS:</strong> {unit.statusPegawai?.PNS || 0}
-                </Text>
-                <Text>
-                  <strong>CPNS:</strong> {unit.statusPegawai?.CPNS || 0}
-                </Text>
-                <Text>
-                  <strong>P3K:</strong> {unit.statusPegawai?.P3K || 0}
-                </Text>
-                <Text>
-                  <strong>PTT:</strong> {unit.statusPegawai?.PTT || 0}
-                </Text>
+                {STATUS_CONFIG.map((status) => {
+                  let value = unit.statusPegawai?.[status.key] || 0;
+
+                  if (status.key === "P3KPW") {
+                    value =
+                      unit.statusPegawai?.P3KPW ??
+                      unit.statusPegawai?.p3KPW ??
+                      0;
+                  }
+
+                  if (status.key === "PJPL") {
+                    value =
+                      unit.statusPegawai?.PJPL ??
+                      unit.statusPegawai?.PJLP ??
+                      0;
+                  }
+
+                  return (
+                    <Text key={status.key}>
+                      <strong>{status.label}:</strong> {value}
+                    </Text>
+                  );
+                })}
               </HStack>
               <Table variant="pegawai" size="sm" mb={6}>
                 <Thead>
@@ -106,14 +125,29 @@ function StatistikPegawai() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {["PNS", "CPNS", "P3K", "PTT"].map((status) => {
+                  {STATUS_CONFIG.map((status) => {
                     let totalPerStatus = 0;
 
                     return (
-                      <Tr key={status}>
-                        <Td fontWeight="bold">{status}</Td>
+                      <Tr key={status.key}>
+                        <Td fontWeight="bold">{status.label}</Td>
                         {Object.values(unit.profesi).map((profesi) => {
-                          const jumlah = profesi.jumlah[status] || 0;
+                          let jumlah = profesi.jumlah[status.key] || 0;
+
+                          if (status.key === "P3KPW") {
+                            jumlah =
+                              profesi.jumlah.P3KPW ||
+                              profesi.jumlah.p3KPW ||
+                              0;
+                          }
+
+                          if (status.key === "PJPL") {
+                            jumlah =
+                              profesi.jumlah.PJPL ||
+                              profesi.jumlah.PJLP ||
+                              0;
+                          }
+
                           totalPerStatus += jumlah;
                           return (
                             <Td key={profesi.namaProfesi} isNumeric>
@@ -136,7 +170,10 @@ function StatistikPegawai() {
                         (profesi.jumlah.PNS || 0) +
                         (profesi.jumlah.CPNS || 0) +
                         (profesi.jumlah.P3K || 0) +
-                        (profesi.jumlah.PTT || 0);
+                        (profesi.jumlah.P3KPW ||
+                          profesi.jumlah.p3KPW ||
+                          0) +
+                        (profesi.jumlah.PJPL || profesi.jumlah.PJLP || 0);
 
                       return (
                         <Td

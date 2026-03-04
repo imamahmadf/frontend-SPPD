@@ -123,8 +123,9 @@ const usePerjalananData = (user) => {
           pelayananKesehatanId: jenisPelayananKesehatan,
           isSrikandi,
           isNotaDinas,
+          penomoran: user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran,
         },
-        { responseType: "blob" }
+        { responseType: "blob" },
       )
       .then((res) => {
         // Jika isNotaDinas === 2, langsung redirect tanpa generate file word
@@ -178,7 +179,7 @@ const usePerjalananData = (user) => {
   async function fetchDataPegawai() {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get`
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/pegawai/get`,
       );
       setDataPegawai(res.data);
     } catch (err) {
@@ -193,10 +194,10 @@ const usePerjalananData = (user) => {
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/perjalanan/get/seed?indukUnitKerjaId=${
           user[0]?.unitKerja_profile?.indukUnitKerja.id
-        }&unitKerjaId=${user[0]?.unitKerja_profile?.id}`
+        }&unitKerjaId=${user[0]?.unitKerja_profile?.id}`,
       );
       setDataSeed(res.data);
-console.log(res.data)
+      console.log(res.data);
       if (res.data.resultPPTK?.length > 0) {
         setDataPPTK({
           value: res.data.resultPPTK[0],
@@ -234,7 +235,7 @@ console.log(res.data)
       const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/perjalanan/get/jenis-perjalanan/${id}`
+        }/perjalanan/get/jenis-perjalanan/${id}`,
       );
       setDataJenisPerjalanan(res.data.result);
       console.log(res.data.result, "JENIS PERJALANANNN!!!!");
@@ -248,7 +249,7 @@ console.log(res.data)
       const res = await axios.get(
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/klasifikasi/get/kode-klasifikasi/${id}`
+        }/klasifikasi/get/kode-klasifikasi/${id}`,
       );
       setKodeKlasifikasi(res.data.result);
       setDataKlasifikasi(res.data.result);
@@ -262,7 +263,7 @@ console.log(res.data)
       const res = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/get/${
           user[0].unitKerja_profile.indukUnitKerja.id
-        }`
+        }`,
       );
       setDataTemplate(res.data.result);
     } catch (err) {

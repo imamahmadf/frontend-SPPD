@@ -111,6 +111,11 @@ function NavbarPegawai() {
     useSelector(selectIsAuthenticated) || localStorage.getItem("token");
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
+  const hasOnlyRole9 = React.useMemo(() => {
+    if (!role || !Array.isArray(role) || role.length === 0) return false;
+    const userRoleIds = role.map((roleObj) => roleObj.roleId || roleObj.id);
+    return userRoleIds.every((id) => id === 9);
+  }, [role]);
   const { colorMode, toggleColorMode } = useColorMode();
   const history = useHistory();
   const location = useLocation();
@@ -556,48 +561,52 @@ function NavbarPegawai() {
                         bgGradient: "linear(to-r, pegawai, pegawaiGelap)",
                       }}
                     >
-                      <Link to={"/profile"}>
-                        <MenuItem
-                          icon={<Avatar size="xs" name={user[0]?.nama} />}
-                          _hover={{
-                            bg: "gray.50",
-                            transform: "translateX(4px)",
-                            transition: "all 0.2s ease",
-                          }}
-                          borderRadius="lg"
-                          transition="all 0.2s ease"
-                        >
-                          Profile
-                        </MenuItem>
-                      </Link>
-                      <Link to={"/"}>
-                        <MenuItem
-                          icon={<Image h={"20px"} src={LogoPena} />}
-                          _hover={{
-                            bg: "gray.50",
-                            transform: "translateX(4px)",
-                            transition: "all 0.2s ease",
-                          }}
-                          borderRadius="lg"
-                          transition="all 0.2s ease"
-                        >
-                          Pena
-                        </MenuItem>
-                      </Link>
-                      <Link to={"/aset/dashboard"}>
-                        <MenuItem
-                          icon={<Image h={"20px"} src={LogoAset} />}
-                          _hover={{
-                            bg: "gray.50",
-                            transform: "translateX(4px)",
-                            transition: "all 0.2s ease",
-                          }}
-                          borderRadius="lg"
-                          transition="all 0.2s ease"
-                        >
-                          Aset
-                        </MenuItem>
-                      </Link>
+                      {!hasOnlyRole9 && (
+                        <>
+                          <Link to={"/profile"}>
+                            <MenuItem
+                              icon={<Avatar size="xs" name={user[0]?.nama} />}
+                              _hover={{
+                                bg: "gray.50",
+                                transform: "translateX(4px)",
+                                transition: "all 0.2s ease",
+                              }}
+                              borderRadius="lg"
+                              transition="all 0.2s ease"
+                            >
+                              Profile
+                            </MenuItem>
+                          </Link>
+                          <Link to={"/"}>
+                            <MenuItem
+                              icon={<Image h={"20px"} src={LogoPena} />}
+                              _hover={{
+                                bg: "gray.50",
+                                transform: "translateX(4px)",
+                                transition: "all 0.2s ease",
+                              }}
+                              borderRadius="lg"
+                              transition="all 0.2s ease"
+                            >
+                              Pena
+                            </MenuItem>
+                          </Link>
+                          <Link to={"/aset/dashboard"}>
+                            <MenuItem
+                              icon={<Image h={"20px"} src={LogoAset} />}
+                              _hover={{
+                                bg: "gray.50",
+                                transform: "translateX(4px)",
+                                transition: "all 0.2s ease",
+                              }}
+                              borderRadius="lg"
+                              transition="all 0.2s ease"
+                            >
+                              Aset
+                            </MenuItem>
+                          </Link>
+                        </>
+                      )}
                       <Link to={"/pegawai/dashboard"}>
                         <MenuItem
                           icon={<Image h={"20px"} src={LogoPegawai} />}
@@ -612,20 +621,22 @@ function NavbarPegawai() {
                           Kepegawaian
                         </MenuItem>
                       </Link>
-                      <Link to={"/perencanaan"}>
-                        <MenuItem
-                          icon={<Image h={"20px"} src={LogoPerencanaan} />}
-                          _hover={{
-                            bg: "gray.50",
-                            transform: "translateX(4px)",
-                            transition: "all 0.2s ease",
-                          }}
-                          borderRadius="lg"
-                          transition="all 0.2s ease"
-                        >
-                          Perencanaan
-                        </MenuItem>
-                      </Link>
+                      {!hasOnlyRole9 && (
+                        <Link to={"/perencanaan"}>
+                          <MenuItem
+                            icon={<Image h={"20px"} src={LogoPerencanaan} />}
+                            _hover={{
+                              bg: "gray.50",
+                              transform: "translateX(4px)",
+                              transition: "all 0.2s ease",
+                            }}
+                            borderRadius="lg"
+                            transition="all 0.2s ease"
+                          >
+                            Perencanaan
+                          </MenuItem>
+                        </Link>
+                      )}
                       <Box px={2} py={1}>
                         <Box
                           as="hr"

@@ -33,185 +33,25 @@ import {
   FormControl,
   FormLabel,
   useDisclosure,
+  Spacer,
 } from "@chakra-ui/react";
 import axios from "axios";
-import ExcelJS from "exceljs";
 import { useHistory } from "react-router-dom";
 import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 
-function HasilKerjaPJPL(props) {
+function PenilaianAtasan(props) {
   const [dataRealisasi, setDataRealisasi] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [capaian, setCapaian] = useState("");
   const [buktiDukung, setBuktiDukung] = useState("");
   const [selectedKinerjaPJPLId, setSelectedKinerjaPJPLId] = useState(null);
   const [realisasiKinerjaPJPLId, setRealisasiKinerjaPJPLId] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  const [nilaiInput, setNilaiInput] = useState("");
   const history = useHistory();
   const toast = useToast();
-  const {
-    isOpen: isRealisasiOpen,
-    onOpen: onRealisasiOpen,
-    onClose: onRealisasiClose,
-  } = useDisclosure();
-
-  const handleExportExcel = async () => {
-    if (!dataRealisasi) return;
-
-    try {
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet("Hasil Kerja PJPL");
-
-      const periodeRealisasi =
-        dataRealisasi.tanggalAwal && dataRealisasi.tanggalAkhir
-          ? `${new Date(dataRealisasi.tanggalAwal).toLocaleDateString(
-              "id-ID",
-              {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              }
-            )} - ${new Date(dataRealisasi.tanggalAkhir).toLocaleDateString(
-              "id-ID",
-              {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              }
-            )}`
-          : "-";
-
-      sheet.columns = [
-        { key: "col1", width: 5 },
-        { key: "col2", width: 35 },
-        { key: "col3", width: 18 },
-        { key: "col4", width: 35 },
-        { key: "col5", width: 18 },
-        { key: "col6", width: 15 },
-        { key: "col7", width: 15 },
-        { key: "col8", width: 25 },
-        { key: "col9", width: 25 },
-        { key: "col10", width: 40 },
-      ];
-
-      // Informasi Realisasi (opsional di bagian atas)
-      sheet.addRow(["Informasi Realisasi PJPL"]);
-      sheet.addRow(["Periode", periodeRealisasi]);
-      sheet.addRow(["Status", dataRealisasi.status || "-"]);
-      sheet.addRow([]);
-
-      // Tabel 1: Hasil Kerja Kualitatif PJPL
-      sheet.addRow(["Hasil Kerja Kualitatif PJPL"]);
-      sheet.addRow(["No", "Indikator", "Nilai", "Catatan", "Periode"]);
-
-      if (
-        Array.isArray(dataRealisasi.hasilKerjaKualitatifPJPLs) &&
-        dataRealisasi.hasilKerjaKualitatifPJPLs.length > 0
-      ) {
-        dataRealisasi.hasilKerjaKualitatifPJPLs.forEach((item, index) => {
-          const periodeDetail =
-            item.tanggalAwal && item.tanggalAkhir
-              ? `${new Date(item.tanggalAwal).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })} - ${new Date(item.tanggalAkhir).toLocaleDateString(
-                  "id-ID",
-                  {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  }
-                )}`
-              : "-";
-
-          sheet.addRow([
-            index + 1,
-            item.kualitatifPJPL?.indikator || "-",
-            item.nilai ?? "-",
-            item.catatan ?? "-",
-            periodeDetail,
-          ]);
-        });
-      }
-
-      sheet.addRow([]);
-
-      // Tabel 2: Daftar Kinerja PJPL
-      sheet.addRow(["Daftar Kinerja PJPL"]);
-      sheet.addRow([
-        "No",
-        "Indikator",
-        "Rencana Hasil Kerja",
-        "Target",
-        "Capaian",
-        "Satuan",
-        "Status",
-        "Pegawai Kontrak",
-        "Jabatan",
-        "Bukti Dukung",
-      ]);
-
-      if (
-        Array.isArray(dataRealisasi.kinerjaPJPLs) &&
-        dataRealisasi.kinerjaPJPLs.length > 0
-      ) {
-        dataRealisasi.kinerjaPJPLs.forEach((item, index) => {
-          sheet.addRow([
-            index + 1,
-            item.indikatorPejabat?.indikator || "-",
-            item.indikator || "-",
-            item.target || "-",
-            item.realisasiKinerjaPJPLs?.hasil || "-",
-            item.satuan || "-",
-            item.realisasiKinerjaPJPLs?.status || "-",
-            item.kontrakPJPL?.pegawai?.nama || "-",
-            item.kontrakPJPL?.pegawai?.jabatan || "",
-            item.realisasiKinerjaPJPLs?.buktiDukung || "-",
-          ]);
-        });
-      }
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-
-      const safePeriode =
-        typeof periodeRealisasi === "string" && periodeRealisasi !== "-"
-          ? periodeRealisasi
-              .replace(/\s+/g, "_")
-              .replace(/[^\w\-]/g, "-")
-              .toLowerCase()
-          : "data";
-
-      link.download = `hasil-kerja-pjpl-${safePeriode}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Export berhasil",
-        description: "File Excel berhasil dibuat.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Error!",
-        description: "Gagal mengekspor data ke Excel.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
-
+  const [isUpdating, setIsUpdating] = useState(null); // simpan id yang sedang diupdate
+  const { isOpen, onOpen, onClose } = useDisclosure();
   async function fetchDataRealisasi() {
     setIsLoading(true);
     try {
@@ -236,22 +76,84 @@ function HasilKerjaPJPL(props) {
       setIsLoading(false);
     }
   }
-
-  const handleOpenModalRealisasi = (kinerjaPJPLId, realisasiKinerjaId) => {
-    setSelectedKinerjaPJPLId(kinerjaPJPLId);
-    setRealisasiKinerjaPJPLId(realisasiKinerjaId);
-    setCapaian("");
-    setBuktiDukung("");
-    onRealisasiOpen();
+  const handleOpenModal = (id) => {
+    setSelectedId(id);
+    setNilaiInput("");
+    onOpen();
   };
 
+  const handleSubmitNilai = () => {
+    const parsedNilai = parseFloat(nilaiInput);
+
+    if (Number.isNaN(parsedNilai)) {
+      toast({
+        title: "Error!",
+        description: "Nilai harus diisi.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (parsedNilai < 0 || parsedNilai > 10) {
+      toast({
+        title: "Error!",
+        description: "Nilai harus antara 0 sampai 10.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    updateStatus(selectedId, "diterima", parsedNilai);
+    onClose();
+  };
   const handleResetFormRealisasi = () => {
     setCapaian("");
     setBuktiDukung("");
     setSelectedKinerjaPJPLId(null);
     setRealisasiKinerjaPJPLId(null);
   };
+  const updateStatus = async (id, statusBaru, nilai) => {
+    setIsUpdating(id);
+    try {
+      const payload = { status: statusBaru };
+      if (statusBaru === "diterima" && nilai !== undefined) {
+        payload.nilai = nilai;
+      }
 
+      await axios.post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/PJPL/update/hasil-kerja-pjpl/${id}`,
+        payload
+      );
+      toast({
+        title: "Berhasil",
+        description: `Status diubah menjadi ${statusBaru}`,
+        status: "success",
+        duration: 4000,
+        isClosable: true,
+      });
+      fetchDataRealisasi();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error!",
+        description:
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Gagal mengubah status",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsUpdating(null);
+    }
+  };
   const tambahRealisasi = async () => {
     // Validasi form
     if (!capaian || capaian <= 0) {
@@ -296,7 +198,6 @@ function HasilKerjaPJPL(props) {
         kinerjaPJPLId: selectedKinerjaPJPLId,
         capaian: parseFloat(capaian),
         buktiDukung: buktiDukung.trim(),
-        status: "diajukan",
       };
 
       // Hanya tambahkan realisasiKinerjaPJPLId jika ada nilainya
@@ -379,19 +280,10 @@ function HasilKerjaPJPL(props) {
     <LayoutPegawai>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
-          <HStack mb={"30px"} justifyContent={"space-between"}>
+          <HStack mb={"30px"}>
             <Button onClick={() => history.goBack()} variant={"outline"}>
               Kembali
             </Button>
-            {dataRealisasi && (
-              <Button
-                variant={"primary"}
-                onClick={handleExportExcel}
-                isDisabled={isLoading}
-              >
-                Export Excel
-              </Button>
-            )}
           </HStack>
 
           {isLoading ? (
@@ -406,7 +298,7 @@ function HasilKerjaPJPL(props) {
                   <Heading size="md">Informasi Realisasi PJPL</Heading>
                 </CardHeader>
                 <CardBody>
-                  <SimpleGrid columns={2} spacing={4}>
+                  <SimpleGrid columns={3} spacing={4}>
                     <Box>
                       <Text fontWeight="bold" mb={2}>
                         Periode
@@ -447,63 +339,10 @@ function HasilKerjaPJPL(props) {
                         {dataRealisasi.status || "-"}
                       </Badge>
                     </Box>
-                  </SimpleGrid>
+                  </SimpleGrid>{" "}
+                  <Button>Terima</Button>
                 </CardBody>
               </Card>
-
-              {/* Hasil Kerja Kualitatif PJPL */}
-              {dataRealisasi.hasilKerjaKualitatifPJPLs &&
-                dataRealisasi.hasilKerjaKualitatifPJPLs.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <Heading size="md">Hasil Kerja Kualitatif PJPL</Heading>
-                    </CardHeader>
-                    <CardBody>
-                      <Table variant={"pegawai"}>
-                        <Thead>
-                          <Tr>
-                            <Th>No</Th>
-                            <Th>Indikator</Th>
-                            <Th>Nilai</Th>
-                            <Th>Catatan</Th>
-                            <Th>Periode</Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody bgColor={"secondary"}>
-                          {dataRealisasi.hasilKerjaKualitatifPJPLs.map(
-                            (item, index) => (
-                              <Tr key={item.id}>
-                                <Td>{index + 1}</Td>
-                                <Td>
-                                  {item.kualitatifPJPL?.indikator || "-"}
-                                </Td>
-                                <Td>{item.nilai ?? "-"}</Td>
-                                <Td>{item.catatan ?? "-"}</Td>
-                                <Td>
-                                  {item.tanggalAwal && item.tanggalAkhir
-                                    ? `${new Date(
-                                        item.tanggalAwal
-                                      ).toLocaleDateString("id-ID", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      })} - ${new Date(
-                                        item.tanggalAkhir
-                                      ).toLocaleDateString("id-ID", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      })}`
-                                    : "-"}
-                                </Td>
-                              </Tr>
-                            )
-                          )}
-                        </Tbody>
-                      </Table>
-                    </CardBody>
-                  </Card>
-                )}
 
               {/* Daftar Kinerja PJPL */}
               {dataRealisasi.kinerjaPJPLs &&
@@ -519,29 +358,27 @@ function HasilKerjaPJPL(props) {
                             <Th>No</Th>
                             <Th>Indikator</Th>
                             <Th>Rencana Hasil Kerja</Th>
-                            <Th>Target</Th> <Th>Capaian</Th>
-                            <Th>Satuan</Th>
+                            <Th>Target</Th>
                             <Th>Status</Th>
                             <Th>Pegawai Kontrak</Th>
+                            <Th>Capaian</Th>
                             <Th>Bukti Dukung</Th>
+                            <Th>Nilai</Th>
                             <Th>Realisasi</Th>
                           </Tr>
                         </Thead>
                         <Tbody bgColor={"secondary"}>
                           {dataRealisasi.kinerjaPJPLs.map((item, index) => (
                             <Tr key={item.id}>
-                              <Td>{index + 1}</Td>
+                              <Td>{item.realisasiKinerjaPJPLs?.id}</Td>
                               <Td>{item.indikatorPejabat?.indikator || "-"}</Td>
                               <Td>{item.indikator || "-"}</Td>
-                              <Td>{item.target || "-"}</Td>{" "}
-                              <Td>
-                                {item.realisasiKinerjaPJPLs?.hasil || "-"}
-                              </Td>
-                              <Td>{item.satuan || "-"}</Td>
+                              <Td>{item.target || "-"}</Td>
                               <Td>
                                 <Badge
                                   colorScheme={
-                                    item.status === "diajukan"
+                                    item.realisasiKinerjaPJPLs?.status ===
+                                    "diajukan"
                                       ? "blue"
                                       : item.status === "disetujui"
                                       ? "green"
@@ -561,6 +398,10 @@ function HasilKerjaPJPL(props) {
                                 </Text>
                               </Td>
                               <Td>
+                                {item.realisasiKinerjaPJPLs?.hasil || "-"}
+                              </Td>
+
+                              <Td>
                                 {item.realisasiKinerjaPJPLs?.buktiDukung ? (
                                   <Button
                                     size="sm"
@@ -579,30 +420,37 @@ function HasilKerjaPJPL(props) {
                                 )}
                               </Td>
                               <Td>
-                                {item.realisasiKinerjaPJPLs?.status ===
-                                "diterima" ? (
-                                  "-"
+                                {item.realisasiKinerjaPJPLs?.nilai || "-"}
+                              </Td>
+                              <Td>
+                                {item.status === "disetujui" ? (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    colorScheme="red"
+                                    isLoading={isUpdating === item.id}
+                                    onClick={() =>
+                                      updateStatus(item.id, "ditolak")
+                                    }
+                                  >
+                                    Batal
+                                  </Button>
                                 ) : (
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     colorScheme="green"
-                                    onClick={() => {
-                                      const realisasiKinerjaId =
-                                        getRealisasiKinerjaPJPLId(item.id);
-                                      console.log("Kinerja ID:", item.id);
-                                      console.log(
-                                        "Realisasi Kinerja ID:",
-                                        realisasiKinerjaId
-                                      );
-                                      console.log("Item data:", item);
-                                      handleOpenModalRealisasi(
-                                        item.id,
-                                        realisasiKinerjaId
-                                      );
-                                    }}
+                                    isLoading={
+                                      isUpdating ===
+                                      item.realisasiKinerjaPJPLs?.id
+                                    }
+                                    onClick={() =>
+                                      handleOpenModal(
+                                        item.realisasiKinerjaPJPLs?.id
+                                      )
+                                    }
                                   >
-                                    Input Realisasi
+                                    Terima
                                   </Button>
                                 )}
                               </Td>
@@ -624,69 +472,48 @@ function HasilKerjaPJPL(props) {
 
       {/* Modal Input Realisasi */}
       <Modal
-        closeOnOverlayClick={false}
-        isOpen={isRealisasiOpen}
+        isOpen={isOpen}
         onClose={() => {
-          handleResetFormRealisasi();
-          onRealisasiClose();
+          setNilaiInput("");
+          onClose();
         }}
+        isCentered
       >
         <ModalOverlay />
-        <ModalContent borderRadius={0} maxWidth="1200px">
-          <ModalHeader></ModalHeader>
+        <ModalContent>
+          <ModalHeader>Masukkan Nilai</ModalHeader>
           <ModalCloseButton />
-
           <ModalBody>
-            <Box>
-              <HStack mb={"30px"}>
-                <Box bgColor={"pegawai"} width={"30px"} height={"30px"}></Box>
-                <Heading color={"pegawai"}>Input Realisasi</Heading>
-              </HStack>
-
-              <SimpleGrid columns={1} spacing={10} p={"30px"}>
-                <FormControl>
-                  <FormLabel fontSize={"24px"}>Capaian</FormLabel>
-                  <Input
-                    height={"60px"}
-                    bgColor={"terang"}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={capaian}
-                    onChange={(e) => setCapaian(e.target.value)}
-                    placeholder="Contoh: 100"
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize={"24px"}>
-                    Bukti Dukung (Link Google Drive)
-                  </FormLabel>
-                  <Input
-                    height={"60px"}
-                    bgColor={"terang"}
-                    type="url"
-                    value={buktiDukung}
-                    onChange={(e) => setBuktiDukung(e.target.value)}
-                    placeholder="https://drive.google.com/..."
-                  />
-                </FormControl>
-              </SimpleGrid>
-            </Box>
+            <FormControl>
+              <FormLabel>Nilai (0 - 10)</FormLabel>
+              <Input
+                type="number"
+                min={0}
+                max={10}
+                step="0.1"
+                value={nilaiInput}
+                onChange={(e) => setNilaiInput(e.target.value)}
+                placeholder="Contoh: 8.5"
+              />
+            </FormControl>
           </ModalBody>
-
-          <ModalFooter pe={"60px"} pb={"30px"}>
+          <ModalFooter>
             <Button
-              variant={"outline"}
+              variant="ghost"
               mr={3}
               onClick={() => {
-                handleResetFormRealisasi();
-                onRealisasiClose();
+                setNilaiInput("");
+                onClose();
               }}
             >
               Batal
             </Button>
-            <Button onClick={tambahRealisasi} variant={"primary"}>
-              Simpan
+            <Button
+              colorScheme="green"
+              isLoading={isUpdating === selectedId}
+              onClick={handleSubmitNilai}
+            >
+              Simpan & Terima
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -695,4 +522,4 @@ function HasilKerjaPJPL(props) {
   );
 }
 
-export default HasilKerjaPJPL;
+export default PenilaianAtasan;

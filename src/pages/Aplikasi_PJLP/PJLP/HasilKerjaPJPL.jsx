@@ -35,7 +35,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import axios from "axios";
-import ExcelJS from "exceljs";
 import { useHistory } from "react-router-dom";
 import LayoutPegawai from "../../Componets/Pegawai/LayoutPegawai";
 
@@ -53,164 +52,6 @@ function HasilKerjaPJPL(props) {
     onOpen: onRealisasiOpen,
     onClose: onRealisasiClose,
   } = useDisclosure();
-
-  const handleExportExcel = async () => {
-    if (!dataRealisasi) return;
-
-    try {
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet("Hasil Kerja PJPL");
-
-      const periodeRealisasi =
-        dataRealisasi.tanggalAwal && dataRealisasi.tanggalAkhir
-          ? `${new Date(dataRealisasi.tanggalAwal).toLocaleDateString(
-              "id-ID",
-              {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              }
-            )} - ${new Date(dataRealisasi.tanggalAkhir).toLocaleDateString(
-              "id-ID",
-              {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              }
-            )}`
-          : "-";
-
-      sheet.columns = [
-        { key: "col1", width: 5 },
-        { key: "col2", width: 35 },
-        { key: "col3", width: 18 },
-        { key: "col4", width: 35 },
-        { key: "col5", width: 18 },
-        { key: "col6", width: 15 },
-        { key: "col7", width: 15 },
-        { key: "col8", width: 25 },
-        { key: "col9", width: 25 },
-        { key: "col10", width: 40 },
-      ];
-
-      // Informasi Realisasi (opsional di bagian atas)
-      sheet.addRow(["Informasi Realisasi PJPL"]);
-      sheet.addRow(["Periode", periodeRealisasi]);
-      sheet.addRow(["Status", dataRealisasi.status || "-"]);
-      sheet.addRow([]);
-
-      // Tabel 1: Hasil Kerja Kualitatif PJPL
-      sheet.addRow(["Hasil Kerja Kualitatif PJPL"]);
-      sheet.addRow(["No", "Indikator", "Nilai", "Catatan", "Periode"]);
-
-      if (
-        Array.isArray(dataRealisasi.hasilKerjaKualitatifPJPLs) &&
-        dataRealisasi.hasilKerjaKualitatifPJPLs.length > 0
-      ) {
-        dataRealisasi.hasilKerjaKualitatifPJPLs.forEach((item, index) => {
-          const periodeDetail =
-            item.tanggalAwal && item.tanggalAkhir
-              ? `${new Date(item.tanggalAwal).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })} - ${new Date(item.tanggalAkhir).toLocaleDateString(
-                  "id-ID",
-                  {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  }
-                )}`
-              : "-";
-
-          sheet.addRow([
-            index + 1,
-            item.kualitatifPJPL?.indikator || "-",
-            item.nilai ?? "-",
-            item.catatan ?? "-",
-            periodeDetail,
-          ]);
-        });
-      }
-
-      sheet.addRow([]);
-
-      // Tabel 2: Daftar Kinerja PJPL
-      sheet.addRow(["Daftar Kinerja PJPL"]);
-      sheet.addRow([
-        "No",
-        "Indikator",
-        "Rencana Hasil Kerja",
-        "Target",
-        "Capaian",
-        "Satuan",
-        "Status",
-        "Pegawai Kontrak",
-        "Jabatan",
-        "Bukti Dukung",
-      ]);
-
-      if (
-        Array.isArray(dataRealisasi.kinerjaPJPLs) &&
-        dataRealisasi.kinerjaPJPLs.length > 0
-      ) {
-        dataRealisasi.kinerjaPJPLs.forEach((item, index) => {
-          sheet.addRow([
-            index + 1,
-            item.indikatorPejabat?.indikator || "-",
-            item.indikator || "-",
-            item.target || "-",
-            item.realisasiKinerjaPJPLs?.hasil || "-",
-            item.satuan || "-",
-            item.realisasiKinerjaPJPLs?.status || "-",
-            item.kontrakPJPL?.pegawai?.nama || "-",
-            item.kontrakPJPL?.pegawai?.jabatan || "",
-            item.realisasiKinerjaPJPLs?.buktiDukung || "-",
-          ]);
-        });
-      }
-
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-
-      const safePeriode =
-        typeof periodeRealisasi === "string" && periodeRealisasi !== "-"
-          ? periodeRealisasi
-              .replace(/\s+/g, "_")
-              .replace(/[^\w\-]/g, "-")
-              .toLowerCase()
-          : "data";
-
-      link.download = `hasil-kerja-pjpl-${safePeriode}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Export berhasil",
-        description: "File Excel berhasil dibuat.",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: "Error!",
-        description: "Gagal mengekspor data ke Excel.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
 
   async function fetchDataRealisasi() {
     setIsLoading(true);
@@ -379,19 +220,10 @@ function HasilKerjaPJPL(props) {
     <LayoutPegawai>
       <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
         <Container maxW={"1280px"} variant={"primary"} p={"30px"} my={"30px"}>
-          <HStack mb={"30px"} justifyContent={"space-between"}>
+          <HStack mb={"30px"}>
             <Button onClick={() => history.goBack()} variant={"outline"}>
               Kembali
             </Button>
-            {dataRealisasi && (
-              <Button
-                variant={"primary"}
-                onClick={handleExportExcel}
-                isDisabled={isLoading}
-              >
-                Export Excel
-              </Button>
-            )}
           </HStack>
 
           {isLoading ? (
@@ -450,60 +282,6 @@ function HasilKerjaPJPL(props) {
                   </SimpleGrid>
                 </CardBody>
               </Card>
-
-              {/* Hasil Kerja Kualitatif PJPL */}
-              {dataRealisasi.hasilKerjaKualitatifPJPLs &&
-                dataRealisasi.hasilKerjaKualitatifPJPLs.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <Heading size="md">Hasil Kerja Kualitatif PJPL</Heading>
-                    </CardHeader>
-                    <CardBody>
-                      <Table variant={"pegawai"}>
-                        <Thead>
-                          <Tr>
-                            <Th>No</Th>
-                            <Th>Indikator</Th>
-                            <Th>Nilai</Th>
-                            <Th>Catatan</Th>
-                            <Th>Periode</Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody bgColor={"secondary"}>
-                          {dataRealisasi.hasilKerjaKualitatifPJPLs.map(
-                            (item, index) => (
-                              <Tr key={item.id}>
-                                <Td>{index + 1}</Td>
-                                <Td>
-                                  {item.kualitatifPJPL?.indikator || "-"}
-                                </Td>
-                                <Td>{item.nilai ?? "-"}</Td>
-                                <Td>{item.catatan ?? "-"}</Td>
-                                <Td>
-                                  {item.tanggalAwal && item.tanggalAkhir
-                                    ? `${new Date(
-                                        item.tanggalAwal
-                                      ).toLocaleDateString("id-ID", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      })} - ${new Date(
-                                        item.tanggalAkhir
-                                      ).toLocaleDateString("id-ID", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric",
-                                      })}`
-                                    : "-"}
-                                </Td>
-                              </Tr>
-                            )
-                          )}
-                        </Tbody>
-                      </Table>
-                    </CardBody>
-                  </Card>
-                )}
 
               {/* Daftar Kinerja PJPL */}
               {dataRealisasi.kinerjaPJPLs &&

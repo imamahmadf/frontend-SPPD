@@ -1117,6 +1117,35 @@ function Navbar() {
                         bgGradient: "linear(to-r, primary, primaryGelap)",
                       }}
                     >
+                      <Box px={4} py={2} bg="gray.50" borderBottom="1px solid" borderColor="gray.100">
+                        <Text fontSize="11px" color="gray.500">
+                          Penomoran:{" "}
+                          <Text
+                            as="span"
+                            color={
+                              user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran === "aktif"
+                                ? "green.600"
+                                : "gray.500"
+                            }
+                            fontWeight="500"
+                          >
+                            {user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran || "-"}
+                          </Text>
+                          {" · "}
+                          Keuangan:{" "}
+                          <Text
+                            as="span"
+                            color={
+                              user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan === "aktif"
+                                ? "green.600"
+                                : "gray.500"
+                            }
+                            fontWeight="500"
+                          >
+                            {user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan || "-"}
+                          </Text>
+                        </Text>
+                      </Box>
                       <Link to={"/profile"}>
                         <MenuItem
                           icon={
@@ -1390,6 +1419,37 @@ function Navbar() {
                       Lihat Profile
                     </Button>
                   </Link>
+                </Box>
+
+                {/* Penomoran & Keuangan */}
+                <Box px={4} py={2} bg={boxBg} borderBottom="1px solid" borderColor={borderColor}>
+                  <Text fontSize="xs" color={textColorLight}>
+                    Penomoran:{" "}
+                    <Text
+                      as="span"
+                      color={
+                        user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran === "aktif"
+                          ? "green.500"
+                          : undefined
+                      }
+                      fontWeight="500"
+                    >
+                      {user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran || "-"}
+                    </Text>
+                    {" · "}
+                    Keuangan:{" "}
+                    <Text
+                      as="span"
+                      color={
+                        user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan === "aktif"
+                          ? "green.500"
+                          : undefined
+                      }
+                      fontWeight="500"
+                    >
+                      {user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan || "-"}
+                    </Text>
+                  </Text>
                 </Box>
 
                 {/* Quick Actions Section */}

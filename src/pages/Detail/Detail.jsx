@@ -401,6 +401,7 @@ function Detail(props) {
             adaStatusDuaAtauTiga={adaStatusDuaAtauTiga}
             onEditClick={onEditPerjalananClick}
             penomoran={user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran}
+            keuangan={user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan}
           />
 
           <Container
@@ -447,6 +448,7 @@ function Detail(props) {
               semuaPersonilBelumAdaRincian={semuaPersonilBelumAdaRincian}
               adaPersonilYangBisaDiajukan={adaPersonilYangBisaDiajukan}
               adaPersonilYangBisaDicetak={adaPersonilYangBisaDicetak}
+              keuangan={user[0]?.unitKerja_profile?.indukUnitKerja?.keuangan}
               isSubmittingPengajuan={isSubmittingPengajuan}
               isCreatingAutoBulk={isCreatingAutoBulk}
               isPrintingAll={isPrintingAll}
