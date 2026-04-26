@@ -67,6 +67,7 @@ import {
   FaList,
   FaTag,
   FaCheckCircle,
+  FaEdit,
   FaTrash,
 } from "react-icons/fa";
 import { MdDescription, MdAttachMoney, MdInventory2 } from "react-icons/md";
@@ -82,6 +83,9 @@ function DetailSP(props) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [jenisDokumenId, setJenisDokumenId] = useState(null);
   const [tanggal, setTanggal] = useState("");
+  const [dokumenTanggalEdit, setDokumenTanggalEdit] = useState(null);
+  const [tanggalEditValue, setTanggalEditValue] = useState("");
+  const [isSavingTanggal, setIsSavingTanggal] = useState(false);
   const [daftarBarjas, setDaftarBarjas] = useState([
     {
       jenisBarjasId: null,
@@ -108,8 +112,86 @@ function DetailSP(props) {
     onOpen: onDeleteOpen,
     onClose: onDeleteClose,
   } = useDisclosure();
+  const {
+    isOpen: isEditTanggalOpen,
+    onOpen: onEditTanggalOpen,
+    onClose: onEditTanggalClose,
+  } = useDisclosure();
   const [selectedBarjas, setSelectedBarjas] = useState([]);
   const [itemToDelete, setItemToDelete] = useState(null);
+
+  const toDateInputValue = (value) => {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 10);
+  };
+
+  const openEditTanggal = (dokumen) => {
+    setDokumenTanggalEdit(dokumen);
+    setTanggalEditValue(toDateInputValue(dokumen?.tanggal));
+    onEditTanggalOpen();
+  };
+
+  const closeEditTanggal = () => {
+    if (isSavingTanggal) return;
+    onEditTanggalClose();
+    setDokumenTanggalEdit(null);
+    setTanggalEditValue("");
+  };
+
+  const submitEditTanggal = () => {
+    if (!dokumenTanggalEdit?.id) {
+      toast({
+        title: "Error!",
+        description: "Data dokumen tidak valid",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (!tanggalEditValue) {
+      toast({
+        title: "Error!",
+        description: "Tanggal surat wajib diisi",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setIsSavingTanggal(true);
+    axios
+      .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/edit/dokumen`, {
+        id: dokumenTanggalEdit.id,
+        tanggal: tanggalEditValue,
+      })
+      .then((res) => {
+        toast({
+          title: "Berhasil!",
+          description: "Tanggal surat berhasil diupdate.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        fetchDataDokumen();
+        closeEditTanggal();
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({
+          title: "Error!",
+          description: err.response?.data?.message || "Gagal mengupdate tanggal",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => setIsSavingTanggal(false));
+  };
 
   async function fetchDataDokumen() {
     await axios
@@ -1313,9 +1395,20 @@ function DetailSP(props) {
 
                           <SimpleGrid columns={2} spacing={3}>
                             <Box>
-                              <Text fontSize="xs" color="gray.600" mb={1}>
-                                Tanggal Surat
-                              </Text>
+                        <Flex align="center" justify="space-between" mb={1}>
+                          <Text fontSize="xs" color="gray.600">
+                            Tanggal Surat
+                          </Text>
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            color="aset"
+                            leftIcon={<Icon as={FaEdit} />}
+                            onClick={() => openEditTanggal(item)}
+                          >
+                            Edit
+                          </Button>
+                        </Flex>
                               <Text fontSize="sm">
                                 {item?.tanggal
                                   ? new Date(item?.tanggal).toLocaleDateString(
@@ -1444,6 +1537,60 @@ function DetailSP(props) {
           </Container>
         </Box>
       </LayoutAset>
+
+      {/* Modal Edit Tanggal Surat */}
+      <Modal
+        isOpen={isEditTanggalOpen}
+        onClose={closeEditTanggal}
+        isCentered
+        size="md"
+      >
+        <ModalOverlay />
+        <ModalContent bgColor={colorMode === "dark" ? "gray.800" : "white"}>
+          <ModalHeader>Edit Tanggal Surat</ModalHeader>
+          <ModalCloseButton isDisabled={isSavingTanggal} />
+          <ModalBody pb={6}>
+            <VStack align="stretch" spacing={3}>
+              <Box>
+                <Text fontSize="sm" color="gray.600">
+                  Nomor Dokumen
+                </Text>
+                <Text fontSize="md" fontWeight="semibold">
+                  {dokumenTanggalEdit?.nomor || "-"}
+                </Text>
+              </Box>
+              <FormControl>
+                <FormLabel>Tanggal Surat</FormLabel>
+                <Input
+                  type="date"
+                  value={tanggalEditValue}
+                  onChange={(e) => setTanggalEditValue(e.target.value)}
+                  isDisabled={isSavingTanggal}
+                  bgColor={colorMode === "dark" ? "gray.700" : "terang"}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="ghost"
+              mr={3}
+              onClick={closeEditTanggal}
+              isDisabled={isSavingTanggal}
+            >
+              Batal
+            </Button>
+            <Button
+              variant="primary"
+              onClick={submitEditTanggal}
+              isLoading={isSavingTanggal}
+              loadingText="Menyimpan"
+            >
+              Simpan
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Modal Pilih Barjas */}
       <Modal
