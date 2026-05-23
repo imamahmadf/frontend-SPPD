@@ -39,13 +39,13 @@ export const login = (namaPengguna, password) => async (dispatch) => {
   try {
     const { data } = await axios.post(
       `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/login`,
-      { namaPengguna, password }
+      { namaPengguna, password },
     );
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user)); // Simpan user
     localStorage.setItem("role", JSON.stringify(data.role)); // Simpan user
     dispatch(
-      loginSuccess({ user: data.user, token: data.token, role: data.role })
+      loginSuccess({ user: data.user, token: data.token, role: data.role }),
     );
     console.log(data, "data dri API");
   } catch (error) {
@@ -70,7 +70,7 @@ export const register =
           role,
           unitKerjaId,
           pegawaiId,
-        }
+        },
       );
       console.log("Register berhasil");
     } catch (error) {
@@ -103,15 +103,13 @@ axios.interceptors.response.use(
         const res = await axios.post(
           `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/user/refresh`,
           {},
-          { withCredentials: true } // Pastikan refresh token dikirim sebagai httpOnly cookie
+          { withCredentials: true }, // Pastikan refresh token dikirim sebagai httpOnly cookie
         );
         localStorage.setItem("token", res.data.accessToken);
-        axios.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${res.data.accessToken}`;
-        originalRequest.headers[
-          "Authorization"
-        ] = `Bearer ${res.data.accessToken}`;
+        axios.defaults.headers.common["Authorization"] =
+          `Bearer ${res.data.accessToken}`;
+        originalRequest.headers["Authorization"] =
+          `Bearer ${res.data.accessToken}`;
         return axios(originalRequest);
       } catch (err) {
         console.error("Refresh token gagal, logout...");
@@ -121,5 +119,5 @@ axios.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );

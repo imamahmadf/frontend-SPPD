@@ -119,6 +119,7 @@ import DashboardKeuangan from "./pages/Keuangan/DashboardKeuangan.jsx";
 import DetailKontrakPJPL from "./pages/PJPL/DetailKontrakPJPL.jsx";
 import LoginPegawai from "./pages/LoginPegawai.jsx";
 import Unauthorized from "./pages/Unauthorized.jsx";
+import AdminDinkesThankYouModal from "./Componets/AdminDinkesThankYouModal.jsx";
 
 // /////////KEUANGAN/////////////////////
 import templateBPD from "./pages/Keuangan/templateBPD.jsx";
@@ -168,6 +169,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+        <AdminDinkesThankYouModal />
         <Switch>
           <ProtectedRoute
             component={Daftar}

@@ -165,10 +165,13 @@ function DetailSP(props) {
 
     setIsSavingTanggal(true);
     axios
-      .post(`${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/edit/dokumen`, {
-        id: dokumenTanggalEdit.id,
-        tanggal: tanggalEditValue,
-      })
+      .post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/edit/dokumen`,
+        {
+          id: dokumenTanggalEdit.id,
+          tanggal: tanggalEditValue,
+        },
+      )
       .then((res) => {
         toast({
           title: "Berhasil!",
@@ -184,7 +187,8 @@ function DetailSP(props) {
         console.error(err);
         toast({
           title: "Error!",
-          description: err.response?.data?.message || "Gagal mengupdate tanggal",
+          description:
+            err.response?.data?.message || "Gagal mengupdate tanggal",
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -198,7 +202,7 @@ function DetailSP(props) {
       .get(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/get/dokumen/${
           props.match.params.id
-        }`
+        }`,
       )
       .then((res) => {
         setDataDokumen(res.data.result);
@@ -246,7 +250,7 @@ function DetailSP(props) {
 
   const setBarjasJumlah = (barjasId, jumlah) => {
     setSelectedBarjas((prev) =>
-      prev.map((b) => (b.id === barjasId ? { ...b, jumlah } : b))
+      prev.map((b) => (b.id === barjasId ? { ...b, jumlah } : b)),
     );
   };
 
@@ -268,7 +272,7 @@ function DetailSP(props) {
         (dataDokumen?.barjas || []).map((item) => ({
           id: item.id,
           jumlah: Number(item?.jumlah || 1),
-        }))
+        })),
       );
     }
   };
@@ -299,7 +303,7 @@ function DetailSP(props) {
             barjasId: b.id,
             jumlah: b.jumlah,
           })),
-        }
+        },
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -334,7 +338,7 @@ function DetailSP(props) {
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/post/barjas`,
         {
           data: daftarBarjas,
-        }
+        },
       )
       .then((res) => {
         console.log(res.status, res.data, "tessss");
@@ -371,7 +375,7 @@ function DetailSP(props) {
   async function fetchSeed() {
     await axios
       .get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/get/seed-detail`
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/get/seed-detail`,
       )
       .then((res) => {
         setDataJenisBarjas(res.data.resultJenisBarjas);
@@ -427,7 +431,7 @@ function DetailSP(props) {
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/delete/barjas`,
         {
           id: itemToDelete.id,
-        }
+        },
       )
       .then((res) => {
         toast({
@@ -481,7 +485,7 @@ function DetailSP(props) {
   };
   const totalBerjalan = (daftarBarjas || []).reduce(
     (sum, it) => sum + Number(it?.harga || 0) * Number(it?.jumlah || 0),
-    0
+    0,
   );
 
   // Hitung statistik
@@ -489,11 +493,11 @@ function DetailSP(props) {
   const totalItemBarjas = dataDokumen?.barjas?.length || 0;
   const totalNominal = (dataDokumen?.barjas || []).reduce(
     (sum, it) => sum + Number(it?.harga || 0) * Number(it?.jumlah || 0),
-    0
+    0,
   );
   const totalJumlahBarang = (dataDokumen?.barjas || []).reduce(
     (sum, it) => sum + Number(it?.jumlah || 0),
-    0
+    0,
   );
 
   return (
@@ -884,7 +888,7 @@ function DetailSP(props) {
                                 value: item.jenisBarjasId,
                                 label:
                                   dataJenisBarjas?.find(
-                                    (v) => v.id === item.jenisBarjasId
+                                    (v) => v.id === item.jenisBarjasId,
                                   )?.jenis || "",
                               }
                             : null
@@ -899,7 +903,7 @@ function DetailSP(props) {
                           handleBarjasChange(
                             index,
                             "jenisBarjasId",
-                            selectedOption?.value || null
+                            selectedOption?.value || null,
                           );
                         }}
                         components={{
@@ -1114,7 +1118,8 @@ function DetailSP(props) {
                         </Td>
                         <Td isNumeric fontWeight="semibold">
                           {formatRupiah(
-                            Number(item?.harga || 0) * Number(item?.jumlah || 0)
+                            Number(item?.harga || 0) *
+                              Number(item?.jumlah || 0),
                           )}
                         </Td>
                         <Td>
@@ -1176,8 +1181,8 @@ function DetailSP(props) {
                           (sum, it) =>
                             sum +
                             Number(it?.harga || 0) * Number(it?.jumlah || 0),
-                          0
-                        )
+                          0,
+                        ),
                       )}
                     </Td>
                   </Tr>
@@ -1348,7 +1353,7 @@ function DetailSP(props) {
                       (sum, it) =>
                         sum +
                         Number(it?.jumlah || 0) * Number(it?.barja?.harga || 0),
-                      0
+                      0,
                     );
                     return (
                       <Box
@@ -1395,20 +1400,24 @@ function DetailSP(props) {
 
                           <SimpleGrid columns={2} spacing={3}>
                             <Box>
-                        <Flex align="center" justify="space-between" mb={1}>
-                          <Text fontSize="xs" color="gray.600">
-                            Tanggal Surat
-                          </Text>
-                          <Button
-                            size="xs"
-                            variant="ghost"
-                            color="aset"
-                            leftIcon={<Icon as={FaEdit} />}
-                            onClick={() => openEditTanggal(item)}
-                          >
-                            Edit
-                          </Button>
-                        </Flex>
+                              <Flex
+                                align="center"
+                                justify="space-between"
+                                mb={1}
+                              >
+                                <Text fontSize="xs" color="gray.600">
+                                  Tanggal Surat
+                                </Text>
+                                <Button
+                                  size="xs"
+                                  variant="ghost"
+                                  color="aset"
+                                  leftIcon={<Icon as={FaEdit} />}
+                                  onClick={() => openEditTanggal(item)}
+                                >
+                                  Edit
+                                </Button>
+                              </Flex>
                               <Text fontSize="sm">
                                 {item?.tanggal
                                   ? new Date(item?.tanggal).toLocaleDateString(
@@ -1417,7 +1426,7 @@ function DetailSP(props) {
                                         day: "numeric",
                                         month: "short",
                                         year: "numeric",
-                                      }
+                                      },
                                     )
                                   : "-"}
                               </Text>
@@ -1429,7 +1438,7 @@ function DetailSP(props) {
                               <Text fontSize="sm">
                                 {item?.createdAt
                                   ? new Date(
-                                      item?.createdAt
+                                      item?.createdAt,
                                     ).toLocaleDateString("id-ID", {
                                       day: "numeric",
                                       month: "short",
@@ -1492,7 +1501,7 @@ function DetailSP(props) {
                                   {item.itemDokumenBarjas.map((it, idx) => {
                                     const nama = it?.barja?.nama ?? "-";
                                     const qty = Number(
-                                      it?.jumlah || 0
+                                      it?.jumlah || 0,
                                     ).toLocaleString("id-ID");
                                     return (
                                       <Text
@@ -1692,7 +1701,7 @@ function DetailSP(props) {
                           onClick={() =>
                             handleToggleBarjas(
                               item.id,
-                              Number(item?.jumlah || 1)
+                              Number(item?.jumlah || 1),
                             )
                           }
                         >
@@ -1702,7 +1711,7 @@ function DetailSP(props) {
                               onChange={() =>
                                 handleToggleBarjas(
                                   item.id,
-                                  Number(item?.jumlah || 1)
+                                  Number(item?.jumlah || 1),
                                 )
                               }
                               colorScheme="green"
@@ -1743,7 +1752,7 @@ function DetailSP(props) {
                           <Td isNumeric fontWeight="semibold">
                             {formatRupiah(
                               Number(item?.harga || 0) *
-                                Number(item?.jumlah || 0)
+                                Number(item?.jumlah || 0),
                             )}
                           </Td>
                         </Tr>
@@ -1783,13 +1792,13 @@ function DetailSP(props) {
                         {formatRupiah(
                           selectedBarjas.reduce((sum, b) => {
                             const item = dataDokumen.barjas.find(
-                              (bar) => bar.id === b.id
+                              (bar) => bar.id === b.id,
                             );
                             return (
                               sum +
                               Number(item?.harga || 0) * Number(b.jumlah || 0)
                             );
-                          }, 0)
+                          }, 0),
                         )}
                       </Text>
                     )}
@@ -1873,7 +1882,7 @@ function DetailSP(props) {
                     </Text>
                     <Text fontSize="sm">
                       {Number(itemToDelete?.jumlah || 0).toLocaleString(
-                        "id-ID"
+                        "id-ID",
                       )}
                     </Text>
                   </Box>
@@ -1884,7 +1893,7 @@ function DetailSP(props) {
                     <Text fontSize="sm" fontWeight="semibold" color="aset">
                       {formatRupiah(
                         Number(itemToDelete?.harga || 0) *
-                          Number(itemToDelete?.jumlah || 0)
+                          Number(itemToDelete?.jumlah || 0),
                       )}
                     </Text>
                   </Box>
