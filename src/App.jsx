@@ -169,7 +169,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <AdminDinkesThankYouModal />
+        {/* <AdminDinkesThankYouModal /> */}
         <Switch>
           <ProtectedRoute
             component={Daftar}

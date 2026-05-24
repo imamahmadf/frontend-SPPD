@@ -143,7 +143,7 @@ function NavbarAset() {
     // Validasi: Pastikan environment variable sudah diset (penting untuk produksi)
     if (!socketUrl) {
       console.error(
-        "⚠️ VITE_REACT_APP_API_BASE_URL tidak diset! Socket.io tidak dapat terhubung."
+        "⚠️ VITE_REACT_APP_API_BASE_URL tidak diset! Socket.io tidak dapat terhubung.",
       );
       return; // Jangan inisialisasi socket jika URL tidak ada
     }
@@ -151,7 +151,7 @@ function NavbarAset() {
     // Peringatan jika masih menggunakan localhost di produksi
     if (socketUrl.includes("localhost") && import.meta.env.PROD) {
       console.warn(
-        "⚠️ PERINGATAN: Menggunakan localhost di produksi! Pastikan environment variable sudah diset dengan benar."
+        "⚠️ PERINGATAN: Menggunakan localhost di produksi! Pastikan environment variable sudah diset dengan benar.",
       );
     }
 
@@ -437,7 +437,7 @@ function NavbarAset() {
                     fontWeight={700}
                     letterSpacing="0.2px"
                   >
-                    Dinas Kesehatan
+                    Dinas Kesehatanxxxx
                   </Text>
                   <Text
                     color="gray.600"
@@ -468,7 +468,13 @@ function NavbarAset() {
             </Box>
 
             {/* Right Section: User Menu (Desktop) dan Hamburger (Mobile) */}
-            <HStack spacing={3} flexShrink={0} position="relative" zIndex={1} ml="auto">
+            <HStack
+              spacing={3}
+              flexShrink={0}
+              position="relative"
+              zIndex={1}
+              ml="auto"
+            >
               {/* Color Mode Toggle - Hidden on mobile */}
               <IconButton
                 display={{ base: "none", lg: "flex" }}
@@ -950,7 +956,7 @@ function NavbarAset() {
                       ? index.length > 0
                         ? index[0]
                         : -1
-                      : index
+                      : index,
                   );
                 }}
               >
