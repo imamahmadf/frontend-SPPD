@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { userRedux } from "../../Redux/Reducers/auth";
 import LayoutPerencanaan from "../../Componets/perencanaan/LayoutPerencanaan";
-import ReactPaginate from "react-paginate";
 import "../../Style/pagination.css";
+import AppPagination from "../../Componets/AppPagination";
 import {
   Box,
   Container,
@@ -1178,22 +1178,10 @@ function Indikator(props) {
                   {Math.min((page + 1) * limit, totalRows)} dari {totalRows}{" "}
                   data
                 </Text>
-                <ReactPaginate
-                  previousLabel={"←"}
-                  nextLabel={"→"}
+                <AppPagination
+                  page={page}
                   pageCount={totalPage || 1}
                   onPageChange={changePage}
-                  forcePage={page}
-                  activeClassName={"item active "}
-                  breakClassName={"item break-me "}
-                  breakLabel={"..."}
-                  containerClassName={"pagination"}
-                  disabledClassName={"disabled-page"}
-                  marginPagesDisplayed={1}
-                  nextClassName={"item next "}
-                  pageClassName={"item pagination-page "}
-                  pageRangeDisplayed={2}
-                  previousClassName={"item previous"}
                 />
               </Box>
             </>

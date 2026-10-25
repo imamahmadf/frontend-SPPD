@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 import LayoutAset from "../../Componets/Aset/LayoutAset";
-import ReactPaginate from "react-paginate";
 
 import "../../Style/pagination.css";
+import AppPagination from "../../Componets/AppPagination";
 import { Link, useHistory } from "react-router-dom";
 import Foto from "../../assets/add_photo.png";
 import { BsDownload } from "react-icons/bs";
@@ -33,11 +33,13 @@ import {
   SimpleGrid,
   Th,
   Td,
-  Flex,
   Textarea,
   Tooltip,
   Input,
+  Select,
   Spacer,
+  Progress,
+  Badge,
   useToast,
   useColorMode,
   Menu,
@@ -61,11 +63,42 @@ import {
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
 
+const gayaFilter = {
+  container: (provided) => ({
+    ...provided,
+    borderRadius: "6px",
+  }),
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "terang",
+    border: "0px",
+    minHeight: "48px",
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    bg: state.isFocused ? "aset" : "white",
+    color: state.isFocused ? "white" : "black",
+  }),
+};
+
+const cekMassalAwal = {
+  running: false,
+  total: 0,
+  selesai: 0,
+  berhasil: 0,
+  tidakDitemukan: 0,
+  gagal: 0,
+  dilewati: 0,
+  current: "",
+  log: [],
+};
+
 function DaftarKendaraan() {
   const [DataKendaraan, setDataKendaraan] = useState([]);
   const history = useHistory();
   const [dataSeed, setDataSeed] = useState(null);
   const [page, setPage] = useState(0);
+  const [daftarVersi, setDaftarVersi] = useState(0);
   const [limit, setLimit] = useState(50);
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
@@ -80,7 +113,6 @@ function DaftarKendaraan() {
   const [nomorKontak, setNomorKontak] = useState(0);
   const [nomor, setNomor] = useState(0);
   const [seri, setSeri] = useState("");
-  const [time, setTime] = useState("");
   const [loadingItems, setLoadingItems] = useState({});
   const [loadingSurat, setLoadingSurat] = useState({});
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -94,14 +126,47 @@ function DaftarKendaraan() {
   const [pegawaiFilterId, setPegawaiFilterId] = useState(0);
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
+  const [jenisFilterId, setJenisFilterId] = useState(0);
+  const [statusFilterId, setStatusFilterId] = useState(0);
+  const [kondisiFilterId, setKondisiFilterId] = useState(0);
+  const [merekFilter, setMerekFilter] = useState("");
+  const [seriFilter, setSeriFilter] = useState("");
+  const [nomorPlatInput, setNomorPlatInput] = useState("");
+  const [merekInput, setMerekInput] = useState("");
+  const [seriInput, setSeriInput] = useState("");
+  const [sortBy, setSortBy] = useState("pajakTahunIni");
+  const [sortOrder, setSortOrder] = useState("ASC");
+  const [pegawaiFilterValue, setPegawaiFilterValue] = useState(null);
+  const [unitKerjaFilterValue, setUnitKerjaFilterValue] = useState(null);
+  const [jenisFilterValue, setJenisFilterValue] = useState(null);
+  const [statusFilterValue, setStatusFilterValue] = useState(null);
+  const [kondisiFilterValue, setKondisiFilterValue] = useState(null);
+  const filterTimer = useRef({});
   const {
     isOpen: isTambahOpen,
     onOpen: onTambahOpen,
     onClose: onTambahClose,
   } = useDisclosure();
+  const {
+    isOpen: isCekMassalOpen,
+    onOpen: onCekMassalOpen,
+    onClose: onCekMassalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isSuratOpen,
+    onOpen: onSuratOpen,
+    onClose: onSuratClose,
+  } = useDisclosure();
+  const [suratTarget, setSuratTarget] = useState(null);
+  const [penandatanganValue, setPenandatanganValue] = useState(null);
+  const [unitKerjaCekId, setUnitKerjaCekId] = useState(0);
+  const [cekMassal, setCekMassal] = useState(cekMassalAwal);
+  const batalCekRef = useRef(false);
+  const abortCekRef = useRef(null);
+  const cekBerjalanRef = useRef(false);
 
   const changePage = ({ selected }) => {
-    setPage(selected);
+    setPage((current) => (current === selected ? current : selected));
   };
   const handleSubmitChange = (field, val) => {
     console.log(field, val);
@@ -167,7 +232,204 @@ function DaftarKendaraan() {
         setOpenMenuId(null);
       });
   };
-  const cektakSurat = (val) => {
+
+  const opsiUnitCek = [
+    { value: 0, label: "Semua unit kerja" },
+    ...(dataSeed?.unitKerja || []).map((val) => ({
+      value: val.id,
+      label: val.unitKerja,
+    })),
+  ];
+
+  const bukaCekMassal = () => {
+    if (!cekMassal.running) {
+      setUnitKerjaCekId(unitKerjaFilterId || 0);
+      setCekMassal(cekMassalAwal);
+    }
+    onCekMassalOpen();
+  };
+
+  const batalkanCekMassal = () => {
+    batalCekRef.current = true;
+    abortCekRef.current?.abort();
+  };
+
+  const mulaiCekMassal = async () => {
+    if (cekBerjalanRef.current) return;
+    cekBerjalanRef.current = true;
+    batalCekRef.current = false;
+    setCekMassal({
+      ...cekMassalAwal,
+      running: true,
+      current: "Mengambil daftar kendaraan...",
+    });
+
+    try {
+      const query = unitKerjaCekId ? `?unitKerjaId=${unitKerjaCekId}` : "";
+      const daftarRes = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/get/untuk-cek${query}`,
+      );
+      const daftar = daftarRes.data?.result || [];
+
+      if (batalCekRef.current) {
+        setCekMassal((prev) => ({
+          ...prev,
+          running: false,
+          total: daftar.length,
+          current: "Dibatalkan",
+        }));
+        setDaftarVersi((versi) => versi + 1);
+        onCekMassalClose();
+        return;
+      }
+
+      if (daftar.length === 0) {
+        setCekMassal((prev) => ({
+          ...prev,
+          running: false,
+          current: "Tidak ada kendaraan pada pilihan ini",
+        }));
+        return;
+      }
+
+      setCekMassal((prev) => ({ ...prev, total: daftar.length, current: "" }));
+
+      for (let index = 0; index < daftar.length; index += 1) {
+        if (batalCekRef.current) break;
+
+        const item = daftar[index];
+        const plat = `KT ${item.nomor || "-"} ${item.seri || ""}`.trim();
+        const unit = item.kendaraanUK?.unitKerja || "-";
+
+        if (!item.nomor || !item.seri) {
+          setCekMassal((prev) => ({
+            ...prev,
+            selesai: prev.selesai + 1,
+            dilewati: prev.dilewati + 1,
+            current: plat,
+            log: [
+              {
+                plat,
+                unit,
+                status: "dilewati",
+                pesan: "Nomor atau seri kosong",
+              },
+              ...prev.log,
+            ],
+          }));
+          continue;
+        }
+
+        setCekMassal((prev) => ({ ...prev, current: plat }));
+        const controller = new AbortController();
+        abortCekRef.current = controller;
+
+        try {
+          await axios.post(
+            `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/cek`,
+            {
+              id: item.id,
+              nomor: item.nomor,
+              seri: item.seri,
+              phone: 6281350617579,
+              kt: "KT",
+            },
+            { timeout: 45000, signal: controller.signal },
+          );
+          setCekMassal((prev) => ({
+            ...prev,
+            selesai: prev.selesai + 1,
+            berhasil: prev.berhasil + 1,
+            log: [
+              { plat, unit, status: "berhasil", pesan: "Diperbarui" },
+              ...prev.log,
+            ],
+          }));
+        } catch (err) {
+          if (batalCekRef.current || err?.code === "ERR_CANCELED") break;
+          const tidakDitemukan = err?.response?.status === 404;
+          setCekMassal((prev) => ({
+            ...prev,
+            selesai: prev.selesai + 1,
+            tidakDitemukan: prev.tidakDitemukan + (tidakDitemukan ? 1 : 0),
+            gagal: prev.gagal + (tidakDitemukan ? 0 : 1),
+            log: [
+              {
+                plat,
+                unit,
+                status: tidakDitemukan ? "tidak ditemukan" : "gagal",
+                pesan:
+                  err?.response?.data?.message || "Gagal mengakses SIMPATOR",
+              },
+              ...prev.log,
+            ],
+          }));
+        }
+
+        if (!batalCekRef.current && index < daftar.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+      }
+
+      const dibatalkan = batalCekRef.current;
+      setCekMassal((prev) => ({
+        ...prev,
+        running: false,
+        current: dibatalkan ? "Dibatalkan" : "Selesai",
+      }));
+      setDaftarVersi((versi) => versi + 1);
+      onCekMassalClose();
+      toast({
+        title: dibatalkan ? "Cek pajak dihentikan" : "Cek pajak selesai",
+        description: dibatalkan
+          ? "Sebagian data yang sudah berhasil tetap tersimpan."
+          : "Data pajak kendaraan sudah diperbarui dari SIMPATOR.",
+        status: dibatalkan ? "warning" : "success",
+        duration: 4000,
+        isClosable: true,
+      });
+    } catch (err) {
+      console.error(err);
+      setCekMassal((prev) => ({
+        ...prev,
+        running: false,
+        current: "Gagal mengambil daftar kendaraan",
+      }));
+      toast({
+        title: "Gagal",
+        description: "Tidak dapat mengambil daftar kendaraan untuk dicek.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      cekBerjalanRef.current = false;
+    }
+  };
+  const bukaCetakSurat = (item) => {
+    setSuratTarget(item);
+    setPenandatanganValue(null);
+    setOpenMenuId(null);
+    onSuratOpen();
+  };
+  const tutupCetakSurat = () => {
+    if (suratTarget && loadingSurat[suratTarget.id]) return;
+    setPenandatanganValue(null);
+    onSuratClose();
+  };
+  const cektakSurat = () => {
+    const val = suratTarget;
+    if (!val) return;
+    if (!penandatanganValue?.value) {
+      toast({
+        title: "Penandatangan wajib dipilih",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
     setLoadingSurat((prev) => ({ ...prev, [val.id]: true }));
     axios
       .post(
@@ -180,10 +442,11 @@ function DaftarKendaraan() {
           jenisKendaraan: val.jenisKendaraan.jenis,
           userId: user[0].id,
           kendaraanId: val.id,
+          penandatanganId: penandatanganValue.value,
         },
         {
           responseType: "blob", // Penting untuk menerima file sebagai blob
-        }
+        },
       )
       .then((res) => {
         console.log(res.data); // Log respons dari backend
@@ -200,22 +463,30 @@ function DaftarKendaraan() {
         // Tampilkan toast sukses
         toast({
           title: "Berhasil",
-          description: "File nota dinas berhasil diunduh",
+          description: "File surat pengantar berhasil diunduh",
           status: "success",
           duration: 3000,
           isClosable: true,
           position: "top",
         });
-
-        // Redirect setelah download selesai
+        setPenandatanganValue(null);
+        onSuratClose();
       })
-      .catch((err) => {
-        console.error(err); // Tangani error
-
-        // Tampilkan toast error
+      .catch(async (err) => {
+        console.error(err);
+        let pesan = "Terjadi kesalahan saat mengunduh file";
+        const data = err.response?.data;
+        if (data instanceof Blob) {
+          try {
+            const json = JSON.parse(await data.text());
+            pesan = json.message || json.error || pesan;
+          } catch (parseError) {
+            console.error(parseError);
+          }
+        }
         toast({
           title: "Gagal",
-          description: "Terjadi kesalahan saat mengunduh file",
+          description: pesan,
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -276,18 +547,42 @@ function DaftarKendaraan() {
   }
 
   async function fetchDataKendaraan() {
+    const params = new URLSearchParams({
+      page,
+      limit,
+      unitKerjaId: unitKerjaFilterId || 0,
+      pegawaiId: pegawaiFilterId || 0,
+      nomor: nomorPlat || "",
+      startDate: tanggalAwal || "",
+      endDate: tanggalAkhir || "",
+      jenisId: jenisFilterId || 0,
+      statusId: statusFilterId || 0,
+      kondisiId: kondisiFilterId || 0,
+      merek: merekFilter || "",
+      seri: seriFilter || "",
+      sortBy,
+      sortOrder,
+    });
     await axios
       .get(
-        `${
-          import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/kendaraan/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&nomor=${nomorPlat}&startDate=${tanggalAwal}&endDate=${tanggalAkhir}`
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kendaraan/get?${params.toString()}`,
+        {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        },
       )
       .then((res) => {
         setDataKendaraan(res.data.result);
-        setPage(res.data.page);
-        setPages(res.data.totalPage);
-        setRows(res.data.totalRows);
-        console.log(res.data.result);
+        const totalPage = res.data.totalPage || 0;
+        setPages(totalPage);
+        setRows(res.data.totalRows || 0);
+        setPage((current) => {
+          if (totalPage === 0) return 0;
+          if (current > totalPage - 1) return totalPage - 1;
+          return current;
+        });
       })
       .catch((err) => {
         console.error(err);
@@ -301,7 +596,7 @@ function DaftarKendaraan() {
         {
           responseType: "blob", // agar respons dibaca sebagai file
           // headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -317,31 +612,68 @@ function DaftarKendaraan() {
     }
   };
 
-  function inputHandler(event, field) {
-    const tes = setTimeout(() => {
-      const { value } = event.target;
+  const setDebouncedFilter = (key, value, setter) => {
+    clearTimeout(filterTimer.current[key]);
+    filterTimer.current[key] = setTimeout(() => {
+      setter(value);
+      setPage(0);
+    }, 500);
+  };
 
-      setNomorPlat(value);
-    }, 2000);
-  }
+  const resetFilter = () => {
+    Object.values(filterTimer.current).forEach((timer) => clearTimeout(timer));
+    setPegawaiFilterId(0);
+    setPegawaiFilterValue(null);
+    setUnitKerjaFilterId(0);
+    setUnitKerjaFilterValue(null);
+    setJenisFilterId(0);
+    setJenisFilterValue(null);
+    setStatusFilterId(0);
+    setStatusFilterValue(null);
+    setKondisiFilterId(0);
+    setKondisiFilterValue(null);
+    setNomorPlat("");
+    setNomorPlatInput("");
+    setMerekFilter("");
+    setMerekInput("");
+    setSeriFilter("");
+    setSeriInput("");
+    setTanggalAwal("");
+    setTanggalAkhir("");
+    setSortBy("pajakTahunIni");
+    setSortOrder("ASC");
+    setPage(0);
+  };
+
   useEffect(() => {
-    fetchDataKendaraan();
     fetchSeed();
     fetchDataPegawai();
+  }, []);
+
+  useEffect(() => {
+    fetchDataKendaraan();
   }, [
     page,
+    limit,
     unitKerjaFilterId,
     pegawaiFilterId,
     nomorPlat,
     tanggalAkhir,
     tanggalAwal,
+    jenisFilterId,
+    statusFilterId,
+    kondisiFilterId,
+    merekFilter,
+    seriFilter,
+    sortBy,
+    sortOrder,
+    daftarVersi,
   ]);
   return (
     <>
       <LayoutAset>
         <Box bgColor={"secondary"} pb={"40px"} px={"30px"}>
           <Box
-            style={{ overflowX: "auto" }}
             bgColor={"white"}
             p={"30px"}
             borderRadius={"5px"}
@@ -350,7 +682,10 @@ function DaftarKendaraan() {
             <HStack gap={5} mb={"30px"}>
               <Button onClick={onTambahOpen} variant={"primary"} px={"50px"}>
                 Tambah +
-              </Button>{" "}
+              </Button>
+              <Button onClick={bukaCekMassal} variant={"primary"} px={"30px"}>
+                Cek Pajak Massal
+              </Button>
               <Spacer />
               <Button
                 variant={"primary"}
@@ -360,27 +695,21 @@ function DaftarKendaraan() {
                 <BsDownload />
               </Button>{" "}
             </HStack>{" "}
-            <Flex
-              borderRadius={"5px"}
-              bg={colorMode === "dark" ? "gray.800" : "white"}
-              mb={"30px"}
-              gap={5}
-            >
+            <SimpleGrid columns={{ base: 1, md: 2, xl: 4 }} gap={5} mb={4}>
               <FormControl>
-                <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                <FormLabel>Nama Pegawai</FormLabel>
                 <AsyncSelect
+                  isClearable
+                  value={pegawaiFilterValue}
                   loadOptions={async (inputValue) => {
                     if (!inputValue) return [];
                     try {
                       const res = await axios.get(
                         `${
                           import.meta.env.VITE_REACT_APP_API_BASE_URL
-                        }/pegawai/search?q=${inputValue}`
+                        }/pegawai/search?q=${inputValue}`,
                       );
-
-                      const filtered = res.data.result;
-
-                      return filtered.map((val) => ({
+                      return (res.data.result || []).map((val) => ({
                         value: val.id,
                         label: val.nama,
                       }));
@@ -389,106 +718,219 @@ function DaftarKendaraan() {
                       return [];
                     }
                   }}
-                  placeholder="Ketik Nama Pegawai"
+                  placeholder="Ketik nama pegawai"
                   onChange={(selectedOption) => {
-                    setPegawaiFilterId(selectedOption.value);
+                    setPegawaiFilterValue(selectedOption);
+                    setPegawaiFilterId(selectedOption?.value || 0);
+                    setPage(0);
                   }}
-                  components={{
-                    DropdownIndicator: () => null,
-                    IndicatorSeparator: () => null,
-                  }}
-                  chakraStyles={{
-                    container: (provided) => ({
-                      ...provided,
-                      borderRadius: "6px",
-                    }),
-                    control: (provided) => ({
-                      ...provided,
-                      backgroundColor: "terang",
-                      border: "0px",
-                      height: "60px",
-                      _hover: { borderColor: "yellow.700" },
-                      minHeight: "40px",
-                    }),
-                    option: (provided, state) => ({
-                      ...provided,
-                      bg: state.isFocused ? "aset" : "white",
-                      color: state.isFocused ? "white" : "black",
-                    }),
-                  }}
+                  chakraStyles={gayaFilter}
                 />
               </FormControl>
-              <FormControl border={0}>
-                <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+              <FormControl>
+                <FormLabel>Unit Kerja</FormLabel>
                 <Select2
+                  isClearable
+                  value={unitKerjaFilterValue}
                   options={dataSeed?.unitKerja?.map((val) => ({
                     value: val.id,
-                    label: `${val.unitKerja}`,
+                    label: val.unitKerja,
                   }))}
-                  placeholder="Contoh: Laboratorium kesehatan daerah"
-                  focusBorderColor="red"
+                  placeholder="Semua unit kerja"
                   onChange={(selectedOption) => {
-                    setUnitKerjaFilterId(selectedOption.value);
+                    setUnitKerjaFilterValue(selectedOption);
+                    setUnitKerjaFilterId(selectedOption?.value || 0);
+                    setPage(0);
                   }}
-                  components={{
-                    DropdownIndicator: () => null, // Hilangkan tombol panah
-                    IndicatorSeparator: () => null, // Kalau mau sekalian hilangkan garis vertikal
-                  }}
-                  chakraStyles={{
-                    container: (provided) => ({
-                      ...provided,
-                      borderRadius: "6px",
-                    }),
-                    control: (provided) => ({
-                      ...provided,
-                      backgroundColor: "terang",
-                      border: "0px",
-                      height: "60px",
-                      _hover: {
-                        borderColor: "yellow.700",
-                      },
-                      minHeight: "40px",
-                    }),
-                    option: (provided, state) => ({
-                      ...provided,
-                      bg: state.isFocused ? "aset" : "white",
-                      color: state.isFocused ? "white" : "black",
-                    }),
-                  }}
+                  chakraStyles={gayaFilter}
                 />
               </FormControl>
               <FormControl>
-                <FormLabel fontSize={"24px"}>Nomor Plat</FormLabel>
-                <Input
-                  height={"60px"}
-                  bgColor={"terang"}
-                  onChange={inputHandler}
-                  placeholder="Contoh : 3321"
+                <FormLabel>Jenis Kendaraan</FormLabel>
+                <Select2
+                  isClearable
+                  value={jenisFilterValue}
+                  options={dataSeed?.jenis?.map((val) => ({
+                    value: val.id,
+                    label: val.jenis,
+                  }))}
+                  placeholder="Semua jenis"
+                  onChange={(selectedOption) => {
+                    setJenisFilterValue(selectedOption);
+                    setJenisFilterId(selectedOption?.value || 0);
+                    setPage(0);
+                  }}
+                  chakraStyles={gayaFilter}
                 />
-              </FormControl>{" "}
+              </FormControl>
               <FormControl>
-                <FormLabel fontSize={"24px"}>Awal</FormLabel>
+                <FormLabel>Status Pajak</FormLabel>
+                <Select2
+                  isClearable
+                  value={statusFilterValue}
+                  options={dataSeed?.status?.map((val) => ({
+                    value: val.id,
+                    label: val.status,
+                  }))}
+                  placeholder="Semua status"
+                  onChange={(selectedOption) => {
+                    setStatusFilterValue(selectedOption);
+                    setStatusFilterId(selectedOption?.value || 0);
+                    setPage(0);
+                  }}
+                  chakraStyles={gayaFilter}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Kondisi</FormLabel>
+                <Select2
+                  isClearable
+                  value={kondisiFilterValue}
+                  options={dataSeed?.kondisi?.map((val) => ({
+                    value: val.id,
+                    label: val.nama,
+                  }))}
+                  placeholder="Semua kondisi"
+                  onChange={(selectedOption) => {
+                    setKondisiFilterValue(selectedOption);
+                    setKondisiFilterId(selectedOption?.value || 0);
+                    setPage(0);
+                  }}
+                  chakraStyles={gayaFilter}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Nomor Plat</FormLabel>
                 <Input
-                  minWidth={"200px"}
-                  bgColor={"terang"}
-                  height={"60px"}
+                  height="48px"
+                  bgColor="terang"
+                  value={nomorPlatInput}
+                  onChange={(e) => {
+                    setNomorPlatInput(e.target.value);
+                    setDebouncedFilter("nomor", e.target.value, setNomorPlat);
+                  }}
+                  placeholder="Contoh: 3321"
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Seri</FormLabel>
+                <Input
+                  height="48px"
+                  bgColor="terang"
+                  value={seriInput}
+                  onChange={(e) => {
+                    setSeriInput(e.target.value);
+                    setDebouncedFilter("seri", e.target.value, setSeriFilter);
+                  }}
+                  placeholder="Contoh: E"
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Merek</FormLabel>
+                <Input
+                  height="48px"
+                  bgColor="terang"
+                  value={merekInput}
+                  onChange={(e) => {
+                    setMerekInput(e.target.value);
+                    setDebouncedFilter("merek", e.target.value, setMerekFilter);
+                  }}
+                  placeholder="Contoh: Honda"
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Pajak dari</FormLabel>
+                <Input
+                  bgColor="terang"
+                  height="48px"
                   type="date"
                   value={tanggalAwal}
-                  onChange={(e) => setTanggalAwal(e.target.value)}
+                  onChange={(e) => {
+                    setTanggalAwal(e.target.value);
+                    setPage(0);
+                  }}
                 />
               </FormControl>
               <FormControl>
-                <FormLabel fontSize={"24px"}> Akhir</FormLabel>
+                <FormLabel>Pajak sampai</FormLabel>
                 <Input
                   type="date"
-                  minWidth={"200px"}
-                  bgColor={"terang"}
-                  height={"60px"}
+                  bgColor="terang"
+                  height="48px"
                   value={tanggalAkhir}
-                  onChange={(e) => setTanggalAkhir(e.target.value)}
+                  onChange={(e) => {
+                    setTanggalAkhir(e.target.value);
+                    setPage(0);
+                  }}
                 />
               </FormControl>
-            </Flex>
+              <FormControl>
+                <FormLabel>Urutkan</FormLabel>
+                <Select
+                  height="48px"
+                  bgColor="terang"
+                  value={`${sortBy}:${sortOrder}`}
+                  onChange={(e) => {
+                    const [nextSortBy, nextSortOrder] =
+                      e.target.value.split(":");
+                    setSortBy(nextSortBy);
+                    setSortOrder(nextSortOrder);
+                    setPage(0);
+                  }}
+                >
+                  <option value="pajakTahunIni:ASC">
+                    Pajak tahun ini dulu
+                  </option>
+                  <option value="tgl_pkb:ASC">Tanggal pajak terdekat</option>
+                  <option value="tgl_pkb:DESC">Tanggal pajak terjauh</option>
+                  <option value="tg_stnk:ASC">Tanggal STNK terdekat</option>
+                  <option value="tg_stnk:DESC">Tanggal STNK terjauh</option>
+                  <option value="nomor:ASC">Nomor plat terkecil</option>
+                  <option value="nomor:DESC">Nomor plat terbesar</option>
+                  <option value="total:ASC">Nominal pajak terkecil</option>
+                  <option value="total:DESC">Nominal pajak terbesar</option>
+                  <option value="nilaiPerolehan:ASC">
+                    Nilai perolehan terkecil
+                  </option>
+                  <option value="nilaiPerolehan:DESC">
+                    Nilai perolehan terbesar
+                  </option>
+                  <option value="tanggalPerolehan:DESC">
+                    Perolehan terbaru
+                  </option>
+                  <option value="tanggalPerolehan:ASC">
+                    Perolehan terlama
+                  </option>
+                  <option value="merek:ASC">Merek A-Z</option>
+                  <option value="unitKerja:ASC">Unit kerja A-Z</option>
+                  <option value="pemilik:ASC">Nama pemilik A-Z</option>
+                </Select>
+              </FormControl>
+              <FormControl>
+                <FormLabel>Data per halaman</FormLabel>
+                <Select
+                  height="48px"
+                  bgColor="terang"
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(0);
+                  }}
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={1000}>1000</option>
+                </Select>
+              </FormControl>
+            </SimpleGrid>
+            <HStack mb="30px" justify="space-between">
+              <Text>{rows || 0} kendaraan</Text>
+              <Button variant="outline" onClick={resetFilter}>
+                Reset filter
+              </Button>
+            </HStack>
+            <Box overflowX="auto">
             <Table variant={"aset"}>
               <Thead>
                 <Tr>
@@ -576,7 +1018,7 @@ function DaftarKendaraan() {
                               day: "numeric",
                               month: "long",
                               year: "numeric",
-                            }
+                            },
                           )
                         : "-"}
                     </Td>
@@ -595,7 +1037,7 @@ function DaftarKendaraan() {
                           size="sm"
                           onClick={() =>
                             setOpenMenuId((prev) =>
-                              prev === item.id ? null : item.id
+                              prev === item.id ? null : item.id,
                             )
                           }
                         />
@@ -613,7 +1055,7 @@ function DaftarKendaraan() {
                             <MenuItem
                               onClick={() =>
                                 history.push(
-                                  `/sijaka/detail-kendaraan/${item.id}`
+                                  `/sijaka/detail-kendaraan/${item.id}`,
                                 )
                               }
                               icon={<BsEyeFill />}
@@ -623,7 +1065,7 @@ function DaftarKendaraan() {
                           )}
 
                           <MenuItem
-                            onClick={() => cektakSurat(item)}
+                            onClick={() => bukaCetakSurat(item)}
                             isDisabled={loadingSurat[item.id]}
                             icon={<BsFileEarmarkArrowDown />}
                           >
@@ -638,34 +1080,24 @@ function DaftarKendaraan() {
                 ))}
               </Tbody>
             </Table>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-
-                boxSizing: "border-box",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <ReactPaginate
-                previousLabel={"+"}
-                nextLabel={"-"}
-                pageCount={pages}
-                onPageChange={changePage}
-                activeClassName={"item active "}
-                breakClassName={"item break-me "}
-                breakLabel={"..."}
-                containerClassName={"pagination"}
-                disabledClassName={"disabled-page"}
-                marginPagesDisplayed={1}
-                nextClassName={"item next "}
-                pageClassName={"item pagination-page "}
-                pageRangeDisplayed={2}
-                previousClassName={"item previous"}
-              />
-            </div>
+            </Box>
+            <Box mt={4}>
+              <Text fontSize="sm" mb={2}>
+                {rows > 0
+                  ? `Menampilkan ${page * limit + 1}–${Math.min(
+                      (page + 1) * limit,
+                      rows
+                    )} dari ${rows} kendaraan`
+                  : "Tidak ada kendaraan"}
+              </Text>
+              {pages > 1 && (
+                <AppPagination
+                  page={Math.min(page, pages - 1)}
+                  pageCount={pages}
+                  onPageChange={changePage}
+                />
+              )}
+            </Box>
           </Box>
 
           <Modal
@@ -745,7 +1177,7 @@ function DaftarKendaraan() {
                             const res = await axios.get(
                               `${
                                 import.meta.env.VITE_REACT_APP_API_BASE_URL
-                              }/pegawai/search?q=${inputValue}`
+                              }/pegawai/search?q=${inputValue}`,
                             );
 
                             const filtered = res.data.result;
@@ -757,7 +1189,7 @@ function DaftarKendaraan() {
                           } catch (err) {
                             console.error(
                               "Failed to load options:",
-                              err.message
+                              err.message,
                             );
                             return [];
                           }
@@ -987,6 +1419,178 @@ function DaftarKendaraan() {
               <ModalFooter pe={"60px"} pb={"30px"}>
                 <Button onClick={tambahkendaraan} variant={"primary"}>
                   Tambah Kendaraan
+                </Button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          <Modal
+            closeOnOverlayClick={!cekMassal.running}
+            closeOnEsc={!cekMassal.running}
+            isOpen={isCekMassalOpen}
+            onClose={() => {
+              if (cekMassal.running) return;
+              onCekMassalClose();
+            }}
+          >
+            <ModalOverlay />
+            <ModalContent borderRadius={0} maxWidth="720px">
+              <ModalHeader>Cek Pajak Massal</ModalHeader>
+              <ModalCloseButton isDisabled={cekMassal.running} />
+              <ModalBody>
+                <Text mb={4}>
+                  Data pajak diambil dari SIMPATOR lalu disimpan ke setiap
+                  kendaraan. Pengecekan berjalan satu per satu supaya akses
+                  SIMPATOR tetap stabil. Pilih satu unit kerja, atau semua unit
+                  kerja sekaligus.
+                </Text>
+                <FormControl mb={4}>
+                  <FormLabel>Unit Kerja</FormLabel>
+                  <Select2
+                    options={opsiUnitCek}
+                    value={
+                      opsiUnitCek.find(
+                        (item) => item.value === unitKerjaCekId,
+                      ) || opsiUnitCek[0]
+                    }
+                    isDisabled={cekMassal.running}
+                    onChange={(selectedOption) => {
+                      setUnitKerjaCekId(selectedOption?.value || 0);
+                    }}
+                    chakraStyles={{
+                      control: (provided) => ({
+                        ...provided,
+                        backgroundColor: "terang",
+                        border: "0px",
+                        minHeight: "48px",
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        bg: state.isFocused ? "aset" : "white",
+                        color: state.isFocused ? "white" : "black",
+                      }),
+                    }}
+                  />
+                </FormControl>
+
+                {cekMassal.total > 0 && (
+                  <Box mb={4}>
+                    <Progress
+                      value={(cekMassal.selesai / cekMassal.total) * 100}
+                      colorScheme="green"
+                      borderRadius="md"
+                      hasStripe
+                      isAnimated={cekMassal.running}
+                      mb={2}
+                    />
+                    <Text fontSize="sm" mb={2}>
+                      {cekMassal.selesai} dari {cekMassal.total}
+                      {cekMassal.current ? ` · ${cekMassal.current}` : ""}
+                    </Text>
+                    <HStack spacing={2} flexWrap="wrap">
+                      <Badge colorScheme="green">
+                        Berhasil {cekMassal.berhasil}
+                      </Badge>
+                      <Badge colorScheme="orange">
+                        Tidak ditemukan {cekMassal.tidakDitemukan}
+                      </Badge>
+                      <Badge colorScheme="red">Gagal {cekMassal.gagal}</Badge>
+                      <Badge colorScheme="gray">
+                        Dilewati {cekMassal.dilewati}
+                      </Badge>
+                    </HStack>
+                  </Box>
+                )}
+
+                {cekMassal.current && cekMassal.total === 0 && (
+                  <Text mb={4}>{cekMassal.current}</Text>
+                )}
+
+                {cekMassal.log.length > 0 && (
+                  <Box
+                    maxH="220px"
+                    overflowY="auto"
+                    borderWidth="1px"
+                    borderRadius="md"
+                    p={3}
+                  >
+                    {cekMassal.log.map((item, index) => (
+                      <Text key={`${item.plat}-${index}`} fontSize="sm" mb={1}>
+                        {item.plat} ({item.unit}) — {item.status}
+                        {item.pesan ? `: ${item.pesan}` : ""}
+                      </Text>
+                    ))}
+                  </Box>
+                )}
+              </ModalBody>
+              <ModalFooter>
+                {cekMassal.running ? (
+                  <Button colorScheme="red" onClick={batalkanCekMassal}>
+                    Hentikan
+                  </Button>
+                ) : (
+                  <Button variant="primary" onClick={mulaiCekMassal}>
+                    Mulai Cek
+                  </Button>
+                )}
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          <Modal
+            closeOnOverlayClick={false}
+            isOpen={isSuratOpen}
+            onClose={tutupCetakSurat}
+          >
+            <ModalOverlay />
+            <ModalContent borderRadius={0} maxWidth="560px">
+              <ModalHeader>Cetak Surat Pengantar</ModalHeader>
+              <ModalCloseButton
+                isDisabled={suratTarget && loadingSurat[suratTarget.id]}
+              />
+              <ModalBody>
+                <Text mb={4}>
+                  {suratTarget
+                    ? `Plat KT ${suratTarget.nomor} ${suratTarget.seri || ""}`
+                    : ""}
+                </Text>
+                <FormControl>
+                  <FormLabel>Penandatangan</FormLabel>
+                  <AsyncSelect
+                    value={penandatanganValue}
+                    loadOptions={async (inputValue) => {
+                      if (!inputValue) return [];
+                      try {
+                        const res = await axios.get(
+                          `${
+                            import.meta.env.VITE_REACT_APP_API_BASE_URL
+                          }/pegawai/search?q=${inputValue}`
+                        );
+                        return res.data.result.map((val) => ({
+                          value: val.id,
+                          label: val.nip ? `${val.nama} — ${val.nip}` : val.nama,
+                        }));
+                      } catch (err) {
+                        console.error(err.message);
+                        return [];
+                      }
+                    }}
+                    placeholder="Ketik nama pegawai"
+                    onChange={(selectedOption) =>
+                      setPenandatanganValue(selectedOption)
+                    }
+                    chakraStyles={gayaFilter}
+                  />
+                </FormControl>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  variant="primary"
+                  onClick={cektakSurat}
+                  isLoading={suratTarget && loadingSurat[suratTarget.id]}
+                  isDisabled={!penandatanganValue}
+                >
+                  Cetak
                 </Button>
               </ModalFooter>
             </ModalContent>

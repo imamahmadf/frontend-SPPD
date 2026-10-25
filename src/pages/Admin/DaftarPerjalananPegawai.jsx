@@ -30,12 +30,10 @@ import {
   Spacer,
   Spinner,
 } from "@chakra-ui/react";
-import { BsCaretRightFill } from "react-icons/bs";
-import { BsCaretLeftFill } from "react-icons/bs";
 import { BsEyeFill } from "react-icons/bs";
 import { BsPencilFill } from "react-icons/bs";
-import ReactPaginate from "react-paginate";
 import "../../Style/pagination.css";
+import AppPagination from "../../Componets/AppPagination";
 import {
   Select as Select2,
   CreatableSelect,
@@ -191,21 +189,10 @@ function DaftarPerjalanan() {
               height: "100%",
             }}
           >
-            <ReactPaginate
-              previousLabel={<BsCaretLeftFill />}
-              nextLabel={<BsCaretRightFill />}
+            <AppPagination
+              page={page}
               pageCount={pages}
               onPageChange={changePage}
-              activeClassName={"item active "}
-              breakClassName={"item break-me "}
-              breakLabel={"..."}
-              containerClassName={"pagination"}
-              disabledClassName={"disabled-page"}
-              marginPagesDisplayed={2}
-              nextClassName={"item next "}
-              pageClassName={"item pagination-page "}
-              pageRangeDisplayed={2}
-              previousClassName={"item previous"}
             />
           </div>
         </Container>

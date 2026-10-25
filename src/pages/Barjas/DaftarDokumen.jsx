@@ -4,9 +4,9 @@ import * as Yup from "yup";
 import axios from "axios";
 
 import LayoutAset from "../../Componets/Aset/LayoutAset";
-import ReactPaginate from "react-paginate";
 
 import "../../Style/pagination.css";
+import AppPagination from "../../Componets/AppPagination";
 import { Link, useHistory } from "react-router-dom";
 import Foto from "../../assets/add_photo.png";
 import { BsDownload } from "react-icons/bs";
@@ -53,6 +53,7 @@ import {
   Badge,
   Skeleton,
   SkeletonText,
+  Select,
 } from "@chakra-ui/react";
 import {
   Select as Select2,
@@ -76,26 +77,30 @@ function DaftarDokumen() {
   const history = useHistory();
   const [dataSeed, setDataSeed] = useState(null);
   const [page, setPage] = useState(0);
-  const [limit, setLimit] = useState(50);
+  const [limit, setLimit] = useState(25);
   const [pages, setPages] = useState(0);
   const [rows, setRows] = useState(0);
 
-  const [time, setTime] = useState("");
   const [loadingItems, setLoadingItems] = useState({});
   const [loadingSurat, setLoadingSurat] = useState({});
   const [openMenuId, setOpenMenuId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
 
   const user = useSelector(userRedux);
   const role = useSelector(selectRole);
-  const [nomorPlat, setNomorPlat] = useState("");
-  const [unitKerjaFilterId, setUnitKerjaFilterId] = useState(0);
-  const [pegawaiFilterId, setPegawaiFilterId] = useState(0);
+  const [nomorInput, setNomorInput] = useState("");
+  const [nomor, setNomor] = useState("");
+  const [unitKerjaFilter, setUnitKerjaFilter] = useState(null);
+  const [subKegPerFilter, setSubKegPerFilter] = useState(null);
+  const [rekananFilter, setRekananFilter] = useState(null);
+  const [akunBelanjaFilter, setAkunBelanjaFilter] = useState(null);
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
-  const [subKegPerFilterId, setSubKegPerFilterId] = useState(null);
+  const [sortBy, setSortBy] = useState("tanggal");
+  const [sortOrder, setSortOrder] = useState("DESC");
   const initialValuesTambahSP = {
     subKegPerId: null,
     rekananId: null,
@@ -154,15 +159,50 @@ function DaftarDokumen() {
     setPage(selected);
   };
 
-  // Reset ke halaman pertama saat filter berubah
+  const resetFilters = () => {
+    setNomorInput("");
+    setNomor("");
+    setUnitKerjaFilter(null);
+    setSubKegPerFilter(null);
+    setRekananFilter(null);
+    setAkunBelanjaFilter(null);
+    setTanggalAwal("");
+    setTanggalAkhir("");
+    setSortBy("tanggal");
+    setSortOrder("DESC");
+    setPage(0);
+  };
+
+  const hasActiveFilter = Boolean(
+    nomor ||
+      unitKerjaFilter?.value ||
+      subKegPerFilter?.value ||
+      rekananFilter?.value ||
+      akunBelanjaFilter?.value ||
+      tanggalAwal ||
+      tanggalAkhir,
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setNomor(nomorInput.trim());
+      setPage(0);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [nomorInput]);
+
   useEffect(() => {
     setPage(0);
   }, [
-    unitKerjaFilterId,
-    pegawaiFilterId,
+    unitKerjaFilter?.value,
+    subKegPerFilter?.value,
+    rekananFilter?.value,
+    akunBelanjaFilter?.value,
     tanggalAwal,
     tanggalAkhir,
-    subKegPerFilterId,
+    sortBy,
+    sortOrder,
+    limit,
   ]);
 
   const handleCloseModal = (resetForm) => {
@@ -287,15 +327,37 @@ function DaftarDokumen() {
       });
   }
 
+  const buildFilterParams = (includePagination = false) => {
+    const params = new URLSearchParams({
+      sortBy,
+      sortOrder,
+      indukUnitKerjaId: String(
+        user[0]?.unitKerja_profile?.indukUnitKerja?.id || "",
+      ),
+    });
+    if (includePagination) {
+      params.set("page", String(page));
+      params.set("limit", String(limit));
+    }
+    if (nomor) params.set("nomor", nomor);
+    if (unitKerjaFilter?.value) params.set("unitKerjaId", unitKerjaFilter.value);
+    if (subKegPerFilter?.value) params.set("subKegPerId", subKegPerFilter.value);
+    if (rekananFilter?.value) params.set("rekananId", rekananFilter.value);
+    if (akunBelanjaFilter?.value) {
+      params.set("akunBelanjaId", akunBelanjaFilter.value);
+    }
+    if (tanggalAwal) params.set("startDate", tanggalAwal);
+    if (tanggalAkhir) params.set("endDate", tanggalAkhir);
+    return params;
+  };
+
   async function fetchDataDokumen() {
     setIsLoading(true);
+    const params = buildFilterParams(true);
+
     await axios
       .get(
-        `${
-          import.meta.env.VITE_REACT_APP_API_BASE_URL
-        }/barjas/get?time=${time}&page=${page}&limit=${limit}&unitKerjaId=${unitKerjaFilterId}&pegawaiId=${pegawaiFilterId}&startDate=${tanggalAwal}&endDate=${tanggalAkhir}&subKegPerId=${subKegPerFilterId}&indukUnitKerjaId=${
-          user[0]?.unitKerja_profile?.indukUnitKerja?.id
-        }`
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/get?${params.toString()}`,
       )
       .then((res) => {
         setDataDokumen(res.data.result);
@@ -320,47 +382,87 @@ function DaftarDokumen() {
   }
 
   const downloadExcel = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
     try {
+      const params = buildFilterParams(false);
       const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/get/download`,
-        {
-          responseType: "blob", // agar respons dibaca sebagai file
-          // headers: { Authorization: `Bearer ${token}` },
-        }
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/barjas/get/download?${params.toString()}`,
+        { responseType: "blob" },
       );
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const blob = response.data;
+      const contentType = String(
+        response.headers["content-type"] || "",
+      ).toLowerCase();
+      if (contentType.includes("application/json") || blob.type === "application/json") {
+        const json = JSON.parse(await blob.text());
+        throw new Error(json.message || json.error || "Gagal mengunduh Excel");
+      }
+
+      const filename = `daftar-surat-pesanan-${new Date()
+        .toISOString()
+        .slice(0, 10)}.xlsx`;
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "data-nomor-dokumen.xlsx");
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Berhasil",
+        description: "File Excel berhasil diunduh",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error("Gagal mengunduh file Excel:", error);
-      alert("Terjadi kesalahan saat mengunduh file.");
+      let message = "Terjadi kesalahan saat mengunduh file Excel.";
+      const data = error.response?.data;
+      if (data instanceof Blob) {
+        try {
+          const json = JSON.parse(await data.text());
+          message = json.message || json.error || message;
+        } catch (parseError) {
+          console.error(parseError);
+        }
+      } else if (error.message) {
+        message = error.message;
+      }
+      toast({
+        title: "Gagal mengunduh Excel",
+        description: message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
-  function inputHandler(event, field) {
-    const tes = setTimeout(() => {
-      const { value } = event.target;
+  useEffect(() => {
+    if (user?.[0]?.unitKerja_profile?.id) fetchSeed();
+  }, [user]);
 
-      setNomorPlat(value);
-    }, 2000);
-  }
   useEffect(() => {
     fetchDataDokumen();
-    fetchSeed();
   }, [
     page,
     limit,
-    unitKerjaFilterId,
-    pegawaiFilterId,
-    nomorPlat,
-    tanggalAkhir,
+    nomor,
+    unitKerjaFilter?.value,
+    subKegPerFilter?.value,
+    rekananFilter?.value,
+    akunBelanjaFilter?.value,
     tanggalAwal,
-    subKegPerFilterId,
+    tanggalAkhir,
+    sortBy,
+    sortOrder,
   ]);
   return (
     <>
@@ -405,6 +507,8 @@ function DaftarDokumen() {
                   onClick={downloadExcel}
                   leftIcon={<BsDownload />}
                   size="md"
+                  isLoading={isDownloading}
+                  loadingText="Mengunduh"
                 >
                   Export Excel
                 </Button>
@@ -415,15 +519,72 @@ function DaftarDokumen() {
 
             {/* Filter Section */}
             <Box mb={"30px"}>
-              <Heading size="md" mb={"20px"} color="gray.700">
-                Filter Pencarian
-              </Heading>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={5}>
+              <Flex
+                justify="space-between"
+                align="center"
+                mb={"20px"}
+                gap={3}
+                flexWrap="wrap"
+              >
+                <Heading size="md" color="gray.700">
+                  Filter dan Urutan
+                </Heading>
+                {hasActiveFilter && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    colorScheme="red"
+                    onClick={resetFilters}
+                  >
+                    Reset Filter
+                  </Button>
+                )}
+              </Flex>
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
                 <FormControl>
-                  <FormLabel fontSize={"16px"} fontWeight="medium">
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Nomor SP
+                  </FormLabel>
+                  <Input
+                    placeholder="Cari nomor surat pesanan"
+                    value={nomorInput}
+                    onChange={(e) => setNomorInput(e.target.value)}
+                    bg={colorMode === "dark" ? "gray.700" : "terang"}
+                    height="44px"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Tanggal Awal
+                  </FormLabel>
+                  <Input
+                    type="date"
+                    value={tanggalAwal}
+                    onChange={(e) => setTanggalAwal(e.target.value)}
+                    bg={colorMode === "dark" ? "gray.700" : "terang"}
+                    height="44px"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Tanggal Akhir
+                  </FormLabel>
+                  <Input
+                    type="date"
+                    value={tanggalAkhir}
+                    min={tanggalAwal || undefined}
+                    onChange={(e) => setTanggalAkhir(e.target.value)}
+                    bg={colorMode === "dark" ? "gray.700" : "terang"}
+                    height="44px"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
                     Unit Kerja
                   </FormLabel>
                   <AsyncSelect
+                    isClearable
+                    value={unitKerjaFilter}
                     loadOptions={async (inputValue) => {
                       if (!inputValue) return [];
                       try {
@@ -432,118 +593,148 @@ function DaftarDokumen() {
                             import.meta.env.VITE_REACT_APP_API_BASE_URL
                           }/admin/search/unit-kerja?q=${inputValue}`
                         );
-
-                        const filtered = res.data.result;
-
-                        return filtered.map((val) => ({
+                        return (res.data.result || []).map((val) => ({
                           value: val.id,
                           label: val.unitKerja,
                         }));
                       } catch (err) {
-                        console.error("Failed to load options:", err.message);
+                        console.error(err);
                         return [];
                       }
                     }}
-                    placeholder="Ketik Nama Unit Kerja"
+                    placeholder="Cari unit kerja"
                     onChange={(selectedOption) => {
-                      setUnitKerjaFilterId(selectedOption.value);
+                      setUnitKerjaFilter(selectedOption || null);
                     }}
-                    components={{
-                      DropdownIndicator: () => null,
-                      IndicatorSeparator: () => null,
-                    }}
-                    chakraStyles={{
-                      container: (provided) => ({
-                        ...provided,
-                        borderRadius: "6px",
-                      }),
-                      control: (provided) => ({
-                        ...provided,
-                        backgroundColor: "terang",
-                        border: "0px",
-                        height: "60px",
-                        _hover: { borderColor: "yellow.700" },
-                        minHeight: "40px",
-                      }),
-                      option: (provided, state) => ({
-                        ...provided,
-                        bg: state.isFocused ? "aset" : "white",
-                        color: state.isFocused ? "white" : "black",
-                      }),
-                    }}
+                    menuPosition="fixed"
                   />
                 </FormControl>
                 <FormControl>
-                  <FormLabel fontSize={"16px"} fontWeight="medium">
+                  <FormLabel fontSize="sm" fontWeight="medium">
                     Sub Kegiatan
                   </FormLabel>
                   <AsyncSelect
+                    isClearable
+                    value={subKegPerFilter}
+                    loadOptions={async (inputValue) => {
+                      if (!inputValue) return [];
+                      try {
+                        const indukId =
+                          user[0]?.unitKerja_profile?.indukUnitKerja?.id ||
+                          user[0]?.unitKerja_profile?.id;
+                        const res = await axios.get(
+                          `${
+                            import.meta.env.VITE_REACT_APP_API_BASE_URL
+                          }/barjas/get/sub-kegiatan/search?q=${inputValue}&indukUnitKerjaId=${indukId}`
+                        );
+                        return (res.data.result || []).map((val) => ({
+                          value: val.id,
+                          label: `${val.nama}${
+                            val.daftarUnitKerja?.unitKerja
+                              ? ` - ${val.daftarUnitKerja.unitKerja}`
+                              : ""
+                          }`,
+                        }));
+                      } catch (err) {
+                        console.error(err);
+                        return [];
+                      }
+                    }}
+                    placeholder="Cari sub kegiatan"
+                    onChange={(selectedOption) => {
+                      setSubKegPerFilter(selectedOption || null);
+                    }}
+                    menuPosition="fixed"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Rekanan
+                  </FormLabel>
+                  <AsyncSelect
+                    isClearable
+                    value={rekananFilter}
                     loadOptions={async (inputValue) => {
                       if (!inputValue) return [];
                       try {
                         const res = await axios.get(
                           `${
                             import.meta.env.VITE_REACT_APP_API_BASE_URL
-                          }/barjas/get/sub-kegiatan/search?q=${inputValue}&indukUnitKerjaId=${
-                            user[0]?.unitKerja_profile?.id
-                          }`
+                          }/barjas/get/rekanan/search?q=${inputValue}`
                         );
-
-                        const filtered = res.data.result;
-
-                        return filtered.map((val) => ({
+                        return (res.data.result || []).map((val) => ({
                           value: val.id,
                           label: val.nama,
                         }));
                       } catch (err) {
-                        console.error("Failed to load options:", err.message);
+                        console.error(err);
                         return [];
                       }
                     }}
-                    placeholder="Ketik Nama Sub Kegiatan"
+                    placeholder="Cari rekanan"
                     onChange={(selectedOption) => {
-                      setSubKegPerFilterId(selectedOption.value);
+                      setRekananFilter(selectedOption || null);
                     }}
-                    components={{
-                      DropdownIndicator: () => null,
-                      IndicatorSeparator: () => null,
-                    }}
-                    chakraStyles={{
-                      container: (provided) => ({
-                        ...provided,
-                        borderRadius: "6px",
-                      }),
-                      control: (provided) => ({
-                        ...provided,
-                        backgroundColor: "terang",
-                        border: "0px",
-                        height: "60px",
-                        _hover: { borderColor: "yellow.700" },
-                        minHeight: "40px",
-                      }),
-                      option: (provided, state) => ({
-                        ...provided,
-                        bg: state.isFocused ? "aset" : "white",
-                        color: state.isFocused ? "white" : "black",
-                      }),
-                    }}
+                    menuPosition="fixed"
                   />
                 </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Akun Belanja
+                  </FormLabel>
+                  <Select2
+                    isClearable
+                    options={(dataSeed?.resultAkunBelanja || []).map((val) => ({
+                      value: val.id,
+                      label: val.kode ? `${val.kode} — ${val.akun}` : val.akun,
+                    }))}
+                    placeholder="Pilih akun belanja"
+                    value={akunBelanjaFilter}
+                    onChange={(selectedOption) => {
+                      setAkunBelanjaFilter(selectedOption || null);
+                    }}
+                    menuPosition="fixed"
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Urutkan
+                  </FormLabel>
+                  <Select
+                    value={`${sortBy}:${sortOrder}`}
+                    onChange={(e) => {
+                      const [nextSortBy, nextSortOrder] =
+                        e.target.value.split(":");
+                      setSortBy(nextSortBy);
+                      setSortOrder(nextSortOrder);
+                    }}
+                    height="44px"
+                    bg={colorMode === "dark" ? "gray.700" : "terang"}
+                  >
+                    <option value="tanggal:DESC">Tanggal terbaru</option>
+                    <option value="tanggal:ASC">Tanggal terlama</option>
+                    <option value="nomor:ASC">Nomor A-Z</option>
+                    <option value="nomor:DESC">Nomor Z-A</option>
+                    <option value="createdAt:DESC">Baru diinput</option>
+                  </Select>
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium">
+                    Data per halaman
+                  </FormLabel>
+                  <Select
+                    value={limit}
+                    onChange={(e) => setLimit(Number(e.target.value))}
+                    height="44px"
+                    bg={colorMode === "dark" ? "gray.700" : "terang"}
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                  </Select>
+                </FormControl>
               </SimpleGrid>
-              {(unitKerjaFilterId || subKegPerFilterId) && (
-                <Button
-                  mt={4}
-                  size="sm"
-                  variant="ghost"
-                  colorScheme="red"
-                  onClick={() => {
-                    setUnitKerjaFilterId(0);
-                    setSubKegPerFilterId(null);
-                  }}
-                >
-                  Reset Filter
-                </Button>
-              )}
             </Box>
 
             <Divider mb={"30px"} />
@@ -711,8 +902,9 @@ function DaftarDokumen() {
                             Tidak ada data dokumen
                           </Text>
                           <Text fontSize="sm" color="gray.400">
-                            Klik tombol "Tambah Dokumen" untuk menambahkan data
-                            baru
+                            {hasActiveFilter
+                              ? "Coba ubah atau reset filter pencarian"
+                              : 'Klik tombol "Tambah Dokumen" untuk menambahkan data baru'}
                           </Text>
                         </VStack>
                       </Td>
@@ -722,29 +914,31 @@ function DaftarDokumen() {
               </Table>
             </Box>
             {/* Pagination */}
-            <Box
+            <Flex
               mt={6}
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
+              gap={4}
+              justify="space-between"
+              align="center"
+              wrap="wrap"
             >
-              <ReactPaginate
-                previousLabel={"←"}
-                nextLabel={"→"}
-                pageCount={pages}
-                onPageChange={changePage}
-                activeClassName={"item active "}
-                breakClassName={"item break-me "}
-                breakLabel={"..."}
-                containerClassName={"pagination"}
-                disabledClassName={"disabled-page"}
-                marginPagesDisplayed={1}
-                nextClassName={"item next "}
-                pageClassName={"item pagination-page "}
-                pageRangeDisplayed={2}
-                previousClassName={"item previous"}
-              />
-            </Box>
+              <Text fontSize="sm" color="gray.600">
+                {rows > 0
+                  ? `Menampilkan ${page * limit + 1} - ${Math.min(
+                      (page + 1) * limit,
+                      rows,
+                    )} dari ${rows} data`
+                  : "Tidak ada data untuk ditampilkan"}
+              </Text>
+              {pages > 1 && (
+                <Box overflowX="auto">
+                  <AppPagination
+                    page={page}
+                    pageCount={pages}
+                    onPageChange={changePage}
+                  />
+                </Box>
+              )}
+            </Flex>
           </Box>
 
           <Modal

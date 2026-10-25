@@ -45,8 +45,6 @@ import {
   CardBody,
   CardHeader,
 } from "@chakra-ui/react";
-import { BsCaretRightFill } from "react-icons/bs";
-import { BsCaretLeftFill } from "react-icons/bs";
 import { BsEyeFill } from "react-icons/bs";
 import { BsDownload } from "react-icons/bs";
 import { BsFileEarmarkExcel } from "react-icons/bs";
@@ -54,8 +52,8 @@ import { BsPersonPlusFill } from "react-icons/bs";
 import { BsTrashFill } from "react-icons/bs";
 import { BsPeopleFill } from "react-icons/bs";
 import { useDisclosure } from "@chakra-ui/react";
-import ReactPaginate from "react-paginate";
 import "../Style/pagination.css";
+import AppPagination from "../Componets/AppPagination";
 import { Link, useHistory } from "react-router-dom";
 import Loading from "../Componets/Loading";
 import { Select as Select2 } from "chakra-react-select";
@@ -1492,21 +1490,10 @@ function DaftarPegawai() {
               justifyContent="center"
               alignItems="center"
             >
-              <ReactPaginate
-                previousLabel={<BsCaretLeftFill />}
-                nextLabel={<BsCaretRightFill />}
+              <AppPagination
+                page={page}
                 pageCount={pages}
                 onPageChange={changePage}
-                activeClassName={"item active "}
-                breakClassName={"item break-me "}
-                breakLabel={"..."}
-                containerClassName={"pagination"}
-                disabledClassName={"disabled-page"}
-                marginPagesDisplayed={2}
-                nextClassName={"item next "}
-                pageClassName={"item pagination-page "}
-                pageRangeDisplayed={2}
-                previousClassName={"item previous"}
               />
             </Box>
           </Container>

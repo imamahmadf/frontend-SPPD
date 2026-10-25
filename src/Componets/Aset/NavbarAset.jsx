@@ -66,6 +66,8 @@ const menuData = [
     pathPrefix: "/barjas",
     items: [
       { label: "Daftar Surat Pesanan", path: "/barjas/daftar-dokumen-sp" },
+      { label: "Daftar Dokumen", path: "/barjas/daftar-dokumen" },
+      { label: "Daftar Barjas", path: "/barjas/daftar-barjas" },
       { label: "Pengaturan Dokumen Barjas", path: "/barjas/jenis-dokumen" },
       { label: "Pengaturan SP", path: "/barjas/nomor-sp" },
     ],
@@ -437,7 +439,7 @@ function NavbarAset() {
                     fontWeight={700}
                     letterSpacing="0.2px"
                   >
-                    Dinas Kesehatanxxxx
+                    Dinas Kesehatan
                   </Text>
                   <Text
                     color="gray.600"

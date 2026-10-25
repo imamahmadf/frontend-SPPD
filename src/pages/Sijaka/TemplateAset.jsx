@@ -20,6 +20,16 @@ import {
   Th,
   Td,
   Tbody,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  FormHelperText,
+  HStack,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../../Redux/Reducers/auth";
@@ -32,7 +42,67 @@ const TemplateAset = () => {
   const [dataTemplate, setDataTemplate] = useState([]);
   const [oldFile, setOldFile] = useState("");
   const [templateId, setTemplateId] = useState(null);
+  const [nomorEdit, setNomorEdit] = useState("");
+  const [menyimpanNomor, setMenyimpanNomor] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
+
+  const bukaEditNomor = () => {
+    setNomorEdit(dataTemplate[0]?.nomorSurat || "");
+    onOpen();
+  };
+
+  const simpanNomorSurat = async () => {
+    const nomor = nomorEdit.trim();
+    if (!templateId) {
+      toast({
+        title: "Template belum tersedia",
+        description: "Unggah template terlebih dahulu",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (!nomor) {
+      toast({
+        title: "Nomor surat wajib diisi",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    setMenyimpanNomor(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/edit-nomor-aset`,
+        { id: templateId, nomorSurat: nomor }
+      );
+      toast({
+        title: "Sukses!",
+        description: response.data.message,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose();
+      fetchTemplate();
+    } catch (error) {
+      toast({
+        title: "Gagal menyimpan",
+        description:
+          error.response?.data?.message ||
+          "Terjadi kesalahan saat memperbarui nomor surat",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setMenyimpanNomor(false);
+    }
+  };
 
   const handleDownload = async (fileName) => {
     try {
@@ -206,10 +276,12 @@ const TemplateAset = () => {
                 <Tr>
                   <Th>Nomor Surat</Th>
                   <Th>Surat Pengantar</Th>
+                  <Th>Aksi</Th>
                 </Tr>
               </Thead>
+              <Tbody>
               <Tr>
-                <Td>{dataTemplate[0]?.nomorSurat}</Td>
+                <Td>{dataTemplate[0]?.nomorSurat || "-"}</Td>
                 <Td>
                   {dataTemplate[0]?.dokumen ? (
                     <Button
@@ -222,11 +294,57 @@ const TemplateAset = () => {
                     "-"
                   )}
                 </Td>
+                <Td>
+                  <Button
+                    size="sm"
+                    variant={"primary"}
+                    onClick={bukaEditNomor}
+                    isDisabled={!templateId}
+                  >
+                    Edit nomor
+                  </Button>
+                </Td>
               </Tr>
+              </Tbody>
             </Table>
           </Box>
         </Container>
       </Box>
+
+      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Edit Nomor Surat</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Nomor Surat</FormLabel>
+              <Input
+                value={nomorEdit}
+                onChange={(event) => setNomorEdit(event.target.value)}
+                placeholder="Contoh: 000/NOMOR/DINKES/2026"
+              />
+              <FormHelperText>
+                Kata NOMOR akan diganti nomor urut saat surat pengantar dibuat.
+              </FormHelperText>
+            </FormControl>
+          </ModalBody>
+          <ModalFooter>
+            <HStack>
+              <Button
+                variant={"primary"}
+                onClick={simpanNomorSurat}
+                isLoading={menyimpanNomor}
+              >
+                Simpan
+              </Button>
+              <Button onClick={onClose} isDisabled={menyimpanNomor}>
+                Batal
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </LayoutAset>
   );
 };

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Layout from "../Componets/Layout";
-import ReactPaginate from "react-paginate";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../Style/pagination.css";
+import AppPagination from "../Componets/AppPagination";
 import { Link, useHistory } from "react-router-dom";
 import {
   Box,
@@ -1235,21 +1235,10 @@ function Daftar() {
                 justifyContent="center"
                 alignItems="center"
               >
-                <ReactPaginate
-                  previousLabel={"←"}
-                  nextLabel={"→"}
+                <AppPagination
+                  page={page}
                   pageCount={pages}
                   onPageChange={changePage}
-                  activeClassName={"item active "}
-                  breakClassName={"item break-me "}
-                  breakLabel={"..."}
-                  containerClassName={"pagination"}
-                  disabledClassName={"disabled-page"}
-                  marginPagesDisplayed={1}
-                  nextClassName={"item next "}
-                  pageClassName={"item pagination-page "}
-                  pageRangeDisplayed={2}
-                  previousClassName={"item previous"}
                 />
               </Box>
             </Box>

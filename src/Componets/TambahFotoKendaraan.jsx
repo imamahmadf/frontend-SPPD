@@ -108,11 +108,12 @@ function TambahFotoKendaraan(props) {
     <Box position="relative">
       <Image
         borderRadius={"5px"}
-        alt="foto obat"
-        width="720px"
-        height="820px"
-        overflow="hiden"
+        alt="foto kendaraan"
+        width={props.lebar || "720px"}
+        height={props.tinggi || "820px"}
+        maxW="100%"
         objectFit="cover"
+        bg="gray.100"
         src={
           props?.foto
             ? import.meta.env.VITE_REACT_APP_API_BASE_URL + props?.foto

@@ -31,13 +31,13 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { BsEyeFill } from "react-icons/bs";
-import ReactPaginate from "react-paginate";
 import {
   Select as Select2,
   CreatableSelect,
   AsyncSelect,
 } from "chakra-react-select";
 import "../../Style/pagination.css";
+import AppPagination from "../../Componets/AppPagination";
 import { Link, useHistory } from "react-router-dom";
 import axios, { Axios } from "axios";
 import Layout from "../../Componets/Layout";
@@ -385,21 +385,10 @@ function DaftarAdmin() {
               height: "100%",
             }}
           >
-            <ReactPaginate
-              previousLabel={"+"}
-              nextLabel={"-"}
+            <AppPagination
+              page={page}
               pageCount={pages}
               onPageChange={changePage}
-              activeClassName={"item active "}
-              breakClassName={"item break-me "}
-              breakLabel={"..."}
-              containerClassName={"pagination"}
-              disabledClassName={"disabled-page"}
-              marginPagesDisplayed={1}
-              nextClassName={"item next "}
-              pageClassName={"item pagination-page "}
-              pageRangeDisplayed={2}
-              previousClassName={"item previous"}
             />
           </div>
         </Container>

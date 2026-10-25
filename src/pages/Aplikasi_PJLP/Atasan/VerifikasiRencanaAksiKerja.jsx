@@ -28,9 +28,8 @@ import {
   SimpleGrid,
   Divider,
 } from "@chakra-ui/react";
-import { BsCaretRightFill, BsCaretLeftFill } from "react-icons/bs";
-import ReactPaginate from "react-paginate";
 import "../../../Style/pagination.css";
+import AppPagination from "../../../Componets/AppPagination";
 import axios from "axios";
 import LayoutPegawai from "../../../Componets/Pegawai/LayoutPegawai";
 import { useSelector } from "react-redux";
@@ -380,22 +379,10 @@ function VerifikasiRencanaAksiKerja() {
                       {Math.min(page * limit + limit, totalRows)} dari{" "}
                       {totalRows} data
                     </Text>
-                    <ReactPaginate
-                      previousLabel={<BsCaretLeftFill />}
-                      nextLabel={<BsCaretRightFill />}
+                    <AppPagination
+                      page={page}
                       pageCount={totalPages}
                       onPageChange={changePage}
-                      forcePage={page}
-                      activeClassName={"item active "}
-                      breakClassName={"item break-me "}
-                      breakLabel={"..."}
-                      containerClassName={"pagination"}
-                      disabledClassName={"disabled-page"}
-                      marginPagesDisplayed={2}
-                      nextClassName={"item next "}
-                      pageClassName={"item pagination-page "}
-                      pageRangeDisplayed={2}
-                      previousClassName={"item previous"}
                     />
                   </Flex>
                 </>

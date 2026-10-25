@@ -3,13 +3,11 @@ import axios from "axios";
 
 import LayoutAset from "../../Componets/Aset/LayoutAset";
 import TambahFotoKendaraan from "../../Componets/TambahFotoKendaraan";
-import { Link, useHistory } from "react-router-dom";
 import {
   Box,
   Text,
   Button,
   Container,
-  VStack,
   FormControl,
   FormLabel,
   Input,
@@ -20,7 +18,8 @@ import {
   Tr,
   Th,
   Td,
-  Spacer,
+  SimpleGrid,
+  Badge,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -38,14 +37,57 @@ import {
 import { useDisclosure } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import {
-  Select as Select2,
-  CreatableSelect,
-  AsyncSelect,
-} from "chakra-react-select";
+import { Select as Select2, AsyncSelect } from "chakra-react-select";
+
+function formatTanggal(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function formatRupiah(value) {
+  if (value === null || value === undefined || value === "") return "-";
+  const angka = Number(value);
+  if (Number.isNaN(angka)) return "-";
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(angka);
+}
+
+function InfoItem({ label, value }) {
+  return (
+    <Box minW={0}>
+      <Text fontSize="13px" color="gray.500" mb="2px">
+        {label}
+      </Text>
+      <Text fontWeight="600" wordBreak="break-word">
+        {value === null || value === undefined || value === "" ? "-" : value}
+      </Text>
+    </Box>
+  );
+}
+
+function JudulBagian({ children }) {
+  return (
+    <HStack px={{ base: "16px", md: "24px" }} pt="24px" spacing={3}>
+      <Box bgColor="aset" w="6px" h="26px" borderRadius="full" />
+      <Heading size="md" color="aset">
+        {children}
+      </Heading>
+    </HStack>
+  );
+}
 
 function DetailKendaraan(props) {
-  const [detailKendaraan, setDetailKendaraan] = useState([]);
+  const [detailKendaraan, setDetailKendaraan] = useState(null);
+  const [memuat, setMemuat] = useState(true);
   const [nomorSurat, setNomorSurat] = useState("");
   const [randomNumber, setRandomNumber] = useState(0);
   const [jenisList, setJenisList] = useState([]);
@@ -86,9 +128,11 @@ function DetailKendaraan(props) {
       const result = res.data.result;
       setDetailKendaraan(result);
       setNomorSurat(res.data.resultTemplate[0]?.nomorSurat || "");
-      console.log(result);
     } catch (err) {
       console.error(err);
+      setDetailKendaraan(null);
+    } finally {
+      setMemuat(false);
     }
   };
   const mutasi = () => {
@@ -184,344 +228,261 @@ function DetailKendaraan(props) {
     }
   };
 
+  const plat = `KT ${detailKendaraan?.nomor || "-"} ${
+    detailKendaraan?.seri || ""
+  }`.trim();
+
   return (
     <LayoutAset>
-      <Box pb={"60px"}>
-        <Container variant={"primary"} maxW={"1280px"} p={"30px"}>
-          <Box display="flex" gap={5}>
-            <Box>
+      <Box pb="60px" px={{ base: "16px", md: "30px" }} pt="20px">
+        {memuat ? (
+          <Container variant="primary" maxW="1280px" p="40px" borderRadius="8px">
+            <Text color="gray.500">Memuat detail kendaraan...</Text>
+          </Container>
+        ) : !detailKendaraan ? (
+          <Container variant="primary" maxW="1280px" p="40px" borderRadius="8px">
+            <Heading size="md" color="aset" mb={2}>
+              Detail kendaraan tidak ditemukan
+            </Heading>
+            <Text color="gray.500">
+              Data kendaraan tidak dapat ditampilkan. Periksa kembali tautan atau coba muat ulang halaman.
+            </Text>
+          </Container>
+        ) : (
+        <Box>
+        <Container variant="primary" maxW="1280px" p={{ base: "16px", md: "24px" }} borderRadius="8px">
+          <Flex
+            direction={{ base: "column", lg: "row" }}
+            gap={{ base: 5, lg: 8 }}
+            align="stretch"
+          >
+            <Box w={{ base: "100%", lg: "340px" }} flexShrink={0}>
               <TambahFotoKendaraan
                 foto={detailKendaraan?.foto}
                 id={detailKendaraan?.id}
                 randomNumber={setRandomNumber}
+                lebar="100%"
+                tinggi={{ base: "240px", md: "380px" }}
               />
             </Box>
-            <Spacer />
-            <Box p={4} borderWidth="1px" boxShadow="md" bg="gray.50">
-              <Heading as="h1" size="xl" mb={4} color="aset">
-                Detail Kendaraan
-              </Heading>
-              <VStack align="start" spacing={3}>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Nomor Kendaraan:
+            <Box flex="1" minW={0}>
+              <Flex
+                justify="space-between"
+                align={{ base: "flex-start", md: "center" }}
+                direction={{ base: "column", sm: "row" }}
+                gap={3}
+                mb={5}
+              >
+                <Box>
+                  <Text fontSize="sm" color="gray.500" fontWeight="600">
+                    Detail Kendaraan
                   </Text>
-                  <Text>
-                    KT {detailKendaraan?.nomor} {detailKendaraan?.seri}
-                  </Text>
+                  <Heading as="h1" size="lg" color="aset" mt={1}>
+                    {plat}
+                  </Heading>
+                </Box>
+                <HStack spacing={2} flexWrap="wrap">
+                  <Badge colorScheme="blue" px={3} py={1} borderRadius="full">
+                    {detailKendaraan?.statusKendaraan?.status || "Status belum diisi"}
+                  </Badge>
+                  <Badge colorScheme="green" px={3} py={1} borderRadius="full">
+                    {detailKendaraan?.kondisi?.nama || "Kondisi belum diisi"}
+                  </Badge>
                 </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Unit Kerja:
-                  </Text>
-                  <Text>{detailKendaraan?.kendaraanUK?.unitKerja || "-"}</Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Jenis Kendaraan:
-                  </Text>
-                  <Text>{detailKendaraan?.jenisKendaraan?.jenis}</Text>
-                </HStack>{" "}
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Merek Mobil:
-                  </Text>
-                  <Text>{detailKendaraan?.merek}</Text>
-                </HStack>{" "}
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Warna Mobil:
-                  </Text>
-                  <Text>{detailKendaraan?.warna}</Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Tanggal STNK:
-                  </Text>
-                  <Text>
-                    {detailKendaraan?.tgl_pkb &&
-                      new Date(detailKendaraan?.tgl_pkb).toLocaleDateString(
-                        "id-ID",
-                        {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        }
-                      )}
-                  </Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Tanggal BPKB:
-                  </Text>
-                  <Text>
-                    {detailKendaraan?.tg_stnk &&
-                      new Date(detailKendaraan?.tg_stnk).toLocaleDateString(
-                        "id-ID",
-                        {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        }
-                      )}
-                  </Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Nomor Rangka:
-                  </Text>
-                  <Text>{detailKendaraan?.noRangka}</Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Nomor Mesin:
-                  </Text>
-                  <Text>{detailKendaraan?.noMesin}</Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Kondisi:
-                  </Text>
-                  <Text>{detailKendaraan?.kondisi?.nama}</Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Nilai Perolehan:
-                  </Text>
-                  <Text>{detailKendaraan?.nilaiPerolehan}</Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Tangal Perolehan:
-                  </Text>
-                  <Text>
-                    {" "}
-                    {detailKendaraan?.tgl_pkb &&
-                      new Date(
-                        detailKendaraan?.tanggalPerolehan
-                      ).toLocaleDateString("id-ID", {
-                        weekday: "long",
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                  </Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Nibar:
-                  </Text>
-                  <Text>{detailKendaraan?.nibar}</Text>
-                </HStack>
-                <HStack width="100%">
-                  <Text fontWeight="semibold" minW="140px">
-                    Status:
-                  </Text>
-                  <Text>{detailKendaraan?.statusKendaraan?.status}</Text>
-                </HStack>
-              </VStack>
-              <Flex mt={"30px"} gap={5}>
-                <Button variant={"primary"} onClick={onEditOpen}>
+              </Flex>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacingX={8} spacingY={4}>
+                <InfoItem
+                  label="Unit Kerja"
+                  value={detailKendaraan?.kendaraanUK?.unitKerja}
+                />
+                <InfoItem
+                  label="Pegawai"
+                  value={detailKendaraan?.pegawai?.nama}
+                />
+                <InfoItem
+                  label="Jenis Kendaraan"
+                  value={detailKendaraan?.jenisKendaraan?.jenis}
+                />
+                <InfoItem label="Merek" value={detailKendaraan?.merek} />
+                <InfoItem label="Warna" value={detailKendaraan?.warna} />
+                <InfoItem label="Nomor Kontak" value={detailKendaraan?.noKontak} />
+                <InfoItem label="Nomor Rangka" value={detailKendaraan?.noRangka} />
+                <InfoItem label="Nomor Mesin" value={detailKendaraan?.noMesin} />
+                <InfoItem
+                  label="Tanggal PKB"
+                  value={formatTanggal(detailKendaraan?.tgl_pkb)}
+                />
+                <InfoItem
+                  label="Tanggal STNK"
+                  value={formatTanggal(detailKendaraan?.tg_stnk)}
+                />
+                <InfoItem
+                  label="Nilai Perolehan"
+                  value={formatRupiah(detailKendaraan?.nilaiPerolehan)}
+                />
+                <InfoItem
+                  label="Tanggal Perolehan"
+                  value={formatTanggal(detailKendaraan?.tanggalPerolehan)}
+                />
+                <InfoItem label="NIBAR" value={detailKendaraan?.nibar} />
+              </SimpleGrid>
+              <Flex mt={6} gap={3} flexWrap="wrap">
+                <Button variant="primary" onClick={onEditOpen}>
                   Edit
                 </Button>
-                <Button variant={"primary"} onClick={onMutasiOpen}>
+                <Button variant="primary" onClick={onMutasiOpen}>
                   Mutasi
                 </Button>
                 <Button
-                  variant={"primary"}
+                  variant="primary"
                   onClick={() => handleLinkClick(detailKendaraan?.link)}
                 >
                   BPKB
                 </Button>
               </Flex>
             </Box>
-          </Box>
+          </Flex>
         </Container>
 
         <Container
-          variant={"primary"}
-          maxW={"1280px"}
-          p={"0px"}
-          pt={"30px"}
-          mt={"30px"}
+          variant="primary"
+          maxW="1280px"
+          p="0"
+          mt="24px"
+          borderRadius="8px"
+          overflow="hidden"
         >
-          <HStack>
-            <Box bgColor={"aset"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"aset"}>Riwayat Surat Pengantar</Heading>
-          </HStack>
-          <Box p={"30px"}>
-            <Table variant={"aset"}>
+          <JudulBagian>Riwayat Surat Pengantar</JudulBagian>
+          <Box p={{ base: "16px", md: "24px" }} overflowX="auto">
+            <Table variant="aset" minW="720px">
               <Thead>
                 <Tr>
-                  <Th>Nomor Surat</Th>
-                  <Th>Tanggal</Th>
-                  <Th>Pembuat Surat</Th>
+                  <Th textTransform="none" letterSpacing="normal">
+                    Nomor Surat
+                  </Th>
+                  <Th textTransform="none" letterSpacing="normal">
+                    Tanggal
+                  </Th>
+                  <Th textTransform="none" letterSpacing="normal">
+                    Penandatangan
+                  </Th>
+                  <Th textTransform="none" letterSpacing="normal">
+                    Pembuat Surat
+                  </Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {detailKendaraan?.suratPengantars?.map((item, index) => (
-                  <Tr key={index}>
-                    <Td>{nomorSurat.replace("NOMOR", item.noLoket)}</Td>
-                    <Td>
-                      {item?.updatedAt
-                        ? new Date(item?.updatedAt).toLocaleDateString(
-                            "id-ID",
-                            {
-                              weekday: "long",
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            }
-                          )
-                        : "-"}
+                {detailKendaraan?.suratPengantars?.length ? (
+                  detailKendaraan.suratPengantars.map((item, index) => (
+                    <Tr key={item.id || index}>
+                      <Td>{(nomorSurat || "").replace("NOMOR", item.noLoket)}</Td>
+                      <Td>{formatTanggal(item?.updatedAt)}</Td>
+                      <Td>{item?.penandatangan?.nama || "-"}</Td>
+                      <Td>{item?.user?.nama || "-"}</Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td colSpan={4} textAlign="center" color="gray.500">
+                      Belum ada riwayat surat pengantar
                     </Td>
-                    <Td>{item?.user?.nama}</Td>
                   </Tr>
-                ))}
+                )}
               </Tbody>
             </Table>
           </Box>
         </Container>
 
         <Container
-          variant={"primary"}
-          maxW={"1280px"}
-          ps={"0px"}
-          pt={"30px"}
-          mt={"30px"}
+          variant="primary"
+          maxW="1280px"
+          p="0"
+          mt="24px"
+          borderRadius="8px"
+          overflow="hidden"
         >
-          <HStack>
-            <Box bgColor={"aset"} width={"30px"} height={"30px"}></Box>
-            <Heading color={"aset"}>Riwayat Mutasi Kendaraan</Heading>
-          </HStack>
-          <Box px={"30px"} pb={"30px"} pt={"20px"}>
-            <Table variant={"aset"}>
+          <JudulBagian>Riwayat Mutasi Kendaraan</JudulBagian>
+          <Box px={{ base: "16px", md: "24px" }} pb="24px" pt="16px" overflowX="auto">
+            <Table variant="aset" minW="960px">
               <Thead>
                 <Tr>
                   <Th
                     colSpan={2}
-                    borderColor={"white"}
-                    border={"1px"}
-                    style={{ textAlign: "center" }}
+                    textAlign="center"
+                    textTransform="none"
+                    letterSpacing="normal"
                   >
-                    unit kerja
+                    Unit Kerja
                   </Th>
                   <Th
                     colSpan={2}
-                    style={{ textAlign: "center" }}
-                    borderColor={"white"}
-                    border={"1px"}
+                    textAlign="center"
+                    textTransform="none"
+                    letterSpacing="normal"
                   >
-                    pegawai
+                    Pegawai
                   </Th>
                   <Th
                     rowSpan={2}
-                    style={{ textAlign: "center" }}
-                    borderColor={"white"}
-                    border={"1px"}
+                    textAlign="center"
+                    textTransform="none"
+                    letterSpacing="normal"
                   >
-                    tanggal BAST
+                    Tanggal BAST
                   </Th>
                   <Th
                     rowSpan={2}
-                    style={{ textAlign: "center" }}
-                    borderColor={"white"}
-                    border={"1px"}
+                    textAlign="center"
+                    textTransform="none"
+                    letterSpacing="normal"
                   >
-                    keterangan
+                    Keterangan
                   </Th>
                 </Tr>
                 <Tr>
-                  <Th
-                    style={{ textAlign: "center" }}
-                    borderColor={"white"}
-                    border={"1px"}
-                  >
-                    asal
+                  <Th textAlign="center" textTransform="none" letterSpacing="normal">
+                    Asal
                   </Th>
-                  <Th
-                    style={{ textAlign: "center" }}
-                    borderColor={"white"}
-                    border={"1px"}
-                  >
-                    tujuan
+                  <Th textAlign="center" textTransform="none" letterSpacing="normal">
+                    Tujuan
                   </Th>
-                  <Th
-                    style={{ textAlign: "center" }}
-                    borderColor={"white"}
-                    border={"1px"}
-                  >
-                    asal
+                  <Th textAlign="center" textTransform="none" letterSpacing="normal">
+                    Asal
                   </Th>
-                  <Th
-                    style={{ textAlign: "center" }}
-                    borderColor={"white"}
-                    border={"1px"}
-                  >
-                    tujuan
+                  <Th textAlign="center" textTransform="none" letterSpacing="normal">
+                    Tujuan
                   </Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {detailKendaraan?.mutasiKendaraans?.map((item, index) => (
-                  <Tr key={index}>
-                    <Td
-                      style={{ textAlign: "center" }}
-                      borderColor={"white"}
-                      border={"1px"}
-                    >
-                      {item.unitKerjaAsal?.unitKerja}
-                    </Td>
-                    <Td
-                      style={{ textAlign: "center" }}
-                      borderColor={"white"}
-                      border={"1px"}
-                    >
-                      {item.unitKerjaTujuan?.unitKerja}
-                    </Td>
-                    <Td
-                      style={{ textAlign: "center" }}
-                      borderColor={"white"}
-                      border={"1px"}
-                    >
-                      {item.pegawaiAsal?.nama}
-                    </Td>
-                    <Td
-                      style={{ textAlign: "center" }}
-                      borderColor={"white"}
-                      border={"1px"}
-                    >
-                      {item.pegawaiTujuan?.nama}
-                    </Td>{" "}
-                    <Td
-                      style={{ textAlign: "center" }}
-                      borderColor={"white"}
-                      border={"1px"}
-                    >
-                      {item?.tanggal
-                        ? new Date(item?.tanggal).toLocaleDateString("id-ID", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })
-                        : "-"}
-                    </Td>
-                    <Td
-                      style={{ textAlign: "center" }}
-                      borderColor={"white"}
-                      border={"1px"}
-                    >
-                      {item?.keterangan}
+                {detailKendaraan?.mutasiKendaraans?.length ? (
+                  detailKendaraan.mutasiKendaraans.map((item, index) => (
+                    <Tr key={item.id || index}>
+                      <Td textAlign="center">
+                        {item.unitKerjaAsal?.unitKerja || "-"}
+                      </Td>
+                      <Td textAlign="center">
+                        {item.unitKerjaTujuan?.unitKerja || "-"}
+                      </Td>
+                      <Td textAlign="center">{item.pegawaiAsal?.nama || "-"}</Td>
+                      <Td textAlign="center">{item.pegawaiTujuan?.nama || "-"}</Td>
+                      <Td textAlign="center">{formatTanggal(item?.tanggal)}</Td>
+                      <Td textAlign="center">{item?.keterangan || "-"}</Td>
+                    </Tr>
+                  ))
+                ) : (
+                  <Tr>
+                    <Td colSpan={6} textAlign="center" color="gray.500">
+                      Belum ada riwayat mutasi
                     </Td>
                   </Tr>
-                ))}
+                )}
               </Tbody>
             </Table>
           </Box>
         </Container>
+        </Box>
+        )}
 
         {/* Modal Edit */}
         <Modal
@@ -530,7 +491,7 @@ function DetailKendaraan(props) {
           onClose={onEditClose}
         >
           <ModalOverlay />
-          <ModalContent borderRadius={0} maxWidth="800px">
+          <ModalContent borderRadius="8px" maxWidth="800px" mx={4}>
             <ModalHeader>Edit Data Kendaraan</ModalHeader>
             <ModalCloseButton />
             <Formik
@@ -550,7 +511,8 @@ function DetailKendaraan(props) {
                 kondisiId: detailKendaraan?.kondisi?.id?.toString() || "", // Penting: harus string
 
                 nilaiPerolehan: detailKendaraan?.nilaiPerolehan,
-                tanggalPerolehan: detailKendaraan?.tanggalPerolehan,
+                tanggalPerolehan:
+                  detailKendaraan?.tanggalPerolehan?.split?.("T")[0] || "",
                 nibar: detailKendaraan?.nibar,
                 link: detailKendaraan?.link,
               }}
@@ -560,8 +522,8 @@ function DetailKendaraan(props) {
             >
               {(props) => (
                 <Form>
-                  <ModalBody pb={6}>
-                    <VStack spacing={4} align="stretch">
+                  <ModalBody pb={6} maxH="70vh" overflowY="auto">
+                    <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                       <Field name="nomor">
                         {({ field, form }) => (
                           <FormControl
@@ -682,7 +644,7 @@ function DetailKendaraan(props) {
                           <FormControl
                             isInvalid={form.errors.warna && form.touched.warna}
                           >
-                            <FormLabel>warna</FormLabel>
+                            <FormLabel>Warna</FormLabel>
                             <Input {...field} />
                             <FormErrorMessage>
                               {form.errors.warna}
@@ -727,7 +689,7 @@ function DetailKendaraan(props) {
                           <FormControl
                             isInvalid={form.errors.nibar && form.touched.nibar}
                           >
-                            <FormLabel>nibar</FormLabel>
+                            <FormLabel>NIBAR</FormLabel>
                             <Input {...field} />
                             <FormErrorMessage>
                               {form.errors.nibar}
@@ -743,7 +705,7 @@ function DetailKendaraan(props) {
                               form.touched.statusKendaraanId
                             }
                           >
-                            <FormLabel>status Kendaraan</FormLabel>
+                            <FormLabel>Status Kendaraan</FormLabel>
                             <Select
                               placeholder="Pilih status Kendaraan"
                               {...field}
@@ -820,7 +782,7 @@ function DetailKendaraan(props) {
                           </FormControl>
                         )}
                       </Field>
-                    </VStack>
+                    </SimpleGrid>
                   </ModalBody>
 
                   <ModalFooter>
@@ -846,12 +808,12 @@ function DetailKendaraan(props) {
           onClose={onMutasiClose}
         >
           <ModalOverlay />
-          <ModalContent borderRadius={0} maxWidth="800px">
+          <ModalContent borderRadius="8px" maxWidth="800px" mx={4}>
             <ModalHeader>Mutasi Kendaraan</ModalHeader>
             <ModalCloseButton />{" "}
             <Box p={"30px"}>
               <FormControl my={"30px"}>
-                <FormLabel fontSize={"24px"}>Nama Pegawai</FormLabel>
+                <FormLabel>Nama Pegawai</FormLabel>
                 <AsyncSelect
                   loadOptions={async (inputValue) => {
                     if (!inputValue) return [];
@@ -903,7 +865,7 @@ function DetailKendaraan(props) {
                 />
               </FormControl>
               <FormControl my={"30px"} border={0} bgColor={"white"} flex="1">
-                <FormLabel fontSize={"24px"}>Unit Kerja</FormLabel>
+                <FormLabel>Unit Kerja</FormLabel>
                 <Select2
                   options={seed?.unitKerja?.map((val) => ({
                     value: val.id,
@@ -942,7 +904,7 @@ function DetailKendaraan(props) {
                 />
               </FormControl>{" "}
               <FormControl mt={"30px"}>
-                <FormLabel fontSize={"24px"}>Tanggal BAST</FormLabel>
+                <FormLabel>Tanggal BAST</FormLabel>
                 <Input
                   bgColor={"terang"}
                   type="date"
@@ -952,7 +914,7 @@ function DetailKendaraan(props) {
                 />
               </FormControl>
               <FormControl mt={"30px"}>
-                <FormLabel fontSize={"24px"}>keterangan</FormLabel>
+                <FormLabel>Keterangan</FormLabel>
                 <Textarea
                   bgColor={"terang"}
                   height={"100px"}

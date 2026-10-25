@@ -30,8 +30,8 @@ import { userRedux } from "../../Redux/Reducers/auth";
 import Layout from "../../Componets/Layout";
 import Loading from "../../Componets/Loading";
 import DataKosong from "../../Componets/DataKosong";
-import ReactPaginate from "react-paginate";
 import "../../Style/pagination.css";
+import AppPagination from "../../Componets/AppPagination";
 import { AsyncSelect } from "chakra-react-select";
 
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -520,22 +520,10 @@ function templateBPDKeuangan() {
             justifyContent="center"
             alignItems="center"
           >
-            <ReactPaginate
-              previousLabel={"←"}
-              nextLabel={"→"}
-              breakLabel={"..."}
+            <AppPagination
+              page={page}
               pageCount={totalPage}
-              marginPagesDisplayed={1}
-              pageRangeDisplayed={2}
               onPageChange={changePage}
-              activeClassName={"item active "}
-              breakClassName={"item break-me "}
-              containerClassName={"pagination"}
-              disabledClassName={"disabled-page"}
-              nextClassName={"item next "}
-              pageClassName={"item pagination-page "}
-              previousClassName={"item previous"}
-              forcePage={page}
             />
           </Box>
           

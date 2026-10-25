@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 import Layout from "../../Componets/Layout";
-import ReactPaginate from "react-paginate";
 
 import "../../Style/pagination.css";
+import AppPagination from "../../Componets/AppPagination";
 import { useHistory } from "react-router-dom";
 import Foto from "../../assets/add_photo.png";
 import {
@@ -704,22 +704,10 @@ function DaftarKendaraanDinas() {
             </Box>
             {pages > 1 && (
               <Flex justify="center" align="center" py={4} width="100%">
-                <ReactPaginate
-                  previousLabel="← Sebelumnya"
-                  nextLabel="Selanjutnya →"
+                <AppPagination
+                  page={page}
                   pageCount={Math.max(1, pages)}
                   onPageChange={changePage}
-                  forcePage={page}
-                  activeClassName="item active"
-                  breakClassName="item break-me"
-                  breakLabel="..."
-                  containerClassName="pagination"
-                  disabledClassName="disabled-page"
-                  marginPagesDisplayed={1}
-                  nextClassName="item next"
-                  pageClassName="item pagination-page"
-                  pageRangeDisplayed={2}
-                  previousClassName="item previous"
                 />
               </Flex>
             )}
