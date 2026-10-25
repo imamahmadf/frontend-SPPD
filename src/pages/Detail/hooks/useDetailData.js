@@ -441,17 +441,56 @@ const useDetailData = (perjalananId, user) => {
     }
   };
 
-  // Fungsi cetak semua kwitansi untuk semua personil sekaligus
-  const cetakSemuaKwitansi = async (selectedTemplateId = templateId || 1) => {
-    // Filter personil yang sudah memiliki rincianBPDs dan statusId >= 2
-    const personilsToPrint = detailPerjalanan.personils?.filter(
-      (personil) => 
-        personil.rincianBPDs && 
+  const personilYangBisaDicetak = () =>
+    detailPerjalanan.personils?.filter(
+      (personil) =>
+        personil.rincianBPDs &&
         personil.rincianBPDs.length > 0 &&
         personil.statusId >= 2
-    );
+    ) || [];
 
-    if (!personilsToPrint || personilsToPrint.length === 0) {
+  const buatPayloadKwitansiBulk = (selectedTemplateId, personilsToPrint) => ({
+    perjalananId: detailPerjalanan.id,
+    nomorST: detailPerjalanan.noSuratTugas,
+    untuk: detailPerjalanan.untuk,
+    PPTKNama: detailPerjalanan.PPTK?.pegawai_PPTK?.nama,
+    PPTKNip: detailPerjalanan.PPTK?.pegawai_PPTK?.nip,
+    PPTKJabatan: detailPerjalanan.PPTK?.jabatan,
+    KPANama: detailPerjalanan.KPA?.pegawai_KPA?.nama,
+    KPANip: detailPerjalanan.KPA?.pegawai_KPA?.nip,
+    KPAJabatan: detailPerjalanan.KPA?.jabatan,
+    bendaharaNama: detailPerjalanan.bendahara?.pegawai_bendahara?.nama,
+    bendaharaNip: detailPerjalanan.bendahara?.pegawai_bendahara?.nip,
+    bendaharaJabatan: detailPerjalanan.bendahara?.jabatan,
+    dataBendahara: detailPerjalanan.bendahara,
+    foto: detailPerjalanan.fotoPerjalanans || [],
+    templateId: selectedTemplateId,
+    subKegiatan: detailPerjalanan.daftarSubKegiatan?.subKegiatan,
+    kodeRekening: `${detailPerjalanan.daftarSubKegiatan?.kodeRekening || ""}${
+      detailPerjalanan.jenisPerjalanan?.kodeRekening || ""
+    }`,
+    tanggalPengajuan: detailPerjalanan.tanggalPengajuan,
+    jenis: detailPerjalanan.jenisPerjalanan?.id,
+    tempat: detailPerjalanan.tempats,
+    jenisPerjalanan: detailPerjalanan.jenisPerjalanan?.jenis,
+    tahun: new Date(detailPerjalanan.tanggalPengajuan).getFullYear(),
+    indukUnitKerja:
+      user[0]?.unitKerja_profile?.indukUnitKerja?.indukUnitKerja,
+    personils: personilsToPrint.map((personil) => ({
+      personilId: personil.id,
+      pegawaiNama: personil.pegawai?.nama,
+      pegawaiNip: personil.pegawai?.nip,
+      pegawaiJabatan: personil.pegawai?.jabatan,
+      nomorSPD: personil.nomorSPD,
+      rincianBPD: personil.rincianBPDs,
+    })),
+  });
+
+  // Fungsi cetak semua kwitansi untuk semua personil sekaligus
+  const cetakSemuaKwitansi = async (selectedTemplateId = templateId || 1) => {
+    const personilsToPrint = personilYangBisaDicetak();
+
+    if (personilsToPrint.length === 0) {
       toast({
         title: "Info",
         description: "Tidak ada personil yang dapat dicetak kwitansinya",
@@ -465,48 +504,9 @@ const useDetailData = (perjalananId, user) => {
     setIsPrintingAll(true);
 
     try {
-      // Siapkan data semua personil untuk dicetak
-      const personilsData = personilsToPrint.map((personil) => ({
-        personilId: personil.id,
-        pegawaiNama: personil.pegawai?.nama,
-        pegawaiNip: personil.pegawai?.nip,
-        pegawaiJabatan: personil.pegawai?.jabatan,
-        nomorSPD: personil.nomorSPD,
-        rincianBPD: personil.rincianBPDs,
-      }));
-
       const response = await axios.post(
         `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kwitansi/post/cetak-kwitansi-bulk`,
-        {
-          perjalananId: detailPerjalanan.id,
-          nomorST: detailPerjalanan.noSuratTugas,
-          untuk: detailPerjalanan.untuk,
-          // Data PPTK
-          PPTKNama: detailPerjalanan.PPTK?.pegawai_PPTK?.nama,
-          PPTKNip: detailPerjalanan.PPTK?.pegawai_PPTK?.nip,
-          PPTKJabatan: detailPerjalanan.PPTK?.jabatan,
-          // Data KPA
-          KPANama: detailPerjalanan.KPA?.pegawai_KPA?.nama,
-          KPANip: detailPerjalanan.KPA?.pegawai_KPA?.nip,
-          KPAJabatan: detailPerjalanan.KPA?.jabatan,
-          // Data Bendahara
-          bendaharaNama: detailPerjalanan.bendahara?.pegawai_bendahara?.nama,
-          bendaharaNip: detailPerjalanan.bendahara?.pegawai_bendahara?.nip,
-          bendaharaJabatan: detailPerjalanan.bendahara?.jabatan,
-          dataBendahara: detailPerjalanan.bendahara,
-          // Data lainnya
-          foto: detailPerjalanan.fotoPerjalanans || [],
-          templateId: selectedTemplateId,
-          subKegiatan: detailPerjalanan.daftarSubKegiatan?.subKegiatan,
-          kodeRekening: `${detailPerjalanan.daftarSubKegiatan?.kodeRekening || ""}${detailPerjalanan.jenisPerjalanan?.kodeRekening || ""}`,
-          tanggalPengajuan: detailPerjalanan.tanggalPengajuan,
-          jenis: detailPerjalanan.jenisPerjalanan?.id,
-          tempat: detailPerjalanan.tempats,
-          jenisPerjalanan: detailPerjalanan.jenisPerjalanan?.jenis,
-          tahun: new Date(detailPerjalanan.tanggalPengajuan).getFullYear(),
-          indukUnitKerja: user[0]?.unitKerja_profile?.indukUnitKerja?.indukUnitKerja,
-          personils: personilsData,
-        },
+        buatPayloadKwitansiBulk(selectedTemplateId, personilsToPrint),
         {
           responseType: "blob",
         }
@@ -544,6 +544,32 @@ const useDetailData = (perjalananId, user) => {
     } finally {
       setIsPrintingAll(false);
     }
+  };
+
+  const mintaPdfKwitansi = (selectedTemplateId = templateId || 1) => {
+    const personilsToPrint = personilYangBisaDicetak();
+
+    if (personilsToPrint.length === 0) {
+      toast({
+        title: "Info",
+        description: "Tidak ada personil yang dapat dilihat kwitansinya",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      return null;
+    }
+
+    return axios.post(
+      `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/kwitansi/post/cetak-kwitansi-bulk`,
+      {
+        ...buatPayloadKwitansiBulk(selectedTemplateId, personilsToPrint),
+        pratinjau: true,
+      },
+      {
+        responseType: "blob",
+      }
+    );
   };
 
   // Cek apakah semua personil belum memiliki rincianBPDs
@@ -620,6 +646,7 @@ const useDetailData = (perjalananId, user) => {
       buatOtomatisBulk,
       pengajuanBulk,
       cetakSemuaKwitansi,
+      mintaPdfKwitansi,
       simpanEditNomorSurat,
       setRandomNumber,
       setTemplateId,

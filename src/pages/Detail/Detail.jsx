@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDisclosure } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import {
+  Alert,
+  AlertIcon,
   Box,
   Button,
+  Center,
   Container,
   Flex,
   Grid,
   GridItem,
+  HStack,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,6 +19,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Text,
   useColorModeValue,
   useToast,
@@ -76,6 +81,7 @@ function Detail(props) {
     buatOtomatisBulk,
     pengajuanBulk,
     cetakSemuaKwitansi,
+    mintaPdfKwitansi,
     simpanEditNomorSurat,
     setRandomNumber,
     setTemplateId,
@@ -113,10 +119,107 @@ function Detail(props) {
     onClose: onEditNomorSuratClose,
   } = useDisclosure();
 
+  const {
+    isOpen: isKwitansiOpen,
+    onOpen: onKwitansiOpen,
+    onClose: onKwitansiClose,
+  } = useDisclosure();
+  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
+  const [isViewingKwitansi, setIsViewingKwitansi] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [pdfError, setPdfError] = useState("");
+  const previewRequestRef = useRef(0);
+  const pdfUrlRef = useRef("");
+
   // State untuk search template BPD
   const [selectedTemplateBPD, setSelectedTemplateBPD] = useState(null);
   const [isSubmittingTemplateBPD, setIsSubmittingTemplateBPD] = useState(false);
   const toast = useToast();
+
+  const tutupPreviewKwitansi = () => {
+    previewRequestRef.current += 1;
+    if (pdfUrlRef.current) {
+      window.URL.revokeObjectURL(pdfUrlRef.current);
+      pdfUrlRef.current = "";
+    }
+    setPdfUrl("");
+    setPdfError("");
+    setIsLoadingPdf(false);
+    setIsViewingKwitansi(false);
+    onKwitansiClose();
+  };
+
+  const lihatKwitansi = async () => {
+    const permintaan = mintaPdfKwitansi(templateId);
+    if (!permintaan) return;
+
+    const requestId = ++previewRequestRef.current;
+    if (pdfUrlRef.current) {
+      window.URL.revokeObjectURL(pdfUrlRef.current);
+      pdfUrlRef.current = "";
+    }
+    setPdfUrl("");
+    setPdfError("");
+    setIsLoadingPdf(true);
+    setIsViewingKwitansi(true);
+    onKwitansiOpen();
+
+    try {
+      const res = await permintaan;
+      if (requestId !== previewRequestRef.current) return;
+
+      const blob = res.data;
+      const head = await blob.slice(0, 5).text();
+      if (!head.startsWith("%PDF")) {
+        setPdfError(
+          "Kwitansi belum bisa ditampilkan sebagai PDF. Gunakan tombol Cetak Semua untuk mengunduh berkas."
+        );
+        return;
+      }
+
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: "application/pdf" })
+      );
+      pdfUrlRef.current = url;
+      setPdfUrl(url);
+    } catch (err) {
+      if (requestId !== previewRequestRef.current) return;
+      console.error(err);
+
+      let description = "Gagal menampilkan kwitansi.";
+      const data = err?.response?.data;
+      if (data instanceof Blob) {
+        try {
+          const text = await data.text();
+          const json = JSON.parse(text);
+          if (json?.message) description = json.message;
+        } catch (parseErr) {
+          console.error(parseErr);
+        }
+      }
+
+      setPdfError(description);
+      toast({
+        title: "Error!",
+        description,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      if (requestId !== previewRequestRef.current) return;
+      setIsLoadingPdf(false);
+      setIsViewingKwitansi(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrlRef.current) {
+        window.URL.revokeObjectURL(pdfUrlRef.current);
+      }
+    };
+  }, []);
 
   // State untuk edit personil
   const [pegawaiId, setPegawaiId] = useState(null);
@@ -452,9 +555,11 @@ function Detail(props) {
               isSubmittingPengajuan={isSubmittingPengajuan}
               isCreatingAutoBulk={isCreatingAutoBulk}
               isPrintingAll={isPrintingAll}
+              isViewingKwitansi={isViewingKwitansi}
               onPengajuanBulk={pengajuanBulk}
               onBuatOtomatisBulk={buatOtomatisBulk}
               onCetakSemuaKwitansi={cetakSemuaKwitansi}
+              onLihatKwitansi={lihatKwitansi}
               onTambahPersonil={() => {
                 setPegawaiTambahId(null);
                 onTambahOpen();
@@ -611,6 +716,61 @@ function Detail(props) {
                   Mengerti
                 </Button>
               </ModalFooter>
+            </ModalContent>
+          </Modal>
+
+          <Modal isOpen={isKwitansiOpen} onClose={tutupPreviewKwitansi} size="full">
+            <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(4px)" />
+            <ModalContent
+              bg="gray.100"
+              borderRadius={0}
+              m={0}
+              h="100vh"
+              maxH="100vh"
+              maxW="100vw"
+            >
+              <ModalHeader
+                bg="white"
+                py={4}
+                borderBottom="1px solid"
+                borderColor="gray.200"
+              >
+                <HStack>
+                  <Box as="span">📄</Box>
+                  <Text>Kwitansi Perjalanan</Text>
+                </HStack>
+              </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody p={0} overflow="hidden">
+                {isLoadingPdf || (!pdfUrl && !pdfError) ? (
+                  <Center h="calc(100vh - 73px)">
+                    <VStack spacing={4}>
+                      <Spinner size="xl" color="teal.500" thickness="4px" />
+                      <Text color="gray.600">
+                        Menyiapkan pratinjau kwitansi...
+                      </Text>
+                    </VStack>
+                  </Center>
+                ) : pdfError ? (
+                  <Center h="calc(100vh - 73px)" px={6}>
+                    <Alert status="error" borderRadius="md" maxW="lg">
+                      <AlertIcon />
+                      {pdfError}
+                    </Alert>
+                  </Center>
+                ) : (
+                  <iframe
+                    src={pdfUrl || undefined}
+                    title="Kwitansi Perjalanan"
+                    width="100%"
+                    style={{
+                      border: "none",
+                      height: "calc(100vh - 73px)",
+                      background: "white",
+                    }}
+                  />
+                )}
+              </ModalBody>
             </ModalContent>
           </Modal>
         </Box>

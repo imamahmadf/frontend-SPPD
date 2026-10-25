@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Layout from "../../Componets/Layout";
 import { useDisclosure } from "@chakra-ui/react";
@@ -50,6 +50,7 @@ import {
   StatNumber,
   StatHelpText,
   SimpleGrid,
+  Spinner,
 } from "@chakra-ui/react";
 import { BsImage, BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import Loading from "../../Componets/Loading";
@@ -77,17 +78,35 @@ function RampungAdmin(props) {
     onOpen: onModalNonaktifOpen,
     onClose: onModalNonaktifClose,
   } = useDisclosure();
+  const {
+    isOpen: isKwitansiOpen,
+    onOpen: onKwitansiOpen,
+    onClose: onKwitansiClose,
+  } = useDisclosure();
   const toast = useToast();
   const [selectedImage, setSelectedImage] = useState("");
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [detailPerjalanan, setDetailPerjalanan] = useState([]);
   const [isModalBatalOpen, setIsModalBatalOpen] = useState(false);
+  const [isModalVerifikasiSemuaOpen, setIsModalVerifikasiSemuaOpen] =
+    useState(false);
+  const [isVerifyingAll, setIsVerifyingAll] = useState(false);
   const [alasanBatal, setAlasanBatal] = useState("");
   const [listDalamKotaNonaktif, setListDalamKotaNonaktif] = useState([]);
   const [dataTemplate, setDataTemplate] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isLoadingPdf, setIsLoadingPdf] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [pdfTitle, setPdfTitle] = useState("");
+  const [pdfError, setPdfError] = useState("");
+  const [previewingId, setPreviewingId] = useState(null);
+  const [isViewingSemua, setIsViewingSemua] = useState(false);
+  const [dataTemplateSemua, setDataTemplateSemua] = useState([]);
+  const [templateSemuaId, setTemplateSemuaId] = useState(null);
+  const previewRequestRef = useRef(0);
+  const pdfUrlRef = useRef("");
   const user = useSelector(userRedux);
   const [templateId, setTemplateId] = useState(null);
 
@@ -208,6 +227,70 @@ function RampungAdmin(props) {
     terimaVerifikasi(item.id);
   };
 
+  const bukaVerifikasiSemua = () => {
+    const menunggu =
+      detailPerjalanan?.personils?.filter((item) => item.statusId === 2) || [];
+    if (menunggu.length === 0) {
+      toast({
+        title: "Info",
+        description: "Tidak ada personil yang menunggu verifikasi",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const isDalamKota =
+      detailPerjalanan?.jenisPerjalanan?.tipePerjalananId === 1;
+    if (isDalamKota) {
+      const listNonaktif = getDalamKotaNonaktif(detailPerjalanan);
+      if (listNonaktif.length > 0) {
+        setListDalamKotaNonaktif(listNonaktif);
+        onModalNonaktifOpen();
+        return;
+      }
+    }
+
+    setIsModalVerifikasiSemuaOpen(true);
+  };
+
+  const terimaVerifikasiSemua = () => {
+    setIsVerifyingAll(true);
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi/verifikasi/terima-semua`,
+        { perjalananId: detailPerjalanan?.id || props.match.params.id }
+      )
+      .then((res) => {
+        fetchDataPerjalanan();
+        setIsModalVerifikasiSemuaOpen(false);
+        toast({
+          title: "Berhasil!",
+          description: `${
+            res.data?.jumlah || "Semua"
+          } personil berhasil diverifikasi`,
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({
+          title: "Error!",
+          description:
+            err.response?.data?.message || "Gagal memverifikasi semua personil",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      })
+      .finally(() => setIsVerifyingAll(false));
+  };
+
   const terimaVerifikasi = (personilId) => {
     axios
       .post(
@@ -308,6 +391,39 @@ function RampungAdmin(props) {
       0
     ) || 0;
 
+  const buatPayloadKwitansi = (val) => ({
+    id: val?.id,
+    indukUnitKerja:
+      user[0]?.unitKerja_profile?.indukUnitKerja?.indukUnitKerja,
+    nomorSPD: val?.nomorSPD,
+    nomorST: detailPerjalanan?.noSuratTugas,
+    pegawaiNama: val?.pegawai?.nama,
+    pegawaiNip: val?.pegawai?.nip,
+    pegawaiJabatan: val?.pegawai?.jabatan,
+    untuk: detailPerjalanan?.untuk,
+    PPTKNama: detailPerjalanan?.PPTK?.pegawai_PPTK?.nama,
+    PPTKNip: detailPerjalanan?.PPTK?.pegawai_PPTK?.nip,
+    KPANama: detailPerjalanan?.KPA?.pegawai_KPA?.nama,
+    KPANip: detailPerjalanan?.KPA?.pegawai_KPA?.nip,
+    KPAJabatan: detailPerjalanan?.KPA?.jabatan,
+    foto: detailPerjalanan?.fotoPerjalanans || [],
+    templateId,
+    subKegiatan: detailPerjalanan?.daftarSubKegiatan?.subKegiatan,
+    kodeRekening: `${
+      detailPerjalanan?.daftarSubKegiatan?.kodeRekening || ""
+    }${detailPerjalanan?.jenisPerjalanan?.kodeRekening || ""}`,
+    rincianBPD: val?.rincianBPDs,
+    tanggalPengajuan: detailPerjalanan?.tanggalPengajuan,
+    totalDurasi,
+    jenis: detailPerjalanan?.jenisId,
+    tempat: detailPerjalanan?.tempats,
+    jenisPerjalanan: detailPerjalanan?.jenisPerjalanan?.jenis,
+    dataBendahara: detailPerjalanan?.bendahara,
+    tahun: detailPerjalanan?.tanggalPengajuan
+      ? new Date(detailPerjalanan.tanggalPengajuan).getFullYear()
+      : new Date().getFullYear(),
+  });
+
   const cetak = (val) => {
     if (!templateId) {
       toast({
@@ -327,37 +443,7 @@ function RampungAdmin(props) {
         `${
           import.meta.env.VITE_REACT_APP_API_BASE_URL
         }/kwitansi/post/cetak-kwitansi`,
-        {
-          indukUnitKerja:
-            user[0]?.unitKerja_profile?.indukUnitKerja?.indukUnitKerja,
-          nomorSPD: val?.nomorSPD,
-          nomorST: detailPerjalanan?.noSuratTugas,
-          pegawaiNama: val?.pegawai?.nama,
-          pegawaiNip: val?.pegawai?.nip,
-          pegawaiJabatan: val?.pegawai?.jabatan,
-          untuk: detailPerjalanan?.untuk,
-          PPTKNama: detailPerjalanan?.PPTK?.pegawai_PPTK?.nama,
-          PPTKNip: detailPerjalanan?.PPTK?.pegawai_PPTK?.nip,
-          KPANama: detailPerjalanan?.KPA?.pegawai_KPA?.nama,
-          KPANip: detailPerjalanan?.KPA?.pegawai_KPA?.nip,
-          KPAJabatan: detailPerjalanan?.KPA?.jabatan,
-          foto: detailPerjalanan?.fotoPerjalanans || [],
-          templateId,
-          subKegiatan: detailPerjalanan?.daftarSubKegiatan?.subKegiatan,
-          kodeRekening: `${
-            detailPerjalanan?.daftarSubKegiatan?.kodeRekening || ""
-          }${detailPerjalanan?.jenisPerjalanan?.kodeRekening || ""}`,
-          rincianBPD: val?.rincianBPDs,
-          tanggalPengajuan: detailPerjalanan?.tanggalPengajuan,
-          totalDurasi,
-          jenis: detailPerjalanan?.jenisId,
-          tempat: detailPerjalanan?.tempats,
-          jenisPerjalanan: detailPerjalanan?.jenisPerjalanan?.jenis,
-          dataBendahara: detailPerjalanan?.bendahara,
-          tahun: detailPerjalanan?.tanggalPengajuan
-            ? new Date(detailPerjalanan.tanggalPengajuan).getFullYear()
-            : new Date().getFullYear(),
-        },
+        buatPayloadKwitansi(val),
         {
           responseType: "blob",
         }
@@ -396,6 +482,265 @@ function RampungAdmin(props) {
         setIsPrinting(false);
       });
   };
+
+  const tutupPreviewKwitansi = () => {
+    previewRequestRef.current += 1;
+    if (pdfUrlRef.current) {
+      window.URL.revokeObjectURL(pdfUrlRef.current);
+      pdfUrlRef.current = "";
+    }
+    setPdfUrl("");
+    setPdfError("");
+    setIsLoadingPdf(false);
+    setPreviewingId(null);
+    setIsViewingSemua(false);
+    onKwitansiClose();
+  };
+
+  const lihatKwitansi = (val) => {
+    if (!templateId) {
+      toast({
+        title: "Error!",
+        description:
+          "Template belum dipilih. Silakan pilih template terlebih dahulu.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const requestId = ++previewRequestRef.current;
+    if (pdfUrlRef.current) {
+      window.URL.revokeObjectURL(pdfUrlRef.current);
+      pdfUrlRef.current = "";
+    }
+    setPdfUrl("");
+    setPdfError("");
+    setPdfTitle(val?.pegawai?.nama || "Kwitansi");
+    setPreviewingId(val?.id ?? null);
+    setIsViewingSemua(false);
+    setIsLoadingPdf(true);
+    onKwitansiOpen();
+
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi/post/cetak-kwitansi`,
+        { ...buatPayloadKwitansi(val), pratinjau: true },
+        {
+          responseType: "blob",
+        }
+      )
+      .then(async (res) => {
+        if (requestId !== previewRequestRef.current) return;
+
+        const blob = res.data;
+        const head = await blob.slice(0, 5).text();
+        if (!head.startsWith("%PDF")) {
+          setPdfError(
+            "Kwitansi belum bisa ditampilkan sebagai PDF. Gunakan tombol Cetak Kwitansi untuk mengunduh berkas."
+          );
+          return;
+        }
+
+        const url = window.URL.createObjectURL(
+          new Blob([blob], { type: "application/pdf" })
+        );
+        pdfUrlRef.current = url;
+        setPdfUrl(url);
+      })
+      .catch(async (err) => {
+        if (requestId !== previewRequestRef.current) return;
+        console.error(err);
+
+        let description = "Gagal menampilkan kwitansi.";
+        const data = err?.response?.data;
+        if (data instanceof Blob) {
+          try {
+            const text = await data.text();
+            const json = JSON.parse(text);
+            if (json?.message) description = json.message;
+          } catch (parseErr) {
+            console.error(parseErr);
+          }
+        }
+
+        setPdfError(description);
+        toast({
+          title: "Error!",
+          description,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        if (requestId !== previewRequestRef.current) return;
+        setIsLoadingPdf(false);
+        setPreviewingId(null);
+      });
+  };
+
+  const lihatSemuaKwitansi = () => {
+    if (!templateSemuaId) {
+      toast({
+        title: "Error!",
+        description:
+          "Template semua kwitansi belum dipilih. Silakan pilih template terlebih dahulu.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const personilsToPrint =
+      detailPerjalanan?.personils?.filter(
+        (personil) =>
+          personil.rincianBPDs &&
+          personil.rincianBPDs.length > 0 &&
+          personil.statusId >= 2
+      ) || [];
+
+    if (personilsToPrint.length === 0) {
+      toast({
+        title: "Info",
+        description: "Tidak ada personil yang dapat dilihat kwitansinya",
+        status: "info",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const requestId = ++previewRequestRef.current;
+    if (pdfUrlRef.current) {
+      window.URL.revokeObjectURL(pdfUrlRef.current);
+      pdfUrlRef.current = "";
+    }
+    setPdfUrl("");
+    setPdfError("");
+    setPdfTitle("Semua Personil");
+    setPreviewingId(null);
+    setIsViewingSemua(true);
+    setIsLoadingPdf(true);
+    onKwitansiOpen();
+
+    axios
+      .post(
+        `${
+          import.meta.env.VITE_REACT_APP_API_BASE_URL
+        }/kwitansi/post/cetak-kwitansi-bulk`,
+        {
+          perjalananId: detailPerjalanan.id,
+          nomorST: detailPerjalanan.noSuratTugas,
+          untuk: detailPerjalanan.untuk,
+          PPTKNama: detailPerjalanan.PPTK?.pegawai_PPTK?.nama,
+          PPTKNip: detailPerjalanan.PPTK?.pegawai_PPTK?.nip,
+          PPTKJabatan: detailPerjalanan.PPTK?.jabatan,
+          KPANama: detailPerjalanan.KPA?.pegawai_KPA?.nama,
+          KPANip: detailPerjalanan.KPA?.pegawai_KPA?.nip,
+          KPAJabatan: detailPerjalanan.KPA?.jabatan,
+          bendaharaNama: detailPerjalanan.bendahara?.pegawai_bendahara?.nama,
+          bendaharaNip: detailPerjalanan.bendahara?.pegawai_bendahara?.nip,
+          bendaharaJabatan: detailPerjalanan.bendahara?.jabatan,
+          dataBendahara: detailPerjalanan.bendahara,
+          foto: detailPerjalanan.fotoPerjalanans || [],
+          templateId: templateSemuaId,
+          subKegiatan: detailPerjalanan.daftarSubKegiatan?.subKegiatan,
+          kodeRekening: `${
+            detailPerjalanan.daftarSubKegiatan?.kodeRekening || ""
+          }${detailPerjalanan.jenisPerjalanan?.kodeRekening || ""}`,
+          tanggalPengajuan: detailPerjalanan.tanggalPengajuan,
+          jenis:
+            detailPerjalanan.jenisPerjalanan?.id ?? detailPerjalanan.jenisId,
+          tempat: detailPerjalanan.tempats,
+          jenisPerjalanan: detailPerjalanan.jenisPerjalanan?.jenis,
+          tahun: detailPerjalanan.tanggalPengajuan
+            ? new Date(detailPerjalanan.tanggalPengajuan).getFullYear()
+            : new Date().getFullYear(),
+          indukUnitKerja:
+            user[0]?.unitKerja_profile?.indukUnitKerja?.indukUnitKerja,
+          personils: personilsToPrint.map((personil) => ({
+            personilId: personil.id,
+            pegawaiNama: personil.pegawai?.nama,
+            pegawaiNip: personil.pegawai?.nip,
+            pegawaiJabatan: personil.pegawai?.jabatan,
+            nomorSPD: personil.nomorSPD,
+            rincianBPD: personil.rincianBPDs,
+          })),
+          pratinjau: true,
+        },
+        {
+          responseType: "blob",
+        }
+      )
+      .then(async (res) => {
+        if (requestId !== previewRequestRef.current) return;
+
+        const blob = res.data;
+        const head = await blob.slice(0, 5).text();
+        if (!head.startsWith("%PDF")) {
+          setPdfError(
+            "Kwitansi belum bisa ditampilkan sebagai PDF. Gunakan tombol Cetak Kwitansi untuk mengunduh berkas per personil."
+          );
+          return;
+        }
+
+        const url = window.URL.createObjectURL(
+          new Blob([blob], { type: "application/pdf" })
+        );
+        pdfUrlRef.current = url;
+        setPdfUrl(url);
+      })
+      .catch(async (err) => {
+        if (requestId !== previewRequestRef.current) return;
+        console.error(err);
+
+        let description = "Gagal menampilkan kwitansi.";
+        const data = err?.response?.data;
+        if (data instanceof Blob) {
+          try {
+            const text = await data.text();
+            const json = JSON.parse(text);
+            if (json?.message) description = json.message;
+          } catch (parseErr) {
+            console.error(parseErr);
+          }
+        }
+
+        setPdfError(description);
+        toast({
+          title: "Error!",
+          description,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      })
+      .finally(() => {
+        if (requestId !== previewRequestRef.current) return;
+        setIsLoadingPdf(false);
+        setIsViewingSemua(false);
+      });
+  };
+
+  async function fetchTemplateSemua() {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_BASE_URL}/template/get-all-kwitansi`
+      );
+      const list = res.data.result || [];
+      setDataTemplateSemua(list);
+      if (list[0]?.id) {
+        setTemplateSemuaId(String(list[0].id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   function renderTemplate() {
     return dataTemplate?.map((val) => {
@@ -443,6 +788,15 @@ function RampungAdmin(props) {
 
   useEffect(() => {
     fetchDataPerjalanan();
+    fetchTemplateSemua();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pdfUrlRef.current) {
+        window.URL.revokeObjectURL(pdfUrlRef.current);
+      }
+    };
   }, []);
 
   if (!detailPerjalanan || Object.keys(detailPerjalanan).length === 0) {
@@ -989,9 +1343,59 @@ function RampungAdmin(props) {
 
           {/* Personnel List Section */}
           <Box mb={8}>
-            <Heading size="lg" color="gray.800" mb={6}>
+          <Flex
+            justify="space-between"
+            align={{ base: "stretch", md: "center" }}
+            mb={6}
+            gap={4}
+            wrap="wrap"
+          >
+            <Heading size="lg" color="gray.800">
               Daftar Personil
             </Heading>
+            <HStack spacing={2} flexWrap="wrap">
+              <Select
+                size="md"
+                bg="white"
+                borderRadius="md"
+                maxW={{ base: "100%", md: "220px" }}
+                value={templateSemuaId || ""}
+                onChange={(e) => setTemplateSemuaId(e.target.value)}
+                placeholder="Template semua"
+              >
+                {dataTemplateSemua.map((val) => (
+                  <option key={val.id} value={val.id}>
+                    {val.nama}
+                  </option>
+                ))}
+              </Select>
+              {detailPerjalanan?.personils?.some(
+                (item) => item.statusId === 2
+              ) && (
+                <Button
+                  colorScheme="green"
+                  size="md"
+                  onClick={bukaVerifikasiSemua}
+                  isLoading={isVerifyingAll}
+                  loadingText="Memverifikasi..."
+                  leftIcon={<Box as="span">✅</Box>}
+                >
+                  Verifikasi Semua
+                </Button>
+              )}
+              <Button
+                colorScheme="teal"
+                size="md"
+                onClick={lihatSemuaKwitansi}
+                isDisabled={!templateSemuaId}
+                isLoading={isViewingSemua}
+                loadingText="Menyiapkan..."
+                leftIcon={<Box as="span">👁️</Box>}
+              >
+                Lihat Semua Kwitansi
+              </Button>
+            </HStack>
+          </Flex>
             {detailPerjalanan?.personils?.map((item, index) => (
               <Card
                 key={index}
@@ -1233,6 +1637,17 @@ function RampungAdmin(props) {
                         </Button>
                       </>
                     )}
+                    <Button
+                      colorScheme="teal"
+                      size="md"
+                      onClick={() => lihatKwitansi(item)}
+                      leftIcon={<Box as="span">👁️</Box>}
+                      isDisabled={!templateId}
+                      isLoading={previewingId === item.id}
+                      loadingText="Menyiapkan..."
+                    >
+                      Lihat Kwitansi
+                    </Button>
                     <Button
                       colorScheme="blue"
                       size="md"
@@ -1504,6 +1919,65 @@ function RampungAdmin(props) {
           </Modal>
         )}
 
+        <Modal
+          isOpen={isKwitansiOpen}
+          onClose={tutupPreviewKwitansi}
+          size="full"
+        >
+          <ModalOverlay bg="blackAlpha.800" backdropFilter="blur(4px)" />
+          <ModalContent
+            bg="gray.100"
+            borderRadius={0}
+            m={0}
+            h="100vh"
+            maxH="100vh"
+            maxW="100vw"
+          >
+            <ModalHeader
+              bg="white"
+              py={4}
+              borderBottom="1px solid"
+              borderColor="gray.200"
+            >
+              <HStack>
+                <Box as="span">📄</Box>
+                <Text>Kwitansi {pdfTitle}</Text>
+              </HStack>
+            </ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={0} overflow="hidden">
+              {isLoadingPdf || (!pdfUrl && !pdfError) ? (
+                <Center h="calc(100vh - 73px)">
+                  <VStack spacing={4}>
+                    <Spinner size="xl" color="teal.500" thickness="4px" />
+                    <Text color="gray.600">
+                      Menyiapkan pratinjau kwitansi...
+                    </Text>
+                  </VStack>
+                </Center>
+              ) : pdfError ? (
+                <Center h="calc(100vh - 73px)" px={6}>
+                  <Alert status="error" borderRadius="md" maxW="lg">
+                    <AlertIcon />
+                    {pdfError}
+                  </Alert>
+                </Center>
+              ) : (
+                <iframe
+                  src={pdfUrl || undefined}
+                  title={`Kwitansi ${pdfTitle}`}
+                  width="100%"
+                  style={{
+                    border: "none",
+                    height: "calc(100vh - 73px)",
+                    background: "white",
+                  }}
+                />
+              )}
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+
         {/* Modal Preview Undangan PDF */}
         {detailPerjalanan?.undangan && (
           <Modal
@@ -1655,6 +2129,43 @@ function RampungAdmin(props) {
             </ModalBody>
             <ModalFooter>
               <Button onClick={onModalNonaktifClose}>Tutup</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        <Modal
+          isOpen={isModalVerifikasiSemuaOpen}
+          onClose={() => {
+            if (!isVerifyingAll) setIsModalVerifikasiSemuaOpen(false);
+          }}
+          isCentered
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Verifikasi Semua Personil</ModalHeader>
+            <ModalCloseButton isDisabled={isVerifyingAll} />
+            <ModalBody>
+              <Text>
+                Semua personil yang menunggu verifikasi pada perjalanan ini
+                akan diverifikasi sekaligus. Lanjutkan?
+              </Text>
+            </ModalBody>
+            <ModalFooter gap={3}>
+              <Button
+                variant="outline"
+                onClick={() => setIsModalVerifikasiSemuaOpen(false)}
+                isDisabled={isVerifyingAll}
+              >
+                Batal
+              </Button>
+              <Button
+                colorScheme="green"
+                onClick={terimaVerifikasiSemua}
+                isLoading={isVerifyingAll}
+                loadingText="Memverifikasi..."
+              >
+                Verifikasi Semua
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>

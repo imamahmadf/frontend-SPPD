@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import Layout from "../Componets/Layout";
 import { BsFileEarmarkArrowDown } from "react-icons/bs";
 import "../Style/pagination.css";
 import AppPagination from "../Componets/AppPagination";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import {
   Box,
   Text,
@@ -15,12 +15,9 @@ import {
   ModalHeader,
   ModalFooter,
   ModalBody,
-  Image,
   ModalCloseButton,
-  Container,
   FormControl,
   FormLabel,
-  Center,
   HStack,
   Table,
   Thead,
@@ -29,10 +26,12 @@ import {
   Th,
   Td,
   Flex,
-  Textarea,
   Tooltip,
   Input,
-  Spacer,
+  InputGroup,
+  InputLeftElement,
+  Select,
+  Grid,
   useToast,
   useDisclosure,
   useColorMode,
@@ -44,17 +43,22 @@ import {
   IconButton,
   Heading,
   VStack,
-  Divider,
-  SimpleGrid,
-  Spinner,
   Skeleton,
   Checkbox,
 } from "@chakra-ui/react";
-import { BsEyeFill, BsThreeDotsVertical, BsX } from "react-icons/bs";
+import {
+  BsEyeFill,
+  BsX,
+  BsSearch,
+  BsPrinter,
+  BsTrash,
+  BsChevronDown,
+  BsListUl,
+  BsCalendar3,
+} from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { userRedux, selectRole } from "../Redux/Reducers/auth";
 import Loading from "../Componets/Loading";
-import DataKosong from "../Componets/DataKosong";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import { format } from "date-fns";
@@ -75,6 +79,119 @@ function stringToColor(str) {
     color += ("00" + value.toString(16)).slice(-2);
   }
   return color;
+}
+
+const STATUS_PERSONIL = {
+  1: {
+    label: "SPD & Surat Tugas dibuat",
+    dot: "#3B82F6",
+    bg: "#EFF6FF",
+    color: "#1D4ED8",
+  },
+  2: {
+    label: "Pengajuan kuitansi",
+    dot: "#F59E0B",
+    bg: "#FFF7ED",
+    color: "#C2410C",
+  },
+  3: {
+    label: "Kuitansi tervierifikasi",
+    dot: "#16A34A",
+    bg: "#F0FDF4",
+    color: "#15803D",
+  },
+  4: {
+    label: "Kuitansi ditolak",
+    dot: "#EF4444",
+    bg: "#FEF2F2",
+    color: "#B91C1C",
+  },
+};
+
+function gayaStatus(statusId) {
+  return (
+    STATUS_PERSONIL[statusId] || {
+      label: "Draft — SPD belum dibuat",
+      dot: "#9CA3AF",
+      bg: "#F3F4F6",
+      color: "#4B5563",
+    }
+  );
+}
+
+function gayaTipe(item) {
+  const tipeId = item?.jenisPerjalanan?.tipePerjalanan?.id;
+  const label =
+    item?.jenisPerjalanan?.tipePerjalanan?.tipe ||
+    item?.jenisPerjalanan?.jenis ||
+    "-";
+  if (tipeId === 1) {
+    return { label, bg: "#ECFDF3", color: "#067647" };
+  }
+  if (tipeId === 2) {
+    return { label, bg: "#EFF8FF", color: "#175CD3" };
+  }
+  return { label, bg: "#F2F4F7", color: "#344054" };
+}
+
+function daftarTujuan(item) {
+  const dalamDaerah = item?.jenisPerjalanan?.tipePerjalanan?.id === 1;
+  return (item?.tempats || [])
+    .map((tempat) => (dalamDaerah ? tempat?.dalamKota?.nama : tempat?.tempat))
+    .filter(Boolean);
+}
+
+function formatTanggalSingkat(nilai) {
+  const tanggal = new Date(nilai);
+  if (Number.isNaN(tanggal.getTime())) return "-";
+  return tanggal.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatJadwal(mulai, selesai) {
+  if (!mulai) return "-";
+  const awal = new Date(mulai);
+  const akhir = selesai ? new Date(selesai) : null;
+  if (Number.isNaN(awal.getTime())) return "-";
+  if (
+    !akhir ||
+    Number.isNaN(akhir.getTime()) ||
+    awal.toDateString() === akhir.toDateString()
+  ) {
+    return formatTanggalSingkat(awal);
+  }
+
+  const bulanAwal = awal.toLocaleDateString("id-ID", { month: "short" });
+  const bulanAkhir = akhir.toLocaleDateString("id-ID", { month: "short" });
+  if (
+    awal.getFullYear() === akhir.getFullYear() &&
+    awal.getMonth() === akhir.getMonth()
+  ) {
+    return `${awal.getDate()}–${akhir.getDate()} ${bulanAwal} ${awal.getFullYear()}`;
+  }
+  if (awal.getFullYear() === akhir.getFullYear()) {
+    return `${awal.getDate()} ${bulanAwal} – ${akhir.getDate()} ${bulanAkhir} ${awal.getFullYear()}`;
+  }
+  return `${formatTanggalSingkat(awal)} – ${formatTanggalSingkat(akhir)}`;
+}
+
+function hitungDurasi(mulai, selesai) {
+  if (!mulai) return null;
+  const awal = new Date(mulai);
+  const akhir = selesai ? new Date(selesai) : new Date(mulai);
+  if (Number.isNaN(awal.getTime()) || Number.isNaN(akhir.getTime()))
+    return null;
+  const hari =
+    Math.round(
+      (new Date(akhir).setHours(0, 0, 0, 0) -
+        new Date(awal).setHours(0, 0, 0, 0)) /
+        86400000,
+    ) + 1;
+  if (!Number.isFinite(hari) || hari < 1) return null;
+  return `${hari} hari`;
 }
 
 function KalenderPerjalanan({ events, colorMode, formats, localizer }) {
@@ -166,10 +283,15 @@ function Daftar() {
   });
   const [tanggalAwal, setTanggalAwal] = useState("");
   const [tanggalAkhir, setTanggalAkhir] = useState("");
+  const [kataCari, setKataCari] = useState("");
+  const [jenisFilter, setJenisFilter] = useState("");
+  const [tampilan, setTampilan] = useState("daftar");
 
   const resetFilter = () => {
     setTanggalAwal("");
     setTanggalAkhir("");
+    setKataCari("");
+    setJenisFilter("");
   };
 
   const changePage = ({ selected }) => {
@@ -580,8 +702,57 @@ function Daftar() {
     fetchDataPerjalanan();
   }, [page, tanggalAkhir, tanggalAwal]);
 
+  const dataTampil = useMemo(() => {
+    const kata = kataCari.trim().toLowerCase();
+    return (dataPerjalanan || []).filter((item) => {
+      if (
+        jenisFilter &&
+        String(item?.jenisPerjalanan?.id || "") !== String(jenisFilter)
+      ) {
+        return false;
+      }
+      if (!kata) return true;
+
+      const tujuan = daftarTujuan(item).join(" ");
+      const namaPersonil = (item?.personils || [])
+        .map((personil) => personil?.pegawai?.nama)
+        .filter(Boolean)
+        .join(" ");
+      const dokumen = [
+        item?.noSuratTugas,
+        item?.suratKeluar?.nomor,
+        item?.noNotaDinas,
+        item?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas?.kodeInduk,
+        item?.jenisPerjalanan?.jenis,
+        item?.jenisPerjalanan?.tipePerjalanan?.tipe,
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      return `${tujuan} ${namaPersonil} ${dokumen}`
+        .toLowerCase()
+        .includes(kata);
+    });
+  }, [dataPerjalanan, kataCari, jenisFilter]);
+
+  const opsiJenis = useMemo(() => {
+    const unik = new Map();
+    (dataPerjalanan || []).forEach((item) => {
+      const id = item?.jenisPerjalanan?.id;
+      const nama = item?.jenisPerjalanan?.jenis;
+      if (id && nama && !unik.has(String(id))) {
+        unik.set(String(id), nama);
+      }
+    });
+    return Array.from(unik, ([id, nama]) => ({ id, nama }));
+  }, [dataPerjalanan]);
+
+  const adaFilter = Boolean(
+    kataCari || jenisFilter || tanggalAwal || tanggalAkhir,
+  );
+
   // Mapping dataPerjalanan ke events untuk kalender, setiap personil jadi event terpisah
-  const events = (dataPerjalanan || []).flatMap((item) => {
+  const events = (dataTampil || []).flatMap((item) => {
     if (!item) return [];
     const start = item?.tempats?.[0]?.tanggalBerangkat
       ? new Date(item?.tempats?.[0]?.tanggalBerangkat)
@@ -615,156 +786,243 @@ function Daftar() {
     <>
       {isLoading && <Loading />}
       <Layout>
-        {isLoadingData ? (
-          <Box
-            bg={colorMode === "dark" ? "gray.900" : "secondary.light"}
-            pb={{ base: "30px", md: "40px" }}
-            px={{ base: "15px", md: "30px" }}
-            minH="100vh"
-          >
-            {/* Loading Skeleton untuk Kalender */}
-            <Box
-              bg={colorMode === "dark" ? "gray.800" : "white"}
-              p={{ base: "20px", md: "30px" }}
-              borderRadius="10px"
-              boxShadow="sm"
-              border="1px solid"
-              borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
-              mb={{ base: "20px", md: "30px" }}
-            >
-              <Skeleton height="40px" width="300px" mb={4} />
-              <Skeleton height="400px" borderRadius="8px" />
+        <Box
+          bg={colorMode === "dark" ? "gray.900" : "#F5F7FB"}
+          pb={{ base: "30px", md: "40px" }}
+          px={{ base: "16px", md: "28px" }}
+          pt={{ base: "20px", md: "28px" }}
+          minH="100vh"
+        >
+          {isLoadingData ? (
+            <Box>
+              <Skeleton height="28px" width="280px" mb={3} />
+              <Skeleton height="16px" width="420px" mb={6} />
+              <Skeleton height="92px" borderRadius="xl" mb={4} />
+              <Skeleton height="420px" borderRadius="xl" />
             </Box>
-
-            {/* Loading Skeleton untuk Tabel */}
-            <Box
-              bg={colorMode === "dark" ? "gray.800" : "white"}
-              p={{ base: "20px", md: "30px" }}
-              borderRadius="10px"
-              boxShadow="sm"
-              border="1px solid"
-              borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
-            >
-              <Skeleton height="40px" width="250px" mb={6} />
-              <Divider mb={6} />
-
-              {/* Filter Skeleton */}
-              <Box
-                mb={6}
-                p={4}
-                bg={colorMode === "dark" ? "gray.700" : "gray.50"}
-                borderRadius="8px"
-              >
-                <Skeleton height="20px" width="150px" mb={4} />
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                  <Skeleton height="60px" />
-                  <Skeleton height="60px" />
-                  <Skeleton height="60px" />
-                </SimpleGrid>
-              </Box>
-
-              {/* Table Skeleton */}
-              <Box overflowX="auto">
-                <Skeleton height="50px" mb={2} />
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} height="80px" mb={2} />
-                ))}
-              </Box>
-
-              {/* Pagination Skeleton */}
-              <Center mt={6}>
-                <Skeleton height="40px" width="300px" />
-              </Center>
-            </Box>
-          </Box>
-        ) : dataPerjalanan[0] ? (
-          <Box
-            bg={colorMode === "dark" ? "gray.900" : "secondary.light"}
-            pb={{ base: "30px", md: "40px" }}
-            px={{ base: "15px", md: "30px" }}
-            minH="100vh"
-          >
-            {/* Kalender Perjalanan */}
-            <Box
-              bg={colorMode === "dark" ? "gray.900" : "secondary.light"}
-              pb={{ base: "20px", md: "30px" }}
-              px={{ base: "15px", md: "30px" }}
-              pt={{ base: "20px", md: "30px" }}
-            >
-              <KalenderPerjalanan
-                events={events}
-                colorMode={colorMode}
-                formats={formats}
-                localizer={localizer}
-              />
-            </Box>
-
-            {/* Tabel Data Perjalanan */}
-            <Box
-              mt={{ base: "30px", md: "40px" }}
-              bg={colorMode === "dark" ? "gray.800" : "white"}
-              p={{ base: "20px", md: "30px" }}
-              borderRadius={"10px"}
-              boxShadow="sm"
-              border="1px solid"
-              borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
-            >
-              {/* Header Section */}
+          ) : (
+            <>
               <Flex
-                direction={{ base: "column", md: "row" }}
+                direction={{ base: "column", lg: "row" }}
                 justify="space-between"
-                align={{ base: "stretch", md: "center" }}
-                mb={6}
+                align={{ base: "stretch", lg: "flex-start" }}
                 gap={4}
+                mb={5}
               >
-                <Heading
-                  size="lg"
-                  color={colorMode === "dark" ? "white" : "gray.700"}
+                <Box>
+                  <Heading
+                    fontSize={{ base: "2xl", md: "3xl" }}
+                    fontWeight="bold"
+                    color={colorMode === "dark" ? "white" : "gray.900"}
+                    letterSpacing="-0.02em"
+                  >
+                    Daftar Perjalanan Dinas
+                  </Heading>
+                  <Text
+                    mt={1}
+                    fontSize="sm"
+                    color={colorMode === "dark" ? "gray.400" : "gray.500"}
+                  >
+                    {rows} perjalanan tercatat. Pilih salah satu untuk melihat
+                    detail, personil, dan biaya.
+                  </Text>
+                </Box>
+                <HStack
+                  spacing={2}
+                  alignSelf={{ base: "stretch", lg: "center" }}
+                  bg={colorMode === "dark" ? "gray.800" : "transparent"}
+                  p={colorMode === "dark" ? 1 : 0}
+                  borderRadius="xl"
                 >
-                  Daftar Perjalanan Dinas
-                </Heading>
-                <Text
-                  fontSize="sm"
-                  color={colorMode === "dark" ? "gray.400" : "gray.600"}
-                >
-                  Total: {rows} data
-                </Text>
+                  <Button
+                    size="sm"
+                    leftIcon={<BsListUl />}
+                    onClick={() => setTampilan("daftar")}
+                    bg={
+                      tampilan === "daftar"
+                        ? colorMode === "dark"
+                          ? "gray.700"
+                          : "white"
+                        : colorMode === "dark"
+                          ? "transparent"
+                          : "white"
+                    }
+                    color={
+                      tampilan === "daftar"
+                        ? colorMode === "dark"
+                          ? "white"
+                          : "gray.800"
+                        : "gray.500"
+                    }
+                    border="1px solid"
+                    borderColor={
+                      tampilan === "daftar"
+                        ? colorMode === "dark"
+                          ? "gray.600"
+                          : "gray.200"
+                        : colorMode === "dark"
+                          ? "gray.700"
+                          : "gray.200"
+                    }
+                    boxShadow={tampilan === "daftar" ? "sm" : "none"}
+                    borderRadius="lg"
+                    fontWeight="semibold"
+                    px={4}
+                    _hover={{ bg: colorMode === "dark" ? "gray.700" : "white" }}
+                  >
+                    Daftar
+                  </Button>
+                  <Button
+                    size="sm"
+                    leftIcon={<BsCalendar3 />}
+                    onClick={() => setTampilan("kalender")}
+                    bg={
+                      tampilan === "kalender"
+                        ? colorMode === "dark"
+                          ? "gray.700"
+                          : "white"
+                        : colorMode === "dark"
+                          ? "transparent"
+                          : "white"
+                    }
+                    color={
+                      tampilan === "kalender"
+                        ? colorMode === "dark"
+                          ? "white"
+                          : "gray.800"
+                        : "gray.500"
+                    }
+                    border="1px solid"
+                    borderColor={
+                      tampilan === "kalender"
+                        ? colorMode === "dark"
+                          ? "gray.600"
+                          : "gray.200"
+                        : colorMode === "dark"
+                          ? "gray.700"
+                          : "gray.200"
+                    }
+                    boxShadow={tampilan === "kalender" ? "sm" : "none"}
+                    borderRadius="lg"
+                    fontWeight="semibold"
+                    px={4}
+                    _hover={{ bg: colorMode === "dark" ? "gray.700" : "white" }}
+                  >
+                    Kalender
+                  </Button>
+                </HStack>
               </Flex>
 
-              <Divider mb={6} />
-              {JSON.stringify(
-                user[0]?.unitKerja_profile?.indukUnitKerja?.penomoran,
-              )}
-              {/* Filter Section */}
               <Box
-                mb={6}
-                p={4}
-                bg={colorMode === "dark" ? "gray.700" : "gray.50"}
-                borderRadius="8px"
+                bg={colorMode === "dark" ? "gray.800" : "white"}
+                border="1px solid"
+                borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+                borderRadius="xl"
+                boxShadow="sm"
+                p={{ base: 4, md: 5 }}
+                mb={4}
               >
-                <Heading
-                  size="sm"
-                  mb={4}
-                  color={colorMode === "dark" ? "white" : "gray.700"}
+                <Grid
+                  templateColumns={{
+                    base: "1fr",
+                    lg: adaFilter
+                      ? "minmax(220px, 1.6fr) minmax(160px, 1fr) minmax(150px, 1fr) minmax(150px, 1fr) auto"
+                      : "minmax(220px, 1.6fr) minmax(160px, 1fr) minmax(150px, 1fr) minmax(150px, 1fr)",
+                  }}
+                  gap={4}
+                  alignItems="end"
                 >
-                  Filter Data
-                </Heading>
-                <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
                   <FormControl>
-                    <FormLabel fontSize="sm" fontWeight="medium">
-                      Tanggal Berangkat (Awal)
+                    <FormLabel
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                      mb={1.5}
+                    >
+                      Cari
+                    </FormLabel>
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none" h="40px">
+                        <BsSearch color="#98A2B3" />
+                      </InputLeftElement>
+                      <Input
+                        value={kataCari}
+                        onChange={(e) => setKataCari(e.target.value)}
+                        placeholder="Tujuan, nomor surat, atau nama personil"
+                        h="40px"
+                        pl={10}
+                        bg={colorMode === "dark" ? "gray.900" : "white"}
+                        borderColor={
+                          colorMode === "dark" ? "gray.600" : "gray.200"
+                        }
+                        borderRadius="lg"
+                        fontSize="sm"
+                        _placeholder={{ color: "gray.400" }}
+                        _hover={{ borderColor: "gray.300" }}
+                        _focus={{
+                          borderColor: "primary",
+                          boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                        }}
+                      />
+                    </InputGroup>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                      mb={1.5}
+                    >
+                      Jenis perjalanan
+                    </FormLabel>
+                    <Select
+                      value={jenisFilter}
+                      onChange={(e) => setJenisFilter(e.target.value)}
+                      h="40px"
+                      bg={colorMode === "dark" ? "gray.900" : "white"}
+                      borderColor={
+                        colorMode === "dark" ? "gray.600" : "gray.200"
+                      }
+                      borderRadius="lg"
+                      fontSize="sm"
+                      _hover={{ borderColor: "gray.300" }}
+                      _focus={{
+                        borderColor: "primary",
+                        boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
+                      }}
+                    >
+                      <option value="">Semua jenis</option>
+                      {opsiJenis.map((jenis) => (
+                        <option key={jenis.id} value={jenis.id}>
+                          {jenis.nama}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                      mb={1.5}
+                    >
+                      Berangkat dari
                     </FormLabel>
                     <Input
                       type="date"
                       value={tanggalAwal}
-                      onChange={(e) => setTanggalAwal(e.target.value)}
-                      bg={colorMode === "dark" ? "gray.800" : "white"}
-                      borderColor={
-                        colorMode === "dark" ? "gray.600" : "gray.300"
-                      }
-                      _hover={{
-                        borderColor: "primary",
+                      onChange={(e) => {
+                        setPage(0);
+                        setTanggalAwal(e.target.value);
                       }}
+                      h="40px"
+                      bg={colorMode === "dark" ? "gray.900" : "white"}
+                      borderColor={
+                        colorMode === "dark" ? "gray.600" : "gray.200"
+                      }
+                      borderRadius="lg"
+                      fontSize="sm"
+                      _hover={{ borderColor: "gray.300" }}
                       _focus={{
                         borderColor: "primary",
                         boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
@@ -772,477 +1030,598 @@ function Daftar() {
                     />
                   </FormControl>
                   <FormControl>
-                    <FormLabel fontSize="sm" fontWeight="medium">
-                      Tanggal Pulang (Akhir)
+                    <FormLabel
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color={colorMode === "dark" ? "gray.300" : "gray.600"}
+                      mb={1.5}
+                    >
+                      Pulang sampai
                     </FormLabel>
                     <Input
                       type="date"
                       value={tanggalAkhir}
-                      onChange={(e) => setTanggalAkhir(e.target.value)}
-                      bg={colorMode === "dark" ? "gray.800" : "white"}
-                      borderColor={
-                        colorMode === "dark" ? "gray.600" : "gray.300"
-                      }
-                      _hover={{
-                        borderColor: "primary",
+                      onChange={(e) => {
+                        setPage(0);
+                        setTanggalAkhir(e.target.value);
                       }}
+                      h="40px"
+                      bg={colorMode === "dark" ? "gray.900" : "white"}
+                      borderColor={
+                        colorMode === "dark" ? "gray.600" : "gray.200"
+                      }
+                      borderRadius="lg"
+                      fontSize="sm"
+                      _hover={{ borderColor: "gray.300" }}
                       _focus={{
                         borderColor: "primary",
                         boxShadow: "0 0 0 1px var(--chakra-colors-primary)",
                       }}
                     />
                   </FormControl>
-                  <FormControl display="flex" alignItems="flex-end">
+                  {adaFilter && (
                     <Button
                       leftIcon={<BsX />}
                       onClick={resetFilter}
                       variant="outline"
-                      colorScheme="gray"
-                      width="100%"
-                      isDisabled={!tanggalAwal && !tanggalAkhir}
+                      h="40px"
+                      borderRadius="lg"
+                      fontWeight="medium"
                     >
-                      Reset Filter
+                      Reset
                     </Button>
-                  </FormControl>
-                </SimpleGrid>
+                  )}
+                </Grid>
               </Box>
 
-              {/* Table Section */}
-              <Box
-                style={{ overflowX: "auto" }}
-                borderRadius="8px"
-                border="1px solid"
-                borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
-              >
-                <Table variant={"primary"} size={{ base: "sm", md: "md" }}>
-                  <Thead>
-                    <Tr>
-                      <Th
-                        position="sticky"
-                        left={0}
-                        bg={colorMode === "dark" ? "gray.800" : "white"}
-                        zIndex={1}
-                        minW="50px"
-                      >
-                        No.
-                      </Th>
-                      <Th minW="120px">Unit Kerja Surtug</Th>
-                      <Th minW="200px">No Surat/Nota/Telaahan</Th>
-                      <Th minW="180px">Tanggal Berangkat</Th>
-                      <Th minW="180px">Tanggal Pulang</Th>
-                      <Th minW="200px">Jenis & Tujuan</Th>
-                      <Th minW="150px">Personil 1</Th>
-                      <Th minW="150px">Personil 2</Th>
-                      <Th minW="150px">Personil 3</Th>
-                      <Th minW="150px">Personil 4</Th>
-                      <Th minW="150px">Personil 5</Th>
-                      <Th
-                        position="sticky"
-                        right={0}
-                        bg={colorMode === "dark" ? "gray.800" : "white"}
-                        zIndex={1}
-                        minW="80px"
-                      >
-                        Aksi
-                      </Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {dataPerjalanan?.map((item, index) => (
-                      <Tr
-                        key={item?.id || index}
-                        _hover={{
-                          bg: colorMode === "dark" ? "gray.750" : "gray.50",
-                        }}
-                        transition="background-color 0.2s"
-                      >
-                        <Td
-                          position="sticky"
-                          left={0}
-                          bg={colorMode === "dark" ? "gray.800" : "white"}
-                          zIndex={1}
-                          fontWeight="medium"
-                        >
-                          {index + 1 + page * limit}
-                        </Td>
-                        <Td>
-                          <Text
-                            fontSize="sm"
-                            color={
-                              colorMode === "dark" ? "gray.300" : "gray.700"
-                            }
-                          >
-                            {item?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas
-                              ?.kodeInduk || "-"}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <VStack align="start" spacing={2}>
-                            {item?.noSuratTugas && (
-                              <Box>
-                                <Text
-                                  fontSize="xs"
-                                  color={
-                                    colorMode === "dark"
-                                      ? "gray.400"
-                                      : "gray.600"
-                                  }
-                                  mb={1}
-                                >
-                                  Surat Tugas:
-                                </Text>
-                                <Text
-                                  fontWeight="medium"
-                                  fontSize="sm"
-                                  color={
-                                    colorMode === "dark" ? "white" : "gray.700"
-                                  }
-                                >
-                                  {item?.noSuratTugas || "-"}
-                                </Text>
-                              </Box>
-                            )}
-                            {item?.suratKeluar?.nomor && (
-                              <Box>
-                                <Text
-                                  fontSize="xs"
-                                  color={
-                                    colorMode === "dark"
-                                      ? "gray.400"
-                                      : "gray.600"
-                                  }
-                                  mb={1}
-                                >
-                                  {item?.isNotaDinas === 0
-                                    ? "Telaahan Staf:"
-                                    : "Nota Dinas:"}
-                                </Text>
-                                <Text
-                                  fontWeight="medium"
-                                  fontSize="sm"
-                                  color={
-                                    colorMode === "dark" ? "white" : "gray.700"
-                                  }
-                                >
-                                  {item?.suratKeluar?.nomor || "-"}
-                                </Text>
-                              </Box>
-                            )}
-                            {!item?.noSuratTugas &&
-                              !item?.suratKeluar?.nomor && (
-                                <Text
-                                  fontSize="sm"
-                                  color={
-                                    colorMode === "dark"
-                                      ? "gray.400"
-                                      : "gray.500"
-                                  }
-                                >
-                                  -
-                                </Text>
-                              )}
-                          </VStack>
-                        </Td>
-                        <Td>
-                          <Text
-                            fontSize="sm"
-                            color={
-                              colorMode === "dark" ? "gray.300" : "gray.700"
-                            }
-                          >
-                            {item?.tempats?.[0]?.tanggalBerangkat
-                              ? new Date(
-                                  item?.tempats?.[0]?.tanggalBerangkat,
-                                ).toLocaleDateString("id-ID", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })
-                              : "-"}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text
-                            fontSize="sm"
-                            color={
-                              colorMode === "dark" ? "gray.300" : "gray.700"
-                            }
-                          >
-                            {item?.tempats?.[item?.tempats?.length - 1]
-                              ?.tanggalPulang
-                              ? new Date(
-                                  item?.tempats?.[item?.tempats?.length - 1]
-                                    ?.tanggalPulang,
-                                ).toLocaleDateString("id-ID", {
-                                  day: "numeric",
-                                  month: "short",
-                                  year: "numeric",
-                                })
-                              : "-"}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <VStack align="start" spacing={2}>
-                            <Box>
-                              <Text
-                                fontSize="xs"
-                                color={
-                                  colorMode === "dark" ? "gray.400" : "gray.600"
-                                }
-                                mb={1}
-                              >
-                                Jenis:
-                              </Text>
-                              <Badge
-                                colorScheme="primary"
-                                fontSize="xs"
-                                px={2}
-                                py={1}
-                                borderRadius="md"
-                              >
-                                {item?.jenisPerjalanan?.jenis || "-"}
-                              </Badge>
-                            </Box>
-                            {item?.tempats?.length > 0 && (
-                              <Box>
-                                <Text
-                                  fontSize="xs"
-                                  color={
-                                    colorMode === "dark"
-                                      ? "gray.400"
-                                      : "gray.600"
-                                  }
-                                  mb={1}
-                                >
-                                  Tujuan:
-                                </Text>
-                                {item?.jenisPerjalanan?.tipePerjalanan?.id === 1
-                                  ? item?.tempats?.map((val) => (
-                                      <Text
-                                        key={val?.id || Math.random()}
-                                        fontWeight="medium"
-                                        fontSize="sm"
-                                        color={
-                                          colorMode === "dark"
-                                            ? "white"
-                                            : "gray.700"
-                                        }
-                                      >
-                                        {val?.dalamKota?.nama || "-"}
-                                      </Text>
-                                    ))
-                                  : item?.tempats?.map((val) => (
-                                      <Text
-                                        key={val?.id || Math.random()}
-                                        fontWeight="medium"
-                                        fontSize="sm"
-                                        color={
-                                          colorMode === "dark"
-                                            ? "white"
-                                            : "gray.700"
-                                        }
-                                      >
-                                        {val?.tempat || "-"}
-                                      </Text>
-                                    ))}
-                              </Box>
-                            )}
-                          </VStack>
-                        </Td>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Td key={i}>
-                            {item?.personils?.[i] ? (
-                              <Tooltip
-                                label={
-                                  item?.personils?.[i]?.status
-                                    ?.statusKuitansi || "-"
-                                }
-                                aria-label="Status tooltip"
-                                bg={
-                                  item?.personils?.[i]?.statusId === 1
-                                    ? "gelap"
-                                    : item?.personils?.[i]?.statusId === 2
-                                      ? "ungu"
-                                      : item?.personils?.[i]?.statusId === 3
-                                        ? "primary"
-                                        : item?.personils?.[i]?.statusId === 4
-                                          ? "danger"
-                                          : "gray.600"
-                                }
-                                hasArrow
-                                placement="top"
-                              >
-                                <Badge
-                                  display="flex"
-                                  alignItems="center"
-                                  justifyContent="center"
-                                  px={3}
-                                  py={1.5}
-                                  maxW="200px"
-                                  overflow="hidden"
-                                  textOverflow="ellipsis"
-                                  whiteSpace="nowrap"
-                                  borderRadius="md"
-                                  textTransform="none"
-                                  fontSize="xs"
-                                  fontWeight="medium"
-                                  bgColor={
-                                    item?.personils?.[i]?.statusId === 1
-                                      ? "gelap"
-                                      : item?.personils?.[i]?.statusId === 2
-                                        ? "ungu"
-                                        : item?.personils?.[i]?.statusId === 3
-                                          ? "primary"
-                                          : item?.personils?.[i]?.statusId === 4
-                                            ? "danger"
-                                            : "gray.200"
-                                  }
-                                  color={
-                                    item?.personils?.[i]?.statusId === 1 ||
-                                    item?.personils?.[i]?.statusId === 2 ||
-                                    item?.personils?.[i]?.statusId === 3 ||
-                                    item?.personils?.[i]?.statusId === 4
-                                      ? "white"
-                                      : "gray.700"
-                                  }
-                                  cursor="help"
-                                >
-                                  {item?.personils?.[i]?.pegawai?.nama || "-"}
-                                </Badge>
-                              </Tooltip>
-                            ) : (
-                              <Text
-                                fontSize="sm"
-                                color={
-                                  colorMode === "dark" ? "gray.500" : "gray.400"
-                                }
-                                fontStyle="italic"
-                              >
-                                -
-                              </Text>
-                            )}
-                          </Td>
-                        ))}
-                        <Td
-                          position="sticky"
-                          right={0}
-                          bg={colorMode === "dark" ? "gray.800" : "white"}
-                          zIndex={1}
-                        >
-                          <Menu placement="auto" strategy="fixed">
-                            <MenuButton
-                              as={IconButton}
-                              icon={<BsThreeDotsVertical />}
-                              variant="ghost"
-                              size="sm"
-                              aria-label="Menu aksi"
-                              _hover={{
-                                bg:
-                                  colorMode === "dark"
-                                    ? "gray.700"
-                                    : "gray.100",
-                              }}
-                            />
-                            <MenuList
-                              bg={colorMode === "dark" ? "gray.800" : "white"}
-                              borderColor={
-                                colorMode === "dark" ? "gray.700" : "gray.200"
-                              }
-                              zIndex={9999}
-                            >
-                              {item?.noSuratTugas && (
-                                <MenuItem
-                                  icon={<BsEyeFill />}
-                                  onClick={() =>
-                                    history.push(
-                                      `/detail-perjalanan/${item?.id || ""}`,
-                                    )
-                                  }
-                                  _hover={{
-                                    bg:
-                                      colorMode === "dark"
-                                        ? "gray.700"
-                                        : "gray.100",
-                                  }}
-                                >
-                                  Lihat Detail
-                                </MenuItem>
-                              )}
-                              <MenuItem
-                                icon={<BsFileEarmarkArrowDown />}
-                                onClick={() => postSuratTugas(item)}
-                                _hover={{
-                                  bg:
-                                    colorMode === "dark"
-                                      ? "gray.700"
-                                      : "gray.100",
-                                }}
-                              >
-                                Cetak Surat Tugas
-                              </MenuItem>
-                              <MenuItem
-                                icon={<BsFileEarmarkArrowDown />}
-                                onClick={() => handleBukaModalCetakSPD(item)}
-                                _hover={{
-                                  bg:
-                                    colorMode === "dark"
-                                      ? "gray.700"
-                                      : "gray.100",
-                                }}
-                              >
-                                Cetak Surat Perjalanan Dinas
-                              </MenuItem>
-                              <MenuItem
-                                icon={<BsFileEarmarkArrowDown />}
-                                onClick={() => postNotaDinas(item)}
-                                _hover={{
-                                  bg:
-                                    colorMode === "dark"
-                                      ? "gray.700"
-                                      : "gray.100",
-                                }}
-                              >
-                                Cetak Nota Dinas
-                              </MenuItem>
-                              {!item?.personils?.some(
-                                (p) => p?.statusId === 2 || p?.statusId === 3,
-                              ) && (
-                                <MenuItem
-                                  onClick={() => {
-                                    setSelectedPerjalanan(item?.id || 0);
-                                    onOpen();
-                                  }}
-                                  color="red.500"
-                                  _hover={{
-                                    bg: "red.50",
-                                  }}
-                                >
-                                  Hapus
-                                </MenuItem>
-                              )}
-                            </MenuList>
-                          </Menu>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </Box>
-              {/* Pagination */}
-              <Box
-                mt={6}
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <AppPagination
-                  page={page}
-                  pageCount={pages}
-                  onPageChange={changePage}
+              {tampilan === "kalender" ? (
+                <KalenderPerjalanan
+                  events={events}
+                  colorMode={colorMode}
+                  formats={formats}
+                  localizer={localizer}
                 />
-              </Box>
-            </Box>
+              ) : (
+                <>
+                  <Flex
+                    direction={{ base: "column", md: "row" }}
+                    justify="space-between"
+                    align={{ base: "flex-start", md: "center" }}
+                    gap={3}
+                    mb={3}
+                    px={1}
+                  >
+                    <HStack spacing={4} wrap="wrap">
+                      <HStack spacing={2}>
+                        <Box
+                          w="8px"
+                          h="8px"
+                          borderRadius="full"
+                          bg="#9CA3AF"
+                          flexShrink={0}
+                        />
+                        <Text
+                          fontSize="xs"
+                          color={colorMode === "dark" ? "gray.400" : "gray.600"}
+                        >
+                          Draft — SPD belum dibuat
+                        </Text>
+                      </HStack>
+                      {Object.values(STATUS_PERSONIL).map((status) => (
+                        <HStack key={status.label} spacing={2}>
+                          <Box
+                            w="8px"
+                            h="8px"
+                            borderRadius="full"
+                            bg={status.dot}
+                            flexShrink={0}
+                          />
+                          <Text
+                            fontSize="xs"
+                            color={
+                              colorMode === "dark" ? "gray.400" : "gray.600"
+                            }
+                          >
+                            {status.label}
+                          </Text>
+                        </HStack>
+                      ))}
+                    </HStack>
+                    <Text
+                      fontSize="sm"
+                      color={colorMode === "dark" ? "gray.400" : "gray.500"}
+                      whiteSpace="nowrap"
+                    >
+                      Menampilkan {dataTampil.length} dari {rows} perjalanan
+                    </Text>
+                  </Flex>
 
+                  <Box
+                    bg={colorMode === "dark" ? "gray.800" : "white"}
+                    border="1px solid"
+                    borderColor={colorMode === "dark" ? "gray.700" : "gray.200"}
+                    borderRadius="xl"
+                    boxShadow="sm"
+                    overflowX="auto"
+                  >
+                    <Table variant="unstyled" minW="980px">
+                      <Thead>
+                        <Tr>
+                          {["No", "Tujuan", "Jadwal", "Personil", "Dokumen", "Aksi"].map(
+                            (kolom) => (
+                              <Th
+                                key={kolom}
+                                fontSize="sm"
+                                fontWeight="medium"
+                                color={
+                                  colorMode === "dark" ? "gray.400" : "gray.500"
+                                }
+                                textTransform="none"
+                                letterSpacing="normal"
+                                py={4}
+                                px={4}
+                                borderBottom="1px solid"
+                                borderColor={
+                                  colorMode === "dark" ? "gray.700" : "gray.100"
+                                }
+                              >
+                                {kolom}
+                              </Th>
+                            ),
+                          )}
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {dataTampil.length === 0 ? (
+                          <Tr>
+                            <Td colSpan={6} py={10}>
+                              <Text
+                                textAlign="center"
+                                color={
+                                  colorMode === "dark" ? "gray.400" : "gray.500"
+                                }
+                              >
+                                {adaFilter
+                                  ? "Tidak ada perjalanan yang cocok dengan filter."
+                                  : "Belum ada perjalanan dinas."}
+                              </Text>
+                            </Td>
+                          </Tr>
+                        ) : (
+                          dataTampil.map((item, index) => {
+                            const tujuan = daftarTujuan(item);
+                            const mulai = item?.tempats?.[0]?.tanggalBerangkat;
+                            const selesai =
+                              item?.tempats?.[item?.tempats?.length - 1]
+                                ?.tanggalPulang;
+                            const tipe = gayaTipe(item);
+                            const kodeUnit =
+                              item?.ttdSuratTuga?.indukUnitKerja_ttdSuratTugas
+                                ?.kodeInduk;
+                            const bisaHapus = !item?.personils?.some(
+                              (personil) =>
+                                personil?.statusId === 2 ||
+                                personil?.statusId === 3,
+                            );
+                            const nomor =
+                              kataCari || jenisFilter
+                                ? index + 1
+                                : index + 1 + page * limit;
+
+                            return (
+                              <Tr
+                                key={item?.id || index}
+                                _hover={{
+                                  bg:
+                                    colorMode === "dark"
+                                      ? "gray.750"
+                                      : "gray.50",
+                                }}
+                              >
+                                <Td
+                                  py={4}
+                                  px={4}
+                                  color={
+                                    colorMode === "dark"
+                                      ? "gray.300"
+                                      : "gray.600"
+                                  }
+                                  borderBottom="1px solid"
+                                  borderColor={
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100"
+                                  }
+                                  verticalAlign="top"
+                                >
+                                  {nomor}
+                                </Td>
+                                <Td
+                                  py={4}
+                                  px={4}
+                                  borderBottom="1px solid"
+                                  borderColor={
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100"
+                                  }
+                                  verticalAlign="top"
+                                  minW="180px"
+                                >
+                                  <Text
+                                    fontWeight="semibold"
+                                    color={
+                                      colorMode === "dark"
+                                        ? "white"
+                                        : "gray.800"
+                                    }
+                                  >
+                                    {tujuan[0] || "-"}
+                                  </Text>
+                                  {tujuan.slice(1).map((nama, urutan) => (
+                                    <Text
+                                      key={`${nama}-${urutan}`}
+                                      fontWeight="medium"
+                                      fontSize="sm"
+                                      color={
+                                        colorMode === "dark"
+                                          ? "gray.200"
+                                          : "gray.700"
+                                      }
+                                    >
+                                      {nama}
+                                    </Text>
+                                  ))}
+                                  <HStack mt={2} spacing={2} align="center">
+                                    <Tooltip
+                                      label={
+                                        item?.jenisPerjalanan?.jenis || tipe.label
+                                      }
+                                      hasArrow
+                                    >
+                                      <Badge
+                                        bg={tipe.bg}
+                                        color={tipe.color}
+                                        px={2}
+                                        py={0.5}
+                                        borderRadius="md"
+                                        fontSize="xs"
+                                        fontWeight="semibold"
+                                        textTransform="none"
+                                      >
+                                        {tipe.label}
+                                      </Badge>
+                                    </Tooltip>
+                                  </HStack>
+                                  {item?.jenisPerjalanan?.jenis &&
+                                    item.jenisPerjalanan.jenis !== tipe.label && (
+                                      <Text
+                                        mt={1}
+                                        fontSize="xs"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "gray.400"
+                                            : "gray.500"
+                                        }
+                                      >
+                                        {item.jenisPerjalanan.jenis}
+                                      </Text>
+                                    )}
+                                </Td>
+                                <Td
+                                  py={4}
+                                  px={4}
+                                  borderBottom="1px solid"
+                                  borderColor={
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100"
+                                  }
+                                  verticalAlign="top"
+                                  whiteSpace="nowrap"
+                                >
+                                  <Tooltip
+                                    label={`Berangkat ${
+                                      mulai
+                                        ? formatTanggalSingkat(mulai)
+                                        : "-"
+                                    } · Pulang ${
+                                      selesai
+                                        ? formatTanggalSingkat(selesai)
+                                        : "-"
+                                    }`}
+                                    hasArrow
+                                  >
+                                    <Box>
+                                      <Text
+                                        fontWeight="medium"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "gray.100"
+                                            : "gray.800"
+                                        }
+                                      >
+                                        {formatJadwal(mulai, selesai)}
+                                      </Text>
+                                      {hitungDurasi(mulai, selesai) && (
+                                        <Text
+                                          fontSize="sm"
+                                          color={
+                                            colorMode === "dark"
+                                              ? "gray.400"
+                                              : "gray.500"
+                                          }
+                                        >
+                                          {hitungDurasi(mulai, selesai)}
+                                        </Text>
+                                      )}
+                                    </Box>
+                                  </Tooltip>
+                                </Td>
+                                <Td
+                                  py={4}
+                                  px={4}
+                                  borderBottom="1px solid"
+                                  borderColor={
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100"
+                                  }
+                                  verticalAlign="top"
+                                  maxW="320px"
+                                >
+                                  {(item?.personils || []).length === 0 ? (
+                                    <Text fontSize="sm" color="gray.400">
+                                      -
+                                    </Text>
+                                  ) : (
+                                    <Flex wrap="wrap" gap={2}>
+                                      {item.personils.map((personil, urutan) => {
+                                        const gaya = gayaStatus(
+                                          personil?.statusId,
+                                        );
+                                        return (
+                                          <Tooltip
+                                            key={
+                                              personil?.id ||
+                                              personil?.pegawai?.id ||
+                                              urutan
+                                            }
+                                            label={
+                                              personil?.status?.statusKuitansi ||
+                                              gaya.label
+                                            }
+                                            hasArrow
+                                            bg={gaya.dot}
+                                          >
+                                            <Badge
+                                              bg={gaya.bg}
+                                              color={gaya.color}
+                                              px={2.5}
+                                              py={1}
+                                              borderRadius="full"
+                                              fontSize="xs"
+                                              fontWeight="medium"
+                                              textTransform="none"
+                                              cursor="help"
+                                            >
+                                              {personil?.pegawai?.nama || "-"}
+                                            </Badge>
+                                          </Tooltip>
+                                        );
+                                      })}
+                                    </Flex>
+                                  )}
+                                </Td>
+                                <Td
+                                  py={4}
+                                  px={4}
+                                  borderBottom="1px solid"
+                                  borderColor={
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100"
+                                  }
+                                  verticalAlign="top"
+                                  minW="240px"
+                                >
+                                  <VStack align="start" spacing={1}>
+                                    {item?.noSuratTugas && (
+                                      <Text
+                                        fontSize="xs"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "gray.400"
+                                            : "gray.500"
+                                        }
+                                      >
+                                        <Text
+                                          as="span"
+                                          fontWeight="semibold"
+                                          color={
+                                            colorMode === "dark"
+                                              ? "gray.300"
+                                              : "gray.600"
+                                          }
+                                        >
+                                          ST
+                                        </Text>{" "}
+                                        {item.noSuratTugas}
+                                      </Text>
+                                    )}
+                                    {item?.suratKeluar?.nomor && (
+                                      <Text
+                                        fontSize="xs"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "gray.400"
+                                            : "gray.500"
+                                        }
+                                      >
+                                        <Text
+                                          as="span"
+                                          fontWeight="semibold"
+                                          color={
+                                            colorMode === "dark"
+                                              ? "gray.300"
+                                              : "gray.600"
+                                          }
+                                        >
+                                          {item?.isNotaDinas === 0
+                                            ? "Telaahan"
+                                            : "ND"}
+                                        </Text>{" "}
+                                        {item.suratKeluar.nomor}
+                                      </Text>
+                                    )}
+                                    {kodeUnit && (
+                                      <Text
+                                        fontSize="xs"
+                                        color={
+                                          colorMode === "dark"
+                                            ? "gray.500"
+                                            : "gray.400"
+                                        }
+                                      >
+                                        Unit kerja {kodeUnit}
+                                      </Text>
+                                    )}
+                                    {!item?.noSuratTugas &&
+                                      !item?.suratKeluar?.nomor &&
+                                      !kodeUnit && (
+                                        <Text fontSize="sm" color="gray.400">
+                                          -
+                                        </Text>
+                                      )}
+                                  </VStack>
+                                </Td>
+                                <Td
+                                  py={4}
+                                  px={4}
+                                  borderBottom="1px solid"
+                                  borderColor={
+                                    colorMode === "dark"
+                                      ? "gray.700"
+                                      : "gray.100"
+                                  }
+                                  verticalAlign="top"
+                                >
+                                  <HStack spacing={2}>
+                                    {item?.noSuratTugas && (
+                                      <Button
+                                        size="sm"
+                                        leftIcon={<BsEyeFill />}
+                                        bg="primary"
+                                        color="white"
+                                        borderRadius="lg"
+                                        fontWeight="semibold"
+                                        _hover={{ bg: "primaryGelap" }}
+                                        onClick={() =>
+                                          history.push(
+                                            `/detail-perjalanan/${item?.id || ""}`,
+                                          )
+                                        }
+                                      >
+                                        Detail
+                                      </Button>
+                                    )}
+                                    <Menu placement="bottom-end" strategy="fixed">
+                                      <MenuButton
+                                        as={Button}
+                                        size="sm"
+                                        variant="outline"
+                                        leftIcon={<BsPrinter />}
+                                        rightIcon={<BsChevronDown />}
+                                        borderRadius="lg"
+                                        fontWeight="medium"
+                                        bg={
+                                          colorMode === "dark"
+                                            ? "gray.800"
+                                            : "white"
+                                        }
+                                        borderColor={
+                                          colorMode === "dark"
+                                            ? "gray.600"
+                                            : "gray.200"
+                                        }
+                                      >
+                                        Cetak
+                                      </MenuButton>
+                                      <MenuList
+                                        zIndex={9999}
+                                        bg={
+                                          colorMode === "dark"
+                                            ? "gray.800"
+                                            : "white"
+                                        }
+                                        borderColor={
+                                          colorMode === "dark"
+                                            ? "gray.700"
+                                            : "gray.200"
+                                        }
+                                      >
+                                        <MenuItem
+                                          icon={<BsFileEarmarkArrowDown />}
+                                          onClick={() => postSuratTugas(item)}
+                                        >
+                                          Cetak Surat Tugas
+                                        </MenuItem>
+                                        <MenuItem
+                                          icon={<BsFileEarmarkArrowDown />}
+                                          onClick={() =>
+                                            handleBukaModalCetakSPD(item)
+                                          }
+                                        >
+                                          Cetak Surat Perjalanan Dinas
+                                        </MenuItem>
+                                        <MenuItem
+                                          icon={<BsFileEarmarkArrowDown />}
+                                          onClick={() => postNotaDinas(item)}
+                                        >
+                                          Cetak Nota Dinas
+                                        </MenuItem>
+                                      </MenuList>
+                                    </Menu>
+                                    {bisaHapus && (
+                                      <Tooltip label="Hapus" hasArrow>
+                                        <IconButton
+                                          aria-label="Hapus perjalanan"
+                                          icon={<BsTrash />}
+                                          size="sm"
+                                          variant="ghost"
+                                          color="gray.500"
+                                          borderRadius="lg"
+                                          _hover={{
+                                            color: "red.500",
+                                            bg: "red.50",
+                                          }}
+                                          onClick={() => {
+                                            setSelectedPerjalanan(item?.id || 0);
+                                            onOpen();
+                                          }}
+                                        />
+                                      </Tooltip>
+                                    )}
+                                  </HStack>
+                                </Td>
+                              </Tr>
+                            );
+                          })
+                        )}
+                      </Tbody>
+                    </Table>
+                  </Box>
+                  <Flex justify="center" mt={6}>
+                    <AppPagination
+                      page={page}
+                      pageCount={pages}
+                      onPageChange={changePage}
+                    />
+                  </Flex>
+                </>
+              )}
+            </>
+          )}
             {/* Modal Konfirmasi Hapus */}
             <Modal isOpen={isOpen} onClose={onClose} isCentered>
               <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(2px)" />
@@ -1452,10 +1831,7 @@ function Daftar() {
                 </ModalFooter>
               </ModalContent>
             </Modal>
-          </Box>
-        ) : (
-          <DataKosong />
-        )}
+        </Box>
       </Layout>
     </>
   );

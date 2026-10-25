@@ -18,6 +18,7 @@ import {
   FiCheckCircle,
   FiUserPlus,
   FiSearch,
+  FiEye,
   FiPrinter,
   FiZap,
 } from "react-icons/fi";
@@ -33,9 +34,11 @@ function DaftarPersonil({
   isSubmittingPengajuan,
   isCreatingAutoBulk,
   isPrintingAll,
+  isViewingKwitansi,
   onPengajuanBulk,
   onBuatOtomatisBulk,
   onCetakSemuaKwitansi,
+  onLihatKwitansi,
   onTambahPersonil,
   onEditPersonil,
   onHapusPersonil,
@@ -207,6 +210,17 @@ function DaftarPersonil({
                       </option>
                     ))}
                   </Select>
+                  <Button
+                    leftIcon={<FiEye />}
+                    colorScheme="teal"
+                    onClick={onLihatKwitansi}
+                    isLoading={isViewingKwitansi}
+                    loadingText="Menyiapkan..."
+                    size="sm"
+                    transition="all 0.2s"
+                  >
+                    Lihat Kwitansi
+                  </Button>
                   <Button
                     leftIcon={<FiPrinter />}
                     colorScheme="blue"
